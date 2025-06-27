@@ -17,7 +17,7 @@
         <div style="text-align: center; margin-bottom: 30px;">
             <h2 style="margin: 0; font-size: 24px; color: #333;">Cadastro de Paciente</h2>
         </div>
-        <form class="row g-3 needs-validation" action="{{ route('includePatient') }}" method="POST">
+        <form class="row g-3 needs-validation" action="{{ route('criarPaciente-Psicologia') }}" method="POST">
             <div class="linha-com-titulo">
                 <h5>Dados Pessoais</h5>
                 <div class="linha-flex"></div>

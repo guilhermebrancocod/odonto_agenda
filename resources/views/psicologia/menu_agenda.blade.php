@@ -16,7 +16,7 @@
     <div id="calendar" style="min-width: 70%;"></div>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/mdb-ui-kit/7.1.0/mdb.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.11/index.global.min.js"></script>
-    <script type="module" src="/js/calendar.js"></script>
+    <script type="module" src="/js/Psicologia/calendar_psicologia.js"></script>
 
 </body>
 
