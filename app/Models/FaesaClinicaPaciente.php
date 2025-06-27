@@ -32,6 +32,6 @@ class FaesaClinicaPaciente extends Model
      * É útil para converter strings 
      */
     protected $casts = [
-        'DT_NASC' => 'date',
+        'DT_NASC_PACIENTE' => 'date',
     ];
 }

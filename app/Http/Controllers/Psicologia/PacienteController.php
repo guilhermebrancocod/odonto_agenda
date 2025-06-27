@@ -4,12 +4,12 @@ namespace App\Http\Controllers\Psicologia;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
+use App\Models\FaesaClinicaPaciente;
 
 class PacienteController extends Controller
 {
     public function criarPaciente(Request $request)
     {
-        dd($request);
         // VALIDAÇÃO DOS DADOS
         $validated = $request->validate([
             'CPF_PACIENTE' => 'required|string|unique:FAESA_CLINICA_PACIENTE,CPF_PACIENTE',
@@ -28,6 +28,8 @@ class PacienteController extends Controller
 
         // CRIAÇÃO DO PACIENTE
         $paciente = FaesaClinicaPaciente::create($validated);
+
+        dd($paciente);
 
         // RETORNO DE SUCESSO
         return response()->json([

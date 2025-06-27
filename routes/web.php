@@ -2,11 +2,15 @@
 
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\OdontoController;
-use App\Http\Controllers\Piscologia\PacienteController;
-use App\Http\Controllers\Piscologia\AgendamentoController;
+use App\Http\Controllers\Psicologia\PacienteController;
+use App\Http\Controllers\Psicologia\AgendamentoController;
 
 // ODONTOLOGIA
 Route::get('/odontologia/menu', function () {
+    return view('odontologia/menu_agenda');
+})->name('menu_agenda');
+
+Route::get('/odontologia', function () {
     return view('odontologia/menu_agenda');
 })->name('menu_agenda');
 
@@ -37,13 +41,21 @@ Route::get('/psicologia/menu', function () {
     return view('psicologia/menu_agenda');
 })->name('menu_agenda');
 
+Route::get('/psicologia', function () {
+    return view('psicologia/menu_agenda');
+})->name('menu_agenda');
+
 Route::get('/psicologia/relatorio', function () {
     return view('psicologia/report_agenda');
 })->name('relatorio');
 
 
 // PSICOLOGIA - CRIAÇÃO DE PACIENTE
+Route::get('/psicologia/criarpaciente', function() {
+    return view('/psicologia/criar_paciente');
+})->name('criarPaciente-Psicologia');
 Route::post('/psicologia/criarpaciente', [PacienteController::class, 'criarPaciente'])->name('criarPaciente-Psicologia');
+
 
 Route::get('/psicologia/criaragenda', function () {
     return view('psicologia/criar_agenda');

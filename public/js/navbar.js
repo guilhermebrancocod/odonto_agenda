@@ -79,12 +79,12 @@ function createNavBar() {
     <h4>Odonto</h4>
 
     <ul>
-      <li><a href="/"><i class="fas fa-home"></i> Início</a></li>
-      <li><a href="/criaragenda"><i class="fas fa-calendar-plus"></i> Incluir Agendamento</a></li>
-      <li><a href="/criaragenda"><i class="fas fa-edit"></i>Consultar Agenda</a></li>
-      <li><a href="/criarpaciente"><i class="fas fa-user-plus"></i> Cadastrar Paciente</a></li>
-      <li><a href="/consultarpaciente"><i class="fas fa-users"></i> Consultar Paciente</a></li>
-      <li><a href="/relatorio"><i class="fas fa-chart-bar"></i> Relatório</a></li>
+      <li><a href="/odontologia/menu/"><i class="fas fa-home"></i> Início</a></li>
+      <li><a href="/odontologia/criaragenda"><i class="fas fa-calendar-plus"></i> Incluir Agendamento</a></li>
+      <li><a href="/odontologia/criaragenda"><i class="fas fa-edit"></i>Consultar Agenda</a></li>
+      <li><a href="/odontologia/criarpaciente"><i class="fas fa-user-plus"></i> Cadastrar Paciente</a></li>
+      <li><a href="/odontologia/consultarpaciente"><i class="fas fa-users"></i> Consultar Paciente</a></li>
+      <li><a href="/odontologia/relatorio"><i class="fas fa-chart-bar"></i> Relatório</a></li>
     </ul>
 
     <a href="/logout" class="logout-link"><i class="fas fa-sign-out-alt"></i> Logout</a>
