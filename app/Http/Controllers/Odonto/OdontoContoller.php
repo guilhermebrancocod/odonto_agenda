@@ -9,7 +9,7 @@ class OdontoController extends Controller
 {
     public function fIncludePatient(Request $request)
     {
-        $idPaciente = DB::table('TABELA_PACIENTE')->insertGetId(
+        $idPaciente = DB::table('FAESA_CLINICA_PACIENTE')->insertGetId(
             [
                 'NOME_COMPL_PACIENTE' => $request->input('nome'),
                 'CPF_PACIENTE' => $request->input('cpf_paciente'),
@@ -22,8 +22,7 @@ class OdontoController extends Controller
                 'MUNICIPIO' => $request->input('cidade'),
                 'UF' => $request->input('estado'),
                 'E_MAIL_PACIENTE' => $request->input('email'),
-                'FONE_1_PACIENTE' => $request->input('celular'),
-                'FONE_2_PACIENTE' => $request->input('telefone')
+                'FONE_PACIENTE' => $request->input('celular'),
             ]
         );
         

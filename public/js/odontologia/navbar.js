@@ -15,7 +15,7 @@ function createNavBar() {
     }
 
     nav img {
-      width: 60px;
+      width: 100px;
       margin: 20px 0 10px;
     }
 
@@ -63,7 +63,7 @@ function createNavBar() {
       color: #ecf0f1;
       text-decoration: none;
       display: block;
-      width: 100%;
+      width: 90%;
       text-align: center;
     }
 
@@ -75,13 +75,13 @@ function createNavBar() {
   <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
 
   <nav>
-    <img src="img/faesa.png" alt="Logo">
+    <img src="/img/faesa.png" alt="Logo">
     <h4>Odonto</h4>
 
     <ul>
       <li><a href="/odontologia/menu/"><i class="fas fa-home"></i> Início</a></li>
       <li><a href="/odontologia/criaragenda"><i class="fas fa-calendar-plus"></i> Incluir Agendamento</a></li>
-      <li><a href="/odontologia/criaragenda"><i class="fas fa-edit"></i>Consultar Agenda</a></li>
+      <li><a href="/odontologia/consultaragenda"><i class="fas fa-edit"></i>Consultar Agenda</a></li>
       <li><a href="/odontologia/criarpaciente"><i class="fas fa-user-plus"></i> Cadastrar Paciente</a></li>
       <li><a href="/odontologia/consultarpaciente"><i class="fas fa-users"></i> Consultar Paciente</a></li>
       <li><a href="/odontologia/relatorio"><i class="fas fa-chart-bar"></i> Relatório</a></li>

@@ -7,6 +7,7 @@
     <title>Cadastro</title>
     <link rel="icon" type="img/png" href="faesa_favicon.png">
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700&display=swap" rel="stylesheet">
+
     <link href="https://cdnjs.cloudflare.com/ajax/libs/mdb-ui-kit/7.1.0/mdb.min.css" rel="stylesheet" />
     <link href="/css/style.css" rel="stylesheet">
 </head>
@@ -54,18 +55,45 @@
                     </div>
                     <div style="flex: 0.2">
                         <label for="hr_ini" style="font-size: 14px; color: #666;">Horário Início</label>
-                        <input type="text" id="horario" class="form-control" style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 6px; font-size: 14px;">
+                        <input type="text" id="hr_ini" class="form-control" style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 6px; font-size: 14px;">
                     </div>
                     <div style="flex: 0.2">
                         <label for="hr_fim" style="font-size: 14px; color: #666;">Horário Fim</label>
-                        <input type="text" id="horario" class="form-control" style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 6px; font-size: 14px;">
+                        <input type="text" id="hr_fim" class="form-control" style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 6px; font-size: 14px;">
                     </div>
-                    <div style="flex: 0.2">
+                    <div style="flex: 0.3;">
+                        <label for="tipo" style="font-size: 14px; color: #666;">Recorrencia</label>
+                        <select type="text" id="tipo" class="selectpicker" style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 6px; font-size: 14px;">
+                            <option value=""></option>
+                            <option value="">Pontual</option>
+                            <option value="">Semanal</option>
+                            <option value="">Trimestral</option>
+                            <option value="">Semestral</option>
+                            <option value="">Anual</option>
+                        </select>
+                    </div>
+                    <div style="flex: 0.3;">
                         <label for="tipo" style="font-size: 14px; color: #666;">Tipo</label>
-                        <input type="text" id="tipo" class="form-control" style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 6px; font-size: 14px;">
+                        <select type="text" id="tipo" class="selectpicker" style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 6px; font-size: 14px;">
+                             <option value=""></option>
+                            <option value="">Segunda-feira</option>
+                            <option value="">Terça-feira</option>
+                            <option value="">Quarta-feira</option>
+                            <option value="">Quinta-feira</option>
+                            <option value="">Sexta-feira</option>
+                            <option value="">Sabado</option>
+                        </select>
+                    </div>
+                    <div style="flex: 0.3;">
+                        <label for="pagto" style="font-size: 14px; color: #666;">Haverá Pagamento</label>
+                        <select type="text" id="pagto" class="selectpicker" style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 6px; font-size: 14px;">
+                            <option value=""></option>
+                            <option value="S">Sim</option>
+                            <option value="N">Não</option>
+                        </select>
                     </div>
                     <div style="text-align: right;flex:0.3">
-                        <button type="submit" style="background-color: #007bff; color: #fff; border: none; padding: 10px 20px; font-size: 14px; border-radius: 6px; cursor: pointer;">
+                        <button id="btn-agendar" type="submit" style="background-color: #007bff; color: #fff; border: none; padding: 10px 20px; font-size: 14px; border-radius: 6px; cursor: pointer;">
                             Agendar
                         </button>
                     </div>
@@ -77,8 +105,8 @@
             </div>
         </form>
     </div>
+    @include('odontologia.modal.modal_cash')
     <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mdb-ui-kit/7.1.0/mdb.min.js"></script>
-    <script type="module" src="/js/create.js"></script>
+    <script type="module" src="/js/odontologia/create_agenda.js"></script>
 </body>
-
 </html>

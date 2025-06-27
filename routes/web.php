@@ -30,6 +30,10 @@ Route::get('/odontologia/consultarpaciente', function () {
     return view('odontologia/consult_patient');
 })->name('consultarpaciente');
 
+Route::get('/odontologia/consultaragenda', function () {
+    return view('odontologia/consult_agenda');
+})->name('consultaragenda');
+
 Route::middleware(['web', 'Auth.Login'])->group(function () {
     Route::post('include/patient', [OdontoController::class, 'fIncludePatient'])->name('includePatient');
     Route::post('select/patient', [OdontoController::class, 'fSelectPatient'])->name('selectPatient');

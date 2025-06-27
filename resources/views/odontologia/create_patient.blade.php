@@ -38,7 +38,10 @@
                     </div>
                     <div style="flex: 0.2;">
                         <label for="sexo" style="font-size: 14px; color: #666;">Sexo</label>
-                        <input type="text" id="sexo" class="form-control" style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 6px; font-size: 14px;">
+                        <select type="text" id="sexo" class="selectpicker" style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 6px; font-size: 14px;">
+                            <option value="">M</option>
+                            <option value="">F</option>
+                        </select>
                     </div>
                 </div>
             </tr>
@@ -67,7 +70,12 @@
                     <input type="text" id="bairro" class="form-control" style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 6px; font-size: 14px;">
                 </div>
 
-                <div style="flex:1">
+                <div style="flex:0.5">
+                    <label for="complemento" style="font-size: 14px; color: #666;">Completmento</label>
+                    <input type="text" id="complemento" class="form-control" style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 6px; font-size: 14px;">
+                </div>
+
+                <div style="flex:0.5">
                     <label for="Cidade" style="font-size: 14px; color: #666;">Cidade</label>
                     <input type="text" id="cidade" class="form-control" style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 6px; font-size: 14px;">
                 </div>
@@ -105,7 +113,7 @@
         </form>
     </div>
     <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mdb-ui-kit/7.1.0/mdb.min.js"></script>
-    <script type="module" src="/js/create.js"></script>
+    <script type="module" src="/js/odontologia/create_patient.js"></script>
 </body>
 
 </html>

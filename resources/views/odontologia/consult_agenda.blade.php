@@ -15,7 +15,7 @@
     <div id="navbar-container"></div>
     <div style="max-width: 1200px; margin-left:220px; padding: 30px; border-radius: 10px; background-color: #fff; box-shadow: 0 4px 12px rgba(0,0,0,0.05);">
         <div style="text-align: center; margin-bottom: 30px;">
-            <h2 style="margin: 0; font-size: 24px; color: #333;">Pesquisando pacientes</h2>
+            <h2 style="margin: 0; font-size: 24px; color: #333;">Pesquisando agendamentos</h2>
         </div>
         <form class="row g-3 needs-validation">
             <div class="linha-com-titulo">
@@ -45,14 +45,12 @@
             <div class="datatable" style="margin-top:25px">
                 <table class="table datatable-table">
                     <thead class="datatable-header">
-                        <tr style="padding-left: 1rem;">
-                            <th>Nome</th>
-                            <th>Serviço</th>
-                            <th>Observação cadastral</th>
-                            <th>Data/hora</th>
-                            <th>Status</th>
-                            <th>Editar</th>
-                        </tr>
+                        <th>Nome</th>
+                        <th>Serviço</th>
+                        <th>Observação cadastral</th>
+                        <th>Data/hora</th>
+                        <th>Status</th>
+                        <th>Editar</th>
                     </thead>
                     <tbody>
                         <tr>
