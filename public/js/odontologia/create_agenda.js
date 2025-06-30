@@ -5,16 +5,21 @@ const navbarContainer = document.getElementById('navbar-container');
 const navbar = createNavBar();
 navbarContainer.appendChild(navbar);
 
-const agendar = document.getElementById('btn-agendar');
+const add_simple = document.getElementById('add');
 
-agendar.addEventListener('click', function () {
-    const pagto = document.getElementById('pagto').value;
-
-    if (pagto === 'S') {
-        const modalCash = new Modal(document.getElementById('modal_cash'));
-        modalCash.show();
-    } else {
-        // Aqui você pode chamar a função de agendar normal se for 'N'
-        console.log('Agendamento sem pagamento.');
-    }
+add_simple.addEventListener('click', function (event) {
+    event.preventDefault();
+    const modalCash = new Modal(document.getElementById('modal_add_patient'));
+    modalCash.show();
 });
+
+const pagto = document.getElementById('pagto');
+const valor = document.getElementById('valor');
+
+pagto.addEventListener('change', function () {
+    if (pagto.value === 'S') {
+        valor.disabled = false;
+    }else {
+        valor.disabled = true;
+    }
+})

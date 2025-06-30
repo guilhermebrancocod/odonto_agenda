@@ -6,6 +6,10 @@ use App\Http\Controllers\Psicologia\PacienteController;
 use App\Http\Controllers\Psicologia\AgendamentoController;
 
 // ODONTOLOGIA
+Route::get('/', function () {
+    return view('odontologia/menu_agenda');
+})->name('menu_agenda');
+
 Route::get('/odontologia/menu', function () {
     return view('odontologia/menu_agenda');
 })->name('menu_agenda');

@@ -34,8 +34,13 @@
                     </div>
                 </form>
                 <div style="flex-shrink: 0;">
-                    <button type="submit" style="background-color: #007bff; color: #fff; border: none; padding: 10px 20px; font-size: 14px; border-radius: 6px; cursor: pointer;">
-                        Cadastrar
+                    <button type="submit" id='reload' style="background-color: #007bff; color: #fff; border: none; padding: 10px 15px; font-size: 14px; border-radius: 6px; cursor: pointer;" title="Limpar">
+                        <iconify-icon icon="streamline:arrow-round-left-solid"></iconify-icon>
+                    </button>
+                </div>
+                <div style="flex-shrink: 0;">
+                    <button type="submit" id='add' style="background-color: #007bff; color: #fff; border: none; padding: 10px 15px; font-size: 14px; border-radius: 6px; cursor: pointer;" title="Adicionar paciente">
+                        <iconify-icon icon="ix:add-circle-filled"></iconify-icon>
                     </button>
                 </div>
             </div>
@@ -44,60 +49,58 @@
                 <div class="linha-flex"></div>
             </div>
             <div style="display: flex; gap: 10px; flex-wrap: wrap; align-items: flex-end; margin: 20px 0;">
-                <tr>
-                    <div style="flex: 0.1">
-                        <label for="data" style="font-size: 14px; color: #666;">Dia</label>
-                        <input type="date" id="data" class="form-control" style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 6px; font-size: 14px;">
-                    </div>
-                    <div style="flex: 0.1">
-                        <label for="data" style="font-size: 14px; color: #666;">Dia</label>
-                        <input type="date" id="data" class="form-control" style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 6px; font-size: 14px;">
-                    </div>
-                    <div style="flex: 0.2">
-                        <label for="hr_ini" style="font-size: 14px; color: #666;">Horário Início</label>
-                        <input type="text" id="hr_ini" class="form-control" style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 6px; font-size: 14px;">
-                    </div>
-                    <div style="flex: 0.2">
-                        <label for="hr_fim" style="font-size: 14px; color: #666;">Horário Fim</label>
-                        <input type="text" id="hr_fim" class="form-control" style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 6px; font-size: 14px;">
-                    </div>
-                    <div style="flex: 0.3;">
-                        <label for="tipo" style="font-size: 14px; color: #666;">Recorrencia</label>
-                        <select type="text" id="tipo" class="selectpicker" style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 6px; font-size: 14px;">
-                            <option value=""></option>
-                            <option value="">Pontual</option>
-                            <option value="">Semanal</option>
-                            <option value="">Trimestral</option>
-                            <option value="">Semestral</option>
-                            <option value="">Anual</option>
-                        </select>
-                    </div>
-                    <div style="flex: 0.3;">
-                        <label for="tipo" style="font-size: 14px; color: #666;">Tipo</label>
-                        <select type="text" id="tipo" class="selectpicker" style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 6px; font-size: 14px;">
-                             <option value=""></option>
-                            <option value="">Segunda-feira</option>
-                            <option value="">Terça-feira</option>
-                            <option value="">Quarta-feira</option>
-                            <option value="">Quinta-feira</option>
-                            <option value="">Sexta-feira</option>
-                            <option value="">Sabado</option>
-                        </select>
-                    </div>
-                    <div style="flex: 0.3;">
-                        <label for="pagto" style="font-size: 14px; color: #666;">Haverá Pagamento</label>
-                        <select type="text" id="pagto" class="selectpicker" style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 6px; font-size: 14px;">
-                            <option value=""></option>
-                            <option value="S">Sim</option>
-                            <option value="N">Não</option>
-                        </select>
-                    </div>
-                    <div style="text-align: right;flex:0.3">
-                        <button id="btn-agendar" type="submit" style="background-color: #007bff; color: #fff; border: none; padding: 10px 20px; font-size: 14px; border-radius: 6px; cursor: pointer;">
-                            Agendar
-                        </button>
-                    </div>
-                </tr>
+                <div style="flex: 0.1">
+                    <label for="data" style="font-size: 14px; color: #666;">Dia</label>
+                    <input type="date" id="data" class="form-control" style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 6px; font-size: 14px;">
+                </div>
+                <div style="flex: 0.2">
+                    <label for="hr_ini" style="font-size: 14px; color: #666;">Horário Início</label>
+                    <input type="text" id="hr_ini" class="form-control" style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 6px; font-size: 14px;">
+                </div>
+                <div style="flex: 0.2">
+                    <label for="hr_fim" style="font-size: 14px; color: #666;">Horário Fim</label>
+                    <input type="text" id="hr_fim" class="form-control" style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 6px; font-size: 14px;">
+                </div>
+                <div style="flex: 0.3;">
+                    <label for="tipo" style="font-size: 14px; color: #666;">Recorrencia</label>
+                    <select type="text" id="tipo" class="selectpicker" style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 6px; font-size: 14px;">
+                        <option value=""></option>
+                        <option value="">Pontual</option>
+                        <option value="">Semanal</option>
+                        <option value="">Trimestral</option>
+                        <option value="">Semestral</option>
+                        <option value="">Anual</option>
+                    </select>
+                </div>
+                <div style="flex: 0.3;">
+                    <label for="tipo" style="font-size: 14px; color: #666;">Tipo</label>
+                    <select type="text" id="tipo" class="selectpicker" style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 6px; font-size: 14px;">
+                        <option value=""></option>
+                        <option value="">Segunda-feira</option>
+                        <option value="">Terça-feira</option>
+                        <option value="">Quarta-feira</option>
+                        <option value="">Quinta-feira</option>
+                        <option value="">Sexta-feira</option>
+                        <option value="">Sabado</option>
+                    </select>
+                </div>
+                <div style="flex: 0.2;">
+                    <label for="pagto" style="font-size: 14px; color: #666;">Haverá Pagamento</label>
+                    <select type="text" id="pagto" class="selectpicker" style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 6px; font-size: 14px;">
+                        <option value=""></option>
+                        <option value="S">Sim</option>
+                        <option value="N">Não</option>
+                    </select>
+                </div>
+                <div style="flex: 0.2">
+                    <label for="valor" style="font-size: 14px; color: #666;">Valor</label>
+                    <input type="text" id="valor" class="form-control" style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 6px; font-size: 14px;" disabled>
+                </div>
+            </div>
+            <div style="text-align: right;flex:0.3">
+                <button id="btn-agendar" type="submit" style="background-color: #007bff; color: #fff; border: none; padding: 10px 20px; font-size: 14px; border-radius: 6px; cursor: pointer;">
+                    Agendar
+                </button>
             </div>
             <div class="linha-com-titulo">
                 <h5></h5>
@@ -105,8 +108,10 @@
             </div>
         </form>
     </div>
-    @include('odontologia.modal.modal_cash')
+    @include('odontologia.modal.modal_add_patient')
     <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mdb-ui-kit/7.1.0/mdb.min.js"></script>
+    <script src="https://code.iconify.design/iconify-icon/1.0.7/iconify-icon.min.js"></script>
     <script type="module" src="/js/odontologia/create_agenda.js"></script>
 </body>
+
 </html>
