@@ -80,3 +80,8 @@ Route::get('/psicologia/consultar-paciente/buscar/', [PacienteController::class,
 
 // CONSULTA DE AGENDAMENTO
 Route::get('/psicologia/consultar-agendamento', [AgendamentoController::class, 'getAgendamento'])->name('getAgendamento');
+
+// CRIAÇÃO DE SERVIÇO
+Route::get('/psicologia/criar-servico', function() {
+    return view('psicologia/criar_servico');
+})->name('criar-servico');

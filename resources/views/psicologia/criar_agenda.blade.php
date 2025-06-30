@@ -52,35 +52,51 @@
 
                 <input type="hidden" name="paciente_id" id="paciente_id" />
 
+                <!-- TÍTULO DA SEÇÃO DE AGENDAMENTO -->
                 <div class="linha-com-titulo">
                     <h5>Horário</h5>
                     <div class="linha-flex"></div>
                 </div>
 
                 <div style="display: flex; gap: 10px; flex-wrap: wrap; align-items: flex-end; margin: 20px 0;">
+
+                    <!-- DIA DO AGENDAMENTO -->
                     <div style="flex: 0.2">
                         <label for="data" style="font-size: 14px; color: #666;">Dia</label>
-                        <input type="date" id="data" name="data" class="form-control" required />
+                        <input type="date" id="data" name="dia_agend" class="form-control" required />
                     </div>
+
+                    <!-- HORARIO INICIAL -->
                     <div style="flex: 0.2">
                         <label for="hr_ini" style="font-size: 14px; color: #666;">Horário Início</label>
                         <input type="time" id="hr_ini" name="hr_ini" class="form-control" required />
                     </div>
+
+                    <!-- HORARIO FINAL -->
                     <div style="flex: 0.2">
                         <label for="hr_fim" style="font-size: 14px; color: #666;">Horário Fim</label>
                         <input type="time" id="hr_fim" name="hr_fim" class="form-control" required />
                     </div>
+
+                    <!-- TIPO DE AGENDAMENTO -->
                     <div style="flex: 0.2">
                         <label for="tipo" style="font-size: 14px; color: #666;">Tipo</label>
                         <input
                             type="text"
                             id="tipo"
-                            name="tipo"
+                            name="tipo_recorrencia"
                             class="form-control"
                             placeholder="Ex: Psicoterapia"
                             required
                         />
                     </div>
+
+                    <div>
+                        <label for="servico" style="font-size: 14px; color: #666;">Servico</label>
+                        <input type="text" id="servico" name="servico" class="form-control" placeholder="" required>
+                    </div>
+
+                    <!-- BOTÃO DE AGENDAR -->
                     <div style="flex: 0.2; text-align: right;">
                         <button
                             type="submit"
@@ -89,6 +105,7 @@
                             Agendar
                         </button>
                     </div>
+
                 </div>
             </form>
         </div>

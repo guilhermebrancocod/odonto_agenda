@@ -73,6 +73,7 @@ function createNavBar() {
   </style>
 
   <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.1/font/bootstrap-icons.min.css">
 
   <nav>
     <img src="img/faesa.png" alt="Logo">
@@ -84,6 +85,12 @@ function createNavBar() {
       <li><a href="/psicologia/criar-agenda"><i class="fas fa-edit"></i>Consultar Agenda</a></li>
       <li><a href="/psicologia/criar-paciente"><i class="fas fa-user-plus"></i> Cadastrar Paciente</a></li>
       <li><a href="/psicologia/consultar-paciente/"><i class="fas fa-users"></i> Consultar Paciente</a></li>
+      <li>
+        <a href="/psicologia/criar-servico/">
+          <i class="bi bi-hammer"></i>
+          Cadastrar Serviço
+        </a>
+      </li>
       <li><a href="/psicologia/relatorio"><i class="fas fa-chart-bar"></i> Relatório</a></li>
     </ul>
 

@@ -9,6 +9,13 @@ use Illuminate\Database\Eloquent\Collection;
 
 class PacienteController extends Controller
 {
+    /**
+     * Cria um novo registro de Paciente no Banco de Dados
+     * 
+     * @param Request @request Dados da Requisição HTTP
+     * @return \Illuminate\Http\RedirectResponse Redireciona de volta à página anterior com uma mensagem de status.
+     * @throws \Illuminate\Validation\ValidationException Se algum dado da requisição falhar na validação.
+     */
     public function criarPaciente(Request $request)
     {
         $validated = $request->validate([
@@ -31,6 +38,13 @@ class PacienteController extends Controller
         return redirect()->back()->with('success', 'Paciente criado com sucesso!');
     }
 
+    /**
+     * Recupera e retorna uma coleção de Pacientes, com opção de busca por nome
+     * 
+     * @param Request $request A instância da requisição HTTP. Pode conter o parâmetro 'search'.
+     * @return \Illuminate\Http\JsonResponse Retorna uma resposta JSON contendo uma coleção
+     * de objetos FaesaClinicaPaciente.
+     */
     public function getPaciente(Request $request)
     {
         $nome = $request->query('search');
