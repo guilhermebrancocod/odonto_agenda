@@ -64,16 +64,18 @@ Route::get('/psicologia/criarpaciente', function() {
 })->name('criarPaciente-Psicologia');
 Route::post('/psicologia/criarpaciente', [PacienteController::class, 'criarPaciente'])->name('criarPaciente-Psicologia');
 
-
+// CRIAÇÃO DE AGENDA
 Route::get('/psicologia/criaragenda', function () {
     return view('psicologia/criar_agenda');
 })->name('criaragenda');
 
-Route::get('/psicologia/consultarpaciente', function () {
-    return view('psicologia/consultar_paciente');
+// PÁGINA DE CONSULTA DE PACIENTE
+Route::get('/psicologia/consultar-paciente/', function () {
+    return view('psicologia.consultar_paciente');
 })->name('consultarpaciente');
 
-Route::middleware(['web', 'Auth.Login'])->group(function () {
-    Route::post('include/patient', [OdontoController::class, 'fIncludePatient'])->name('includePatient');
-    Route::post('select/patient', [OdontoController::class, 'fSelectPatient'])->name('selectPatient');
-});
+// CONSULTA DE PACIENTE
+Route::get('/psicologia/consultar-paciente/buscar/', [PacienteController::class, 'getPaciente'])->name('getPaciente');
+
+// CONSULTA DE AGENDAMENTO
+Route::get('/psicologia/consultar-agendamento', [AgendamentoController::class, 'getAgendamento'])->name('getAgendamento');

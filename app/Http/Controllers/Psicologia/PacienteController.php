@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Psicologia;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\FaesaClinicaPaciente;
+use Illuminate\Database\Eloquent\Collection;
 
 class PacienteController extends Controller
 {
@@ -29,12 +30,17 @@ class PacienteController extends Controller
         // CRIAÇÃO DO PACIENTE
         $paciente = FaesaClinicaPaciente::create($validated);
 
-        dd($paciente);
-
         // RETORNO DE SUCESSO
         return response()->json([
             'message' => 'Paciente criado com sucesso',
             'paciente' => $paciente,
         ], 201);
+    }
+
+    public function getPaciente(Request $request): Collection
+    {
+        $nome = $request->query('search');
+
+        return FaesaClinicaPaciente::where('NOME_COMPL_PACIENTE', 'like', "%{$nome}%")->get();
     }
 }
