@@ -37,10 +37,10 @@ class PacienteController extends Controller
         ], 201);
     }
 
-    public function getPaciente(Request $request): Collection
+    public function getPaciente(Request $request)
     {
         $nome = $request->query('search');
-
-        return FaesaClinicaPaciente::where('NOME_COMPL_PACIENTE', 'like', "%{$nome}%")->get();
+        $pacientes = FaesaClinicaPaciente::where('NOME_COMPL_PACIENTE', 'like', "%{$nome}%")->get();
+        return view('psicologia.consultar_paciente', compact('pacientes'));
     }
 }
