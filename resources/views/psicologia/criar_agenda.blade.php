@@ -18,11 +18,12 @@
                 <h2 style="margin: 0; font-size: 24px; color: #333;">Agendamento</h2>
             </div>
 
-            <!-- 🔍 FORMULÁRIO DE PESQUISA (GET) -->
-            <div style="margin-bottom: 30px;">
-                <form action="{{ route('getAgendamentoPorPaciente') }}" method="GET" style="display: flex; gap: 10px; flex-wrap: wrap;">
+            <!-- FORMULÁRIO DE PESQUISA (GET) -->
+            <div style="margin-bottom: 20px;">
+                <form action="{{ route('getPaciente') }}" method="GET" style="display: flex; gap: 10px; flex-wrap: wrap;">
                     <div style="flex: 1;">
                         <input id="search-input" name="search" type="search" class="form-control" placeholder="Pesquisar paciente"
+                            value="{{ request('search') }}"
                             style="padding: 8px; border: 1px solid #ddd; border-radius: 6px; font-size: 14px;" />
                     </div>
                     <button type="submit" style="background-color: #007bff; color: #fff; border: none; padding: 10px 20px; font-size: 14px; border-radius: 6px; cursor: pointer;">
@@ -31,9 +32,47 @@
                 </form>
             </div>
 
-            <!-- 📅 FORMULÁRIO DE AGENDAMENTO (POST) -->
-            <form action="{{ route('agendarPaciente') }}" method="POST">
+            <!-- PACIENTES ENCONTRADOS -->
+            @if(request()->has('search'))
+                @if($pacientes->count() > 0)
+                    <div style="margin-bottom: 20px;">
+                        <h5 style="font-size: 16px; color: #333;">Pacientes encontrados:</h5>
+                        <ul style="list-style: none; padding: 0;">
+                            @foreach($pacientes as $paciente)
+                                <li style="padding: 10px; border: 1px solid #ddd; border-radius: 6px; margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center;">
+                                    <span>
+                                        {{ $paciente->NOME_COMPL_PACIENTE }} ({{ $paciente->CPF_PACIENTE }})
+                                        - {{ \Carbon\Carbon::parse($paciente->DT_NASC_PACIENTE)->format('d/m/Y') }}
+                                    </span>
+                                    <a href="{{ route('getPaciente', ['selected_paciente' => $paciente->ID_PACIENTE]) }}"
+                                       class="btn btn-sm btn-primary">Selecionar</a>
+                                </li>
+                            @endforeach
+                        </ul>
+                    </div>
+                @else
+                    <div style="margin-top: 20px; color: red;">
+                        Nenhum paciente encontrado com o nome "{{ request('search') }}".
+                    </div>
+                @endif
+            @endif
+
+            <!-- FORMULÁRIO DE AGENDAMENTO (POST) -->
+            <form action="" method="POST">
                 @csrf
+
+                @if(request()->has('selected_paciente'))
+                    @php
+                        $pacienteSelecionado = \App\Models\FaesaClinicaPaciente::find(request('selected_paciente'));
+                    @endphp
+                    @if($pacienteSelecionado)
+                        <div class="alert alert-success">
+                            Paciente selecionado: {{ $pacienteSelecionado->NOME_COMPL_PACIENTE }} ({{ $pacienteSelecionado->CPF_PACIENTE }})
+                        </div>
+                        <input type="hidden" name="paciente_id" value="{{ $pacienteSelecionado->ID_PACIENTE }}">
+                    @endif
+                @endif
+
                 <div class="linha-com-titulo">
                     <h5>Horário</h5>
                     <div class="linha-flex"></div>

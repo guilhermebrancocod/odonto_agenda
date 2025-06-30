@@ -80,10 +80,10 @@ function createNavBar() {
 
     <ul>
       <li><a href="/psicologia/"><i class="fas fa-home"></i> Início</a></li>
-      <li><a href="/psicologia/criaragenda"><i class="fas fa-calendar-plus"></i> Incluir Agendamento</a></li>
-      <li><a href="/psicologia/criaragenda"><i class="fas fa-edit"></i>Consultar Agenda</a></li>
-      <li><a href="/psicologia/criarpaciente"><i class="fas fa-user-plus"></i> Cadastrar Paciente</a></li>
-      <li><a href="/psicologia/consultarpaciente"><i class="fas fa-users"></i> Consultar Paciente</a></li>
+      <li><a href="/psicologia/criar-agenda"><i class="fas fa-calendar-plus"></i> Incluir Agendamento</a></li>
+      <li><a href="/psicologia/criar-agenda"><i class="fas fa-edit"></i>Consultar Agenda</a></li>
+      <li><a href="/psicologia/criar-paciente"><i class="fas fa-user-plus"></i> Cadastrar Paciente</a></li>
+      <li><a href="/psicologia/consultar-paciente/"><i class="fas fa-users"></i> Consultar Paciente</a></li>
       <li><a href="/psicologia/relatorio"><i class="fas fa-chart-bar"></i> Relatório</a></li>
     </ul>
 

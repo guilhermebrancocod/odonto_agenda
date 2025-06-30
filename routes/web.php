@@ -59,20 +59,20 @@ Route::get('/psicologia/relatorio', function () {
 
 
 // PSICOLOGIA - CRIAÇÃO DE PACIENTE
-Route::get('/psicologia/criarpaciente', function() {
+Route::get('/psicologia/criar-paciente', function() {
     return view('/psicologia/criar_paciente');
-})->name('criarPaciente-Psicologia');
+})->name('criar-paciente');
 Route::post('/psicologia/criarpaciente', [PacienteController::class, 'criarPaciente'])->name('criarPaciente-Psicologia');
 
 // CRIAÇÃO DE AGENDA
-Route::get('/psicologia/criaragenda', function () {
+Route::get('/psicologia/criar-agenda', function () {
     return view('psicologia/criar_agenda');
-})->name('criaragenda');
+})->name('criar-agenda');
 
 // PÁGINA DE CONSULTA DE PACIENTE
 Route::get('/psicologia/consultar-paciente/', function () {
     return view('psicologia.consultar_paciente');
-})->name('consultarpaciente');
+})->name('consultar-paciente');
 
 // CONSULTA DE PACIENTE
 Route::get('/psicologia/consultar-paciente/buscar/', [PacienteController::class, 'getPaciente'])->name('getPaciente');
