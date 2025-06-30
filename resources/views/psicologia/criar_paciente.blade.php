@@ -28,6 +28,12 @@
             </div>
         @endif
 
+        @if(session('success'))
+            <div class="alert alert-success">
+                {{ session('success') }}
+            </div>
+        @endif
+
         <form class="row g-3 needs-validation" action="{{ route('criarPaciente-Psicologia') }}" method="POST">
             @csrf
 

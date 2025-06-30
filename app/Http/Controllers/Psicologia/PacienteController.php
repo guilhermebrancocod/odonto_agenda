@@ -11,7 +11,6 @@ class PacienteController extends Controller
 {
     public function criarPaciente(Request $request)
     {
-        // VALIDAÇÃO DOS DADOS
         $validated = $request->validate([
             'CPF_PACIENTE' => 'required|string|unique:FAESA_CLINICA_PACIENTE,CPF_PACIENTE',
             'NOME_COMPL_PACIENTE' => 'required|string|max:255',
@@ -27,14 +26,9 @@ class PacienteController extends Controller
             'E_MAIL_PACIENTE' => 'nullable|email|max:255|unique:FAESA_CLINICA_PACIENTE,E_MAIL_PACIENTE',
         ]);
 
-        // CRIAÇÃO DO PACIENTE
-        $paciente = FaesaClinicaPaciente::create($validated);
+        FaesaClinicaPaciente::create($validated);
 
-        // RETORNO DE SUCESSO
-        return response()->json([
-            'message' => 'Paciente criado com sucesso',
-            'paciente' => $paciente,
-        ], 201);
+        return redirect()->back()->with('success', 'Paciente criado com sucesso!');
     }
 
     public function getPaciente(Request $request)

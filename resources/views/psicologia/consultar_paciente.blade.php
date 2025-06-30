@@ -14,6 +14,7 @@
     <div id="navbar-container">
         <div style="max-width: 1200px; margin-left:220px; padding: 30px; border-radius: 10px; background-color: #fff; box-shadow: 0 4px 12px rgba(0,0,0,0.05);">
 
+            <!-- TITULO DA SEÇÃO DE CONSULTA DE PACIENTE -->
             <div style="text-align: center; margin-bottom: 30px;">
                 <h2 style="margin: 0; font-size: 24px; color: #333;">Pesquisando</h2>
             </div>
@@ -23,6 +24,7 @@
                 <div class="linha-flex"></div>
             </div>
 
+            <!-- INPUT DAS INFORMACOES DO PACIENTE PARA PESQUISA -->
             <div style="display: flex; gap: 20px; align-items: flex-end; flex-wrap: wrap; margin: 20px 0;">
                 <form id="search-form" class="d-flex gap-3 align-items-end flex-wrap" style="margin:20px 0;">
                     <div style="flex: 1;">
@@ -43,10 +45,13 @@
                 </form>
             </div>
 
+            <!-- TÍTULO DA SEÇÃO DE RESULTADOS DA PESQUISA DE PACIENTE -->
             <div class="linha-com-titulo">
                 <h5>Resultado</h5>
                 <div class="linha-flex"></div>
             </div>
+
+            <!-- TABELA COM INFORMAÇÕES DO RESULTADO DA PESQUISA POR PACIENTE -->
             <div class="datatable" style="margin-top:25px">
                 <table class="table datatable-table">
                     <thead class="datatable-header">
@@ -71,6 +76,7 @@
         </div>
     </div>
 
+    <!-- JAVA SCRIPT -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/mdb-ui-kit/7.1.0/mdb.min.js"></script>
     <script>
         const searchForm = document.getElementById('search-form');
@@ -81,14 +87,13 @@
             e.preventDefault();
 
             const nome = searchInput.value.trim();
-            // REMOVIDA a validação que impedia envio com campo vazio:
-            // if (!nome) return;
 
             fetch(`/psicologia/consultar-paciente/buscar?search=${encodeURIComponent(nome)}`)
                 .then(response => response.json())
                 .then(pacientes => {
                     pacientesTbody.innerHTML = '';
 
+                    // CASO NÃO ACHE PACIENTE ALGUM
                     if (pacientes.length === 0) {
                         pacientesTbody.innerHTML = `
                             <tr>
@@ -98,6 +103,7 @@
                         return;
                     }
 
+                    // PARA CADA PACIENTE CRIA UM REGISTRO (linha)
                     pacientes.forEach(paciente => {
                         const row = document.createElement('tr');
 
@@ -114,6 +120,7 @@
                         pacientesTbody.appendChild(row);
                     });
                 })
+                // EM CASO DE ERRO DURANTE PESQUISA
                 .catch(error => {
                     console.error(error);
                     pacientesTbody.innerHTML = `
