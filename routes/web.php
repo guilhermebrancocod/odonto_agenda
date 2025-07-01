@@ -6,6 +6,13 @@ use App\Http\Controllers\Psicologia\PacienteController;
 use App\Http\Controllers\Psicologia\AgendamentoController;
 use App\Http\Controllers\Psicologia\ServicoController;
 
+
+// PÁGINA DE LOGIN - SELEÇÃO DE PSICOLOGIA OU ODONTOLOGIA
+Route::get('/', function() {
+    if(session()->has('usuario'))
+    return view('login');
+});
+
 // ODONTOLOGIA
 Route::get('/', function () {
     return view('odontologia/menu_agenda');
