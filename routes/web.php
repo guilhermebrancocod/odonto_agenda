@@ -4,6 +4,7 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\OdontoController;
 use App\Http\Controllers\Psicologia\PacienteController;
 use App\Http\Controllers\Psicologia\AgendamentoController;
+use App\Http\Controllers\Psicologia\ServicoController;
 
 // ODONTOLOGIA
 Route::get('/', function () {
@@ -84,4 +85,6 @@ Route::get('/psicologia/consultar-agendamento', [AgendamentoController::class, '
 // CRIAÇÃO DE SERVIÇO
 Route::get('/psicologia/criar-servico', function() {
     return view('psicologia/criar_servico');
-})->name('criar-servico');
+});
+
+Route::post('/psicologia/criar-servico/criar', [ServicoController::class, 'criarServico'])->name('criarServico-Psicologia');
