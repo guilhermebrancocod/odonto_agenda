@@ -4,7 +4,8 @@ namespace App\Http\Middleware;
 
 use Closure;
 use Illuminate\Http\Request;
-use Symfony\Component\HttpFoundation\Response;
+use Illuminate\Support\Facades\Http;
+use App\Models\FaesaClinicaUsuario;
 
 class AuthMiddleware
 {
@@ -27,6 +28,13 @@ class AuthMiddleware
             ];
 
             $response = $this->getApiData($credentials);
+
+            if($response['success']) {
+                $this->validarUsuario($credentials);
+
+            } else {
+                session()->flush();
+            }
         }
     }
 
@@ -34,5 +42,36 @@ class AuthMiddleware
     {
         $apiUrl = config('services.faesa.api_url');
         $apiKey = config('services.faesa.api_key');
+
+        try {
+            $response = Http::withHeaders([
+                'Accept' => "application/json",
+                'Authorization' => $apiKey
+            ])->timeout(5)->post($apiUrl, $credentials);
+
+            if($response->successful()) {
+                return [
+                    'success' => true,
+                    'data' => $response->json()
+                ];
+            }
+
+            return [
+                'success' => false,
+                'message' => 'Credenciais Inválidas',
+                'status'  => $response->status()
+            ];
+        } catch (\Exception $e) {
+            return [
+                'success' => false,
+                'message' => $e->getMessage()
+            ];
+        }
+    }
+
+    public function validarUsuario(array $credentials): array
+    {
+        $username = $credentials['username'];
+        $usuario = FaesaClinicaUsuario::where('ID_USUARIO_CLINICA', $username);
     }
 }
