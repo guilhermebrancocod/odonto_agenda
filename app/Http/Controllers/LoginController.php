@@ -10,4 +10,9 @@ class LoginController extends Controller
     {
         dd($request);
     }
+
+    public function logout(Request $request)
+    {
+        dd($request);
+    }
 }

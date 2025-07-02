@@ -6,13 +6,12 @@ use Illuminate\Database\Eloquent\Model;
 
 class FaesaClinicaUsuario extends Model
 {
-    // CRIAR TABELA FAESA_CLINICA_USUARIO
     protected $table = 'FAESA_CLINICA_USUARIO';
 
-    protected $primaryKey = 'ID_USUARIO_CLINICA';
+    protected $primaryKey = 'ID_USUARIO';
 
     public function clinica(): BelongsTo
     {
-        return $this->belongsTo(FaesaClinica::class, 'ID_CLINICA_USUARIO', 'ID_CLINICA');
+        return $this->belongsTo(FaesaClinica::class, 'ID_CLINICA', 'ID_CLINICA');
     }
 }
