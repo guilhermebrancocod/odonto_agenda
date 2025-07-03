@@ -30,10 +30,16 @@ class AuthMiddleware
             $response = $this->getApiData($credentials);
 
             if($response['success']) {
-                $this->validarUsuario($credentials);
-
+                if(!$this->validarUsuario($credentials)) {
+                    session()->flush();
+                    return redirect()->back()->with('error', "Credenciais Inválidas");
+                } else {
+                    return $next($request);
+                }
+                
             } else {
                 session()->flush();
+                return redirect()->back()->with('error', "Credenciais Inválidas");
             }
         }
     }
@@ -69,9 +75,10 @@ class AuthMiddleware
         }
     }
 
-    public function validarUsuario(array $credentials): array
+    public function validarUsuario(array $credentials): FaesaClinicaUsuario|null
     {
         $username = $credentials['username'];
-        $usuario = FaesaClinicaUsuario::where('ID_USUARIO_CLINICA', $username);
-    }
+        $usuario = FaesaClinicaUsuario::where('ID_USUARIO_CLINICA', $username)->first();
+        return $usuario;
+     }
 }

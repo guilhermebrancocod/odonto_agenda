@@ -8,7 +8,7 @@ class LoginController extends Controller
 {
     public function login(Request $request)
     {
-        dd($request);
+        dd("Passou pela validação");
     }
 
     public function logout(Request $request)
