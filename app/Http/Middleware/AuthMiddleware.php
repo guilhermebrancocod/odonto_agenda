@@ -6,6 +6,7 @@ use Closure;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Http;
 use App\Models\FaesaClinicaUsuario;
+use Illuminate\Database\Eloquent\Collection;
 
 class AuthMiddleware
 {
@@ -30,11 +31,16 @@ class AuthMiddleware
             $response = $this->getApiData($credentials);
 
             if($response['success']) {
-                if(!$this->validarUsuario($credentials)) {
+
+                $validacao = $this->validarUsuario($credentials);
+
+                if(!$validacao) {
                     session()->flush();
                     return redirect()->back()->with('error', "Credenciais Inválidas");
                 } else {
-                    return $next($request);
+                    // CRIA SESSÃO COM DADOS DO USUARIO DA TABELA DE USUÁRIOS
+                    session(['usuario' => $validacao]);
+                    return $next($response);
                 }
                 
             } else {
@@ -75,10 +81,10 @@ class AuthMiddleware
         }
     }
 
-    public function validarUsuario(array $credentials): FaesaClinicaUsuario|null
+    public function validarUsuario(array $credentials): Collection
     {
         $username = $credentials['username'];
-        $usuario = FaesaClinicaUsuario::where('ID_USUARIO_CLINICA', $username)->first();
+        $usuario = FaesaClinicaUsuario::where('ID_USUARIO_CLINICA', $username)->get();
         return $usuario;
      }
 }
