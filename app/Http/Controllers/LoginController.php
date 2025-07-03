@@ -12,7 +12,8 @@ class LoginController extends Controller
         $clinicas = $usuario->pluck('ID_CLINICA')->toArray();
 
         if(in_array(1, $clinicas) && in_array(2, $clinicas)) {
-            dd("Acesso Às duas clínicas");
+            // dd("Acesso à ambas as clínicas");
+            return redirect()->route('selecionar-clinica-get');
         } else if (in_array(1, $clinicas)) {
             dd("Acesso à clínica de Psicologia");
         } else if (in_array(2, $clinicas)) {
@@ -24,6 +25,7 @@ class LoginController extends Controller
 
     public function logout(Request $request)
     {
-        dd($request);
+        session()->flush();
+        return redirect()->route('loginGET');
     }
 }

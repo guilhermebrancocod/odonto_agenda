@@ -6,6 +6,7 @@ use App\Http\Controllers\Psicologia\PacienteController;
 use App\Http\Controllers\Psicologia\AgendamentoController;
 use App\Http\Controllers\Psicologia\ServicoController;
 use App\Http\Controllers\LoginController;
+use App\Http\Controllers\Psicologia\ClinicaController;
 use App\Http\Middleware\AuthMiddleware;
 
 
@@ -19,7 +20,12 @@ Route::get('/', function() {
 
 Route::middleware([AuthMiddleware::class])->group(function() {
 
+    // VERIFICAÇÃO DE CLÍNICA
+    Route::get('/selecionar-clinica', function() {
+        return view('selecionar_clinica');
+    })->name('selecionar-clinica-get');
 
+    Route::post('/selecionar-clinica', [ClinicaController::class, 'selecionarClinica'])->name('selecionar-clinica-post');
 
 
     // PÁGINA DE LOGIN
@@ -47,17 +53,19 @@ Route::middleware([AuthMiddleware::class])->group(function() {
     Route::get('/odontologia', function() {
 
         // ARMAZENA DADOS DA SESSÃO
+        $usuario = session('usuario');
 
-        return view('odontologia/menu_agenda');
-    })->name('menu_agenda');
+        return view('odontologia/menu_agenda', compact('usuario'));
+    })->name('menu_agenda_odontologia');
 
     // MENU PSICOLOGIA GET
     Route::get('/psicologia', function() {
 
         // ARMAZENA DADOS DA SESSÃO
+        $usuario = session('usuario');
 
-        return view('psicologia/menu_agenda');
-    })->name('menu_agenda');
+        return view('psicologia/menu_agenda', compact('usuario'));
+    })->name('menu_agenda_psicologia');
     
 
 

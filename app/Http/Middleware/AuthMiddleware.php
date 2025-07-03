@@ -6,7 +6,6 @@ use Closure;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Http;
 use App\Models\FaesaClinicaUsuario;
-use Illuminate\Database\Eloquent\Collection;
 
 class AuthMiddleware
 {
@@ -14,6 +13,10 @@ class AuthMiddleware
     {
         // ARMAZENA ROTA QUE USUARIO QUER ACESSAR
         $routeName = $request->route()->getName();
+
+        if(!$routeName) {
+            return $next($request);
+        }
 
         // CASO A ROTA QUE O USUÁRIO TENTA ACESSAR SEJA ALGUMA DESSAS, ELE PERMITE
         if(in_array($routeName, ['loginGET', 'logout'])) {
@@ -34,13 +37,12 @@ class AuthMiddleware
 
                 $validacao = $this->validarUsuario($credentials);
 
-                if(!$validacao) {
+                if ($validacao->isEmpty()) {
                     session()->flush();
                     return redirect()->back()->with('error', "Credenciais Inválidas");
                 } else {
-                    // CRIA SESSÃO COM DADOS DO USUARIO DA TABELA DE USUÁRIOS
                     session(['usuario' => $validacao]);
-                    return $next($response);
+                    return $next($request);
                 }
                 
             } else {
@@ -48,9 +50,16 @@ class AuthMiddleware
                 return redirect()->back()->with('error', "Credenciais Inválidas");
             }
         }
+
+         // Se não for loginPOST, nem rotas liberadas, pode fazer aqui a checagem da sessão por exemplo
+        if (!session()->has('usuario')) {
+            return redirect()->route('loginGET');
+        }
+
+        return $next($request);
     }
 
-    public function getApiData(array $credentials): array
+    public function getApiData(array $credentials)
     {
         $apiUrl = config('services.faesa.api_url');
         $apiKey = config('services.faesa.api_key');
@@ -81,7 +90,7 @@ class AuthMiddleware
         }
     }
 
-    public function validarUsuario(array $credentials): Collection
+    public function validarUsuario(array $credentials)
     {
         $username = $credentials['username'];
         $usuario = FaesaClinicaUsuario::where('ID_USUARIO_CLINICA', $username)->get();
