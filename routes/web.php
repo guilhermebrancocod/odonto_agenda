@@ -65,7 +65,7 @@ Route::middleware([AuthMiddleware::class])->group(function() {
 
     Route::post('/login', [LoginController::class, 'login'])->name('loginPOST');
 
-    Route::get('/logout', [LoginController::class, 'logout'])->name('logout');
+    Route::get('/psicologia/logout', [LoginController::class, 'logout'])->name('logout');
 
     Route::get('/selecionar-clinica', function() {
         return view('selecionar_clinica');
@@ -85,8 +85,8 @@ Route::middleware([AuthMiddleware::class, CheckClinicaMiddleware::class])->prefi
         return view('psicologia/report_agenda');
     })->name('relatorio_psicologia');
 
-    Route::get('/criarpaciente', function () {
-        return view('psicologia/create_patient');
+    Route::get('/criar-paciente', function () {
+        return view('psicologia/criar_paciente');
     })->name('criarpaciente_psicologia');
 
     Route::post('/criar-paciente/criar', [PacienteController::class, 'criarPaciente'])->name('criarPaciente-Psicologia');
@@ -98,7 +98,7 @@ Route::middleware([AuthMiddleware::class, CheckClinicaMiddleware::class])->prefi
     Route::post('/editar-paciente/{id}', [PacienteController::class, 'editarPaciente'])->name('editarPaciente-Psicologia');
 
     Route::get('/criaragenda', function () {
-        return view('psicologia/create_agenda');
+        return view('psicologia/criar_agenda');
     })->name('criaragenda_psicologia');
 
     Route::get('/consultar-agendamento', [AgendamentoController::class, 'getAgendamento'])->name('getAgendamento');

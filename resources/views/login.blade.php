@@ -2,284 +2,253 @@
 <html lang="pt-br">
 
 <head>
-    
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="icon" type="image/png" href="/favicon_faesa.png">
-    <title>Login</title>
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <title>Menu</title>
 
-</head>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700&display=swap" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.11/index.global.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.1/font/bootstrap-icons.min.css">
+
+    <!-- BOOTSTRAP -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.7/dist/css/bootstrap.min.css" rel="stylesheet" crossorigin="anonymous">
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.7/dist/js/bootstrap.bundle.min.js" crossorigin="anonymous"></script>
+
     <style>
-
         body {
-            /* font-family: Arial, sans-serif; */
-            font-family: Arial, Helvetica, sans-serif;
-            margin: 0;
-            padding: 0;
-            background-color: #5CA4EA;   /* #107ed8  #5CA4EA */
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            height: 100vh;
-            overflow: hidden;
+            font-family: 'Montserrat', sans-serif;
         }
 
-        .container {
-            width: 280px;
-            background-color: #fff;
-            padding: 70px 50px;
-            border-radius: 10px;
-            box-shadow: 3px 3px 13px #000;
-            /* box-shadow: 0 0 10px rgba(0, 0, 0, 0.1); */
+        :root {
+            --blue-color: #085ca4;
+            --secondary-color: #7aacce;
+            --third-color: #fc7c34;
+            --light-color: #ecf5f9;
         }
 
-        .container img {
-            display: block;
-            margin: 0 auto 20px;
-            width: 190px;
-            margin-bottom: 70px;
-        }
-
-        label {
-            font-size: 18px;
-        }
-
-        input[type="text"],
-        input[type="password"] {
-            width: calc(100% - 20px);
-            padding: 2px;
-            margin: 15px 0px;
-            border: 1px solid #ccc;
-            box-sizing: border-box;
-            border: 0 none;
-            outline: 0;
-            font-size: 16px;
-        }
-
-        input[type="submit"] {
-            width: 281px;
-            padding: 15px;
-            margin-top:15px;
-            background-color: #007bff; /*  #007bff   #007bff */
-            border: none;
-            border-radius: 4px;
-            color: #fff;
-            cursor: pointer;
-            font-size: 15px;
-            height: 50px;
-
-        }
-
-        input[type="submit"]:hover {
-            background-color: #0056b3;
-        }
-        hr {
-            color: black;
-            margin-top: -10px;
-        }
-        .hr {
-            padding-bottom: 20px;
-        }
-
-        .error {
-            color: red;
-            margin-top: 5px;
-        }
-
-        .alert-danger {
-            color: #a94442;
-            background-color: #f2dede;
-            border-color: #ebccd1;
-            padding: 10px;
-            border-radius: 5px;
-            margin-bottom: 10px;
-        }
-
-        .forgot-password-link {
-            margin-top: 20px;
-        }
-
-        .forgot-password-link a {
-            text-decoration: none;
-            color: #007bff;
-            font-size: 15px;
-        }
-
-        .forgot-password-link a:hover {
-            text-decoration: underline;
-        }
-
-        .input-group {
-            position: relative;
-            margin-bottom: 20px;
-        }
-
-        .input-group input {
-            width: 100%;
-            padding: 10px 40px 10px 5px;
-            font-size: 16px;
-            border: none;
-            border-bottom: 1px solid #ccc;
-            transition: all 0.3s ease;
-            background: transparent;
-        }
-
-        .input-group label {
-            position: absolute;
-            top: 10px;
-            left: 5px;
-            font-size: 16px;
-            color: gray;
-            pointer-events: none;
-            transition: 0.3s ease all;
-        }
-
-        .input-group input:focus ~ label,
-        .input-group input:not(:placeholder-shown) ~ label {
-            top: -10px;
-            font-size: 12px;
-            color: #2596be;
-        }
-
-        .input-group input:focus {
-            border-bottom: 2px solid #2596be;
-        }
-
-        .toggle-password {
-            position: absolute;
-            top: 50%;
-            right: 10px;
-            transform: translateY(-50%);
-            cursor: pointer;
-            font-size: 18px;
-            color: #999;
-            user-select: none;
-        }
-
-
-
-        /* ESQUECEU A SENHA? */
-        .forgot-password-link a {
-            display: inline-block;
-            color: #2596be;
-            text-decoration: none;
-            transition: color 0.3s ease, transform 0.3s ease;
-        }
-
-        .forgot-password-link a:hover {
-            color:rgb(6, 91, 128);
-            transform: translateX(5px);
-        }
-
-
-
-        /* BOÃO SUBMETER FORMULÁRIO */
-        input[type="submit"] {
-            background-color: #2596be;
+        .link-agendar {
+            background-color: var(--secondary-color);
             color: white;
-            border: none;
-            padding: 12px 24px;
-            font-size: 16px;
-            border-radius: 6px;
-            cursor: pointer;
-            transition: background-color 0.3s ease, transform 0.2s ease, box-shadow 0.3s ease;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            text-decoration: none;
+            transition: background-color 0.3s ease, transform 0.2s ease;
+            border-left: 4px solid transparent;
         }
 
-        input[type="submit"]:hover {
-            background-color: #1b6e91;
-            transform: translateY(-2px);
-            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+        .link-agendar:hover {
+            background-color: var(--third-color);
+            color: white;
+            transform: translateX(4px);
+            border-left: 4px solid white;
         }
 
-        input[type="submit"]:active {
-            transform: translateY(1px);
-            box-shadow: 0 3px 6px rgba(0, 0, 0, 0.1);
+        .link-agendar i {
+            transition: transform 0.3s ease;
         }
 
+        .link-agendar:hover i {
+            transform: scale(1.2) rotate(-5deg);
+        }
 
+        .link-logout {
+            background-color: #c0392b;
+            color: white;
+            text-decoration: none;
+            transition: background-color 0.3s ease, transform 0.2s ease, border-left 0.2s ease;
+            border-left: 4px solid transparent;
+        }
 
+        .link-logout:hover {
+            background-color: #e74c3c;
+            color: white;
+            transform: translateX(4px);
+            border-left: 4px solid white;
+        }
+
+        .link-logout i {
+            transition: transform 0.3s ease;
+        }
+
+        .link-logout:hover i {
+            transform: scale(1.2) rotate(-5deg);
+        }
     </style>
-
-
+</head>
 
 <body>
-    <div class="container">
+    <div class="d-flex vh-100">
 
-        
-        <!-- LOGO FAESA -->
-        <img src="{{ asset('faesa.png') }}" alt="Logo">
-        
-        
-        <form action="{{ route('loginPOST') }}" method="POST">
-            @csrf
+        <!-- SIDEBAR DESKTOP -->
+        <nav class="p-3 d-none d-lg-flex flex-column align-items-center" style="width: 250px; background-color: var(--blue-color);">
+            <img src="{{ asset('faesa.png') }}" alt="Logo" class="img-fluid mb-2">
+            <h4 class="mb-5 p-2 rounded-3 text-black-emphasis" style="background-color: var(--secondary-color);">Psicologia</h4>
+            <ul class="list-group list-group-flush w-100 gap-1">
+                <!-- LINKS -->
+                <li class="list-group-item rounded-1 p-0 overflow-hidden border border-1 border-black">
+                    <a href="/psicologia/" class="link-agendar d-flex align-items-center gap-2 p-2">
+                        <i class="fas fa-home"></i> Início
+                    </a>
+                </li>
+                <li class="list-group-item rounded-1 p-0 overflow-hidden border border-1 border-black">
+                    <a href="/psicologia/criar-agenda" class="link-agendar d-flex align-items-center gap-2 p-2">
+                        <i class="fas fa-calendar-plus"></i> Incluir Agendamento
+                    </a>
+                </li>
+                <li class="list-group-item rounded-1 p-0 overflow-hidden border border-1 border-black">
+                    <a href="/psicologia/consultar-agenda" class="link-agendar d-flex align-items-center gap-2 p-2">
+                        <i class="fas fa-edit"></i> Consultar Agenda
+                    </a>
+                </li>
+                <li class="list-group-item rounded-1 p-0 overflow-hidden border border-1 border-black">
+                    <a href="/psicologia/criar-paciente" class="link-agendar d-flex align-items-center gap-2 p-2">
+                        <i class="fas fa-user-plus"></i> Cadastrar Paciente
+                    </a>
+                </li>
+                <li class="list-group-item rounded-1 p-0 overflow-hidden border border-1 border-black">
+                    <a href="/psicologia/consultar-paciente" class="link-agendar d-flex align-items-center gap-2 p-2">
+                        <i class="fas fa-users"></i> Consultar Paciente
+                    </a>
+                </li>
+                <li class="list-group-item rounded-1 p-0 overflow-hidden border border-1 border-black">
+                    <a href="/psicologia/criar-servico" class="link-agendar d-flex align-items-center gap-2 p-2">
+                        <i class="bi bi-hammer"></i> Cadastrar Serviço
+                    </a>
+                </li>
+                <li class="list-group-item rounded-1 p-0 overflow-hidden border border-1 border-black">
+                    <a href="/psicologia/relatorio" class="link-agendar d-flex align-items-center gap-2 p-2">
+                        <i class="fas fa-chart-bar"></i> Relatório
+                    </a>
+                </li>
+                <li class="list-group-item mt-auto rounded-1 p-0 overflow-hidden border border-1 border-black">
+                    <a href="/psicologia/logout" class="link-logout d-flex align-items-center gap-2 p-2">
+                        <i class="fas fa-sign-out-alt"></i> Logout
+                    </a>
+                </li>
+            </ul>
+        </nav>
 
-            <!-- USUARIO -->
-            <div class="input-group">
-                <input type="text" id="login" name="login" required placeholder=" ">
-                <label for="login">Usuário</label>
+        <!-- BOTÃO OFFCANVAS MOBILE -->
+        <button class="btn btn-primary position-absolute m-2 d-lg-none" type="button" data-bs-toggle="offcanvas" data-bs-target="#offcanvasMenu" aria-controls="offcanvasMenu">
+            <i class="fas fa-bars"></i>
+        </button>
+
+        <!-- OFFCANVAS MOBILE -->
+        <div class="offcanvas offcanvas-start d-lg-none" tabindex="-1" id="offcanvasMenu" aria-labelledby="offcanvasMenuLabel">
+            <div class="offcanvas-header" style="background-color: var(--blue-color);">
+                <h5 class="offcanvas-title text-white" id="offcanvasMenuLabel">Menu</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="offcanvas" aria-label="Fechar"></button>
             </div>
-
-            
-            @error('login')
-            <div class="error">{{ $message }}</div>
-            @enderror
-            
-
-
-            <div class="input-group">
-                <input type="password" id="senha" name="senha" required placeholder=" ">
-                <label for="senha">Senha</label>
-                <span class="toggle-password" onclick="togglePasswordVisibility(this)">
-                    <i class="bi bi-eye"></i>
-                </span>
+            <div class="offcanvas-body p-0" style="background-color: var(--light-color);">
+                <ul class="list-group list-group-flush w-100">
+                    <!-- MESMOS LINKS DO SIDEBAR -->
+                    <li class="list-group-item p-0 overflow-hidden border border-1 border-black">
+                        <a href="/psicologia/" class="link-agendar d-flex align-items-center gap-2 p-2">
+                            <i class="fas fa-home"></i> Início
+                        </a>
+                    </li>
+                    <li class="list-group-item p-0 overflow-hidden border border-1 border-black">
+                        <a href="/psicologia/criar-agenda" class="link-agendar d-flex align-items-center gap-2 p-2">
+                            <i class="fas fa-calendar-plus"></i> Incluir Agendamento
+                        </a>
+                    </li>
+                    <li class="list-group-item p-0 overflow-hidden border border-1 border-black">
+                        <a href="/psicologia/consultar-agenda" class="link-agendar d-flex align-items-center gap-2 p-2">
+                            <i class="fas fa-edit"></i> Consultar Agenda
+                        </a>
+                    </li>
+                    <li class="list-group-item p-0 overflow-hidden border border-1 border-black">
+                        <a href="/psicologia/criar-paciente" class="link-agendar d-flex align-items-center gap-2 p-2">
+                            <i class="fas fa-user-plus"></i> Cadastrar Paciente
+                        </a>
+                    </li>
+                    <li class="list-group-item p-0 overflow-hidden border border-1 border-black">
+                        <a href="/psicologia/consultar-paciente" class="link-agendar d-flex align-items-center gap-2 p-2">
+                            <i class="fas fa-users"></i> Consultar Paciente
+                        </a>
+                    </li>
+                    <li class="list-group-item p-0 overflow-hidden border border-1 border-black">
+                        <a href="/psicologia/criar-servico" class="link-agendar d-flex align-items-center gap-2 p-2">
+                            <i class="bi bi-hammer"></i> Cadastrar Serviço
+                        </a>
+                    </li>
+                    <li class="list-group-item p-0 overflow-hidden border border-1 border-black">
+                        <a href="/psicologia/relatorio" class="link-agendar d-flex align-items-center gap-2 p-2">
+                            <i class="fas fa-chart-bar"></i> Relatório
+                        </a>
+                    </li>
+                    <li class="list-group-item p-0 overflow-hidden border border-1 border-black">
+                        <a href="/psicologia/logout" class="link-logout d-flex align-items-center gap-2 p-2">
+                            <i class="fas fa-sign-out-alt"></i> Logout
+                        </a>
+                    </li>
+                </ul>
             </div>
-            
-            
-            @error('senha')
-            <div class="error">{{ $message }}</div>
-            @enderror
+        </div>
 
-            @if (session('error'))
-            <div class="alert alert-danger">
-                {{ session('error') }}
-            </div>
-            @endif
-
-            
-            <input type="submit" value="Entrar">
-
-            
-            <!-- ESQUECEU A SENHA? -->
-            <div class="forgot-password-link">
-                <a href="https://acesso.faesa.br/#/auth-user/forgot-password">Esqueceu a senha?</a>
-            </div>
-
-
-
-        </form>
+        <!-- CALENDÁRIO -->
+        <div id="calendar" class="flex-grow-1 p-3 overflow-auto"></div>
     </div>
 
-</body>
-
+    <!-- FULLCALENDAR SCRIPT -->
+    <script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.11/index.global.min.js"></script>
     <script>
-        function togglePasswordVisibility(element) {
-            const input = document.getElementById("senha");
-            const icon = element.querySelector("i");
+        document.addEventListener('DOMContentLoaded', function () {
+            const calendarEl = document.getElementById('calendar');
 
-            if (input.type === "password") {
-                input.type = "text";
-                icon.classList.remove("bi-eye");
-                icon.classList.add("bi-eye-slash");
-            } else {
-                input.type = "password";
-                icon.classList.remove("bi-eye-slash");
-                icon.classList.add("bi-eye");
-            }
-        }
+            const calendar = new FullCalendar.Calendar(calendarEl, {
+                initialView: 'dayGridMonth',
+                headerToolbar: {
+                    left: 'prev,next today',
+                    center: 'title',
+                    right: 'dayGridDay,timeGridWeek,dayGridMonth'
+                },
+                slotMinTime: "08:00:00",
+                slotMaxTime: "19:00:00",
+                businessHours: {
+                    daysOfWeek: [1, 2, 3, 4, 5, 6],
+                    startTime: '08:00',
+                    endTime: '18:00',
+                },
+                eventDidMount: function (info) {
+                    info.el.setAttribute('title', info.event.extendedProps.description);
+                },
+                buttonText: {
+                    today: 'Hoje',
+                    month: 'Mês',
+                    week: 'Semana',
+                    day: 'Dia',
+                    list: 'Lista'
+                },
+                locale: 'pt-br',
+                selectable: true,
+                editable: false,
+                select: function (info) {
+                    alert('Selecionado de ' + info.startStr + ' até ' + info.endStr);
+                },
+                events: [
+                    {
+                        title: 'Consulta Odontologia',
+                        start: new Date().toISOString().split('T')[0],
+                        color: '#007bff'
+                    },
+                    {
+                        title: 'Reunião de Equipe',
+                        start: new Date(new Date().setDate(new Date().getDate() + 2)).toISOString().split('T')[0],
+                        end: new Date(new Date().setDate(new Date().getDate() + 4)).toISOString().split('T')[0],
+                        color: '#28a745'
+                    },
+                    {
+                        title: 'Avaliação com Paciente',
+                        start: new Date(new Date().setHours(10, 0, 0, 0)).toISOString(),
+                        end: new Date(new Date().setHours(11, 0, 0, 0)).toISOString(),
+                        allDay: false,
+                        color: '#ffc107'
+                    },
+                ]
+            });
+            calendar.render();
+        });
     </script>
-
-
+</body>
 
 </html>
