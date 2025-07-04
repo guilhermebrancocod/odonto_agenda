@@ -11,6 +11,7 @@ class LoginController extends Controller
         // ARMAZENA LOGIN DE USUARIO E ID DA CLINICA
         $usuario = session('usuario');
         $clinicas = $usuario->pluck('ID_CLINICA')->toArray();
+        
 
         // VERIFICA CLINICAS QUE USUÁRIO TEM ACESSO
         if(in_array(1, $clinicas) && in_array(2, $clinicas)) {

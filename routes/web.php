@@ -7,6 +7,7 @@ use App\Http\Controllers\Psicologia\AgendamentoController;
 use App\Http\Controllers\Psicologia\ServicoController;
 use App\Http\Controllers\LoginController;
 use App\Http\Controllers\Psicologia\ClinicaController;
+
 use App\Http\Middleware\AuthMiddleware;
 use App\Http\Middleware\CheckClinicaMiddleware;
 
@@ -28,19 +29,19 @@ Route::get('/', function() {
     if (session()->has('usuario')) {
         $usuario = session('usuario');
         $clinicas = $usuario->pluck('ID_CLINICA')->toArray();
+        $sit_usuario = session('SIT_USUARIO');
 
         if (in_array(1, $clinicas) && in_array(2, $clinicas)) {
-            // Tem acesso às duas clínicas
+            // SESSÃO AINDA EXISTE - TEM ACESSO ÀS DUAS CLÍNICAS
             $lastRoute = session('last_clinic_route');
 
             if ($lastRoute) {
                 return redirect()->route($lastRoute);
             } else {
-                // Se quiser abrir a tela de seleção
+                // ABRE TELA DE SELEÇÃO - Se não tem LastRoute gravado, abre tela para seleção de clínica que deseja acessar
                 return redirect()->route('selecionar-clinica-get');
-                // ou padrão psicologia:
-                // return redirect()->route('menu_agenda_psicologia');
             }
+
         } elseif (in_array(1, $clinicas)) {
             return redirect()->route('menu_agenda_psicologia');
         } elseif (in_array(2, $clinicas)) {
@@ -53,8 +54,6 @@ Route::get('/', function() {
     return view('login');
 })->name('loginGET');
 
-
-// 🔹 Rotas de login e seleção de clínica protegidas apenas pelo AuthMiddleware
 Route::middleware([AuthMiddleware::class])->group(function() {
 
     Route::get('/login', function() {
@@ -75,7 +74,6 @@ Route::middleware([AuthMiddleware::class])->group(function() {
     Route::post('/selecionar-clinica', [ClinicaController::class, 'selecionarClinica'])->name('selecionar-clinica-post');
 });
 
-// Rotas de PSICOLOGIA protegidas pelo AuthMiddleware + CheckClinicaMiddleware
 Route::middleware([AuthMiddleware::class, CheckClinicaMiddleware::class])->prefix('psicologia')->group(function() {
 
     Route::get('/', function() {
@@ -113,7 +111,6 @@ Route::middleware([AuthMiddleware::class, CheckClinicaMiddleware::class])->prefi
 
 });
 
-// 🔹 Rotas de ODONTOLOGIA protegidas pelo AuthMiddleware + CheckClinicaMiddleware
 Route::middleware([AuthMiddleware::class, CheckClinicaMiddleware::class])->prefix('odontologia')->group(function() {
 
     Route::get('/', function() {

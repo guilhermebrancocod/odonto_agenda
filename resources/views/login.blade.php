@@ -208,7 +208,7 @@
 
         
         <!-- LOGO FAESA -->
-        <img src="faesa.png" alt="Logo">
+        <img src="{{ asset('faesa.png') }}" alt="Logo">
         
         
         <form action="{{ route('loginPOST') }}" method="POST">
