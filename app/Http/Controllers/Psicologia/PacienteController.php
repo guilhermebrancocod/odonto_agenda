@@ -61,4 +61,14 @@ class PacienteController extends Controller
 
         return response()->json($pacientes);
     }
+
+    /**
+     * Identifica e altera um Paciente em específico
+     * 
+     * @param Request $request A instância da requisição HTTP. Pode conter o parâmetro 'search'.
+     */
+    public function editarPaciente(Request $request)
+    {
+        dd($request);
+    }
 }

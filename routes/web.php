@@ -91,6 +91,12 @@ Route::middleware([AuthMiddleware::class, CheckClinicaMiddleware::class])->prefi
 
     Route::post('/criar-paciente/criar', [PacienteController::class, 'criarPaciente'])->name('criarPaciente-Psicologia');
 
+    Route::get('/editar-paciente', function(){
+        return view('psicologia/editar_paciente');
+    })->name('editarPaciente-Psicologia');
+
+    Route::post('/editar-paciente/{id}', [PacienteController::class, 'editarPaciente'])->name('editarPaciente-Psicologia');
+
     Route::get('/criaragenda', function () {
         return view('psicologia/create_agenda');
     })->name('criaragenda_psicologia');

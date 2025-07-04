@@ -50,7 +50,7 @@
                         <th>Observação cadastral</th>
                         <th>Data/hora</th>
                         <th>Status</th>
-                        <th>Editar</th>
+                        <th id="button-editar">Editar</th>
                     </thead>
                     <tbody>
                         <tr>
@@ -84,6 +84,10 @@
     </div>
     <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mdb-ui-kit/7.1.0/mdb.min.js"></script>
     <script type="module" src="/js/odontologia/consult_agenda.js"></script>
+
+    <script>
+        
+    </script>
 </body>
 
 </html>
