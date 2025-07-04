@@ -10,10 +10,6 @@ class ServicoController extends Controller
 {
     public function criarServico(Request $request)
     {
-
-        // Precisa adicionar valor de variavel de sessão ID_CLINICA para completar cadastro de Serviço.
-        // Será feito após completar página de login.
-
         $validated = $request->validate([
             'ID_CLINICA' => 'required|integer|min:1',
             'SERVICO_CLINICA_DESC' => 'required|string|min:1',

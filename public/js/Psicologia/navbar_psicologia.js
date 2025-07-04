@@ -76,7 +76,7 @@ function createNavBar() {
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.1/font/bootstrap-icons.min.css">
 
   <nav>
-    <img src="img/faesa.png" alt="Logo">
+    <img src="faesa.png" alt="Logo">
     <h4>Psicologia</h4>
 
     <ul>
