@@ -17,7 +17,7 @@ class AuthMiddleware
         if(!$routeName) {
             return $next($request);
         }
-
+        
         // CASO A ROTA QUE O USUÁRIO TENTA ACESSAR SEJA ALGUMA DESSAS, ELE PERMITE
         if(in_array($routeName, ['loginGET', 'logout'])) {
             return $next($request);

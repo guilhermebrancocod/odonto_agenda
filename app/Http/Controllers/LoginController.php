@@ -34,8 +34,10 @@ class LoginController extends Controller
     {
         // LIMPA OS DADOS DA SESSÃO
         session()->flush();
+        $request->session()->invalidate();
+        $request->session()->regenerateToken();
 
         // REDIRECIONA PARA TELA DE LOGIN NOVAMENTE
-        return redirect()->route('loginGET');
+        return view('login');
     }
 }
