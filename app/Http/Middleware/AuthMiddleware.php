@@ -18,7 +18,7 @@ class AuthMiddleware
             return $next($request);
         }
         
-        // CASO A ROTA QUE O USUÁRIO TENTA ACESSAR SEJA ALGUMA DESSAS, ELE PERMITE
+        // CASO A ROTA QUE O USUÁRIO TENTA ACESSAR SEJA ALGUMA DESSAS, ELE PERMITE SEGUIR ADIANTE
         if(in_array($routeName, ['loginGET', 'logout'])) {
             return $next($request);
         }
@@ -41,7 +41,7 @@ class AuthMiddleware
                 
                 if ($validacao->isEmpty()) {
                     session()->flush();
-                    return redirect()->back()->with('error', "Credenciais Inválidas");
+                    return redirect()->back()->with('error', "Usuário Inativo");
                 } else {
                     session(['usuario' => $validacao]);
                     return $next($request);
@@ -95,7 +95,9 @@ class AuthMiddleware
     public function validarUsuario(array $credentials)
     {
         $username = $credentials['username'];
-        $usuario = FaesaClinicaUsuario::where('ID_USUARIO_CLINICA', $username)->get();
+        $usuario = FaesaClinicaUsuario::where('ID_USUARIO_CLINICA', $username)
+        ->where('SIT_USUARIO', '=', 'Ativo')
+        ->get();
         return $usuario;
-     }
+    }
 }
