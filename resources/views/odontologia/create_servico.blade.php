@@ -19,19 +19,19 @@
         </div>
 
         @if ($errors->any())
-        <div class="alert alert-danger">
-            <ul>
-                @foreach ($errors->all() as $erro)
-                <li>{{ $erro }}</li>
-                @endforeach
-            </ul>
-        </div>
+            <div class="alert alert-danger">
+                <ul>
+                    @foreach ($errors->all() as $erro)
+                        <li>{{ $erro }}</li>
+                    @endforeach
+                </ul>
+            </div>
         @endif
 
         @if(session('success'))
-        <div class="alert alert-success">
-            {{ session('success') }}
-        </div>
+            <div class="alert alert-success">
+                {{ session('success') }}
+            </div>
         @endif
 
         <form class="row g-3 needs-validation" action="{{ route('criarServico-Psicologia') }}" method="POST">
@@ -59,7 +59,7 @@
 
             <!-- SCRIPT PARA CAMPO DE PREENCHIMENTO DE CÓDIGO INTERNO DE SERVIÇO -->
             <script>
-                document.getElementById('cod-interno-servico').addEventListener('input', function(e) {
+                document.getElementById('cod-interno-servico').addEventListener('input', function (e) {
                     this.value = this.value.replace(/[^0-9\-]/g, '');
                 });
             </script>
@@ -72,11 +72,12 @@
                 <input type="text"
                     id="nome-servico"
                     name="NOME-SERVICO"
-                    class="form-control">
+                    class="form-control"
+                >
             </div>
 
             <button id="salvar" type="submit" style="background-color: #007bff; color: #fff; border: none; padding: 10px 20px; font-size: 14px; border-radius: 6px; cursor: pointer;">
-                Salvar
+                    Salvar
             </button>
 
         </form>

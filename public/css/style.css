@@ -55,15 +55,14 @@ nav li a:hover {
 }
 
 .logout-link {
-    font-size: 16px;
-    text-align: center;
-    padding: 12px 16px;
-    color: white;
-    border-radius: 8px;
-    margin: 10px auto 0;
+    margin-top: auto;
+    margin-bottom: 20px;
+    padding: 10px 20px;
+    color: #ecf0f1;
+    text-decoration: none;
     display: block;
-    width: 80%;
-    transition: background-color 0.3s ease, color 0.3s ease;
+    width: 70%;
+    text-align: center;
 }
 
 .logout-link:hover {
