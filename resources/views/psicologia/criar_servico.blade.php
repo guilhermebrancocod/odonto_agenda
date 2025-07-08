@@ -18,6 +18,7 @@
             <h2 style="margin: 0; font-size: 24px; color: #333;">Cadastro de Serviço</h2>
         </div>
 
+        <!-- SE DER ERRO, MOSTRA NA TELA -->
         @if ($errors->any())
         <div class="alert alert-danger">
             <ul>
@@ -37,6 +38,9 @@
         <form class="row g-3 needs-validation" action="{{ route('criarServico-Psicologia') }}" method="POST">
             @csrf
 
+            <!-- Envia o ID_CLINICA da sessão -->
+            <input type="hidden" name="ID_CLINICA" value="1">
+
             <!-- TÍTULO FORMULÁRIO SERVIÇO -->
             <div class="linha-com-titulo">
                 <h5>Dados Serviço</h5>
@@ -50,7 +54,7 @@
                 </label>
                 <input type="text"
                     id="cod-interno-servico"
-                    name="COD_CONTROL_INTERNO"
+                    name="COD_INTERNO_SERVICO_CLINICA"
                     class="form-control"
                     placeholder="Ex: 1234-5678"
                     pattern="[0-9\-]+"
@@ -71,8 +75,14 @@
                 </label>
                 <input type="text"
                     id="nome-servico"
+<<<<<<< HEAD
                     name="NOME-SERVICO"
                     class="form-control">
+=======
+                    name="SERVICO_CLINICA_DESC"
+                    class="form-control"
+                >
+>>>>>>> main
             </div>
 
             <button id="salvar" type="submit" style="background-color: #007bff; color: #fff; border: none; padding: 10px 20px; font-size: 14px; border-radius: 6px; cursor: pointer;">

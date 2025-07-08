@@ -13,8 +13,6 @@
 <body>
     <div id="navbar-container">
         <div style="max-width: 1200px; margin-left:220px; padding: 30px; border-radius: 10px; background-color: #fff; box-shadow: 0 4px 12px rgba(0,0,0,0.05);">
-
-            <!-- TITULO DA SEÇÃO DE CONSULTA DE PACIENTE -->
             <div style="text-align: center; margin-bottom: 30px;">
                 <h2 style="margin: 0; font-size: 24px; color: #333;">Pesquisando</h2>
             </div>
@@ -24,7 +22,7 @@
                 <div class="linha-flex"></div>
             </div>
 
-            <!-- INPUT DAS INFORMACOES DO PACIENTE PARA PESQUISA -->
+            <!-- FORMULÁRIO DE CONSULTA DE PACIENTE -->
             <div style="display: flex; gap: 20px; align-items: flex-end; flex-wrap: wrap; margin: 20px 0;">
                 <form id="search-form" class="d-flex gap-3 align-items-end flex-wrap" style="margin:20px 0;">
                     <div style="flex: 1;">
@@ -45,13 +43,12 @@
                 </form>
             </div>
 
-            <!-- TÍTULO DA SEÇÃO DE RESULTADOS DA PESQUISA DE PACIENTE -->
             <div class="linha-com-titulo">
                 <h5>Resultado</h5>
                 <div class="linha-flex"></div>
             </div>
 
-            <!-- TABELA COM INFORMAÇÕES DO RESULTADO DA PESQUISA POR PACIENTE -->
+            <!-- TABELA COM PACIENTES RETORNADOS -->
             <div class="datatable" style="margin-top:25px">
                 <table class="table datatable-table">
                     <thead class="datatable-header">
@@ -76,24 +73,42 @@
         </div>
     </div>
 
-    <!-- JAVA SCRIPT -->
+    <!-- MODAL DE CONFIRMAÇÃO -->
+    <div class="modal fade" id="confirmEditModal" tabindex="-1" aria-labelledby="confirmEditModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="confirmEditModalLabel">Editar Paciente</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fechar"></button>
+                </div>
+                <div class="modal-body">
+                    <p id="modal-paciente-nome">Deseja editar este paciente?</p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="button" class="btn btn-primary" id="confirm-edit-btn">Confirmar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- SCRIPTS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/mdb-ui-kit/7.1.0/mdb.min.js"></script>
     <script>
         const searchForm = document.getElementById('search-form');
         const searchInput = document.getElementById('search-input');
         const pacientesTbody = document.getElementById('pacientes-tbody');
+        let selectedPaciente = null;
 
         searchForm.addEventListener('submit', function(e) {
             e.preventDefault();
-
             const nome = searchInput.value.trim();
 
             fetch(`/psicologia/consultar-paciente/buscar?search=${encodeURIComponent(nome)}`)
                 .then(response => response.json())
                 .then(pacientes => {
                     pacientesTbody.innerHTML = '';
-
-                    // CASO NÃO ACHE PACIENTE ALGUM
                     if (pacientes.length === 0) {
                         pacientesTbody.innerHTML = `
                             <tr>
@@ -103,10 +118,8 @@
                         return;
                     }
 
-                    // PARA CADA PACIENTE CRIA UM REGISTRO (linha)
                     pacientes.forEach(paciente => {
                         const row = document.createElement('tr');
-
                         row.innerHTML = `
                             <td>${paciente.ID_PACIENTE ?? '-'}</td>
                             <td>${paciente.NOME_COMPL_PACIENTE ?? '-'}</td>
@@ -115,12 +128,30 @@
                             <td>${paciente.SEXO_PACIENTE ?? '-'}</td>
                             <td>${paciente.FONE_PACIENTE ?? '-'}</td>
                             <td>${paciente.E_MAIL_PACIENTE ?? '-'}</td>
-                            <td><a href="#" class="btn btn-sm btn-primary">Editar</a></td>
+                            <td>
+                                <button type="button" class="btn btn-sm btn-primary editar-btn" 
+                                    data-id="${paciente.ID_PACIENTE}" 
+                                    data-nome="${paciente.NOME_COMPL_PACIENTE ?? 'Paciente'}">
+                                    Editar
+                                </button>
+                            </td>
                         `;
                         pacientesTbody.appendChild(row);
                     });
+
+                    document.querySelectorAll('.editar-btn').forEach(button => {
+                        button.addEventListener('click', () => {
+                            selectedPaciente = {
+                                id: button.getAttribute('data-id'),
+                                nome: button.getAttribute('data-nome')
+                            };
+                            document.getElementById('modal-paciente-nome').textContent = `Deseja editar o paciente: ${selectedPaciente.nome}?`;
+                            const modalElement = document.getElementById('confirmEditModal');
+                            const modal = new bootstrap.Modal(modalElement);
+                            modal.show();
+                        });
+                    });
                 })
-                // EM CASO DE ERRO DURANTE PESQUISA
                 .catch(error => {
                     console.error(error);
                     pacientesTbody.innerHTML = `
@@ -129,6 +160,14 @@
                         </tr>
                     `;
                 });
+        });
+
+        document.getElementById('confirm-edit-btn').addEventListener('click', () => {
+            if (selectedPaciente) {
+                // const url = `/psicologia/editar-paciente/${selectedPaciente.id}?nome=${encodeURIComponent(selectedPaciente.nome)}`;
+                const url = `/psicologia/editar-paciente`;
+                window.location.href = url;
+            }
         });
     </script>
 </body>

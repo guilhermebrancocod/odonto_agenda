@@ -47,14 +47,28 @@ class PacienteController extends Controller
      */
     public function getPaciente(Request $request)
     {
+        // ARMAZENA NOME DO PACIENTE EM QUESTÃO PARA BUSCA
         $nome = $request->query('search');
 
+        // CASO NOME SEJA FORNECIDO, PESQUISA POR ELE
         if ($nome) {
             $pacientes = FaesaClinicaPaciente::where('NOME_COMPL_PACIENTE', 'like', "%{$nome}%")->get();
+        
+        // CASO NOME NÃO SEJA FORNECIDO, RETORNA OS 10 ÚLTIMOS PACIENTES ADICIONADOS    
         } else {
             $pacientes = FaesaClinicaPaciente::orderBy('ID_PACIENTE', 'DESC')->limit(10)->get();
         }
 
         return response()->json($pacientes);
+    }
+
+    /**
+     * Identifica e altera um Paciente em específico
+     * 
+     * @param Request $request A instância da requisição HTTP. Pode conter o parâmetro 'search'.
+     */
+    public function editarPaciente(Request $request)
+    {
+        dd($request);
     }
 }

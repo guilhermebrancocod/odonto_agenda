@@ -5,16 +5,110 @@
     
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" type="text/css" href="{{ asset('css/loginScreen.css') }}" />
+    <link rel="icon" type="image/png" href="/favicon_faesa.png">
     <title>Login</title>
-    <link rel="icon" type="image/png" href="faesa_favicon.png">
-
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.7/dist/js/bootstrap.bundle.min.js" integrity="sha384-ndDqU0Gzau9qJ1lfW4pNLlhNTkCfHzAVBReH9diLvGRem5+R9g2FzA8ZGN954O5Q" crossorigin="anonymous"></script>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.7/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-LN+7fdVzj6u52u30Kp6M/trliBMCMKTyK833zpbD+pXdCLuTusPj697FH4R/5mcr" crossorigin="anonymous">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
 
 </head>
     <style>
+
+        body {
+            /* font-family: Arial, sans-serif; */
+            font-family: Arial, Helvetica, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #5CA4EA;   /* #107ed8  #5CA4EA */
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        .container {
+            width: 280px;
+            background-color: #fff;
+            padding: 70px 50px;
+            border-radius: 10px;
+            box-shadow: 3px 3px 13px #000;
+            /* box-shadow: 0 0 10px rgba(0, 0, 0, 0.1); */
+        }
+
+        .container img {
+            display: block;
+            margin: 0 auto 20px;
+            width: 190px;
+            margin-bottom: 70px;
+        }
+
+        label {
+            font-size: 18px;
+        }
+
+        input[type="text"],
+        input[type="password"] {
+            width: calc(100% - 20px);
+            padding: 2px;
+            margin: 15px 0px;
+            border: 1px solid #ccc;
+            box-sizing: border-box;
+            border: 0 none;
+            outline: 0;
+            font-size: 16px;
+        }
+
+        input[type="submit"] {
+            width: 281px;
+            padding: 15px;
+            margin-top:15px;
+            background-color: #007bff; /*  #007bff   #007bff */
+            border: none;
+            border-radius: 4px;
+            color: #fff;
+            cursor: pointer;
+            font-size: 15px;
+            height: 50px;
+
+        }
+
+        input[type="submit"]:hover {
+            background-color: #0056b3;
+        }
+        hr {
+            color: black;
+            margin-top: -10px;
+        }
+        .hr {
+            padding-bottom: 20px;
+        }
+
+        .error {
+            color: red;
+            margin-top: 5px;
+        }
+
+        .alert-danger {
+            color: #a94442;
+            background-color: #f2dede;
+            border-color: #ebccd1;
+            padding: 10px;
+            border-radius: 5px;
+            margin-bottom: 10px;
+        }
+
+        .forgot-password-link {
+            margin-top: 20px;
+        }
+
+        .forgot-password-link a {
+            text-decoration: none;
+            color: #007bff;
+            font-size: 15px;
+        }
+
+        .forgot-password-link a:hover {
+            text-decoration: underline;
+        }
 
         .input-group {
             position: relative;
@@ -115,10 +209,10 @@
 
         
         <!-- LOGO FAESA -->
-        <img src="faesa.png" alt="Logo">
+        <img src="{{ asset('faesa.png') }}" alt="Logo">
         
         
-        <form action="" method="POST">
+        <form action="{{ route('loginPOST') }}" method="POST">
             @csrf
 
             <!-- USUARIO -->
