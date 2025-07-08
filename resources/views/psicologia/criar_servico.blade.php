@@ -47,20 +47,6 @@
                 <div class="linha-flex"></div>
             </div>
 
-            <!-- CÓDIGO CONTROLE INTERNO (DB: COD_INTERNO_SERVICO_CLINICA) -->
-            <div class="mb-3">
-                <label for="cod-interno-servico" class="form-label text-muted" style="font-size: 14px;">
-                    Código Controle Interno
-                </label>
-                <input type="text"
-                    id="cod-interno-servico"
-                    name="COD_INTERNO_SERVICO_CLINICA"
-                    class="form-control"
-                    placeholder="Ex: 1234-5678"
-                    pattern="[0-9\-]+"
-                    title="Digite apenas números e traços">
-            </div>
-
             <!-- SCRIPT PARA CAMPO DE PREENCHIMENTO DE CÓDIGO INTERNO DE SERVIÇO -->
             <script>
                 document.getElementById('cod-interno-servico').addEventListener('input', function(e) {
@@ -75,14 +61,8 @@
                 </label>
                 <input type="text"
                     id="nome-servico"
-<<<<<<< HEAD
                     name="NOME-SERVICO"
                     class="form-control">
-=======
-                    name="SERVICO_CLINICA_DESC"
-                    class="form-control"
-                >
->>>>>>> main
             </div>
 
             <button id="salvar" type="submit" style="background-color: #007bff; color: #fff; border: none; padding: 10px 20px; font-size: 14px; border-radius: 6px; cursor: pointer;">

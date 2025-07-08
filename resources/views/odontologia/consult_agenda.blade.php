@@ -50,7 +50,6 @@
             <div class="datatable" style="margin-top:15px">
                 <table class="table datatable-table" id="table-agenda">
                     <thead class="datatable-header">
-<<<<<<< HEAD
                         <tr style="padding-left: 1rem;">
                             <th>Nome</th>
                             <th>Data</th>
@@ -60,14 +59,6 @@
                             <th>Telefone</th>
                             <th>Editar</th>
                         </tr>
-=======
-                        <th>Nome</th>
-                        <th>Serviço</th>
-                        <th>Observação cadastral</th>
-                        <th>Data/hora</th>
-                        <th>Status</th>
-                        <th id="button-editar">Editar</th>
->>>>>>> main
                     </thead>
                     <tbody>
                     </tbody>
