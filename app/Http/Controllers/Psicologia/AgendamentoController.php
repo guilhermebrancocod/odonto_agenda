@@ -28,21 +28,29 @@ class AgendamentoController extends Controller
      */
     public function criarAgendamento(Request $request)
     {
-        $validated = $request->validate([
-            'ID_CLINICA' => 'required|integer|min:1',
-            'ID_PACIENTE' => 'required|integer|min:1',
-            'ID_SERVICO_CLINICA' => 'required|integer|min:1',
-            'DT_AGEND' => 'required|date',
-            'HR_AGEND_INI' => 'required|date_format:H:i',
-            'HR_AGEND_FIN' => 'required|date_format:H:i|after:HR_AGEND_INI',
-            'STATUS_AGEND' => 'nullable|string|max:50',
-            'ID_AGEND_REMARCADO' => 'nullable|integer|min:1|exists:FAESA_CLINICA_AGENDAMENTO,ID_AGENDAMENTO',
-            'RECORRENCIA' => 'nullable|boolean',
-            'VALOR_AGEND' => 'nullable|numeric|min:0',
-            'OBSERVACAO_AGEND' => 'nullable|string|max:255',
+        $idClinica = session('clinica-selecionada');
+
+        $request->validate([
+            'paciente_id' => 'required|integer',
+            'id_servico' => 'required|integer',
+            'dia_agend' => 'required|date',
+            'hr_ini' => 'required',
+            'hr_fim' => 'required',
+            'tipo_recorrencia' => 'required|string',
         ]);
 
-        $agendamento = FaesaClinicaAgendamento::create($validated);
+        $dados = [
+            'ID_CLINICA' => $idClinica,
+            'ID_PACIENTE' => $request->paciente_id,
+            'ID_SERVICO' => $request->id_servico,
+            'DT_AGEND' => $request->dia_agend,
+            'HR_AGEND_INI' => $request->hr_ini,
+            'HR_AGEND_FIN' => $request->hr_fim,
+            'STATUS_AGEND' => '1',
+            'RECORRENCIA' => $request->tipo_recorrencia,
+        ];
+
+        $agendamento = FaesaClinicaAgendamento::create($dados);
 
         return response()->json([
             'message' => 'Agendamento criado com sucesso',

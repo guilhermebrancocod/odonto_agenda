@@ -15,7 +15,7 @@ class FaesaClinicaAgendamento extends Model
     protected $fillable = [
         'ID_CLINICA',
         'ID_PACIENTE',
-        'ID_SERVICO_CLINICA',
+        'ID_SERVICO',
         'DT_AGEND',
         'HR_AGEND_INI',
         'HR_AGEND_FIN',
@@ -66,7 +66,7 @@ class FaesaClinicaAgendamento extends Model
      */
     public function servico(): BelongsTo
     {
-        return $this->belongsTo(FaesaClinicaServico::class, 'ID_SERVICO_CLINICA', 'ID_SERVICO_CLINICA');
+        return $this->belongsTo(FaesaClinicaServico::class, 'ID_SERVICO', 'ID_SERVICO_CLINICA');
     }
 
     /**

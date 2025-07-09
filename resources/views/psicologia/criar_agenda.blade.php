@@ -48,9 +48,14 @@
         <div id="paciente-selecionado" class="mb-3"></div>
 
         <!-- FORM DE AGENDAMENTO -->
-        <form action="" method="POST" id="agendamento-form" class="mt-2 w-100">
+        <form action="{{ route('criarAgendamento-Psicologia') }}" method="POST" id="agendamento-form" class="mt-2 w-100">
             @csrf
+
+            <!-- ID DO USUARIO QUE SERÁ ENVIADO COM O FORMULARIO -->
             <input type="hidden" name="paciente_id" id="paciente_id" />
+
+            <!-- ID DO SERVICO QUE SERÁ ENVIADO COM O FORMULARIO -->
+            <input type="hidden" name="id_servico" id="id_servico" />
 
             <!-- SUTBITULO DO FORMULARIO DE AGENDAMENTO -->
             <div class="mb-2">
@@ -78,7 +83,7 @@
                     <input type="time" id="hr_fim" name="hr_fim" class="form-control" required>
                 </div>
 
-                <!-- TIPO -->
+                <!-- TIPO RECORRENCIA -->
                 <div class="col-sm-6 col-md-3">
                     <label for="tipo" class="form-label">Tipo</label>
                     <input type="text" id="tipo" name="tipo_recorrencia" class="form-control" placeholder="Ex: Psicoterapia" required>
@@ -222,6 +227,7 @@ servicoInput.addEventListener('input', () => {
                     item.textContent = servico.SERVICO_CLINICA_DESC; // PEGA A DESCRIÇÃO DO SERVIÇO E MOSTRA NA CAIXA DE SELEÇÃO
                     item.addEventListener('click', () => {
                         servicoInput.value = servico.SERVICO_CLINICA_DESC;
+                        document.getElementById('id_servico').value = servico.ID_SERVICO_CLINICA;
                         servicosList.innerHTML = '';
                     });
                     servicosList.appendChild(item);
