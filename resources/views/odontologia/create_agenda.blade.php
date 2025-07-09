@@ -9,6 +9,11 @@
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700&display=swap" rel="stylesheet">
 
     <link href="https://cdnjs.cloudflare.com/ajax/libs/mdb-ui-kit/7.1.0/mdb.min.css" rel="stylesheet" />
+    <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datepicker/1.10.0/css/bootstrap-datepicker.min.css" rel="stylesheet" />
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-timepicker/0.5.2/css/bootstrap-timepicker.min.css" rel="stylesheet" />
+
     <link href="/css/style.css" rel="stylesheet">
 </head>
 
@@ -18,21 +23,25 @@
         <div style="text-align: center; margin-bottom: 30px;">
             <h2 style="margin: 0; font-size: 24px; color: #333;">Agendamento</h2>
         </div>
-        <form class="row g-3 needs-validation">
+        <form class="row g-3 needs-validation"
+            action="{{ isset($agenda) ? route('updateAgenda', $agenda->ID_AGENDAMENTO) : route('createAgenda') }}"
+            method="POST">
+            @csrf
+            @if(isset($agenda))
+            @method('PUT')
+            @endif
             <div class="linha-com-titulo">
                 <h5>Paciente</h5>
                 <div class="linha-flex"></div>
             </div>
             <div style="display: flex; gap: 20px; align-items: flex-end; flex-wrap: wrap; margin: 20px 0;">
-                <form action="{{ route('selectPatient') }}" method="GET">
-                    <div class="input-group" style="flex: 1;">
-                        <div class="form-outline" data-mdb-input-init>
-                            <input id="search-input" type="search" class="form-control"
-                                style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 6px; font-size: 14px;" />
-                            <label class="form-label" for="search-input">Pesquisar</label>
-                        </div>
+                <div class="input-group" style="flex: 1; flex-direction: column;">
+                    <div class="form-outline">
+                        <select id="selectPatient" name="ID_PACIENTE"
+                            style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 6px; font-size: 14px;">
+                        </select>
                     </div>
-                </form>
+                </div>
                 <div style="flex-shrink: 0;">
                     <button type="submit" id='reload' style="background-color: #007bff; color: #fff; border: none; padding: 10px 15px; font-size: 14px; border-radius: 6px; cursor: pointer;" title="Limpar">
                         <iconify-icon icon="streamline:arrow-round-left-solid"></iconify-icon>
@@ -48,56 +57,120 @@
                 <h5>Horário</h5>
                 <div class="linha-flex"></div>
             </div>
-            <div style="display: flex; gap: 10px; flex-wrap: wrap; align-items: flex-end; margin: 20px 0;">
-                <div style="flex: 0.1">
-                    <label for="data" style="font-size: 14px; color: #666;">Dia</label>
-                    <input type="date" id="data" class="form-control" style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 6px; font-size: 14px;">
+            <div class="row g-3" style="margin: 20px 0;">
+                <!-- Dia Início -->
+                <div class="col-md-3">
+                    <label for="date" class="form-label">Dia Início</label>
+                    <input type="text" id="date" name="date" class="form-control datepicker"
+                        value="{{ old('date', $agenda->DT_AGEND ?? '') }}">
                 </div>
-                <div style="flex: 0.2">
-                    <label for="hr_ini" style="font-size: 14px; color: #666;">Horário Início</label>
-                    <input type="text" id="hr_ini" class="form-control" style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 6px; font-size: 14px;">
+
+                <!-- Dia Fim (caso queira usar futuramente) -->
+                <div class="col-md-3">
+                    <label for="date_end" class="form-label">Dia Fim</label>
+                    <input type="text" id="date_end" name="date_end" class="form-control datepicker"
+                        value="{{ old('date_end', $agenda->DT_AGEND_FIM ?? '') }}">
                 </div>
-                <div style="flex: 0.2">
-                    <label for="hr_fim" style="font-size: 14px; color: #666;">Horário Fim</label>
-                    <input type="text" id="hr_fim" class="form-control" style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 6px; font-size: 14px;">
+
+                <!-- Horário Início -->
+                <div class="col-md-3">
+                    <label for="hr_ini" class="form-label">Horário Início</label>
+                    <input type="text" id="hr_ini" name="hr_ini" class="form-control timepicker"
+                        value="{{ old('hr_ini', isset($agenda->HR_AGEND_INI) ? substr($agenda->HR_AGEND_INI, 0, 5) : '') }}">
                 </div>
-                <div style="flex: 0.3;">
-                    <label for="tipo" style="font-size: 14px; color: #666;">Recorrencia</label>
-                    <select type="text" id="tipo" class="selectpicker" style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 6px; font-size: 14px;">
+
+                <!-- Horário Fim -->
+                <div class="col-md-3">
+                    <label for="hr_fim" class="form-label">Horário Fim</label>
+                    <input type="text" id="hr_fim" name="hr_fim" class="form-control timepicker"
+                        value="{{ old('hr_fim', isset($agenda->HR_AGEND_FIN) ? substr($agenda->HR_AGEND_FIN, 0, 5) : '') }}">
+                </div>
+
+                <!-- Recorrência -->
+                <div class="col-md-4">
+                    <label for="recorrencia" class="form-label">Tipo de agendamento</label>
+                    <select id="recorrencia" name="recorrencia" class="form-select">
                         <option value=""></option>
-                        <option value="">Pontual</option>
-                        <option value="">Semanal</option>
-                        <option value="">Trimestral</option>
-                        <option value="">Semestral</option>
-                        <option value="">Anual</option>
+                        @foreach (['pontual', 'recorrencia'] as $opcao)
+                        <option value="{{ $opcao }}" {{ old('recorrencia', trim($agenda->RECORRENCIA ?? '')) == $opcao ? 'selected' : '' }}>
+                            {{ ucfirst($opcao) }}
+                        </option>
+                        @endforeach
                     </select>
                 </div>
-                <div style="flex: 0.3;">
-                    <label for="tipo" style="font-size: 14px; color: #666;">Tipo</label>
-                    <select type="text" id="tipo" class="selectpicker" style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 6px; font-size: 14px;">
-                        <option value=""></option>
-                        <option value="">Segunda-feira</option>
-                        <option value="">Terça-feira</option>
-                        <option value="">Quarta-feira</option>
-                        <option value="">Quinta-feira</option>
-                        <option value="">Sexta-feira</option>
-                        <option value="">Sabado</option>
+
+                <!-- Tipo -->
+                <div class="col-md-4">
+                    <label for="dia_semana" class="form-label">Dias da semana</label>
+                    <select id="dia_semana" name="dia_semana[]" class="form-select" multiple>
+                        @foreach (['segunda', 'terca', 'quarta', 'quinta', 'sexta', 'sabado'] as $dia)
+                        <option value="{{ $dia }}"
+                            @if (in_array($dia, old('dia_semana', isset($agenda) ? explode(',', $agenda->DIA_SEMANA ?? '') : [])))
+                            selected
+                            @endif>
+                            {{ ucfirst($dia) }}-feira
+                        </option>
+                        @endforeach
                     </select>
                 </div>
-                <div style="flex: 0.2;">
-                    <label for="pagto" style="font-size: 14px; color: #666;">Haverá Pagamento</label>
-                    <select type="text" id="pagto" class="selectpicker" style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 6px; font-size: 14px;">
+
+                <!-- Haverá Pagamento -->
+                <div class="col-md-4">
+                    <label for="pagto" class="form-label">Haverá Pagamento?</label>
+                    <select id="pagto" name="pagto" class="form-select">
                         <option value=""></option>
                         <option value="S">Sim</option>
                         <option value="N">Não</option>
                     </select>
                 </div>
-                <div style="flex: 0.2">
-                    <label for="valor" style="font-size: 14px; color: #666;">Valor</label>
-                    <input type="text" id="valor" class="form-control" style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 6px; font-size: 14px;" disabled>
+
+                <!-- Serviço -->
+                <div class="col-md-4">
+                    <label for="servico" class="form-label">Serviço</label>
+                    <select id="servico" name="servico" class="form-select">
+                        <option value=""></option>
+                        <option value="1" {{ old('servico', $agenda->ID_SERVICO ?? '') == '1' ? 'selected' : '' }}>Limpeza</option>
+                        <option value="2" {{ old('servico', $agenda->ID_SERVICO ?? '') == '2' ? 'selected' : '' }}>Retirada canal</option>
+                    </select>
                 </div>
+
+                <!-- Valor -->
+                <div class="col-md-4">
+                    <label for="valor" class="form-label">Valor</label>
+                    <input type="text" id="valor" class="form-control"
+                        value="{{ old('valor', $agenda->VALOR_AGEND ?? '') }}" {{ old('pagto', $agenda->HAVERA_PAGAMENTO ?? '') != 'S' ? 'disabled' : '' }}>
+                </div>
+
+                <!-- Observação (apenas edição) -->
+                @if(isset($agenda))
+                <div class="col-md-8">
+                    <label for="obs" class="form-label">Observações</label>
+                    <input type="text" id="obs" name="obs" class="form-control"
+                        value="{{ old('obs', $agenda->OBSERVACOES ?? '') }}">
+                </div>
+                @endif
+
+                <!-- Status e Remarcado (apenas edição) -->
+                @if(isset($agenda))
+                <div class="col-md-2">
+                    <label for="status" class="form-label">Status</label>
+                    <select id="status" name="status" class="form-select">
+                        <option value="0" {{ $agenda->STATUS_AGEND == 0 ? 'selected' : '' }}>Agendado</option>
+                        <option value="1" {{ $agenda->STATUS_AGEND == 1 ? 'selected' : '' }}>Cancelado</option>
+                        <option value="2" {{ $agenda->STATUS_AGEND == 2 ? 'selected' : '' }}>Finalizado</option>
+                    </select>
+                </div>
+                <div class="col-md-2">
+                    <label for="remarcado" class="form-label">Remarcado?</label>
+                    <select id="remarcado" name="remarcado" class="form-select">
+                        <option value="0" {{ $agenda->ID_AGEND_REMARCADO == 0 ? 'selected' : '' }}>Não</option>
+                        <option value="1" {{ $agenda->ID_AGEND_REMARCADO > 0 ? 'selected' : '' }}>Sim</option>
+                    </select>
+                </div>
+                @endif
             </div>
-            <div style="text-align: right;flex:0.3">
+
+            <div style="text-align: right;flex:1">
                 <button id="btn-agendar" type="submit" style="background-color: #007bff; color: #fff; border: none; padding: 10px 20px; font-size: 14px; border-radius: 6px; cursor: pointer;">
                     Agendar
                 </button>
@@ -108,9 +181,50 @@
             </div>
         </form>
     </div>
-    @include('odontologia.modal.modal_add_patient')
+    <script>
+        window.agendaData = {
+            pacienteId: "{{ $agenda->ID_PACIENTE ?? '' }}",
+            nomePaciente: "{{ $agenda->NOME_COMPL_PACIENTE ?? '' }}"
+        };
+    </script>
+    @if (session('success'))
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script>
+        Swal.fire({
+            icon: 'success',
+            title: 'Sucesso!',
+            text: "{{ session('success') }}",
+        });
+    </script>
+    @endif
+    <!-- jQuery (PRIMEIRO e APENAS UMA VEZ) -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
+    <!-- Bootstrap Bundle (inclui Popper.js) -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+    <!-- Select2 principal + idioma português -->
+    <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/i18n/pt-BR.js"></script>
+
+    <!-- Bootstrap Datepicker + idioma -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datepicker/1.10.0/js/bootstrap-datepicker.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datepicker/1.10.0/locales/bootstrap-datepicker.pt-BR.min.js"></script>
+
+    <!-- Bootstrap Timepicker -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-timepicker/0.5.2/js/bootstrap-timepicker.min.js"></script>
+
+    <!-- Máscara de input -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.mask/1.14.16/jquery.mask.min.js"></script>
+
+    <!-- MDB UI Kit (se estiver usando componentes dele) -->
     <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mdb-ui-kit/7.1.0/mdb.min.js"></script>
+
+    <!-- Iconify (opcional, para ícones) -->
     <script src="https://code.iconify.design/iconify-icon/1.0.7/iconify-icon.min.js"></script>
+
+
+    <!-- Seu script -->
     <script type="module" src="/js/odontologia/create_agenda.js"></script>
 </body>
 

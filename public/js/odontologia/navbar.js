@@ -1,6 +1,6 @@
 function createNavBar() {
-    const navbar = document.createElement('nav');
-    navbar.innerHTML = `
+  const navbar = document.createElement('nav');
+  navbar.innerHTML = `
   <style>
     nav {
       width: 224px;
@@ -19,12 +19,23 @@ function createNavBar() {
       margin: 20px 0 10px;
     }
 
-    nav h4 {
+    nav h3 {
       color: #ecf0f1;
       font-size: 18px;
       margin-bottom: 20px;
       text-transform: uppercase;
     }
+
+  h3 {
+    display: block;
+    font-size: 1.17em;
+    margin-block-start: 1em;
+    margin-block-end: 1em;
+    margin-inline-start: 0px;
+    margin-inline-end: 0px;
+    font-weight: bold;
+    unicode-bidi: isolate;
+}
 
     nav ul {
       list-style: none;
@@ -63,8 +74,9 @@ function createNavBar() {
       color: #ecf0f1;
       text-decoration: none;
       display: block;
-      width: 90%;
+      width: 70%;
       text-align: center;
+      border-radius: 8px;
     }
 
     .logout-link:hover {
@@ -76,21 +88,21 @@ function createNavBar() {
 
   <nav>
     <img src="/img/faesa.png" alt="Logo">
-    <h4>Odonto</h4>
+    <h3>Odontologia</h3>
 
     <ul>
       <li><a href="/odontologia/menu/"><i class="fas fa-home"></i> Início</a></li>
-      <li><a href="/odontologia/criaragenda"><i class="fas fa-calendar-plus"></i> Incluir Agendamento</a></li>
-      <li><a href="/odontologia/consultaragenda"><i class="fas fa-edit"></i>Consultar Agenda</a></li>
-      <li><a href="/odontologia/criarpaciente"><i class="fas fa-user-plus"></i> Cadastrar Paciente</a></li>
-      <li><a href="/odontologia/consultarpaciente"><i class="fas fa-users"></i> Consultar Paciente</a></li>
+      <li><a href="/odontologia/criaragenda"><i class="fas fa-calendar-plus"></i>Agendar</a></li>
+      <li><a href="/odontologia/consultaragenda"><i class="fas fa-edit"></i>Consultar agenda</a></li>
+      <li><a href="/odontologia/consultarpaciente"><i class="fas fa-users"></i>Paciente</a></li>
       <li><a href="/odontologia/relatorio"><i class="fas fa-chart-bar"></i> Relatório</a></li>
+      <li><a href="/odontologia/criarservico"><i class="fas fa-hammer"></i>Serviço</a></li>
     </ul>
 
     <a href="/logout" class="logout-link"><i class="fas fa-sign-out-alt"></i> Logout</a>
   </nav>
 `;
-    return navbar;
+  return navbar;
 }
 
 export { createNavBar };
