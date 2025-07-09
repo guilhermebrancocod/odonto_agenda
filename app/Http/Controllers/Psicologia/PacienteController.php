@@ -52,7 +52,7 @@ class PacienteController extends Controller
 
         // CASO NOME SEJA FORNECIDO, PESQUISA POR ELE
         if ($nome) {
-            $pacientes = FaesaClinicaPaciente::where('NOME_COMPL_PACIENTE', 'like', "%{$nome}%")->get();
+            $pacientes = FaesaClinicaPaciente::where('NOME_COMPL_PACIENTE', 'LIKE', "%{$nome}%")->get();
         
         // CASO NOME NÃO SEJA FORNECIDO, RETORNA OS 10 ÚLTIMOS PACIENTES ADICIONADOS    
         } else {

@@ -24,6 +24,12 @@ class ServicoController extends Controller
     // PESQUISA OS SERVIÇOS DISPONÍVES
     public function getServico(Request $request)
     {
-        
+        // PEGA VALOR DA PESQUISA
+        $descricao = $request->search;
+
+        $servicos = FaesaClinicaServico::where('SERVICO_CLINICA_DESC', 'LIKE', "{$descricao}%")
+        ->get();
+
+        return $servicos;
     }
 }
