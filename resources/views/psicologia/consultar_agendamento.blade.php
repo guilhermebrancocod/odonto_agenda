@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Consulta de Paciente</title>
+    <title>Consultar Agendamento</title>
     <link rel="icon" type="image/png" href="{{ asset('faesa_favicon.png') }}" />
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700&display=swap" rel="stylesheet" />
     <link href="https://cdnjs.cloudflare.com/ajax/libs/mdb-ui-kit/7.1.0/mdb.min.css" rel="stylesheet" />
@@ -14,7 +14,7 @@
             margin: 0;
         }
         #content-wrapper {
-            height: calc(100vh - 56px); /* altura padrão da navbar Bootstrap */
+            height: calc(100vh - 56px); /* altura padrão navbar */
             overflow-y: auto;
             padding: 16px;
             display: flex;
@@ -30,7 +30,7 @@
 
     <div id="content-wrapper">
         <div class="bg-white p-4 rounded shadow-sm w-100" style="max-width: 1100px;">
-            <h2 class="mb-4 text-center">Consultar Paciente</h2>
+            <h2 class="mb-4 text-center">Consultar Agendamento</h2>
 
             <!-- Formulário de pesquisa -->
             <form id="search-form" class="w-100 mb-4 d-flex flex-column flex-md-row gap-3 align-items-stretch align-items-md-end">

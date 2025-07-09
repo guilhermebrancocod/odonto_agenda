@@ -37,10 +37,7 @@ class AuthMiddleware
 
                 $validacao = $this->validarUsuario($credentials);
 
-                // Adicionar validação por SIT_ALUNO (Verificar se está ativo e em qual(is) está)
-                
                 if ($validacao->isEmpty()) {
-                    session()->flush();
                     return redirect()->back()->with('error', "Usuário Inativo");
                 } else {
                     session(['usuario' => $validacao]);
