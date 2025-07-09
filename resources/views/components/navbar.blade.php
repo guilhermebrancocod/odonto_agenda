@@ -92,7 +92,7 @@
             <img src="{{ asset('faesa_branco.png') }}" alt="Logo" class="img-fluid mb-2" />
 
             <!-- TITULO SIDEBAR -->
-            <h4 class="mb-5 p-2 rounded-3 text-black-emphasis" style="background-color: var(--secondary-color);">
+            <h4 class="mb-5 mt-5 p-2 rounded-3" style="background-color: var(--secondary-color);">
                 <strong>Psicologia</strong>
             </h4>
 

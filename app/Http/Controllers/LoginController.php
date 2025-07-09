@@ -10,6 +10,12 @@ class LoginController extends Controller
     {
         // ARMAZENA LOGIN DE USUARIO E ID DA CLINICA
         $usuario = session('usuario');
+        if ($usuario) {
+            $clinicas = collect($usuario)->pluck('ID_CLINICA')->toArray();
+        } else {
+            return redirect()->route('loginGET');
+        } 
+
         $clinicas = $usuario->pluck('ID_CLINICA')->toArray();
 
         // VERIFICA CLINICAS QUE USUÁRIO TEM ACESSO

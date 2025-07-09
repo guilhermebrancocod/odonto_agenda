@@ -125,6 +125,8 @@ Route::middleware([AuthMiddleware::class, CheckClinicaMiddleware::class])->prefi
 
     Route::post('/criar-servico/criar', [ServicoController::class, 'criarServico'])->name('criarServico-Psicologia');
 
+    Route::get('/pesquisar-servico', [ServicoController::class, 'getServico'])->name('pesquisarServico-Psicologia');
+
 
 Route::get('/odontologia/criarservico', function () {
     return view('odontologia/create_servico');

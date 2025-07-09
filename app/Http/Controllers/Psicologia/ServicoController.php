@@ -20,4 +20,10 @@ class ServicoController extends Controller
 
         return redirect()->back()->with('success', 'Serviço criado com sucesso');
     }
+
+    // PESQUISA OS SERVIÇOS DISPONÍVES
+    public function getServico(Request $request)
+    {
+        
+    }
 }
