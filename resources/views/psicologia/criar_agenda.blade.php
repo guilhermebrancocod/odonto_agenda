@@ -134,7 +134,7 @@ searchForm.addEventListener('submit', function(e) {
         .then(response => response.json())
         .then(pacientes => {
 
-            // AO BUSCAR, OS VALORES ABAIXO SÃO GERADOS
+            // AO BUSCAR, OS VALORES ABAIXO SÃO ZERADOS
             pacientesList.innerHTML = '';
             pacienteSelecionadoDiv.innerHTML = '';
             pacienteIdInput.value = '';
@@ -155,9 +155,23 @@ searchForm.addEventListener('submit', function(e) {
                 item.classList.add('list-group-item', 'list-group-item-action');
                 item.textContent = `${paciente.NOME_COMPL_PACIENTE} (${paciente.CPF_PACIENTE}) - ${new Date(paciente.DT_NASC_PACIENTE).toLocaleDateString('pt-BR')}`;
                 item.addEventListener('click', () => {
-                    pacienteSelecionadoDiv.innerHTML = `<div class="alert alert-success"><strong>Paciente selecionado:</strong> ${paciente.NOME_COMPL_PACIENTE} (${paciente.CPF_PACIENTE})</div>`;
+                    pacienteSelecionadoDiv.innerHTML = 
+                    `<div class="alert alert-success d-flex justify-content-between align-items-center">
+                        <div>
+                            <strong>Paciente selecionado:</strong> ${paciente.NOME_COMPL_PACIENTE} (${paciente.CPF_PACIENTE})
+                        </div>
+                        <button type="button" id="cancelar-paciente" class="btn btn-sm btn-outline-danger ms-2">Cancelar</button>
+                    </div>
+                    `;
+                    
                     pacienteIdInput.value = paciente.ID_PACIENTE;
                     pacientesList.innerHTML = '';
+
+                    // LISTENER DO BOTÃO DE CANCELAR
+                    document.getElementById('cancelar-paciente').addEventListener('click', () => {
+                        pacienteSelecionadoDiv.innerHTML = '';
+                        pacienteIdInput = '';
+                    })
                 });
                 listGroup.appendChild(item);
             });
