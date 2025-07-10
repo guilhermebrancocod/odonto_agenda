@@ -24,7 +24,8 @@ class FaesaClinicaPaciente extends Model
         'UF',
         'CEP',
         'FONE_PACIENTE',
-        'E_MAIL_PACIENTE'
+        'E_MAIL_PACIENTE',
+        'MUNICIPIO',
     ];
 
     /**

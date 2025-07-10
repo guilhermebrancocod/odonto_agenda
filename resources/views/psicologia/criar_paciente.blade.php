@@ -103,8 +103,8 @@
                     <input type="text" id="bairro" name="BAIRRO" class="form-control" />
                 </div>
                 <div class="mb-4">
-                    <label for="cidade" class="form-label">Cidade</label>
-                    <input type="text" id="cidade" name="END_COMPL" class="form-control" />
+                    <label for="municipio" class="form-label">Municipio</label>
+                    <input type="text" id="municipio" name="municipio" class="form-control" />
                 </div>
                 <div class="mb-4">
                     <label for="estado" class="form-label">Estado</label>

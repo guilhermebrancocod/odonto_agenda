@@ -170,8 +170,8 @@
 
                         <!-- UF -->
                         <div class="mb-3">
-                            <label for="editPacienteBAIRRO" class="form-label">UF</label>
-                            <input type="text" class="form-control" id="editPacienteBAIRRO" name="uf">
+                            <label for="editPacienteUF" class="form-label">UF</label>
+                            <input type="text" class="form-control" id="editPacienteUF" name="uf">
                         </div>
 
                         <!-- CEP -->
@@ -182,20 +182,20 @@
 
                         <!-- FONE_PACIENTE -->
                         <div class="mb-3">
-                            <label for="celular" class="form-label">Celular</label>
-                            <input type="text" id="celular" name="CELULAR_PACIENTE" class="form-control" />
+                            <label for="editPacienteCELULAR" class="form-label">Celular</label>
+                            <input type="text" id="editPacienteCELULAR" name="celular" class="form-control" />
                         </div>
 
                         <!-- EMAIL_PACIENTE -->
                         <div class="mb-3">
-                            <label for="email" class="form-label">Email</label>
-                            <input type="email" id="email" name="E_MAIL_PACIENTE" class="form-control" />
+                            <label for="editPacienteEMAIL" class="form-label">Email</label>
+                            <input type="email" id="editPacienteEMAIL" name="email" class="form-control" />
                         </div>
 
                         <!-- MUNICIPIO_PACIENTE -->
                         <div class="mb-4">
-                            <label for="cidade" class="form-label">Cidade</label>
-                            <input type="text" id="cidade" name="END_COMPL" class="form-control" />
+                            <label for="editPacienteMUNICIPIO" class="form-label">Município</label>
+                            <input type="text" id="editPacienteMUNICIPIO" name="municipio" class="form-control" />
                         </div>
 
                         <button type="submit" class="btn btn-primary">Salvar Alterações</button>
@@ -251,10 +251,23 @@
                             <td>${paciente.FONE_PACIENTE ?? '-'}</td>
                             <td>${paciente.E_MAIL_PACIENTE ?? '-'}</td>
                             <td>
-                                <button type="button" class="btn btn-sm btn-primary editar-btn" 
+                                <button
+                                type="button" class="btn btn-sm btn-primary editar-btn" 
                                     data-id="${paciente.ID_PACIENTE}" 
                                     data-nome="${paciente.NOME_COMPL_PACIENTE ?? 'Paciente'}"
-                                    data-cpf="${paciente.CPF_PACIENTE ?? ''}">
+                                    data-cpf="${paciente.CPF_PACIENTE ?? ''}"
+                                    data-dt_nasc="${paciente.DT_NASC_PACIENTE ?? ''}"
+                                    data-sexo="${paciente.SEXO_PACIENTE ?? ''}"
+                                    data-endereco="${paciente.ENDERECO ?? ''}"
+                                    data-num="${paciente.END_NUM ?? ''}"
+                                    data-complemento="${paciente.COMPLEMENTO ?? ''}"
+                                    data-bairro="${paciente.BAIRRO ?? ''}"
+                                    data-uf="${paciente.UF ?? ''}"
+                                    data-cep="${paciente.CEP ?? ''}"
+                                    data-celular="${paciente.FONE_PACIENTE ?? ''}"
+                                    data-email="${paciente.E_MAIL_PACIENTE ?? ''}"
+                                    data-municipio="${paciente.MUNICIPIO ?? ''}"
+                                    >
                                     Editar
                                 </button>
                             </td>
@@ -270,7 +283,18 @@
                             selectedPaciente = {
                                 id: button.getAttribute('data-id'),
                                 nome: button.getAttribute('data-nome'),
-                                cpf: button.getAttribute('data-cpf')
+                                cpf: button.getAttribute('data-cpf'),
+                                dt_nasc: button.getAttribute('data-dt_nasc'),
+                                sexo: button.getAttribute('data-sexo'),
+                                endereco: button.getAttribute('data-endereco'),
+                                num: button.getAttribute('data-num'),
+                                complemento: button.getAttribute('data-complemento'),
+                                bairro: button.getAttribute('data-bairro'),
+                                uf: button.getAttribute('data-uf'),
+                                cep: button.getAttribute('data-cep'),
+                                celular: button.getAttribute('data-celular'),
+                                email: button.getAttribute('data-email'),
+                                municipio: button.getAttribute('data-municipio'),
                             };
                             
                             document.getElementById('modal-paciente-nome').textContent = `Deseja editar o paciente: ${selectedPaciente.nome}?`;
@@ -296,6 +320,24 @@
             if(selectedPaciente) {
                 document.getElementById('editPacienteNome').value = selectedPaciente.nome;
                 document.getElementById('editPacienteCPF').value = selectedPaciente.cpf;
+                // Formatar data para dd/mm/yyyy se quiser mostrar mais amigável:
+                if (selectedPaciente.dt_nasc) {
+                    const dt = new Date(selectedPaciente.dt_nasc);
+                    const formattedDate = dt.toLocaleDateString('pt-BR');
+                    document.getElementById('editPacienteDTNASC').value = formattedDate;
+                } else {
+                    document.getElementById('editPacienteDTNASC').value = '';
+                }
+                document.getElementById('editPacienteSEXO').value = selectedPaciente.sexo || '';
+                document.getElementById('editPacienteENDERECO').value = selectedPaciente.endereco || '';
+                document.getElementById('editPacienteNUM').value = selectedPaciente.num || '';
+                document.getElementById('editPacienteCOMPLEMENTO').value = selectedPaciente.complemento || '';
+                document.getElementById('editPacienteBAIRRO').value = selectedPaciente.bairro || '';
+                document.getElementById('editPacienteUF').value = selectedPaciente.uf || '';
+                document.getElementById('editPacienteCEP').value = selectedPaciente.cep || '';
+                document.getElementById('editPacienteCELULAR').value = selectedPaciente.celular || '';
+                document.getElementById('editPacienteEMAIL').value = selectedPaciente.email || '';
+                document.getElementById('editPacienteMUNICIPIO').value = selectedPaciente.municipio || '';
             }
 
             // ESCONDE MODAL DE CONFIRMAÇÃO DE EDIÇÃO
