@@ -23,17 +23,16 @@ class FaesaClinicaAgendamento extends Model
         'ID_AGEND_REMARCADO',
         'RECORRENCIA',
         'VALOR_AGEND',
-        'OBSERVACAO_AGEND',
+        'OBSERVACOES',
     ];
 
     protected $casts = [
         'DT_AGEND' => 'date',
         'HR_AGEND_INI' => 'string',
         'HR_AGEND_FIN' => 'string',
-        'RECORRENCIA' => 'boolean',
+        'RECORRENCIA' => 'string',
         'VALOR_AGEND' => 'decimal:2',
         'STATUS_AGEND' => 'string',
-        'TIPO_RECORRENCIA' => 'string',
     ];
 
     /**

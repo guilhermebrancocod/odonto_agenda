@@ -57,6 +57,12 @@
             <!-- ID DO SERVICO QUE SERÁ ENVIADO COM O FORMULARIO -->
             <input type="hidden" name="id_servico" id="id_servico" />
 
+            <!-- HASH DA RECORRENCIA -->
+            <input type="hidden" name="recorrencia" id="recorrencia" />
+
+            <!-- STATUS DO AGENDAMENTO PADRÃO -->
+            <input type="hidden" name="status_agend" value="Em aberto" />
+
             <!-- SUTBITULO DO FORMULARIO DE AGENDAMENTO -->
             <div class="mb-2">
                 <h5 class="mb-0">Horário</h5>
@@ -64,6 +70,16 @@
             </div>
 
             <div class="row g-2">
+
+                <!-- CHECKBOX TEM RECORRÊNCIA -->
+                <div class="col-12 mb-2">
+                    <div class="form-check">
+                        <input class="form-check-input" type="checkbox" value="1" id="temRecorrencia" name="tem_recorrencia">
+                        <label class="form-check-label" for="temRecorrencia">
+                            Tem recorrência?
+                        </label>
+                    </div>
+                </div>
 
                 <!-- DIA -->
                 <div class="col-sm-6 col-md-2">
@@ -83,10 +99,28 @@
                     <input type="time" id="hr_fim" name="hr_fim" class="form-control" required>
                 </div>
 
-                <!-- TIPO RECORRENCIA -->
-                <div class="col-sm-6 col-md-3">
-                    <label for="tipo" class="form-label">Tipo</label>
-                    <input type="text" id="tipo" name="tipo_recorrencia" class="form-control" placeholder="Ex: Psicoterapia" required>
+                <!-- CAMPOS DE RECORRÊNCIA (INICIALMENTE OCULTOS) -->
+                <div id="recorrenciaCampos" class="col-12 row g-2 mt-2" style="display: none;">
+                    <!-- SELEÇÃO DE DIAS DA SEMANA -->
+                    <div class="col-sm-6 col-md-6">
+                        <label for="dias_semana" class="form-label">Dias da Semana</label>
+                            <select id="dias_semana" name="dias_semana[]" class="form-select" multiple>
+                                <option value="1">Segunda-feira</option>
+                                <option value="2">Terça-feira</option>
+                                <option value="3">Quarta-feira</option>
+                                <option value="4">Quinta-feira</option>
+                                <option value="5">Sexta-feira</option>
+                                <option value="6">Sábado</option>
+                                <option value="0">Domingo</option>
+                            </select>
+                            <small class="text-muted">Segure Ctrl (Windows) ou Cmd (Mac) para selecionar vários dias.</small>
+                    </div>
+
+                    <!-- DATA FINAL DA RECORRÊNCIA -->
+                    <div class="col-sm-6 col-md-4">
+                        <label for="data_fim_recorrencia" class="form-label">Data Fim Recorrência</label>
+                        <input type="date" id="data_fim_recorrencia" name="data_fim_recorrencia" class="form-control">
+                    </div>
                 </div>
 
                 <!-- SERVICO -->
@@ -95,6 +129,20 @@
                     <input type="text" id="servico" name="servico" class="form-control" autocomplete="off" required>
                     <!-- LISTA DE SERVICOS COM BASE NA PESQUISA -->
                     <div id="servicos-list" class="list-group position-absolute w-100" style="z-index: 1000;"></div>
+                </div>
+
+                <!-- VALOR -->
+                <div class="col-sm-6 col-md-3">
+                    <label for="valor_agend" class="form-label">Valor</label>
+                    <div class="input-group">
+                        <span class="input-group-text">R$</span>
+                        <input type="text" name="valor_agend" id="valor_agend" class="form-control" aria-label="Valor em reais com vírgula e duas casas decimais">
+                    </div>
+                </div>
+
+                <!-- OBSERVACOES -->
+                <div class="input-group">
+                    <textarea name="observacoes" id="observacoes" class="form-control" placeholder="Observações..." rows="5" cols="50" style="height: 100px;"></textarea>
                 </div>
 
                 <!-- BOTAO DE SUBMIT -->
@@ -249,6 +297,37 @@ document.addEventListener('click', (e) => {
     if (!servicoInput.contains(e.target) && !servicosList.contains(e.target)) {
         servicosList.innerHTML = '';
     }
+});
+
+// EXIBE OU OCULTA CAMPOS DE RECORRÊNCIA AO MARCAR O CHECKBOX
+const temRecorrenciaCheckbox = document.getElementById('temRecorrencia');
+const recorrenciaCampos = document.getElementById('recorrenciaCampos');
+
+temRecorrenciaCheckbox.addEventListener('change', function() {
+    if (this.checked) {
+        recorrenciaCampos.style.display = 'flex'; // mostra os campos
+    } else {
+        recorrenciaCampos.style.display = 'none'; // esconde os campos
+        // limpa os campos se desmarcar
+        document.getElementById('dias_semana').selectedIndex = -1;
+        document.getElementById('data_fim_recorrencia').value = '';
+    }
+});
+</script>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // GERA HASH AO MARCAR RECORRÊNCIA
+    const temRecorrenciaCheckbox = document.getElementById('temRecorrencia');
+    const recorrenciaInput = document.getElementById('recorrencia');
+
+    temRecorrenciaCheckbox.addEventListener('change', function() {
+        if (this.checked) {
+            recorrenciaInput.value = crypto.randomUUID();
+        } else {
+            recorrenciaInput.value = '';
+        }
+    });
 });
 </script>
 
