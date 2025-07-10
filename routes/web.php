@@ -112,7 +112,7 @@ Route::middleware([AuthMiddleware::class, CheckClinicaMiddleware::class])->prefi
     Route::get('/consultar-agendamento', function() {
         return view('psicologia.consultar_agendamento');
     });
-    Route::get('/consultar-agendamento/consultar', [AgendamentoController::class, 'getAgendamento'])->name('getAgendamento');
+    Route::post('/consultar-agendamento/consultar', [AgendamentoController::class, 'getAgendamento'])->name('getAgendamento');
 
     Route::get('/consultar-paciente/buscar', [PacienteController::class, 'getPaciente'])->name('getPaciente');
 
@@ -207,7 +207,9 @@ Route::get('/psicologia/consultar-paciente/', function () {
 Route::get('/psicologia/consultar-paciente/buscar/', [PacienteController::class, 'getPaciente'])->name('getPaciente');
 
 // CONSULTA DE AGENDAMENTO
-Route::get('/psicologia/consultar-agendamento', [AgendamentoController::class, 'getAgendamento'])->name('getAgendamento');
+Route::get('/psicologia/consultar-agendamento', function() {
+    return view('psicologia.consultar_agendamento');
+});
 
 // CRIAÇÃO DE SERVIÇO
 Route::get('psicologia/criar-servico', function () {

@@ -17,7 +17,7 @@ class AgendamentoController extends Controller
      */
     public function getAgendamento(Request $request): FaesaClinicaAgendamento
     {
-        dd($request->all());
+        dd($request);
     }
 
     /**
