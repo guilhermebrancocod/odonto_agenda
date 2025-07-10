@@ -8,6 +8,8 @@
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700&display=swap" rel="stylesheet" />
     <link href="https://cdnjs.cloudflare.com/ajax/libs/mdb-ui-kit/7.1.0/mdb.min.css" rel="stylesheet" />
 
+    <meta name="csrf-token" content="{{ csrf_token() }}">
+
     <style>
         html, body {
             height: 100%;
@@ -153,7 +155,7 @@
                         <!-- END NUM -->
                         <div class="mb-3">
                             <label for="editPacienteNUM" class="form-label">Número</label>
-                            <input type="integer" class="form-control" id="editPacienteNUM" name="numero">
+                            <input type="integer" class="form-control" id="editPacienteNUM" name="num">
                         </div>
 
                         <!-- COMPLEMENTO -->
@@ -318,13 +320,14 @@
 
             // INSERE OS VALORES DO PACIENTE SELECIONADO NO MODAL
             if(selectedPaciente) {
+                
                 document.getElementById('editPacienteNome').value = selectedPaciente.nome;
                 document.getElementById('editPacienteCPF').value = selectedPaciente.cpf;
-                // Formatar data para dd/mm/yyyy se quiser mostrar mais amigável:
+                
                 if (selectedPaciente.dt_nasc) {
                     const dt = new Date(selectedPaciente.dt_nasc);
-                    const formattedDate = dt.toLocaleDateString('pt-BR');
-                    document.getElementById('editPacienteDTNASC').value = formattedDate;
+                    const isoDate = dt.toISOString().substring(0, 10);
+                    document.getElementById('editPacienteDTNASC').value = isoDate;
                 } else {
                     document.getElementById('editPacienteDTNASC').value = '';
                 }
@@ -353,17 +356,72 @@
         document.getElementById('editPacienteForm').addEventListener('submit', function(e) {
             e.preventDefault();
 
+            // Dados do formulário
             const nome = document.getElementById('editPacienteNome').value;
-            const cpf = document.getElementById('editPacienteCpf').value;
+            const cpf = document.getElementById('editPacienteCPF').value;
+            const dt_nasc = document.getElementById('editPacienteDTNASC').value;
+            const sexo = document.getElementById('editPacienteSEXO').value;
+            const endereco = document.getElementById('editPacienteENDERECO').value;
+            const num = document.getElementById('editPacienteNUM').value;
+            const complemento = document.getElementById('editPacienteCOMPLEMENTO').value;
+            const bairro = document.getElementById('editPacienteBAIRRO').value;
+            const uf = document.getElementById('editPacienteUF').value;
+            const cep = document.getElementById('editPacienteCEP').value;
+            const celular = document.getElementById('editPacienteCELULAR').value;
+            const email = document.getElementById('editPacienteEMAIL').value;
+            const municipio = document.getElementById('editPacienteMUNICIPIO').value;
 
-            // Aqui você pode enviar os dados via fetch ou axios para atualizar o paciente no backend
-            console.log('Nome:', nome, 'CPF:', cpf);
+            // Verifica se tem paciente selecionado
+            if (!selectedPaciente || !selectedPaciente.id) {
+                alert('Paciente não selecionado.');
+                return;
+            }
 
-            // Após salvar, você pode fechar o modal:
-            const editModal = bootstrap.Modal.getInstance(document.getElementById('editPacienteModal'));
-            editModal.hide();
+            // Monta o objeto com dados a enviar
+            const dados = {
+                nome,
+                cpf,
+                dt_nasc,
+                sexo,
+                endereco,
+                num,
+                complemento,
+                bairro,
+                uf,
+                cep,
+                celular,
+                email,
+                municipio
+            };
+
+            fetch(`editar-paciente/${selectedPaciente.id}`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+                },
+                body: JSON.stringify(dados)
+            })
+            .then(response => {
+                if (!response.ok) throw new Error('Erro ao salvar dados');
+                return response.json();
+            })
+            .then(data => {
+
+                console.log('Sucesso:', data);
+                alert('Paciente atualizado com sucesso!');
+
+                const editModal = bootstrap.Modal.getInstance(document.getElementById('editPacienteModal'));
+                editModal.hide();
+
+                location.reload();
+            })
+            .catch(error => {
+                console.error('Erro:', error);
+                alert('Erro ao atualizar paciente.');
+            });
         });
-        
+    
     </script>
 </body>
 </html>
