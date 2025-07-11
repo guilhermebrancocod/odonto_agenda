@@ -3,18 +3,17 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Consultar Agendamento</title>
+    <title>Consulta de Agendamento</title>
     <link rel="icon" type="image/png" href="{{ asset('faesa_favicon.png') }}" />
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700&display=swap" rel="stylesheet" />
     <link href="https://cdnjs.cloudflare.com/ajax/libs/mdb-ui-kit/7.1.0/mdb.min.css" rel="stylesheet" />
 
+    <meta name="csrf-token" content="{{ csrf_token() }}">
+
     <style>
-        html, body {
-            height: 100%;
-            margin: 0;
-        }
+        html, body { height: 100%; margin: 0; }
         #content-wrapper {
-            height: calc(100vh - 56px); /* altura padrão navbar */
+            height: calc(100vh - 56px);
             overflow-y: auto;
             padding: 16px;
             display: flex;
@@ -22,6 +21,7 @@
             align-items: flex-start;
             background-color: #f8f9fa;
         }
+        .modal-body { max-height: 60vh; overflow-y: auto; }
     </style>
 </head>
 
@@ -32,7 +32,6 @@
         <div class="bg-white p-4 rounded shadow-sm w-100" style="max-width: 1100px;">
             <h2 class="mb-4 text-center">Consultar Agendamento</h2>
 
-            <!-- Formulário de pesquisa -->
             <form id="search-form" class="w-100 mb-4 d-flex flex-column flex-md-row gap-3 align-items-stretch align-items-md-end">
                 <div class="flex-fill">
                     <input
@@ -48,48 +47,27 @@
                 </div>
             </form>
 
-            <!-- Resultados -->
             <div class="w-100">
                 <h5 class="mb-3">Resultados</h5>
-                <div class="table-responsive">
+                <div class="table-responsive" style="max-height: 500px; overflow-y: auto;">
                     <table class="table table-hover table-bordered align-middle">
-                        <thead class="table-light">
+                        <thead class="table-light" style="position: sticky; top: 0; background-color: white; z-index: 10;">
                             <tr>
-                                <th>Cod</th>
-                                <th>Nome</th>
-                                <th>CPF</th>
-                                <th>Data de Nascimento</th>
-                                <th>Sexo</th>
-                                <th>Telefone</th>
-                                <th>Email</th>
+                                <th>Paciente</th>
+                                <th>Serviço</th>
+                                <th>Data</th>
+                                <th>Hora Início</th>
+                                <th>Hora Fim</th>
+                                <th>Status</th>
                                 <th>Ações</th>
                             </tr>
                         </thead>
-                        <tbody id="pacientes-tbody">
+                        <tbody id="agendamentos-tbody">
                             <tr>
                                 <td colspan="8" class="text-center">Nenhuma pesquisa realizada ainda.</td>
                             </tr>
                         </tbody>
                     </table>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Modal de confirmação -->
-    <div class="modal fade" id="confirmEditModal" tabindex="-1" aria-labelledby="confirmEditModalLabel" aria-hidden="true">
-        <div class="modal-dialog">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title" id="confirmEditModalLabel">Editar Paciente</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fechar"></button>
-                </div>
-                <div class="modal-body">
-                    <p id="modal-paciente-nome">Deseja editar este paciente?</p>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-                    <button type="button" class="btn btn-primary" id="confirm-edit-btn">Confirmar</button>
                 </div>
             </div>
         </div>
@@ -101,74 +79,68 @@
     <script>
         const searchForm = document.getElementById('search-form');
         const searchInput = document.getElementById('search-input');
-        const pacientesTbody = document.getElementById('pacientes-tbody');
-        let selectedPaciente = null;
+        const agendamentosTbody = document.getElementById('agendamentos-tbody');
 
-        searchForm.addEventListener('submit', function(e) {
-            e.preventDefault();
-            const nome = searchInput.value.trim();
+        function carregarAgendamentos(search = '') {
+            const url = search
+                ? `/psicologia/get-agendamento?search=${encodeURIComponent(search)}`
+                : `/psicologia/get-agendamento`;
 
-            fetch(`/psicologia/consultar-paciente/buscar?search=${encodeURIComponent(nome)}`)
+            fetch(url)
                 .then(response => response.json())
-                .then(pacientes => {
-                    pacientesTbody.innerHTML = '';
-                    if (pacientes.length === 0) {
-                        pacientesTbody.innerHTML = `
+                .then(agendamentos => {
+                    agendamentosTbody.innerHTML = '';
+                    if (agendamentos.length === 0) {
+                        agendamentosTbody.innerHTML = `
                             <tr>
-                                <td colspan="8" class="text-center">Nenhum paciente encontrado.</td>
+                                <td colspan="8" class="text-center">Nenhum agendamento encontrado.</td>
                             </tr>
                         `;
                         return;
                     }
 
-                    pacientes.forEach(paciente => {
+                    agendamentos.forEach(ag => {
+                        const paciente = ag.paciente ? ag.paciente.NOME_COMPL_PACIENTE : '-';
+                        const servico = ag.servico ? ag.servico.SERVICO_CLINICA_DESC : '-';
+                        const data = ag.DT_AGEND ? new Date(ag.DT_AGEND).toLocaleDateString('pt-BR') : '-';
+                        const horaIni = ag.HR_AGEND_INI ? ag.HR_AGEND_INI.substring(0, 5) : '-';
+                        const horaFim = ag.HR_AGEND_FIN ? ag.HR_AGEND_FIN.substring(0, 5) : '-';
+                        const status = ag.STATUS_AGEND ?? '-';
+
                         const row = document.createElement('tr');
                         row.innerHTML = `
-                            <td>${paciente.ID_PACIENTE ?? '-'}</td>
-                            <td>${paciente.NOME_COMPL_PACIENTE ?? '-'}</td>
-                            <td>${paciente.CPF_PACIENTE ?? '-'}</td>
-                            <td>${paciente.DT_NASC_PACIENTE ? new Date(paciente.DT_NASC_PACIENTE).toLocaleDateString('pt-BR') : '-'}</td>
-                            <td>${paciente.SEXO_PACIENTE ?? '-'}</td>
-                            <td>${paciente.FONE_PACIENTE ?? '-'}</td>
-                            <td>${paciente.E_MAIL_PACIENTE ?? '-'}</td>
+                            <td>${paciente}</td>
+                            <td>${servico}</td>
+                            <td>${data}</td>
+                            <td>${horaIni}</td>
+                            <td>${horaFim}</td>
+                            <td>${status}</td>
                             <td>
-                                <button type="button" class="btn btn-sm btn-primary editar-btn" 
-                                    data-id="${paciente.ID_PACIENTE}" 
-                                    data-nome="${paciente.NOME_COMPL_PACIENTE ?? 'Paciente'}">
-                                    Editar
-                                </button>
+                                <a href="/psicologia/agendamento/${ag.ID_AGENDAMENTO}" class="btn btn-sm btn-primary">Visualizar</a>
                             </td>
                         `;
-                        pacientesTbody.appendChild(row);
-                    });
-
-                    document.querySelectorAll('.editar-btn').forEach(button => {
-                        button.addEventListener('click', () => {
-                            selectedPaciente = {
-                                id: button.getAttribute('data-id'),
-                                nome: button.getAttribute('data-nome')
-                            };
-                            document.getElementById('modal-paciente-nome').textContent = `Deseja editar o paciente: ${selectedPaciente.nome}?`;
-                            const modal = new bootstrap.Modal(document.getElementById('confirmEditModal'));
-                            modal.show();
-                        });
+                        agendamentosTbody.appendChild(row);
                     });
                 })
                 .catch(error => {
                     console.error(error);
-                    pacientesTbody.innerHTML = `
+                    agendamentosTbody.innerHTML = `
                         <tr>
-                            <td colspan="8" class="text-center text-danger">Erro ao buscar pacientes.</td>
+                            <td colspan="8" class="text-center text-danger">Erro ao buscar agendamentos.</td>
                         </tr>
                     `;
                 });
+        }
+
+        searchForm.addEventListener('submit', function(e) {
+            e.preventDefault();
+            const search = searchInput.value.trim();
+            carregarAgendamentos(search);
         });
 
-        document.getElementById('confirm-edit-btn').addEventListener('click', () => {
-            if (selectedPaciente) {
-                const url = `/psicologia/editar-paciente/${selectedPaciente.id}`;
-                window.location.href = url;
-            }
+        // Carrega os últimos 5 agendamentos quando a página for carregada
+        document.addEventListener('DOMContentLoaded', () => {
+            carregarAgendamentos();
         });
     </script>
 </body>

@@ -30,7 +30,16 @@ class PacienteController extends Controller
             'UF' => 'nullable|string|size:2',
             'CEP' => 'nullable|string|max:9',
             'FONE_PACIENTE' => 'nullable|string|max:20',
-            'E_MAIL_PACIENTE' => 'nullable|email|max:255|unique:FAESA_CLINICA_PACIENTE,E_MAIL_PACIENTE',
+            'E_MAIL_PACIENTE' => 'nullable|email|max:255', // removido o unique aqui
+        ], [
+            'CPF_PACIENTE.required' => 'Por favor, informe o CPF do paciente.',
+            'CPF_PACIENTE.unique' => 'Este CPF já está cadastrado.',
+            'NOME_COMPL_PACIENTE.required' => 'Por favor, informe o nome completo do paciente.',
+            'DT_NASC_PACIENTE.required' => 'Por favor, informe a data de nascimento.',
+            'DT_NASC_PACIENTE.date' => 'Informe uma data de nascimento válida.',
+            'SEXO_PACIENTE.required' => 'Por favor, selecione o sexo do paciente.',
+            'SEXO_PACIENTE.in' => 'Sexo selecionado inválido.',
+            'E_MAIL_PACIENTE.email' => 'Informe um e-mail válido.',
         ]);
 
         FaesaClinicaPaciente::create($validated);
@@ -47,20 +56,20 @@ class PacienteController extends Controller
      */
     public function getPaciente(Request $request)
     {
-        // ARMAZENA NOME DO PACIENTE EM QUESTÃO PARA BUSCA
-        $nome = $request->query('search');
+        $search = $request->query('search');
 
-        // CASO NOME SEJA FORNECIDO, PESQUISA POR ELE
-        if ($nome) {
-            $pacientes = FaesaClinicaPaciente::where('NOME_COMPL_PACIENTE', 'LIKE', "%{$nome}%")->get();
-        
-        // CASO NOME NÃO SEJA FORNECIDO, RETORNA OS 10 ÚLTIMOS PACIENTES ADICIONADOS    
+        if ($search) {
+            $pacientes = FaesaClinicaPaciente::where(function ($query) use ($search) {
+                $query->where('NOME_COMPL_PACIENTE', 'LIKE', "%{$search}%")
+                    ->orWhere('CPF_PACIENTE', 'LIKE', "%{$search}%");
+            })->get();
         } else {
             $pacientes = FaesaClinicaPaciente::orderBy('ID_PACIENTE', 'DESC')->limit(10)->get();
         }
 
         return response()->json($pacientes);
     }
+
 
     /**
      * Identifica e altera um Paciente em específico
@@ -69,8 +78,6 @@ class PacienteController extends Controller
      */
     public function editarPaciente(Request $request, $id)
     {
-        dd(session('usuario'));
-
         $validatedData = $request->validate([
             'nome'       => 'required|string|max:255',
             'cpf'        => 'required|string|max:14',
@@ -87,13 +94,11 @@ class PacienteController extends Controller
             'municipio'  => 'nullable|string|max:255',
         ]);
 
-        // Busca o paciente no banco pelo ID
         $paciente = FaesaClinicaPaciente::find($id);
         if (!$paciente) {
             return response()->json(['message' => 'Paciente não encontrado'], 404);
         }
 
-        // Atualiza os campos com os dados validados
         $paciente->NOME_COMPL_PACIENTE = $validatedData['nome'];
         $paciente->CPF_PACIENTE = $validatedData['cpf'];
         $paciente->DT_NASC_PACIENTE = $validatedData['dt_nasc'] ?? $paciente->DT_NASC_PACIENTE;
@@ -108,10 +113,8 @@ class PacienteController extends Controller
         $paciente->E_MAIL_PACIENTE = $validatedData['email'] ?? $paciente->E_MAIL_PACIENTE;
         $paciente->MUNICIPIO = $validatedData['municipio'] ?? $paciente->MUNICIPIO;
 
-        // Salva as alterações no banco
         $paciente->save();
 
-        // Retorna resposta JSON com sucesso
         return response()->json([
             'message' => 'Paciente atualizado com sucesso',
             'paciente' => $paciente,

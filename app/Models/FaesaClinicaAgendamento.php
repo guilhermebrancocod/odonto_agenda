@@ -3,6 +3,8 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class FaesaClinicaAgendamento extends Model
 {
@@ -10,7 +12,7 @@ class FaesaClinicaAgendamento extends Model
 
     protected $primaryKey = 'ID_AGENDAMENTO';
 
-    public $timestamps = false;
+    public $timestamps = true;
 
     protected $fillable = [
         'ID_CLINICA',
@@ -24,6 +26,8 @@ class FaesaClinicaAgendamento extends Model
         'RECORRENCIA',
         'VALOR_AGEND',
         'OBSERVACOES',
+        'CREATED_AT',
+        'UPDATED_AT'
     ];
 
     protected $casts = [
@@ -33,6 +37,8 @@ class FaesaClinicaAgendamento extends Model
         'RECORRENCIA' => 'string',
         'VALOR_AGEND' => 'decimal:2',
         'STATUS_AGEND' => 'string',
+        'CREATED_AT' => 'datetime',
+        'UPDATED_AT' => 'datetime',
     ];
 
     /**
@@ -54,8 +60,9 @@ class FaesaClinicaAgendamento extends Model
      */
     public function paciente(): BelongsTo
     {
-        return $this->belongsTo(FaesaClinicaPaciente::class, 'ID_PACIENTE', 'ID_PACIENTE');
+        return $this->belongsTo(FaesaClinicaPaciente::class, 'ID_PACIENTE');
     }
+
 
     /**
      * Define um relacionamento BelongsTo com a tabela FAESA_CLINICA_SERVICO
@@ -89,8 +96,7 @@ class FaesaClinicaAgendamento extends Model
      */
     public function remarcacoes(): HasMany
     {
-        // ID_AGEND_REMARCADO é a chave estrangeira na tabela 'outra',
-        // ID_AGENDAMENTO é a chave local.
         return $this->hasMany(FaesaClinicaAgendamento::class, 'ID_AGEND_REMARCADO', 'ID_AGENDAMENTO');
     }
+
 }

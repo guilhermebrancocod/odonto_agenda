@@ -116,11 +116,11 @@
                 <hr />
                 <div class="mb-3">
                     <label for="email" class="form-label">Email</label>
-                    <input type="email" id="email" name="E_MAIL_PACIENTE" class="form-control" />
+                    <input type="email" id="email" name="E_MAIL_PACIENTE" class="form-control" required/>
                 </div>
                 <div class="mb-3">
                     <label for="celular" class="form-label">Celular</label>
-                    <input type="text" id="celular" name="CELULAR_PACIENTE" class="form-control" />
+                    <input type="text" id="celular" name="CELULAR_PACIENTE" class="form-control" required/>
                 </div>
                 <div class="mb-3">
                     <label for="telefone" class="form-label">Telefone</label>

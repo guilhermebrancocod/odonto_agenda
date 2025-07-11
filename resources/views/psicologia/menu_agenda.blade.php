@@ -18,6 +18,26 @@
     <!-- CALENDÁRIO -->
     <div id="calendar" class="flex-grow-1 p-3 overflow-auto"></div>
 
+    <!-- Modal para detalhes do agendamento -->
+    <div class="modal fade" id="agendamentoModal" tabindex="-1" aria-labelledby="agendamentoModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+        <div class="modal-header">
+            <h5 class="modal-title" id="agendamentoModalLabel">Detalhes do Agendamento</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fechar"></button>
+        </div>
+        <div class="modal-body">
+            <p><strong>Paciente:</strong> <span id="modalPaciente"></span></p>
+            <p><strong>Data e Horário:</strong> <span id="modalDataHora"></span></p>
+            <p><strong>Observações:</strong> <span id="modalObservacoes"></span></p>
+            <!-- Adicione mais campos se quiser -->
+        </div>
+        <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fechar</button>
+        </div>
+        </div>
+    </div>
+    </div>
 </body >
 
 <!-- FULLCALENDAR SCRIPT -->
@@ -56,27 +76,28 @@
             select: function (info) {
                 alert("Selecionado de " + info.startStr + " até " + info.endStr);
             },
-            events: [
-                {
-                    title: "Consulta Odontologia",
-                    start: new Date().toISOString().split("T")[0],
-                    color: "#007bff",
-                },
-                {
-                    title: "Reunião de Equipe",
-                    start: new Date(new Date().setDate(new Date().getDate() + 2)).toISOString().split("T")[0],
-                    end: new Date(new Date().setDate(new Date().getDate() + 4)).toISOString().split("T")[0],
-                    color: "#28a745",
-                },
-                {
-                    title: "Avaliação com Paciente",
-                    start: new Date(new Date().setHours(10, 0, 0, 0)).toISOString(),
-                    end: new Date(new Date().setHours(11, 0, 0, 0)).toISOString(),
-                    allDay: false,
-                    color: "#ffc107",
-                },
-            ],
+            events: '/psicologia/agendamentos-calendar',
+
+            // Aqui a mágica do clique no evento:
+            eventClick: function(info) {
+                // Preenche o modal com os dados do evento clicado
+                document.getElementById('modalPaciente').textContent = info.event.title;
+
+                // Formatar a data/hora para mostrar bonitinho:
+                const start = info.event.start;
+                const end = info.event.end;
+                const options = { day: '2-digit', month: '2-digit', year: 'numeric', hour:'2-digit', minute:'2-digit' };
+                const dataHoraStr = start.toLocaleString('pt-BR', options) + " - " + (end ? end.toLocaleString('pt-BR', options) : '');
+
+                document.getElementById('modalDataHora').textContent = dataHoraStr;
+                document.getElementById('modalObservacoes').textContent = info.event.extendedProps.description || 'Nenhuma observação';
+
+                // Abre o modal com Bootstrap 5
+                const agendamentoModal = new bootstrap.Modal(document.getElementById('agendamentoModal'));
+                agendamentoModal.show();
+            }
         });
+
         calendar.render();
     });
 </script>

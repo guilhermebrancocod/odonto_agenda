@@ -217,3 +217,13 @@ Route::get('psicologia/criar-servico', function () {
 });
 
 Route::post('/psicologia/criar-servico/criar', [ServicoController::class, 'criarServico'])->name('criarServico-Psicologia');
+
+Route::get('/psicologia/get-agendamento', [AgendamentoController::class, 'getAgendamento'])->name('getAgendamento');
+
+Route::get('/psicologia/agendamento/{id}', [AgendamentoController::class, 'show'])->name('agendamento.show');
+
+// routes/web.php ou routes/api.php
+Route::get('/psicologia/agendamentos-calendar', [AgendamentoController::class, 'getAgendamentosForCalendar']);
+
+Route::get('/psicologia/servicos', [ServicoController::class, 'getServicos']);
+Route::put('/psicologia/servicos/{id}', [ServicoController::class, 'atualizarServico']);
