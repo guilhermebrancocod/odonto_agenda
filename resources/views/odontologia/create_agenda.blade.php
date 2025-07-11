@@ -35,21 +35,18 @@
                 <div class="linha-flex"></div>
             </div>
             <div style="display: flex; gap: 20px; align-items: flex-end; flex-wrap: wrap; margin: 20px 0;">
-                <div class="input-group" style="flex: 1; flex-direction: column;">
-                    <div class="form-outline">
-                        <select id="selectPatient" name="ID_PACIENTE"
-                            style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 6px; font-size: 14px;">
-                        </select>
-                    </div>
-                </div>
+                <select id="selectPatient" name="ID_PACIENTE" class="form-control" style="width: 100%;">
+                    {{-- A opção será carregada via AJAX --}}
+                    @if(old('ID_PACIENTE') && old('NOME_PACIENTE'))
+                    <option value="{{ old('ID_PACIENTE') }}" selected>{{ old('NOME_PACIENTE') }}</option>
+                    @endif
+                </select>
                 <div style="flex-shrink: 0;">
-                    <button type="submit" id='reload' style="background-color: #007bff; color: #fff; border: none; padding: 10px 15px; font-size: 14px; border-radius: 6px; cursor: pointer;" title="Limpar">
+                    <button type="button" id="reload"
+                        onclick="location.reload();"
+                        style="background-color: #007bff; color: #fff; border: none; padding: 10px 15px; font-size: 14px; border-radius: 6px; cursor: pointer;"
+                        title="Limpar / Recarregar">
                         <iconify-icon icon="streamline:arrow-round-left-solid"></iconify-icon>
-                    </button>
-                </div>
-                <div style="flex-shrink: 0;">
-                    <button type="submit" id='add' style="background-color: #007bff; color: #fff; border: none; padding: 10px 15px; font-size: 14px; border-radius: 6px; cursor: pointer;" title="Adicionar paciente">
-                        <iconify-icon icon="ix:add-circle-filled"></iconify-icon>
                     </button>
                 </div>
             </div>
@@ -62,14 +59,14 @@
                 <div class="col-md-3">
                     <label for="date" class="form-label">Dia Início</label>
                     <input type="text" id="date" name="date" class="form-control datepicker"
-                        value="{{ old('date', $agenda->DT_AGEND ?? '') }}">
+                        value="{{ old('date', isset($agenda->DT_AGEND) ? \Carbon\Carbon::parse($agenda->DT_AGEND)->format('d/m/Y') : '') }}">
                 </div>
 
                 <!-- Dia Fim (caso queira usar futuramente) -->
                 <div class="col-md-3">
                     <label for="date_end" class="form-label">Dia Fim</label>
                     <input type="text" id="date_end" name="date_end" class="form-control datepicker"
-                        value="{{ old('date_end', $agenda->DT_AGEND_FIM ?? '') }}">
+                        value="{{ old('date_end', isset($agenda->DT_AGEND) ? \Carbon\Carbon::parse($agenda->DT_AGEND)->format('d/m/Y') : '') }}">
                 </div>
 
                 <!-- Horário Início -->
@@ -103,27 +100,55 @@
                 <div class="col-md-4">
                     <label for="dia_semana" class="form-label">Dias da semana</label>
                     <select id="dia_semana" name="dia_semana[]" class="form-select" multiple>
+                        @php
+                        use Carbon\Carbon;
+
+                        $diasMap = [
+                        0 => 'domingo',
+                        1 => 'segunda',
+                        2 => 'terca',
+                        3 => 'quarta',
+                        4 => 'quinta',
+                        5 => 'sexta',
+                        6 => 'sabado',
+                        ];
+
+                        $recorrenciaAtual = old('recorrencia', trim($agenda->RECORRENCIA ?? ''));
+
+                        $diasSelecionados = [];
+
+                        if ($recorrenciaAtual === 'pontual' && isset($agenda->DT_AGEND)) {
+                        $data = Carbon::parse($agenda->DT_AGEND);
+                        $diasSelecionados = [$diasMap[$data->dayOfWeek]];
+                        } else {
+                        $diasSelecionados = old('dia_semana', isset($agenda) ? explode(',', $agenda->DIA_SEMANA ?? '') : []);
+                        }
+                        @endphp
+
                         @foreach (['segunda', 'terca', 'quarta', 'quinta', 'sexta', 'sabado'] as $dia)
-                        <option value="{{ $dia }}"
-                            @if (in_array($dia, old('dia_semana', isset($agenda) ? explode(',', $agenda->DIA_SEMANA ?? '') : [])))
-                            selected
-                            @endif>
+                        <option value="{{ $dia }}" {{ in_array($dia, $diasSelecionados) ? 'selected' : '' }}>
                             {{ ucfirst($dia) }}-feira
                         </option>
                         @endforeach
                     </select>
                 </div>
-
                 <!-- Haverá Pagamento -->
+                @php
+                // Checa valor enviado pelo formulário (old) ou valor vindo do banco ($agenda)
+                $pagto = old('pagto');
+                if (is_null($pagto) && isset($agenda)) {
+                $pagto = $agenda->VALOR_AGEND !== null ? 'S' : 'N';
+                }
+                @endphp
+
                 <div class="col-md-4">
                     <label for="pagto" class="form-label">Haverá Pagamento?</label>
                     <select id="pagto" name="pagto" class="form-select">
                         <option value=""></option>
-                        <option value="S">Sim</option>
-                        <option value="N">Não</option>
+                        <option value="S" {{ $pagto === 'S' ? 'selected' : '' }}>Sim</option>
+                        <option value="N" {{ $pagto === 'N' ? 'selected' : '' }}>Não</option>
                     </select>
                 </div>
-
                 <!-- Serviço -->
                 <div class="col-md-4">
                     <label for="servico" class="form-label">Serviço</label>
@@ -135,39 +160,50 @@
                 </div>
 
                 <!-- Valor -->
+                @php
+                $pagto = old('pagto');
+                if (is_null($pagto) && isset($agenda)) {
+                $pagto = $agenda->VALOR_AGEND !== null ? 'S' : 'N';
+                }
+
+                $valorDisabled = $pagto === 'N' ? 'disabled' : '';
+                @endphp
+
                 <div class="col-md-4">
                     <label for="valor" class="form-label">Valor</label>
-                    <input type="text" id="valor" class="form-control"
-                        value="{{ old('valor', $agenda->VALOR_AGEND ?? '') }}" {{ old('pagto', $agenda->HAVERA_PAGAMENTO ?? '') != 'S' ? 'disabled' : '' }}>
+                    <input type="text" id="valor" name="valor" class="form-control"
+                        value="{{ old('valor', $agenda->VALOR_AGEND ?? '') }}"
+                        {{ $valorDisabled }}>
                 </div>
 
-                <!-- Observação (apenas edição) -->
-                @if(isset($agenda))
                 <div class="col-md-8">
                     <label for="obs" class="form-label">Observações</label>
                     <input type="text" id="obs" name="obs" class="form-control"
                         value="{{ old('obs', $agenda->OBSERVACOES ?? '') }}">
                 </div>
-                @endif
-
                 <!-- Status e Remarcado (apenas edição) -->
-                @if(isset($agenda))
+                @php
+                $status = old('status', $agenda->STATUS_AGEND ?? 'Agendado');
+                @endphp
                 <div class="col-md-2">
                     <label for="status" class="form-label">Status</label>
                     <select id="status" name="status" class="form-select">
-                        <option value="0" {{ $agenda->STATUS_AGEND == 0 ? 'selected' : '' }}>Agendado</option>
-                        <option value="1" {{ $agenda->STATUS_AGEND == 1 ? 'selected' : '' }}>Cancelado</option>
-                        <option value="2" {{ $agenda->STATUS_AGEND == 2 ? 'selected' : '' }}>Finalizado</option>
+                        <option value="Agendado" {{ $status == 'Agendado' ? 'selected' : '' }}>Agendado</option>
+                        <option value="Presente" {{ $status == 'Presente' ? 'selected' : '' }}>Presente</option>
+                        <option value="Cancelado" {{ $status == 'Cancelado' ? 'selected' : '' }}>Cancelado</option>
                     </select>
                 </div>
+                @php
+                $remarcado = old('remarcado', isset($agenda) ? ($agenda->UPDATED_AT ? '1' : '0') : '0');
+                @endphp
+
                 <div class="col-md-2">
                     <label for="remarcado" class="form-label">Remarcado?</label>
-                    <select id="remarcado" name="remarcado" class="form-select">
-                        <option value="0" {{ $agenda->ID_AGEND_REMARCADO == 0 ? 'selected' : '' }}>Não</option>
-                        <option value="1" {{ $agenda->ID_AGEND_REMARCADO > 0 ? 'selected' : '' }}>Sim</option>
+                    <select id="remarcado" name="remarcado" class="form-select" disabled>
+                        <option value="0" {{ $remarcado == '0' ? 'selected' : '' }}>Não</option>
+                        <option value="1" {{ $remarcado == '1' ? 'selected' : '' }}>Sim</option>
                     </select>
                 </div>
-                @endif
             </div>
 
             <div style="text-align: right;flex:1">

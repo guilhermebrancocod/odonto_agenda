@@ -52,6 +52,33 @@ $(document).ready(function () {
 });
 
 $(document).ready(function () {
+    $('#date').mask('00/00/0000');
+});
+
+document.addEventListener('DOMContentLoaded', function () {
+    const recorrenciaSelect = document.getElementById('recorrencia');
+    const diaSemanaSelect = document.getElementById('dia_semana');
+
+    function atualizarSelecaoDias() {
+        const tipo = recorrenciaSelect.value;
+
+        if (tipo === 'pontual') {
+            diaSemanaSelect.setAttribute('disabled', 'disabled');
+        } else {
+            diaSemanaSelect.removeAttribute('disabled');
+        }
+    }
+
+    // Atualizar ao carregar
+    atualizarSelecaoDias();
+
+    // Atualizar quando mudar
+    recorrenciaSelect.addEventListener('change', function () {
+        atualizarSelecaoDias();
+    });
+});
+
+$(document).ready(function () {
     $.fn.select2.defaults.set("language", "pt-BR");
 
     $('#selectPatient').select2({

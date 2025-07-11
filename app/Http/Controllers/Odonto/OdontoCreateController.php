@@ -17,25 +17,38 @@ class OdontoCreateController extends Controller
 
     public function fCreatePatient(Request $request)
     {
-        $idPaciente = DB::table('FAESA_CLINICA_PACIENTE')->insertGetId(
-            [
-                'NOME_COMPL_PACIENTE' => $request->input('nome'),
-                'CPF_PACIENTE' => preg_replace('/\D/', '', $request->input('cpf')),
-                'DT_NASC_PACIENTE' => $request->input('dt_nasc'),
-                'SEXO_PACIENTE' => $request->input('sexo'),
-                'CEP' => preg_replace('/\D/', '', $request->input('cep')),
-                'ENDERECO' => $request->input('rua'),
-                'END_NUM' => $request->input('numero'),
-                'END_COMPL' => $request->input('complemento'),
-                'BAIRRO' => $request->input('bairro'),
-                'MUNICIPIO' => $request->input('cidade'),
-                'UF' => $request->input('estado'),
-                'E_MAIL_PACIENTE' => $request->input('email'),
-                'FONE_PACIENTE' => preg_replace('/\D/', '', $request->input('celular')),
-            ]
-        );
+        // Remove máscara do CPF
+        $cpf = preg_replace('/\D/', '', $request->input('cpf'));
 
-        return redirect()->route('consultarpaciente')->with('success', 'Paciente criado com sucesso');
+        // Verifica se o CPF já existe
+        $cpfExiste = DB::table('FAESA_CLINICA_PACIENTE')
+            ->where('CPF_PACIENTE', $cpf)
+            ->exists();
+
+        if ($cpfExiste) {
+            return redirect()->back()
+                ->withInput()
+                ->with('alert', 'Paciente já existe!');
+        }
+
+        // Cadastro do paciente
+        $idPaciente = DB::table('FAESA_CLINICA_PACIENTE')->insertGetId([
+            'NOME_COMPL_PACIENTE' => $request->input('nome'),
+            'CPF_PACIENTE' => $cpf,
+            'DT_NASC_PACIENTE' => \Carbon\Carbon::createFromFormat('d/m/Y', $request->input('dt_nasc'))->format('Y-m-d'),
+            'SEXO_PACIENTE' => $request->input('sexo'),
+            'CEP' => preg_replace('/\D/', '', $request->input('cep')),
+            'ENDERECO' => $request->input('rua'),
+            'END_NUM' => $request->input('numero'),
+            'COMPLEMENTO' => $request->input('complemento'),
+            'BAIRRO' => $request->input('bairro'),
+            'MUNICIPIO' => $request->input('cidade'),
+            'UF' => $request->input('estado'),
+            'E_MAIL_PACIENTE' => $request->input('email'),
+            'FONE_PACIENTE' => preg_replace('/\D/', '', $request->input('celular')),
+        ]);
+
+        return redirect()->back()->with('success', 'Paciente criado com sucesso!');
     }
 
     public function showFormAgenda()
@@ -56,7 +69,6 @@ class OdontoCreateController extends Controller
         $dataInicio = \Carbon\Carbon::createFromFormat('d/m/Y', $request->input('date'));
         $dataFim = \Carbon\Carbon::createFromFormat('d/m/Y', $request->input('date_end'));
 
-        // Se for recorrente
         if ($recorrencia === 'recorrencia' && $dataFim && count($diasSemana) > 0) {
             $diasMap = [
                 'domingo' => 0,
@@ -68,10 +80,19 @@ class OdontoCreateController extends Controller
                 'sabado' => 6
             ];
 
-            // Loop de datas
+            // Mapeia os dias selecionados para números
+            $diasNumericosSelecionados = [];
+
+            foreach ($diasSemana as $dia) {
+                if (isset($diasMap[$dia])) {
+                    $diasNumericosSelecionados[] = $diasMap[$dia];
+                }
+            }
+
             $dataAtual = $dataInicio->copy();
+
             while ($dataAtual->lte($dataFim)) {
-                if (in_array(array_search($dataAtual->dayOfWeek, $diasMap), $diasSemana)) {
+                if (in_array($dataAtual->dayOfWeek, $diasNumericosSelecionados)) {
                     DB::table('FAESA_CLINICA_AGENDAMENTO')->insert([
                         'ID_CLINICA' => $idClinica,
                         'ID_PACIENTE' => $request->input('ID_PACIENTE'),
@@ -79,7 +100,7 @@ class OdontoCreateController extends Controller
                         'DT_AGEND' => $dataAtual->format('Y-m-d'),
                         'HR_AGEND_INI' => $request->input('hr_ini'),
                         'HR_AGEND_FIN' => $request->input('hr_fim'),
-                        'STATUS_AGEND' => 1,
+                        'STATUS_AGEND' => $request->input('status'),
                         'ID_AGEND_REMARCADO' => null,
                         'RECORRENCIA' => $recorrencia,
                         'VALOR_AGEND' => $request->input('valor'),
@@ -94,7 +115,7 @@ class OdontoCreateController extends Controller
                 'ID_CLINICA' => $idClinica,
                 'ID_PACIENTE' => $request->input('ID_PACIENTE'),
                 'ID_SERVICO' => $request->input('servico'),
-                'DT_AGEND' => $request->input('date'),
+                'DT_AGEND' => $dataInicio->format('Y-m-d'),
                 'HR_AGEND_INI' => $request->input('hr_ini'),
                 'HR_AGEND_FIN' => $request->input('hr_fim'),
                 'STATUS_AGEND' => $request->input('status'),
@@ -105,9 +126,8 @@ class OdontoCreateController extends Controller
             ]);
         }
 
-        return redirect()->route('criaragenda')->with('success', 'Agendamento realizado com sucesso');
+        return redirect()->back()->with('success', 'Agendamento realizado com sucesso!');
     }
-
 
     public function editPatient($pacienteId)
     {

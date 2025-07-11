@@ -39,6 +39,24 @@ class OdontoConsultController extends Controller
         return response()->json($pacientes);
     }
 
+    public function fSelectAgenda(Request $request)
+    {
+        $query_agenda = $request->input('search-input');
+
+        $selectAgenda = DB::table('FAESA_CLINICA_AGENDAMENTO')
+            ->join('FAESA_CLINICA_PACIENTE', 'FAESA_CLINICA_AGENDAMENTO.ID_PACIENTE', '=', 'FAESA_CLINICA_PACIENTE.ID_PACIENTE')
+            ->select('FAESA_CLINICA_PACIENTE.NOME_COMPL_PACIENTE')
+            ->where(function ($query) use ($query_agenda) {
+                $query->where('FAESA_CLINICA_PACIENTE.NOME_COMPL_PACIENTE', 'like', '%' . $query_agenda . '%')
+                    ->orWhere('FAESA_CLINICA_PACIENTE.CPF_PACIENTE', 'like', '%' . $query_agenda . '%')
+                    ->where('FAESA_CLINICA_AGENDAMENTO.ID_CLINICA', '=', 2);
+            })
+            ->get();
+
+        return view('odontologia/consult_agenda', compact('selectAgenda', 'query_agenda'));
+    }
+
+
     public function buscarAgendamentos(Request $request)
     {
         $pacienteId = $request->input('pacienteId');
@@ -58,6 +76,7 @@ class OdontoConsultController extends Controller
                 'p.E_MAIL_PACIENTE',
                 'p.FONE_PACIENTE'
             )
+            ->where('a.ID_CLINICA', '=', 2)
             ->orderByDesc('a.DT_AGEND');
 
         if ($pacienteId) {

@@ -43,28 +43,43 @@ document.addEventListener('DOMContentLoaded', function () {
         eventDidMount: function (info) {
             // Mostra as observações no tooltip
             info.el.setAttribute('title', info.event.extendedProps.observacoes || '');
-            info.el.setAttribute('color', info.event.extendedProps.color || '');
+
+            // Define a cor de fundo com base no status
+            let status = info.event.extendedProps.status;
+
+            let color = '#6c757d'; // cor padrão (cinza)
+            if (status === 'Agendado') {
+                color = '#007bff'; // azul
+            } else if (status === 'Presente') {
+                color = '#28a745'; // verde
+            } else if (status === 'Cancelado') {
+                color = '#dc3545'; // vermelho
+            }
+
+            info.el.style.backgroundColor = color;
         },
         eventClick: function (info) {
             Swal.fire({
                 title: 'Detalhes do Agendamento',
                 html: `
-            <strong>Paciente:</strong> ${info.event.title}<br>
-            <strong>Observações:</strong> ${info.event.extendedProps.observacoes || 'Sem observações'}<br>
-            <strong>Status:</strong> ${info.event.extendedProps.status === '0' ? 'Agendado/Pendente' :
-                        info.event.extendedProps.status === '1' ? 'Agendado/Presente' :
-                            info.event.extendedProps.status === '2' ? 'Cancelado' :
-                                info.event.extendedProps.status === '3' ? 'Finalizado' :
-                                    'Sem observações'
-                    }<br><br>
-            <label for="new-status">Alterar status:</label>
-            <select id="new-status" class="swal2-select">
-                <option value="0">Agendado/Pendente</option>
-                <option value="1">Agendado/Presente</option>
-                <option value="2">Cancelado</option>
-                <option value="3">Finalizado</option>
-            </select>
-        `,
+                <strong>Paciente:</strong> ${info.event.title}<br>
+                <strong>Observações:</strong> ${info.event.extendedProps.observacoes || 'Sem observações'}<br>
+                <strong>Status:</strong>
+                <span style="color: ${info.event.extendedProps.status === 'Agendado' ? '#007bff' :    // azul
+                        info.event.extendedProps.status === 'Presente' ? '#28a745' :    // verde
+                            info.event.extendedProps.status === 'Cancelado' ? '#dc3545' :   // vermelho
+                                '#6c757d'                                                       // cinza (outros)
+                    }">
+                    ${info.event.extendedProps.status || 'Não informado'}
+                </span>
+                <br><br>
+                <label for="new-status">Alterar status:</label>
+                <select id="new-status" class="swal2-select">
+                    <option value="Agendado">Agendado</option>
+                    <option value="Presente">Presente</option>
+                    <option value="Cancelado">Cancelado</option>
+                </select>
+            `,
                 icon: 'info',
                 showCancelButton: true,
                 confirmButtonText: 'Confirmar',

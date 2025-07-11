@@ -44,7 +44,8 @@
                 <div style="flex: 0.2;">
                     <label for="dt_nasc" style="font-size: 14px; color: #666;">Dt Nascimento</label>
                     <input type="text" id="dt_nasc" name="dt_nasc" class="form-control datepicker"
-                        value="{{ old('dt_nasc', $paciente->DT_NASC_PACIENTE ?? '') }}" style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 6px; font-size: 14px;">
+                        value="{{ old('dt_nasc', isset($paciente->DT_NASC_PACIENTE) ? \Carbon\Carbon::parse($paciente->DT_NASC_PACIENTE)->format('d/m/Y') : '') }}"
+                        style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 6px; font-size: 14px;">
                 </div>
                 <div style="flex: 0.2;">
                     <label for="sexo" style="font-size: 14px; color: #666;">Sexo</label>
@@ -88,7 +89,7 @@
                 <div style="flex:0.5">
                     <label for="complemento" style="font-size: 14px; color: #666;">Completmento</label>
                     <input type="text" id="complemento" name="complemento" class="form-control"
-                        value="{{ old('complemento', $paciente->END_COMPL ?? '') }}" style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 6px; font-size: 14px;" maxlength="100">
+                        value="{{ old('complemento', $paciente->COMPLEMENTO ?? '') }}" style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 6px; font-size: 14px;" maxlength="100">
                 </div>
 
                 <div style="flex:0.5">
@@ -140,6 +141,16 @@
             icon: 'success',
             title: 'Sucesso!',
             text: "{{ session('success') }}",
+        });
+    </script>
+    @endif
+    @if (session('alert'))
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script>
+        Swal.fire({
+            icon: 'warning',
+            title: 'Atenção!',
+            text: "{{ session('alert') }}",
         });
     </script>
     @endif

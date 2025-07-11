@@ -91,11 +91,11 @@ function createNavBar() {
     <h3>Odontologia</h3>
 
     <ul>
-      <li><a href="/odontologia/menu/"><i class="fas fa-home"></i> Início</a></li>
+      <li><a href="/odontologia/menu_agenda_odontologia"><i class="fas fa-home"></i>Início</a></li>
       <li><a href="/odontologia/criaragenda"><i class="fas fa-calendar-plus"></i>Agendar</a></li>
       <li><a href="/odontologia/consultaragenda"><i class="fas fa-edit"></i>Consultar agenda</a></li>
       <li><a href="/odontologia/consultarpaciente"><i class="fas fa-users"></i>Paciente</a></li>
-      <li><a href="/odontologia/relatorio"><i class="fas fa-chart-bar"></i> Relatório</a></li>
+      <li><a href="/odontologia/relatorio"><i class="fas fa-chart-bar"></i>Relatório</a></li>
       <li><a href="/odontologia/criarservico"><i class="fas fa-hammer"></i>Serviço</a></li>
     </ul>
 
