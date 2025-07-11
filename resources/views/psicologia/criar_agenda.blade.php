@@ -4,193 +4,333 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>Agendamento</title>
-    <link rel="icon" type="img/png" href="favicon_faesa.png" />
+    <link rel="icon" type="image/png" href="{{ asset('favicon_faesa.png') }}" />
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700&display=swap" rel="stylesheet" />
     <link href="https://cdnjs.cloudflare.com/ajax/libs/mdb-ui-kit/7.1.0/mdb.min.css" rel="stylesheet" />
-    <link href="/css/style.css" rel="stylesheet" />
+
+    <style>
+        html, body { height: 100%; margin: 0; }
+        #content-wrapper {
+            height: calc(100vh - 56px);
+            overflow-y: auto;
+            padding: 16px;
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+        }
+        #servicos-list button {
+            cursor: pointer;
+        }
+    </style>
 </head>
 <body>
-    <div id="navbar-container">
-        <div style="max-width: 1200px; margin-left:220px; padding: 30px; border-radius: 10px; background-color: #fff; box-shadow: 0 4px 12px rgba(0,0,0,0.05);">
 
-            <!-- TÍTULO SEÇÃO CRIAÇÃO DE AGENDAMENTOS -->
-            <div style="text-align: center; margin-bottom: 30px;">
-                <h2 style="margin: 0; font-size: 24px; color: #333;">Agendamento</h2>
-            </div>
+@include('components.navbar')
 
-            <!-- FORMULÁRIO DE PESQUISA DE PACIENTE PARA CRIAÇÃO DE AGENDAMENTO -->
-            <div style="margin-bottom: 20px;">
-                <form id="search-form" style="display: flex; gap: 10px; flex-wrap: wrap;">
-                    <div style="flex: 1;">
-                        <input
-                            id="search-input"
-                            name="search"
-                            type="search"
-                            class="form-control"
-                            placeholder="Pesquisar paciente"
-                            style="padding: 8px; border: 1px solid #ddd; border-radius: 6px; font-size: 14px;"
-                        />
-                    </div>
-                    <button
-                        type="submit"
-                        style="background-color: #007bff; color: #fff; border: none; padding: 10px 20px; font-size: 14px; border-radius: 6px; cursor: pointer;"
-                    >
-                        Pesquisar
-                    </button>
-                </form>
-            </div>
+<div id="content-wrapper" class="bg-light">
+    <div class="bg-white p-4 rounded shadow-sm w-100" style="max-width: 1000px;">
 
-            <!-- PACIENTES ENCONTRADOS - PREENCHIDO DINAMICAMENTE -->
-            <div id="pacientes-list" style="margin-bottom: 20px;"></div>
-
-            <!-- PACIENTE SELECIONADO -->
-            <div id="paciente-selecionado" style="margin-bottom: 20px;"></div>
-
-            <!-- FORMULÁRIO DE AGENDAMENTO -->
-            <form action="" method="POST" id="agendamento-form">
-                @csrf
-
-                <input type="hidden" name="paciente_id" id="paciente_id" />
-
-                <!-- TÍTULO DA SEÇÃO DE AGENDAMENTO -->
-                <div class="linha-com-titulo">
-                    <h5>Horário</h5>
-                    <div class="linha-flex"></div>
-                </div>
-
-                <div style="display: flex; gap: 10px; flex-wrap: wrap; align-items: flex-end; margin: 20px 0;">
-
-                    <!-- DIA DO AGENDAMENTO -->
-                    <div style="flex: 0.2">
-                        <label for="data" style="font-size: 14px; color: #666;">Dia</label>
-                        <input type="date" id="data" name="dia_agend" class="form-control" required />
-                    </div>
-
-                    <!-- HORARIO INICIAL -->
-                    <div style="flex: 0.2">
-                        <label for="hr_ini" style="font-size: 14px; color: #666;">Horário Início</label>
-                        <input type="time" id="hr_ini" name="hr_ini" class="form-control" required />
-                    </div>
-
-                    <!-- HORARIO FINAL -->
-                    <div style="flex: 0.2">
-                        <label for="hr_fim" style="font-size: 14px; color: #666;">Horário Fim</label>
-                        <input type="time" id="hr_fim" name="hr_fim" class="form-control" required />
-                    </div>
-
-                    <!-- TIPO DE AGENDAMENTO -->
-                    <div style="flex: 0.2">
-                        <label for="tipo" style="font-size: 14px; color: #666;">Tipo</label>
-                        <input
-                            type="text"
-                            id="tipo"
-                            name="tipo_recorrencia"
-                            class="form-control"
-                            placeholder="Ex: Psicoterapia"
-                            required
-                        />
-                    </div>
-
-                    <div>
-                        <label for="servico" style="font-size: 14px; color: #666;">Servico</label>
-                        <input type="text" id="servico" name="servico" class="form-control" placeholder="" required>
-                    </div>
-
-                    <!-- BOTÃO DE AGENDAR -->
-                    <div style="flex: 0.2; text-align: right;">
-                        <button
-                            type="submit"
-                            style="background-color: #007bff; color: #fff; border: none; padding: 10px 20px; font-size: 14px; border-radius: 6px; cursor: pointer;"
-                        >
-                            Agendar
-                        </button>
-                    </div>
-
-                </div>
-            </form>
+        <!-- TITULO -->
+        <div class="text-center mb-3">
+            <h2 class="fs-4 mb-0">Agendamento</h2>
         </div>
+
+        <!-- FORM DE BUSCA DE PACIENTE -->
+        <form id="search-form" class="d-flex flex-wrap gap-2 mb-3">
+            <input id="search-input" name="search" type="search" class="form-control flex-fill" placeholder="Pesquisar paciente">
+            <button type="submit" class="btn btn-primary">Pesquisar</button>
+        </form>
+
+        <!-- LISTA DE PACIENTES ENCONTRADOS PARA AGENDAMENTO -->
+        <div id="pacientes-list" class="mb-3"></div>
+
+        <!-- PACIENTE SELECIONADO -->
+        <div id="paciente-selecionado" class="mb-3"></div>
+
+        <!-- FORM DE AGENDAMENTO -->
+        <form action="{{ route('criarAgendamento-Psicologia') }}" method="POST" id="agendamento-form" class="mt-2 w-100">
+            @csrf
+
+            <!-- ID DO USUARIO QUE SERÁ ENVIADO COM O FORMULARIO -->
+            <input type="hidden" name="paciente_id" id="paciente_id" />
+
+            <!-- ID DO SERVICO QUE SERÁ ENVIADO COM O FORMULARIO -->
+            <input type="hidden" name="id_servico" id="id_servico" />
+
+            <!-- HASH DA RECORRENCIA -->
+            <input type="hidden" name="recorrencia" id="recorrencia" />
+
+            <!-- STATUS DO AGENDAMENTO PADRÃO -->
+            <input type="hidden" name="status_agend" value="Em aberto" />
+
+            <!-- SUTBITULO DO FORMULARIO DE AGENDAMENTO -->
+            <div class="mb-2">
+                <h5 class="mb-0">Horário</h5>
+                <hr class="mt-1">
+            </div>
+
+            <div class="row g-2">
+
+                <!-- CHECKBOX TEM RECORRÊNCIA -->
+                <div class="col-12 mb-2">
+                    <div class="form-check">
+                        <input class="form-check-input" type="checkbox" value="1" id="temRecorrencia" name="tem_recorrencia">
+                        <label class="form-check-label" for="temRecorrencia">
+                            Tem recorrência?
+                        </label>
+                    </div>
+                </div>
+
+                <!-- DIA -->
+                <div class="col-sm-6 col-md-2">
+                    <label for="data" class="form-label">Dia</label>
+                    <input type="date" id="data" name="dia_agend" class="form-control" required>
+                </div>
+
+                <!-- HORARIO INICIAL -->
+                <div class="col-sm-6 col-md-2">
+                    <label for="hr_ini" class="form-label">Horário Início</label>
+                    <input type="time" id="hr_ini" name="hr_ini" class="form-control" required>
+                </div>
+
+                <!-- HORARIO FINAL -->
+                <div class="col-sm-6 col-md-2">
+                    <label for="hr_fim" class="form-label">Horário Fim</label>
+                    <input type="time" id="hr_fim" name="hr_fim" class="form-control" required>
+                </div>
+
+                <!-- CAMPOS DE RECORRÊNCIA (INICIALMENTE OCULTOS) -->
+                <div id="recorrenciaCampos" class="col-12 row g-2 mt-2" style="display: none;">
+                    <!-- SELEÇÃO DE DIAS DA SEMANA -->
+                    <div class="col-sm-6 col-md-6">
+                        <label for="dias_semana" class="form-label">Dias da Semana</label>
+                            <select id="dias_semana" name="dias_semana[]" class="form-select" multiple>
+                                <option value="1">Segunda-feira</option>
+                                <option value="2">Terça-feira</option>
+                                <option value="3">Quarta-feira</option>
+                                <option value="4">Quinta-feira</option>
+                                <option value="5">Sexta-feira</option>
+                                <option value="6">Sábado</option>
+                                <option value="0">Domingo</option>
+                            </select>
+                            <small class="text-muted">Segure Ctrl (Windows) ou Cmd (Mac) para selecionar vários dias.</small>
+                    </div>
+
+                    <!-- DATA FINAL DA RECORRÊNCIA -->
+                    <div class="col-sm-6 col-md-4">
+                        <label for="data_fim_recorrencia" class="form-label">Data Fim Recorrência</label>
+                        <input type="date" id="data_fim_recorrencia" name="data_fim_recorrencia" class="form-control">
+                    </div>
+                </div>
+
+                <!-- SERVICO -->
+                <div class="col-sm-6 col-md-3 position-relative">
+                    <label for="servico" class="form-label">Serviço</label>
+                    <input type="text" id="servico" name="servico" class="form-control" autocomplete="off" required>
+                    <!-- LISTA DE SERVICOS COM BASE NA PESQUISA -->
+                    <div id="servicos-list" class="list-group position-absolute w-100" style="z-index: 1000;"></div>
+                </div>
+
+                <!-- VALOR -->
+                <div class="col-sm-6 col-md-3">
+                    <label for="valor_agend" class="form-label">Valor</label>
+                    <div class="input-group">
+                        <span class="input-group-text">R$</span>
+                        <input type="text" name="valor_agend" id="valor_agend" class="form-control" aria-label="Valor em reais com vírgula e duas casas decimais">
+                    </div>
+                </div>
+
+                <!-- OBSERVACOES -->
+                <div class="input-group">
+                    <textarea name="observacoes" id="observacoes" class="form-control" placeholder="Observações..." rows="5" cols="50" style="height: 100px;"></textarea>
+                </div>
+
+                <!-- BOTAO DE SUBMIT -->
+                <div class="col-12 text-end mt-2">
+                    <button type="submit" class="btn btn-success">Agendar</button>
+                </div>
+            </div>
+        </form>
     </div>
+</div>
 
-    <!-- JAVA SCRIPT -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/mdb-ui-kit/7.1.0/mdb.min.js"></script>
-    <script>
-        const searchForm = document.getElementById('search-form');
-        const searchInput = document.getElementById('search-input');
-        const pacientesList = document.getElementById('pacientes-list');
-        const pacienteSelecionadoDiv = document.getElementById('paciente-selecionado');
-        const pacienteIdInput = document.getElementById('paciente_id');
+<!-- Scripts -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/mdb-ui-kit/7.1.0/mdb.min.js"></script>
 
-        // Ao enviar o formulário de pesquisa
-        searchForm.addEventListener('submit', function(e) {
-            e.preventDefault(); // NÃO PERMITE RECARREGAR A PÁGINA - deixa mais dinâmico
+<script>
 
-            const nome = searchInput.value.trim();
+// FORMULÁRIO DE BUSCA DE PACIENTES
+const searchForm = document.getElementById('search-form');
 
-            fetch(`/psicologia/consultar-paciente/buscar?search=${encodeURIComponent(nome)}`)
-                .then(response => response.json())
-                .then(pacientes => {
-                    // Limpa listas e selecionados
+// INPUT DO NOME/CPF DO PACIENTE
+const searchInput = document.getElementById('search-input');
+
+// LISTA DE PACIENTES ENCONTRADOS PARA AGENDAMENTO
+const pacientesList = document.getElementById('pacientes-list');
+
+// PACIENTE SELECIONADO APÓS BUSCA
+const pacienteSelecionadoDiv = document.getElementById('paciente-selecionado');
+
+
+const pacienteIdInput = document.getElementById('paciente_id');
+
+
+// PESQUISA PACIENTE - FUNCIONALIDADES
+searchForm.addEventListener('submit', function(e) {
+
+    e.preventDefault(); // EVITA RECARREGAMENTO DA PÁGINA
+
+    // RESGATA O NOME DO PACINETE | REMOVE OS ESPAÇOS EM BRANCO COM A FUNÇÃO TRIM()
+    const nome = searchInput.value.trim();
+
+    fetch(`/psicologia/consultar-paciente/buscar?search=${encodeURIComponent(nome)}`)
+        .then(response => response.json())
+        .then(pacientes => {
+
+            // AO BUSCAR, OS VALORES ABAIXO SÃO ZERADOS
+            pacientesList.innerHTML = '';
+            pacienteSelecionadoDiv.innerHTML = '';
+            pacienteIdInput.value = '';
+
+            // CASO NENHUM PACIENTE SEJA ENCONTRADO - MOSTRA MENSAGEM
+            if (pacientes.length === 0) {
+                pacientesList.innerHTML = `<div class="alert alert-warning">Nenhum paciente encontrado.</div>`;
+                return;
+            }
+
+            // CRIA ELEMENTO HTML
+            const listGroup = document.createElement('div');
+            listGroup.classList.add('list-group');
+
+            pacientes.forEach(paciente => {
+                const item = document.createElement('button');
+                item.type = 'button';
+                item.classList.add('list-group-item', 'list-group-item-action');
+                item.textContent = `${paciente.NOME_COMPL_PACIENTE} (${paciente.CPF_PACIENTE}) - ${new Date(paciente.DT_NASC_PACIENTE).toLocaleDateString('pt-BR')}`;
+                item.addEventListener('click', () => {
+                    pacienteSelecionadoDiv.innerHTML = 
+                    `<div class="alert alert-success d-flex justify-content-between align-items-center">
+                        <div>
+                            <strong>Paciente selecionado:</strong> ${paciente.NOME_COMPL_PACIENTE} (${paciente.CPF_PACIENTE})
+                        </div>
+                        <button type="button" id="cancelar-paciente" class="btn btn-sm btn-outline-danger ms-2">Cancelar</button>
+                    </div>
+                    `;
+                    
+                    pacienteIdInput.value = paciente.ID_PACIENTE;
                     pacientesList.innerHTML = '';
-                    pacienteSelecionadoDiv.innerHTML = '';
-                    pacienteIdInput.value = '';
 
-                    if (pacientes.length === 0) {
-                        pacientesList.innerHTML = `<p style="color: red;">Nenhum paciente encontrado.</p>`;
-                        return;
-                    }
-
-                    const ul = document.createElement('ul');
-                    ul.style.listStyle = 'none';
-                    ul.style.padding = '0';
-
-                    // CASO SEJA MAIOR QUE 3, ADICIONA SCROLL
-                    if (pacientes.length > 3) {
-                        ul.style.maxHeight = '200px';
-                        ul.style.overflowY = 'auto';
-                        ul.style.border = '1px solid #ddd';
-                        ul.style.padding = '10px';
-                        ul.style.borderRadius = '6px';
-                    }
-
-                    pacientes.forEach(paciente => {
-                        const li = document.createElement('li');
-                        li.style.padding = '10px';
-                        li.style.border = '1px solid #ddd';
-                        li.style.borderRadius = '6px';
-                        li.style.marginBottom = '10px';
-                        li.style.display = 'flex';
-                        li.style.justifyContent = 'space-between';
-                        li.style.alignItems = 'center';
-
-                        li.innerHTML = `
-                            <span>
-                                ${paciente.NOME_COMPL_PACIENTE} (${paciente.CPF_PACIENTE}) - 
-                                ${new Date(paciente.DT_NASC_PACIENTE).toLocaleDateString('pt-BR')}
-                            </span>
-                            <button type="button" class="btn btn-sm btn-primary">Selecionar</button>
-                        `;
-
-                        li.querySelector('button').addEventListener('click', () => {
-                            pacienteSelecionadoDiv.innerHTML = `
-                                <div class="alert alert-success">
-                                    <strong>Paciente selecionado:</strong> ${paciente.NOME_COMPL_PACIENTE} (${paciente.CPF_PACIENTE})
-                                </div>
-                            `;
-                            pacienteIdInput.value = paciente.ID_PACIENTE;
-                            pacientesList.innerHTML = '';
-                        });
-
-                        ul.appendChild(li);
-                    });
-
-                    pacientesList.appendChild(ul);
-                })
-                // CASO DÊ ERRO AO BUSCAR PACIENTES
-                .catch(error => {
-                    pacientesList.innerHTML = `<p style="color: red;">Erro ao buscar pacientes.</p>`;
-                    console.error(error);
+                    // LISTENER DO BOTÃO DE CANCELAR
+                    document.getElementById('cancelar-paciente').addEventListener('click', () => {
+                        pacienteSelecionadoDiv.innerHTML = '';
+                        pacienteIdInput = '';
+                    })
                 });
+                listGroup.appendChild(item);
+            });
+
+            pacientesList.appendChild(listGroup);
+        })
+        .catch(error => {
+            pacientesList.innerHTML = `<div class="alert alert-danger">Erro ao buscar pacientes.</div>`;
+            console.error(error);
         });
-    </script>
+});
+
+// AUTOCOMPLETE SERVIÇO
+const servicoInput = document.getElementById("servico");
+const servicosList = document.getElementById("servicos-list");
+let timeout = null;
+
+servicoInput.addEventListener('input', () => {
+
+    clearTimeout(timeout); // Cancela o temporizador anterior, caso exista.
+
+    timeout = setTimeout(() => {
+
+        // RESGATA O VALOR DE BUSCA E TIRA ESPAÇOS EM BRANCO
+        const query = servicoInput.value.trim();
+
+        if (!query) {
+            servicosList.innerHTML = '';
+            return;
+        }
+
+        // CODIFICA O VALOR DA QUERY POR QUESTÕES DE SEGURANÇA
+        fetch(`/psicologia/pesquisar-servico?search=${encodeURIComponent(query)}`)
+            .then(response => response.json())
+            .then(servicos => {
+                servicosList.innerHTML = '';
+                
+                // CASO NÃO ENCONTRE NENHUM SERVIÇO COM A BUSCA FEITA
+                if (servicos.length === 0) {
+                    servicosList.innerHTML = `<button type="button" class="list-group-item list-group-item-action disabled">Nenhum serviço encontrado</button>`;
+                    return;
+                }
+                
+                servicos.forEach(servico => {
+                    const item = document.createElement('button');
+                    item.type = 'button';
+                    item.classList.add('list-group-item', 'list-group-item-action');
+                    item.textContent = servico.SERVICO_CLINICA_DESC; // PEGA A DESCRIÇÃO DO SERVIÇO E MOSTRA NA CAIXA DE SELEÇÃO
+                    item.addEventListener('click', () => {
+                        servicoInput.value = servico.SERVICO_CLINICA_DESC;
+                        document.getElementById('id_servico').value = servico.ID_SERVICO_CLINICA;
+                        servicosList.innerHTML = '';
+                    });
+                    servicosList.appendChild(item);
+                });
+
+            })
+            .catch(error => {
+                console.error(error);
+                servicosList.innerHTML = `<button type="button" class="list-group-item list-group-item-action disabled text-danger">Erro ao buscar serviços</button>`;
+            });
+    }, 300);
+});
+
+// FECHA A LISTA AO CLICAR FORA
+// FUNÇÃO ACIONADA QUANDO O USUÁRIO CLICA EM QUALQUER PARTE DA PÁGINA(document)
+document.addEventListener('click', (e) => {
+
+    //  VERIFICA SE O CLIQUE FOI FORA DOS DOIS ELEMENTOS ESPECÍFICOS
+    if (!servicoInput.contains(e.target) && !servicosList.contains(e.target)) {
+        servicosList.innerHTML = '';
+    }
+});
+
+// EXIBE OU OCULTA CAMPOS DE RECORRÊNCIA AO MARCAR O CHECKBOX
+const temRecorrenciaCheckbox = document.getElementById('temRecorrencia');
+const recorrenciaCampos = document.getElementById('recorrenciaCampos');
+
+temRecorrenciaCheckbox.addEventListener('change', function() {
+    if (this.checked) {
+        recorrenciaCampos.style.display = 'flex'; // mostra os campos
+    } else {
+        recorrenciaCampos.style.display = 'none'; // esconde os campos
+        // limpa os campos se desmarcar
+        document.getElementById('dias_semana').selectedIndex = -1;
+        document.getElementById('data_fim_recorrencia').value = '';
+    }
+});
+</script>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // GERA HASH AO MARCAR RECORRÊNCIA
+    const temRecorrenciaCheckbox = document.getElementById('temRecorrencia');
+    const recorrenciaInput = document.getElementById('recorrencia');
+
+    temRecorrenciaCheckbox.addEventListener('change', function() {
+        if (this.checked) {
+            recorrenciaInput.value = crypto.randomUUID();
+        } else {
+            recorrenciaInput.value = '';
+        }
+    });
+});
+</script>
+
 </body>
+
 </html>

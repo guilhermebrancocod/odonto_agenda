@@ -3,6 +3,8 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class FaesaClinicaAgendamento extends Model
 {
@@ -10,12 +12,12 @@ class FaesaClinicaAgendamento extends Model
 
     protected $primaryKey = 'ID_AGENDAMENTO';
 
-    public $timestamps = false;
+    public $timestamps = true;
 
     protected $fillable = [
         'ID_CLINICA',
         'ID_PACIENTE',
-        'ID_SERVICO_CLINICA',
+        'ID_SERVICO',
         'DT_AGEND',
         'HR_AGEND_INI',
         'HR_AGEND_FIN',
@@ -23,17 +25,20 @@ class FaesaClinicaAgendamento extends Model
         'ID_AGEND_REMARCADO',
         'RECORRENCIA',
         'VALOR_AGEND',
-        'OBSERVACAO_AGEND',
+        'OBSERVACOES',
+        'CREATED_AT',
+        'UPDATED_AT'
     ];
 
     protected $casts = [
         'DT_AGEND' => 'date',
         'HR_AGEND_INI' => 'string',
         'HR_AGEND_FIN' => 'string',
-        'RECORRENCIA' => 'boolean',
+        'RECORRENCIA' => 'string',
         'VALOR_AGEND' => 'decimal:2',
         'STATUS_AGEND' => 'string',
-        'TIPO_RECORRENCIA' => 'string',
+        'CREATED_AT' => 'datetime',
+        'UPDATED_AT' => 'datetime',
     ];
 
     /**
@@ -55,8 +60,9 @@ class FaesaClinicaAgendamento extends Model
      */
     public function paciente(): BelongsTo
     {
-        return $this->belongsTo(FaesaClinicaPaciente::class, 'ID_PACIENTE', 'ID_PACIENTE');
+        return $this->belongsTo(FaesaClinicaPaciente::class, 'ID_PACIENTE');
     }
+
 
     /**
      * Define um relacionamento BelongsTo com a tabela FAESA_CLINICA_SERVICO
@@ -66,7 +72,7 @@ class FaesaClinicaAgendamento extends Model
      */
     public function servico(): BelongsTo
     {
-        return $this->belongsTo(FaesaClinicaServico::class, 'ID_SERVICO_CLINICA', 'ID_SERVICO_CLINICA');
+        return $this->belongsTo(FaesaClinicaServico::class, 'ID_SERVICO', 'ID_SERVICO_CLINICA');
     }
 
     /**
@@ -90,8 +96,7 @@ class FaesaClinicaAgendamento extends Model
      */
     public function remarcacoes(): HasMany
     {
-        // ID_AGEND_REMARCADO é a chave estrangeira na tabela 'outra',
-        // ID_AGENDAMENTO é a chave local.
         return $this->hasMany(FaesaClinicaAgendamento::class, 'ID_AGEND_REMARCADO', 'ID_AGENDAMENTO');
     }
+
 }

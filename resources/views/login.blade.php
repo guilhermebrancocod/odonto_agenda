@@ -207,7 +207,7 @@
 <body>
     <div class="container">
 
-        
+
         <!-- LOGO FAESA -->
         <img src="{{ asset('faesa.png') }}" alt="Logo">
         

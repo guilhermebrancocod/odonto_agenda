@@ -19,12 +19,13 @@ class FaesaClinicaPaciente extends Model
         'SEXO_PACIENTE',
         'ENDERECO',
         'END_NUM',
-        'END_COMPL',
+        'COMPLEMENTO',
         'BAIRRO',
         'UF',
         'CEP',
         'FONE_PACIENTE',
-        'E_MAIL_PACIENTE'
+        'E_MAIL_PACIENTE',
+        'MUNICIPIO',
     ];
 
     /**

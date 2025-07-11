@@ -6,286 +6,100 @@
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>Menu</title>
 
-    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700&display=swap" rel="stylesheet" />
     <link href="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.11/index.global.min.css" rel="stylesheet" />
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet" />
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.1/font/bootstrap-icons.min.css" />
-
-    <!-- BOOTSTRAP -->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.7/dist/css/bootstrap.min.css" rel="stylesheet" crossorigin="anonymous" />
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.7/dist/js/bootstrap.bundle.min.js" crossorigin="anonymous"></script>
-
-    <style>
-        body {
-            font-family: "Montserrat", sans-serif;
-        }
-
-        :root {
-            --blue-color: #085ca4;
-            --secondary-color: #7aacce;
-            --third-color: #fc7c34;
-            --light-color: #ecf5f9;
-        }
-
-        .link-agendar {
-            background-color: var(--secondary-color);
-            color: white;
-            text-decoration: none;
-            transition: background-color 0.3s ease, transform 0.2s ease;
-            border-left: 4px solid transparent;
-        }
-
-        .link-agendar:hover {
-            background-color: var(--third-color);
-            color: white;
-            transform: translateX(4px);
-            border-left: 4px solid white;
-        }
-
-        .link-agendar i {
-            transition: transform 0.3s ease;
-        }
-
-        .link-agendar:hover i {
-            transform: scale(1.2) rotate(-5deg);
-        }
-
-        .link-logout {
-            background-color: #c0392b;
-            color: white;
-            text-decoration: none;
-            transition: background-color 0.3s ease, transform 0.2s ease, border-left 0.2s ease;
-            border-left: 4px solid transparent;
-        }
-
-        .link-logout:hover {
-            background-color: #e74c3c;
-            color: white;
-            transform: translateX(4px);
-            border-left: 4px solid white;
-        }
-
-        .link-logout i {
-            transition: transform 0.3s ease;
-        }
-
-        .link-logout:hover i {
-            transform: scale(1.2) rotate(-5deg);
-        }
-
-        @media (max-width: 991.98px) {
-            #main-container {
-                margin-top: 56px; /* ALTURA NAVBAR FIXA */
-            }
-        }
-
-        /* REMOVE MARGEM EM TELAS MAIORES */
-        @media (min-width: 992px) {
-            #main-container {
-                margin-top: 0;
-            }
-        }
-    </style>
-</head>
-
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700&display=swap" rel="stylesheet" />
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/mdb-ui-kit/7.1.0/mdb.min.css" rel="stylesheet" />
+</head >
+    
 <body>
-    <nav class="navbar navbar-dark bg-primary d-lg-none fixed-top" style="height: 56px; padding-left: 1rem;">
-        <button class="btn btn-primary" type="button" data-bs-toggle="offcanvas" data-bs-target="#offcanvasMenu" aria-controls="offcanvasMenu">
-            <i class="fas fa-bars"></i>
-        </button>
-        <img src="{{ asset('faesa_branco.png') }}" id="faesa_icone_branco" alt="" style="margin: auto; display: block; width: 120px;">
-        <span class="navbar-brand mb-0 h1 ms-2">Agendamento Psicologia</span>
-    </nav>
+    
+    @include('components.navbar')
 
-    <div id="main-container" class="d-flex vh-100">
+    <!-- CALENDÁRIO -->
+    <div id="calendar" class="flex-grow-1 p-3 overflow-auto"></div>
 
-        <!-- SIDEBAR DESKTOP -->
-        <nav class="p-3 d-none d-lg-flex flex-column align-items-center" style="width: 250px; background-color: var(--blue-color);">
-            <img src="{{ asset('faesa.png') }}" alt="Logo" class="img-fluid mb-2" />
-
-            <!-- TITULO SIDEBAR -->
-            <h4 class="mb-5 p-2 rounded-3 text-black-emphasis" style="background-color: var(--secondary-color);">
-                Psicologia
-            </h4>
-
-            <ul class="list-group list-group-flush w-100 gap-1">
-                <!-- LINKS -->
-                <li class="list-group-item rounded-1 p-0 overflow-hidden border border-1 border-black">
-                    <a href="/psicologia/" class="link-agendar d-flex align-items-center gap-2 p-2">
-                        <i class="fas fa-home"></i> Início
-                    </a>
-                </li>
-                <!-- INCLUIR AGENDAMENTO -->
-                <li class="list-group-item rounded-1 p-0 overflow-hidden border border-1 border-black">
-                    <a href="/psicologia/criaragenda" class="link-agendar d-flex align-items-center gap-2 p-2">
-                        <i class="fas fa-calendar-plus"></i> Incluir Agendamento
-                    </a>
-                </li>
-                <!-- CONSULTAR AGENDA -->
-                <li class="list-group-item rounded-1 p-0 overflow-hidden border border-1 border-black">
-                    <a href="/psicologia/consultar-agendamento" class="link-agendar d-flex align-items-center gap-2 p-2">
-                        <i class="fas fa-edit"></i> Consultar Agenda
-                    </a>
-                </li>
-                <!-- CADASTRAR PACIENTE -->
-                <li class="list-group-item rounded-1 p-0 overflow-hidden border border-1 border-black">
-                    <a href="/psicologia/criar-paciente" class="link-agendar d-flex align-items-center gap-2 p-2">
-                        <i class="fas fa-user-plus"></i> Cadastrar Paciente
-                    </a>
-                </li>
-                <!-- CONSULTAR PACIENTE -->
-                <li class="list-group-item rounded-1 p-0 overflow-hidden border border-1 border-black">
-                    <a href="/psicologia/consultar-paciente" class="link-agendar d-flex align-items-center gap-2 p-2">
-                        <i class="fas fa-users"></i> Consultar Paciente
-                    </a>
-                </li>
-                <!-- CADASTRAR SERVIÇO -->
-                <li class="list-group-item rounded-1 p-0 overflow-hidden border border-1 border-black">
-                    <a href="/psicologia/criar-servico" class="link-agendar d-flex align-items-center gap-2 p-2">
-                        <i class="bi bi-hammer"></i> Cadastrar Serviço
-                    </a>
-                </li>
-                <!-- RELATÓRIO -->
-                <li class="list-group-item rounded-1 p-0 overflow-hidden border border-1 border-black">
-                    <a href="/psicologia/relatorio" class="link-agendar d-flex align-items-center gap-2 p-2">
-                        <i class="fas fa-chart-bar"></i> Relatório
-                    </a>
-                </li>
-                <!-- LOGOUT -->
-                <li class="list-group-item mt-auto rounded-1 p-0 overflow-hidden border border-1 border-black">
-                    <a href="/psicologia/logout" class="link-logout d-flex align-items-center gap-2 p-2">
-                        <i class="fas fa-sign-out-alt"></i>
-                        Logout
-                    </a>
-                </li>
-            </ul>
-        </nav>
-
-        <!-- OFFCANVAS MOBILE - ESQUERDA PARA DIREITA -->
-        <div class="offcanvas offcanvas-start d-lg-none" tabindex="-1" id="offcanvasMenu" aria-labelledby="offcanvasMenuLabel">
-            <div class="offcanvas-header" style="background-color: var(--blue-color);">
-                <h5 class="offcanvas-title text-white" id="offcanvasMenuLabel">Menu</h5>
-                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="offcanvas" aria-label="Fechar"></button>
-            </div>
-            <div class="offcanvas-body p-0" style="background-color: var(--light-color);">
-                <ul class="list-group list-group-flush w-100">
-                    <!-- MESMOS LINKS DO SIDEBAR -->
-                    <li class="list-group-item p-0 overflow-hidden border border-1 border-black">
-                        <a href="/psicologia/" class="link-agendar d-flex align-items-center gap-2 p-2">
-                            <i class="fas fa-home"></i> Início
-                        </a>
-                    </li>
-                    <!-- INCLUIR AGENDAMENTO -->
-                    <li class="list-group-item p-0 overflow-hidden border border-1 border-black">
-                        <a href="/psicologia/criar-agenda" class="link-agendar d-flex align-items-center gap-2 p-2">
-                            <i class="fas fa-calendar-plus"></i> Incluir Agendamento
-                        </a>
-                    </li>
-                    <!-- CONSULTAR AGENDAMENTO -->
-                    <li class="list-group-item p-0 overflow-hidden border border-1 border-black">
-                        <a href="/psicologia/consultar-agenda" class="link-agendar d-flex align-items-center gap-2 p-2">
-                            <i class="fas fa-edit"></i> Consultar Agenda
-                        </a>
-                    </li>
-                    <!-- CADASTRAR PACIENTE -->
-                    <li class="list-group-item p-0 overflow-hidden border border-1 border-black">
-                        <a href="/psicologia/criar-paciente" class="link-agendar d-flex align-items-center gap-2 p-2">
-                            <i class="fas fa-user-plus"></i> Cadastrar Paciente
-                        </a>
-                    </li>
-                    <!-- CONSULTAR PACIENTE -->
-                    <li class="list-group-item p-0 overflow-hidden border border-1 border-black">
-                        <a href="/psicologia/consultar-paciente" class="link-agendar d-flex align-items-center gap-2 p-2">
-                            <i class="fas fa-users"></i> Consultar Paciente
-                        </a>
-                    </li>
-                    <!-- CADASTRAR SERVIÇO -->
-                    <li class="list-group-item p-0 overflow-hidden border border-1 border-black">
-                        <a href="/psicologia/criar-servico" class="link-agendar d-flex align-items-center gap-2 p-2">
-                            <i class="bi bi-hammer"></i> Cadastrar Serviço
-                        </a>
-                    </li>
-                    <!-- RELATÓRIO -->
-                    <li class="list-group-item p-0 overflow-hidden border border-1 border-black">
-                        <a href="/psicologia/relatorio" class="link-agendar d-flex align-items-center gap-2 p-2">
-                            <i class="fas fa-chart-bar"></i> Relatório
-                        </a>
-                    </li>
-                    <!-- LOGOUT -->
-                    <li class="list-group-item p-0 overflow-hidden border border-1 border-black">
-                        <a href="/psicologia/logout" class="link-logout d-flex align-items-center gap-2 p-2">
-                            <i class="fas fa-sign-out-alt"></i> Logout
-                        </a>
-                    </li>
-                </ul>
-            </div>
+    <!-- Modal para detalhes do agendamento -->
+    <div class="modal fade" id="agendamentoModal" tabindex="-1" aria-labelledby="agendamentoModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+        <div class="modal-header">
+            <h5 class="modal-title" id="agendamentoModalLabel">Detalhes do Agendamento</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fechar"></button>
         </div>
-
-        <!-- CALENDÁRIO -->
-        <div id="calendar" class="flex-grow-1 p-3 overflow-auto"></div>
-
+        <div class="modal-body">
+            <p><strong>Paciente:</strong> <span id="modalPaciente"></span></p>
+            <p><strong>Data e Horário:</strong> <span id="modalDataHora"></span></p>
+            <p><strong>Observações:</strong> <span id="modalObservacoes"></span></p>
+            <!-- Adicione mais campos se quiser -->
+        </div>
+        <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fechar</button>
+        </div>
+        </div>
     </div>
+    </div>
+</body >
 
-    <!-- FULLCALENDAR SCRIPT -->
-    <script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.11/index.global.min.js"></script>
-    <script>
-        document.addEventListener("DOMContentLoaded", function () {
-            const calendarEl = document.getElementById("calendar");
+<!-- FULLCALENDAR SCRIPT -->
+<script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.11/index.global.min.js"></script>
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        const calendarEl = document.getElementById("calendar");
 
-            const calendar = new FullCalendar.Calendar(calendarEl, {
-                initialView: "dayGridMonth",
-                headerToolbar: {
-                    left: "prev,next today",
-                    center: "title",
-                    right: "dayGridDay,timeGridWeek,dayGridMonth",
-                },
-                slotMinTime: "08:00:00",
-                slotMaxTime: "19:00:00",
-                businessHours: {
-                    daysOfWeek: [1, 2, 3, 4, 5, 6],
-                    startTime: "08:00",
-                    endTime: "18:00",
-                },
-                eventDidMount: function (info) {
-                    info.el.setAttribute("title", info.event.extendedProps.description);
-                },
-                buttonText: {
-                    today: "Hoje",
-                    month: "Mês",
-                    week: "Semana",
-                    day: "Dia",
-                    list: "Lista",
-                },
-                locale: "pt-br",
-                selectable: true,
-                editable: false,
-                select: function (info) {
-                    alert("Selecionado de " + info.startStr + " até " + info.endStr);
-                },
-                events: [
-                    {
-                        title: "Consulta Odontologia",
-                        start: new Date().toISOString().split("T")[0],
-                        color: "#007bff",
-                    },
-                    {
-                        title: "Reunião de Equipe",
-                        start: new Date(new Date().setDate(new Date().getDate() + 2)).toISOString().split("T")[0],
-                        end: new Date(new Date().setDate(new Date().getDate() + 4)).toISOString().split("T")[0],
-                        color: "#28a745",
-                    },
-                    {
-                        title: "Avaliação com Paciente",
-                        start: new Date(new Date().setHours(10, 0, 0, 0)).toISOString(),
-                        end: new Date(new Date().setHours(11, 0, 0, 0)).toISOString(),
-                        allDay: false,
-                        color: "#ffc107",
-                    },
-                ],
-            });
-            calendar.render();
+        const calendar = new FullCalendar.Calendar(calendarEl, {
+            initialView: "dayGridMonth",
+            headerToolbar: {
+                left: "prev,next today",
+                center: "title",
+                right: "dayGridDay,timeGridWeek,dayGridMonth",
+            },
+            slotMinTime: "08:00:00",
+            slotMaxTime: "19:00:00",
+            businessHours: {
+                daysOfWeek: [1, 2, 3, 4, 5, 6],
+                startTime: "08:00",
+                endTime: "18:00",
+            },
+            eventDidMount: function (info) {
+                info.el.setAttribute("title", info.event.extendedProps.description);
+            },
+            buttonText: {
+                today: "Hoje",
+                month: "Mês",
+                week: "Semana",
+                day: "Dia",
+                list: "Lista",
+            },
+            locale: "pt-br",
+            selectable: true,
+            editable: false,
+            select: function (info) {
+                alert("Selecionado de " + info.startStr + " até " + info.endStr);
+            },
+            events: '/psicologia/agendamentos-calendar',
+
+            // Aqui a mágica do clique no evento:
+            eventClick: function(info) {
+                // Preenche o modal com os dados do evento clicado
+                document.getElementById('modalPaciente').textContent = info.event.title;
+
+                // Formatar a data/hora para mostrar bonitinho:
+                const start = info.event.start;
+                const end = info.event.end;
+                const options = { day: '2-digit', month: '2-digit', year: 'numeric', hour:'2-digit', minute:'2-digit' };
+                const dataHoraStr = start.toLocaleString('pt-BR', options) + " - " + (end ? end.toLocaleString('pt-BR', options) : '');
+
+                document.getElementById('modalDataHora').textContent = dataHoraStr;
+                document.getElementById('modalObservacoes').textContent = info.event.extendedProps.description || 'Nenhuma observação';
+
+                // Abre o modal com Bootstrap 5
+                const agendamentoModal = new bootstrap.Modal(document.getElementById('agendamentoModal'));
+                agendamentoModal.show();
+            }
         });
-    </script>
-</body>
+
+        calendar.render();
+    });
+</script>
 
 </html>

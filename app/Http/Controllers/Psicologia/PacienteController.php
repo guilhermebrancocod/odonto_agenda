@@ -30,7 +30,16 @@ class PacienteController extends Controller
             'UF' => 'nullable|string|size:2',
             'CEP' => 'nullable|string|max:9',
             'FONE_PACIENTE' => 'nullable|string|max:20',
-            'E_MAIL_PACIENTE' => 'nullable|email|max:255|unique:FAESA_CLINICA_PACIENTE,E_MAIL_PACIENTE',
+            'E_MAIL_PACIENTE' => 'nullable|email|max:255', // removido o unique aqui
+        ], [
+            'CPF_PACIENTE.required' => 'Por favor, informe o CPF do paciente.',
+            'CPF_PACIENTE.unique' => 'Este CPF já está cadastrado.',
+            'NOME_COMPL_PACIENTE.required' => 'Por favor, informe o nome completo do paciente.',
+            'DT_NASC_PACIENTE.required' => 'Por favor, informe a data de nascimento.',
+            'DT_NASC_PACIENTE.date' => 'Informe uma data de nascimento válida.',
+            'SEXO_PACIENTE.required' => 'Por favor, selecione o sexo do paciente.',
+            'SEXO_PACIENTE.in' => 'Sexo selecionado inválido.',
+            'E_MAIL_PACIENTE.email' => 'Informe um e-mail válido.',
         ]);
 
         FaesaClinicaPaciente::create($validated);
@@ -47,14 +56,13 @@ class PacienteController extends Controller
      */
     public function getPaciente(Request $request)
     {
-        // ARMAZENA NOME DO PACIENTE EM QUESTÃO PARA BUSCA
-        $nome = $request->query('search');
+        $search = $request->query('search');
 
-        // CASO NOME SEJA FORNECIDO, PESQUISA POR ELE
-        if ($nome) {
-            $pacientes = FaesaClinicaPaciente::where('NOME_COMPL_PACIENTE', 'like', "%{$nome}%")->get();
-        
-        // CASO NOME NÃO SEJA FORNECIDO, RETORNA OS 10 ÚLTIMOS PACIENTES ADICIONADOS    
+        if ($search) {
+            $pacientes = FaesaClinicaPaciente::where(function ($query) use ($search) {
+                $query->where('NOME_COMPL_PACIENTE', 'LIKE', "%{$search}%")
+                    ->orWhere('CPF_PACIENTE', 'LIKE', "%{$search}%");
+            })->get();
         } else {
             $pacientes = FaesaClinicaPaciente::orderBy('ID_PACIENTE', 'DESC')->limit(10)->get();
         }
@@ -62,13 +70,54 @@ class PacienteController extends Controller
         return response()->json($pacientes);
     }
 
+
     /**
      * Identifica e altera um Paciente em específico
      * 
      * @param Request $request A instância da requisição HTTP. Pode conter o parâmetro 'search'.
      */
-    public function editarPaciente(Request $request)
+    public function editarPaciente(Request $request, $id)
     {
-        dd($request);
+        $validatedData = $request->validate([
+            'nome'       => 'required|string|max:255',
+            'cpf'        => 'required|string|max:14',
+            'dt_nasc'    => 'nullable|date',
+            'sexo'       => 'nullable|string|in:M,F,O',
+            'endereco'   => 'nullable|string|max:255',
+            'num'        => 'nullable|integer',
+            'complemento'=> 'nullable|string|max:255',
+            'bairro'     => 'nullable|string|max:255',
+            'uf'         => 'nullable|string|max:2',
+            'cep'        => 'nullable|string|max:20',
+            'celular'    => 'nullable|string|max:20',
+            'email'      => 'nullable|email|max:255',
+            'municipio'  => 'nullable|string|max:255',
+        ]);
+
+        $paciente = FaesaClinicaPaciente::find($id);
+        if (!$paciente) {
+            return response()->json(['message' => 'Paciente não encontrado'], 404);
+        }
+
+        $paciente->NOME_COMPL_PACIENTE = $validatedData['nome'];
+        $paciente->CPF_PACIENTE = $validatedData['cpf'];
+        $paciente->DT_NASC_PACIENTE = $validatedData['dt_nasc'] ?? $paciente->DT_NASC_PACIENTE;
+        $paciente->SEXO_PACIENTE = $validatedData['sexo'] ?? $paciente->SEXO_PACIENTE;
+        $paciente->ENDERECO = $validatedData['endereco'] ?? $paciente->ENDERECO;
+        $paciente->END_NUM = $validatedData['num'] ?? $paciente->END_NUM;
+        $paciente->COMPLEMENTO = $validatedData['complemento'] ?? $paciente->COMPLEMENTO;
+        $paciente->BAIRRO = $validatedData['bairro'] ?? $paciente->BAIRRO;
+        $paciente->UF = $validatedData['uf'] ?? $paciente->UF;
+        $paciente->CEP = $validatedData['cep'] ?? $paciente->CEP;
+        $paciente->FONE_PACIENTE = $validatedData['celular'] ?? $paciente->FONE_PACIENTE;
+        $paciente->E_MAIL_PACIENTE = $validatedData['email'] ?? $paciente->E_MAIL_PACIENTE;
+        $paciente->MUNICIPIO = $validatedData['municipio'] ?? $paciente->MUNICIPIO;
+
+        $paciente->save();
+
+        return response()->json([
+            'message' => 'Paciente atualizado com sucesso',
+            'paciente' => $paciente,
+        ]);
     }
 }

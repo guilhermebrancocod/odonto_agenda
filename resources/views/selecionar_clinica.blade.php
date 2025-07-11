@@ -29,9 +29,9 @@
     <div class="container d-flex justify-content-center align-items-center vh-100">
         <div class="text-center">
             <!-- LOGO FAESA -->
-            <img src="{{ asset('faesa.png') }}" alt="Logo" class="mb-4">
+            <img src="{{ asset('faesa_branco.png') }}" alt="Logo" class="mb-4">
 
-            <h3>Selecione qual clínica desejar acessar</h3>
+            <h3 style="color: white;">Selecione qual clínica desejar acessar</h3>
 
             <form action="{{ route('selecionar-clinica-post') }}" method="POST">
                 @csrf
