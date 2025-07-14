@@ -49,11 +49,11 @@ document.addEventListener('DOMContentLoaded', function () {
 
             let color = '#6c757d'; // cor padrão (cinza)
             if (status === 'Agendado') {
-                color = '#007bff'; // azul
+                color = '#1d8ae9ff'; // azul
             } else if (status === 'Presente') {
-                color = '#28a745'; // verde
+                color = '#36e25eff'; // verde
             } else if (status === 'Cancelado') {
-                color = '#dc3545'; // vermelho
+                color = '#e91b1bff'; // laranja
             }
 
             info.el.style.backgroundColor = color;
