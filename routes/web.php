@@ -19,9 +19,9 @@ Route::get('/', function () {
         return view('login');
     }
 
-    $usuario = session('usuario');
-    session(['last_clinic_route' => 'menu_agenda_psicologia']);
-    return view('psicologia.menu_agenda', compact('usuario'));
+    // $usuario = session('usuario');
+    // session(['last_clinic_route' => 'menu_agenda_psicologia']);
+    return view('login', compact('usuario'));
 })->name('menu_agenda_psicologia');
 
 // ODONTOLOGIA MENU
@@ -81,7 +81,7 @@ Route::middleware([AuthMiddleware::class])->group(function () {
 
 Route::middleware([AuthMiddleware::class, CheckClinicaMiddleware::class])->prefix('psicologia')->group(function () {}); /*ADICIONAR QUANDO TUDO ESTIVER RODANDO*/
 
-Route::get('/', function () {
+Route::get('/psicologia', function () {
     $usuario = session('usuario');
     return view('psicologia/menu_agenda', compact('usuario'));
 })->name('menu_agenda_psicologia');
@@ -104,11 +104,11 @@ Route::get('/editar-paciente', function () {
 
 Route::post('/editar-paciente/{id}', [PacienteController::class, 'editarPaciente'])->name('editarPaciente-Psicologia');
 
-Route::get('/criar-agendamento', function () {
+Route::get('/psicologia/criar-agendamento', function () {
     return view('psicologia/criar_agenda');
 })->name('criaragenda_psicologia');
 
-Route::post('/criar-agendamento/criar', [AgendamentoController::class, 'criarAgendamento'])->name('criarAgendamento-Psicologia');
+Route::post('/psicologia/criar-agendamento/criar', [AgendamentoController::class, 'criarAgendamento'])->name('criarAgendamento-Psicologia');
 
 Route::get('/consultar-agendamento', function () {
     return view('psicologia.consultar_agendamento');

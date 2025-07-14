@@ -29,8 +29,8 @@ class PacienteController extends Controller
             'BAIRRO' => 'nullable|string|max:50',
             'UF' => 'nullable|string|size:2',
             'CEP' => 'nullable|string|max:9',
-            'FONE_PACIENTE' => 'nullable|string|max:20',
-            'E_MAIL_PACIENTE' => 'nullable|email|max:255', // removido o unique aqui
+            'FONE_PACIENTE' => 'required|nullable|string|max:20',
+            'E_MAIL_PACIENTE' => 'required|nullable|email|max:255', // removido o unique aqui
         ], [
             'CPF_PACIENTE.required' => 'Por favor, informe o CPF do paciente.',
             'CPF_PACIENTE.unique' => 'Este CPF já está cadastrado.',
@@ -39,8 +39,11 @@ class PacienteController extends Controller
             'DT_NASC_PACIENTE.date' => 'Informe uma data de nascimento válida.',
             'SEXO_PACIENTE.required' => 'Por favor, selecione o sexo do paciente.',
             'SEXO_PACIENTE.in' => 'Sexo selecionado inválido.',
+            'E_MAIL_PACIENTE.required' => 'Por favor, informe o e-mail do paciente.',
             'E_MAIL_PACIENTE.email' => 'Informe um e-mail válido.',
-        ]);
+            'FONE_PACIENTE.required' => 'Por favor, informe o celular do paciente.',
+        ]
+        );
 
         FaesaClinicaPaciente::create($validated);
 

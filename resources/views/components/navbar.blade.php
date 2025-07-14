@@ -92,14 +92,16 @@
             <img src="{{ asset('faesa_branco.png') }}" alt="Logo" class="img-fluid mb-2" />
 
             <!-- TITULO SIDEBAR -->
-            <h4 class="mb-5 mt-5 p-2 rounded-3" style="background-color: var(--secondary-color);">
+            <h4 class="mb-5 mt-5 p-2 rounded-3"
+                style="background-color: var(--secondary-color); color: white;">
                 <strong>Psicologia</strong>
             </h4>
+
 
             <ul class="list-group list-group-flush w-100 gap-1">
                 <!-- LINKS -->
                 <li class="list-group-item rounded-1 p-0 overflow-hidden ">
-                    <a href="/psicologia/" class="link-agendar d-flex align-items-center gap-2 p-2">
+                    <a href="/" class="link-agendar d-flex align-items-center gap-2 p-2">
                         <i class="fas fa-home"></i> Início
                     </a>
                 </li>
