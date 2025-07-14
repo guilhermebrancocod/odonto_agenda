@@ -193,4 +193,32 @@ class OdontoConsultController extends Controller
 
         return response()->json($agendamentos);
     }
+
+    public function fSelectService(Request $request)
+    {
+        $query_servico = $request->input('search-input');
+
+        $selectService = DB::table('FAESA_CLINICA_SERVICO')
+            ->select('SERVICO_CLINICA_DESC')
+            ->where(function ($query) use ($query_servico) {
+                $query->where('SERVICO_CLINICA_DESC', 'like', '%' . $query_servico . '%');
+            })
+            ->where('ID_CLINICA', '=', 2)
+            ->get();
+
+        return view('odontologia/consult_service', compact('selectService', 'query_servico'));
+    }
+
+    public function buscarServicos(Request $request)
+    {
+        $query = $request->input('query');
+
+        $servicos = DB::table('FAESA_CLINICA_SERVICO')
+            ->select('ID_SERVICO_CLINICA', 'SERVICO_CLINICA_DESC', 'VALOR_SERVICO', 'PERMITE_ATENDIMENTO_SIMULTANEO')
+            ->where('SERVICO_CLINICA_DESC', 'like', '%' . $query . '%')
+            ->where('ID_CLINICA', '=', 2)
+            ->get();
+
+        return response()->json($servicos);
+    }
 }

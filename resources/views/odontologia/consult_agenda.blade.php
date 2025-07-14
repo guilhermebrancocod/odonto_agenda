@@ -15,7 +15,7 @@
 
 <body>
     <div id="navbar-container"></div>
-    <div style="max-width: 1200px; margin-left:220px; padding: 30px; border-radius: 10px; background-color: #fff; box-shadow: 0 4px 12px rgba(0,0,0,0.05);">
+    <div style="margin-left:220px; padding: 30px; border-radius: 10px; background-color: #fff; box-shadow: 0 4px 12px rgba(0,0,0,0.05);width: 100%;">
         <div style="text-align: center; margin-bottom: 30px;">
             <h2 style="margin: 0; font-size: 24px; color: #333;">Buscando agendamentos</h2>
         </div>

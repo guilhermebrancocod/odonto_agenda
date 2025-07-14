@@ -17,9 +17,9 @@
     <div id="navbar-container"></div>
     <div style="margin-left:220px; padding: 30px; border-radius: 10px; background-color: #fff; box-shadow: 0 4px 12px rgba(0,0,0,0.05);width: 100%;">
         <div style="text-align: center; margin-bottom: 30px;">
-            <h2 style="margin: 0; font-size: 24px; color: #333;">Buscando pacientes</h2>
+            <h2 style="margin: 0; font-size: 24px; color: #333;">Buscando serviços</h2>
         </div>
-        <form id="form-search-patient" class="row g-3 needs-validation">
+        <form id="form-search-service" class="row g-3 needs-validation">
             <div class="linha-com-titulo">
                 <h5>Pesquisar</h5>
                 <div class="linha-flex"></div>
@@ -27,7 +27,7 @@
             <div style="display: flex; gap: 20px; align-items: flex-end; flex-wrap: wrap; margin: 20px 0;">
                 <div class="input-group" style="flex: 1; flex-direction: column;">
                     <div class="form-outline">
-                        <select id="selectPatient" name="selectPatient" style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 6px; font-size: 14px;">
+                        <select id="selectService" name="selectService" style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 6px; font-size: 14px;">
                             <option></option>
                         </select>
                     </div>
@@ -38,7 +38,7 @@
                     </button>
                 </div>
                 <div style="flex-shrink: 0;">
-                    <button type="submit" id='add' style="background-color: #007bff; color: #fff; border: none; padding: 10px 15px; font-size: 14px; border-radius: 6px; cursor: pointer;" title="Adicionar paciente">
+                    <button type="submit" id='add' style="background-color: #007bff; color: #fff; border: none; padding: 10px 15px; font-size: 14px; border-radius: 6px; cursor: pointer;" title="Adicionar serviço">
                         <iconify-icon icon="ix:add-circle-filled"></iconify-icon>
                     </button>
                 </div>
@@ -51,10 +51,9 @@
                 <table class="table datatable-table" id="table-patient">
                     <thead class="datatable-header">
                         <tr style="padding-left: 1rem;">
-                            <th>CPF</th>
-                            <th>Nome</th>
-                            <th>E-mail</th>
-                            <th>Telefone</th>
+                            <th>Descrição</th>
+                            <th>Valor</th>
+                            <th>Permite Horário Simultâneo</th>
                             <th>Editar</th>
                         </tr>
                     </thead>
@@ -77,7 +76,7 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.mask/1.14.16/jquery.mask.min.js"></script>
     <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mdb-ui-kit/7.1.0/mdb.min.js"></script>
     <script src="https://code.iconify.design/iconify-icon/1.0.7/iconify-icon.min.js"></script>
-    <script type="module" src="/js/odontologia/consult_patient.js"></script>
+    <script type="module" src="/js/odontologia/consult_service.js"></script>
 </body>
 
 </html>

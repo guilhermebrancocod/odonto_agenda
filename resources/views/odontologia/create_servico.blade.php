@@ -7,84 +7,86 @@
     <title>Cadastro</title>
     <link rel="icon" type="img/png" href="faesa_favicon.png">
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700&display=swap" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datepicker/1.10.0/css/bootstrap-datepicker.min.css" rel="stylesheet" />
     <link href="https://cdnjs.cloudflare.com/ajax/libs/mdb-ui-kit/7.1.0/mdb.min.css" rel="stylesheet" />
     <link href="/css/style.css" rel="stylesheet">
 </head>
 
 <body>
     <div id="navbar-container"></div>
-    <div style="max-width: 1200px; margin-left:220px; padding: 30px; border-radius: 10px; background-color: #fff; box-shadow: 0 4px 12px rgba(0,0,0,0.05);">
+    <div style="margin-left:220px; padding: 30px; border-radius: 10px; background-color: #fff; box-shadow: 0 4px 12px rgba(0,0,0,0.05); width: 100%;">
         <div style="text-align: center; margin-bottom: 30px;">
-            <h2 style="margin: 0; font-size: 24px; color: #333;">Cadastro de Serviço</h2>
+            <h3 style="margin: 0; font-size: 24px; color: #333;">Cadastro de serviços</h3>
         </div>
-
-        @if ($errors->any())
-            <div class="alert alert-danger">
-                <ul>
-                    @foreach ($errors->all() as $erro)
-                        <li>{{ $erro }}</li>
-                    @endforeach
-                </ul>
-            </div>
-        @endif
-
-        @if(session('success'))
-            <div class="alert alert-success">
-                {{ session('success') }}
-            </div>
-        @endif
-
-        <form class="row g-3 needs-validation" action="{{ route('criarServico-Psicologia') }}" method="POST">
+        <form id="form" class="row g-3 needs-validation"
+            action="{{ isset($servico) ? route('updateService', $servico->ID_SERVICO_CLINICA) : route('createService') }}"
+            method="POST">
             @csrf
-
-            <!-- TÍTULO FORMULÁRIO SERVIÇO -->
+            @if(isset($paciente))
+            @method('PUT')
+            @endif
+            @csrf
             <div class="linha-com-titulo">
-                <h5>Dados Serviço</h5>
+                <h5>Detalhes</h5>
                 <div class="linha-flex"></div>
             </div>
-
-            <!-- CÓDIGO CONTROLE INTERNO (DB: COD_INTERNO_SERVICO_CLINICA) -->
-            <div class="mb-3">
-                <label for="cod-interno-servico" class="form-label text-muted" style="font-size: 14px;">
-                    Código Controle Interno
-                </label>
-                <input type="text"
-                    id="cod-interno-servico"
-                    name="COD_CONTROL_INTERNO"
-                    class="form-control"
-                    placeholder="Ex: 1234-5678"
-                    pattern="[0-9\-]+"
-                    title="Digite apenas números e traços">
+            <div class="row g-3" style="margin: 20px 0;">
+                <div style="flex: 1;">
+                    <label for="descricao" style="font-size: 14px; color: #666;">Descrição</label>
+                    <input type="text" id="descricao" name="descricao" class="form-control"
+                        value="{{ old('descricao', $servico->SERVICO_CLINICA_DESC ?? '') }}" style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 6px; font-size: 14px;" maxlength="255">
+                </div>
+                <div style="flex: 0.5;">
+                    <label for="valor" style="font-size: 14px; color: #666;">Valor</label>
+                    <input type="text" id="valor" name="valor" class="form-control"
+                        value="{{ old('valor', $servico->VALOR_SERVICO ?? '') }}" style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 6px; font-size: 14px;" maxlength="10">
+                </div>
+                <input type="hidden" name="permite_simultaneo" value="0">
+                <div class="form-check" style="margin-left: 7px; font-family: 'Poppins', sans-serif; font-size: 14px;">
+                    <input class="form-check-input" type="checkbox" name="permite_simultaneo" id="permite_simultaneo" value="1">
+                    <label class="form-check-label" for="permite_simultaneo">
+                        Permite atendimento simultâneo
+                    </label>
+                </div>
             </div>
-
-            <!-- SCRIPT PARA CAMPO DE PREENCHIMENTO DE CÓDIGO INTERNO DE SERVIÇO -->
-            <script>
-                document.getElementById('cod-interno-servico').addEventListener('input', function (e) {
-                    this.value = this.value.replace(/[^0-9\-]/g, '');
-                });
-            </script>
-
-            <!-- NOME DO SERVIÇO (DB: SERVICO_CLINICA_DESC) -->
-            <div class="mb-3">
-                <label for="nome-servico" class="form-label text-muted" style="font-size: 14px;">
-                    Nome Serviço
-                </label>
-                <input type="text"
-                    id="nome-servico"
-                    name="NOME-SERVICO"
-                    class="form-control"
-                >
-            </div>
-
-            <button id="salvar" type="submit" style="background-color: #007bff; color: #fff; border: none; padding: 10px 20px; font-size: 14px; border-radius: 6px; cursor: pointer;">
+            <div style="display: flex; justify-content: space-between; gap: 10px;">
+                <button id="voltar" name="voltar" type="submit" style="background-color: #007bff; color: #fff; border: none; padding: 10px 20px; font-size: 14px; border-radius: 6px; cursor: pointer;">
+                    Voltar
+                </button>
+                <button id="salvar" name="salvar" type="submit" onclick="saveGroupData()" style="background-color: #007bff; color: #fff; border: none; padding: 10px 20px; font-size: 14px; border-radius: 6px; cursor: pointer;">
                     Salvar
-            </button>
-
+                </button>
+            </div>
         </form>
     </div>
-
+    </form>
+    </div>
+    @if (session('success'))
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script>
+        Swal.fire({
+            icon: 'success',
+            title: 'Sucesso!',
+            text: "{{ session('success') }}",
+        });
+    </script>
+    @endif
+    @if (session('alert'))
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script>
+        Swal.fire({
+            icon: 'warning',
+            title: 'Atenção!',
+            text: "{{ session('alert') }}",
+        });
+    </script>
+    @endif
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datepicker/1.10.0/js/bootstrap-datepicker.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datepicker/1.10.0/locales/bootstrap-datepicker.pt-BR.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.mask/1.14.16/jquery.mask.min.js"></script>
     <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mdb-ui-kit/7.1.0/mdb.min.js"></script>
-    <script type="module" src="/js/create.js"></script>
+    <script type="module" src="/js/odontologia/create_service.js"></script>
 </body>
 
 </html>

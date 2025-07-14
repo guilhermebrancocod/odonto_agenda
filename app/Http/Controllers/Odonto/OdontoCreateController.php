@@ -154,4 +154,17 @@ class OdontoCreateController extends Controller
 
         return view('odontologia.create_agenda', compact('agenda'));
     }
+
+    public function createService(Request $request)
+    {
+        // Cadastro do paciente
+        $idService = DB::table('FAESA_CLINICA_SERVICO')->insertGetId([
+            'ID_CLINICA' => 2,
+            'SERVICO_CLINICA_DESC' => $request->input('descricao'),
+            'COD_INTERNO_SERVICO_CLINICA' => 0,
+            'VALOR_SERVICO' => $request->input('valor'),
+            'PERMITE_ATENDIMENTO_SIMULTANEO' => $request->boolean('permite_simultaneo')
+        ]);
+        return redirect()->back()->with('success', 'Serviço cadastrado com sucesso!');
+    }
 }

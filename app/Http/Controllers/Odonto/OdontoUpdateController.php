@@ -34,6 +34,22 @@ class OdontoUpdateController extends Controller
         return redirect()->back()->with('success', 'Paciente atualizado com sucesso!');
     }
 
+        public function updateService(Request $request, $idService)
+    {
+        $servico = DB::table('FAESA_CLINICA_SERVICO')->where('ID_SERVICO_CLINICA', $idService)->first();
+
+        DB::table('FAESA_CLINICA_SERVICO')
+            ->where('ID_SERVICO_CLINICA', $idService)
+            ->update([
+                'ID_CLINICA' => 2,
+                'SERVICO_CLINICA_DESC' => $request->input('descricao'),
+                'COD_INTERNO_SERVICO_CLINICA' => 0,
+                'VALOR_SERVICO' => $request->input('valor')
+            ]);
+
+        return redirect()->back()->with('success', 'Paciente atualizado com sucesso!');
+    }
+
     public function updateAgenda(Request $request, $id)
     {
 

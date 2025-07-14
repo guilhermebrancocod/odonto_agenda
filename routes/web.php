@@ -143,12 +143,17 @@ Route::get('/odontologia/criarpaciente/{pacienteId}', [OdontoCreateController::c
 Route::post('/odontologia/criarpaciente', [OdontoCreateController::class, 'fCreatePatient'])->name('createPatient');
 Route::put('/updatePatient/{id}', [OdontoUpdateController::class, 'updatePatient'])->name('updatePatient');
 
+Route::post('/odontologia/criarservico', [OdontoCreateController::class, 'createService'])->name('createService');
+Route::put('/criarservico/{idService}', [OdontoUpdateController::class, 'updateService'])->name('updateService');
+
 Route::post('/alterarstatus/{agendaId}', [OdontoUpdateController::class, 'editStatus'])->name('editStatus');
 
 Route::post('/odontologia/criaragenda', [OdontoCreateController::class, 'fCreateAgenda'])->name('createAgenda');
 Route::get('/odontologia/criaragenda/{agendaId}', [OdontoCreateController::class, 'editAgenda'])->name('editAgenda');
 
 Route::get('/getPacientes', [OdontoConsultController::class, 'buscarPacientes']);
+
+Route::get('/getServices', [OdontoConsultController::class, 'buscarServicos']);
 
 Route::get('/getAgenda', [OdontoConsultController::class, 'buscarAgendamentos']);
 
@@ -161,6 +166,8 @@ Route::put('/updatePatient/{id}', [OdontoUpdateController::class, 'updatePatient
 Route::put('/updateAgenda/{id}', [OdontoUpdateController::class, 'updateAgenda'])->name('updateAgenda');
 
 Route::get('/odontologia/consultarpaciente', [OdontoConsultController::class, 'fSelectPatient'])->name('selectPatient');
+
+Route::get('/odontologia/consultarservico', [OdontoConsultController::class, 'fSelectService'])->name('selectService');
 
 Route::get('/odontologia/consultaragenda', [OdontoConsultController::class, 'fSelectAgenda'])->name('selectAgenda');
 
@@ -189,6 +196,10 @@ Route::middleware([AuthMiddleware::class, CheckClinicaMiddleware::class])->prefi
     Route::get('/criaragenda', function () {
         return view('odontologia/create_agenda');
     })->name('criaragenda_odontologia');
+
+    Route::get('/criarservico', function () {
+        return view('odontologia/create_servico');
+    })->name('criarservico_odontologia');
 });
 // PSICOLOGIA - CRIAÇÃO DE PACIENTE
 Route::get('psicologia/criar-paciente', function () {
@@ -198,6 +209,10 @@ Route::get('psicologia/criar-paciente', function () {
 Route::get('/consultarpaciente', function () {
     return view('odontologia/consult_patient');
 })->name('consultarpaciente');
+
+Route::get('/consultarservico', function () {
+    return view('odontologia/consult_service');
+})->name('consultarservico');
 
 
 // CRIAÇÃO DE AGENDA
