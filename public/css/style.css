@@ -51,7 +51,7 @@ nav ul li a {
 
 nav ul li a:hover,
 nav ul li a.active {
-    background-color:rgb(2, 167, 189);
+    background-color: rgb(2, 167, 189);
 }
 
 nav ul li a i {
@@ -60,20 +60,28 @@ nav ul li a i {
 }
 
 .logout-link {
-    margin-top: auto;
-    margin-bottom: 20px;
-    padding: 10px 20px;
-    color: #ecf0f1;
-    text-decoration: none;
-    display: block;
-    width: 100%;
-    text-align: center;
+  margin-top: auto;
+  margin-bottom: 20px;
+  padding: 12px 24px;
+  color: #ffffff;
+  background-color: #c0392b;
+  text-decoration: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  width: 90%;
+  border-radius: 8px;
+  font-weight: 500;
+  font-size: 15px;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+  transition: background-color 0.2s ease, transform 0.1s ease;
 }
 
 .logout-link:hover {
-    background-color: #c0392b;
+  background-color: #a93226;
+  transform: translateY(-1px);
 }
-
 
 body {
     display: flex;
@@ -165,8 +173,9 @@ body nav img div {
 }
 
 #calendar {
-    max-width: 900px;
-    margin: 0 auto;
+    margin-left: 224px;
+    height: 100vh;
+    width: calc(100% - 224px);
     background-color: white;
     padding: 20px;
     border-radius: 12px;
@@ -189,4 +198,29 @@ body nav img div {
     flex: 1;
     height: 2px;
     background-color: #ccc;
+}
+
+@media (max-width: 991px) {
+    #calendar {
+        margin-left: 0;
+        width: 100%;
+        height: auto;
+        /* caso a altura 100vh esteja cortando conteúdo */
+        padding: 16px;
+    }
+
+    .fc .fc-toolbar-title {
+        font-size: 1rem;
+    }
+
+    .fc-toolbar.fc-header-toolbar {
+        flex-direction: column;
+        gap: 0.5rem;
+        align-items: center;
+    }
+
+    .fc-button {
+        font-size: 0.85rem;
+        padding: 4px 8px;
+    }
 }
