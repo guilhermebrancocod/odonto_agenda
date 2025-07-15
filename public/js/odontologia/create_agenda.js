@@ -55,26 +55,37 @@ $(document).ready(function () {
     $('#date').mask('00/00/0000');
 });
 
-document.addEventListener('DOMContentLoaded', function () {
-    const recorrenciaSelect = document.getElementById('recorrencia');
-    const diaSemanaSelect = document.getElementById('dia_semana');
+$(document).ready(function () {
+    const $select = $('#form-select');
 
-    function atualizarSelecaoDias() {
-        const tipo = recorrenciaSelect.value;
-
-        if (tipo === 'pontual') {
-            diaSemanaSelect.setAttribute('disabled', 'disabled');
-        } else {
-            diaSemanaSelect.removeAttribute('disabled');
+    $select.select2({
+        placeholder: "Busque o serviço",
+        allowClear: true,
+        minimumInputLength: 0,
+        dropdownParent: $('#form-select').parent(),
+        ajax: {
+            url: '/servicos',
+            dataType: 'json',
+            delay: 250,
+            data: function (params) {
+                return { query: params.term || '' };
+            },
+            processResults: function (data) {
+                return {
+                    results: data.map(p => ({
+                        id: p.ID_SERVICO_CLINICA,
+                        text: p.SERVICO_CLINICA_DESC
+                    }))
+                };
+            },
+            cache: true
         }
-    }
+    });
 
-    // Atualizar ao carregar
-    atualizarSelecaoDias();
-
-    // Atualizar quando mudar
-    recorrenciaSelect.addEventListener('change', function () {
-        atualizarSelecaoDias();
+    $select.on('select2:open', function () {
+        setTimeout(() => {
+            document.querySelector('.select2-container--open .select2-search__field')?.focus();
+        }, 0);
     });
 });
 

@@ -130,10 +130,13 @@ Route::post('/criar-servico/criar', [ServicoController::class, 'criarServico'])-
 
 Route::get('/pesquisar-servico', [ServicoController::class, 'getServico'])->name('pesquisarServico-Psicologia');
 
-
 Route::get('/odontologia/criarservico', function () {
     return view('odontologia/create_servico');
 })->name('criarservico');
+
+Route::get('/odontologia/criarbox', function () {
+    return view('odontologia/create_box');
+})->name('criarbox');
 
 Route::get('/odontologia/agendamentos', [OdontoConsultController::class, 'getAgendamentos']);
 
@@ -146,6 +149,12 @@ Route::put('/updatePatient/{id}', [OdontoUpdateController::class, 'updatePatient
 Route::post('/odontologia/criarservico', [OdontoCreateController::class, 'createService'])->name('createService');
 Route::put('/criarservico/{idService}', [OdontoUpdateController::class, 'updateService'])->name('updateService');
 
+Route::post('/odontologia/criarbox', [OdontoCreateController::class, 'createBox'])->name('createBox');
+Route::put('/criarbox/{idBox}', [OdontoUpdateController::class, 'updateBox'])->name('updateBox');
+
+Route::post('/odontologia/criarboxdisciplina', [OdontoCreateController::class, 'createBoxDiscipline'])->name('createBoxDiscipline');
+Route::put('/criarbox/{idBox}', [OdontoUpdateController::class, 'updateBoxDiscipline'])->name('updateBoxDiscipline');
+
 Route::post('/alterarstatus/{agendaId}', [OdontoUpdateController::class, 'editStatus'])->name('editStatus');
 
 Route::post('/odontologia/criaragenda', [OdontoCreateController::class, 'fCreateAgenda'])->name('createAgenda');
@@ -157,7 +166,13 @@ Route::get('/getServices', [OdontoConsultController::class, 'buscarServicos']);
 
 Route::get('/getAgenda', [OdontoConsultController::class, 'buscarAgendamentos']);
 
+Route::get('/getBoxes', [OdontoConsultController::class, 'buscarBoxes']);
+
 Route::get('/paciente/{pacienteId}', [OdontoConsultController::class, 'listaPacienteId']);
+
+Route::get('/servicos/{servicoId}', [OdontoConsultController::class, 'listaServicosId']);
+
+Route::get('/servicos', [OdontoConsultController::class, 'services']);
 
 Route::get('/agenda/{pacienteId}', [OdontoConsultController::class, 'listaAgendamentoId']);
 
@@ -168,6 +183,8 @@ Route::put('/updateAgenda/{id}', [OdontoUpdateController::class, 'updateAgenda']
 Route::get('/odontologia/consultarpaciente', [OdontoConsultController::class, 'fSelectPatient'])->name('selectPatient');
 
 Route::get('/odontologia/consultarservico', [OdontoConsultController::class, 'fSelectService'])->name('selectService');
+
+Route::get('/odontologia/consultarbox', [OdontoConsultController::class, 'fSelectBox'])->name('selectBox');
 
 Route::get('/odontologia/consultaragenda', [OdontoConsultController::class, 'fSelectAgenda'])->name('selectAgenda');
 
@@ -200,6 +217,14 @@ Route::middleware([AuthMiddleware::class, CheckClinicaMiddleware::class])->prefi
     Route::get('/criarservico', function () {
         return view('odontologia/create_servico');
     })->name('criarservico_odontologia');
+
+    Route::get('/criarbox', function () {
+        return view('odontologia/create_box');
+    })->name('criarbox_odontologia');
+
+    Route::get('/criarboxdisciplina', function () {
+        return view('odontologia/create_box_discipline');
+    })->name('criarbox_disciplina_odontologia');
 });
 // PSICOLOGIA - CRIAÇÃO DE PACIENTE
 Route::get('psicologia/criar-paciente', function () {
@@ -214,6 +239,9 @@ Route::get('/consultarservico', function () {
     return view('odontologia/consult_service');
 })->name('consultarservico');
 
+Route::get('/consultarbox', function () {
+    return view('odontologia/consult_box');
+})->name('consultarbox');
 
 // CRIAÇÃO DE AGENDA
 Route::get('/psicologia/criar-agenda', function () {

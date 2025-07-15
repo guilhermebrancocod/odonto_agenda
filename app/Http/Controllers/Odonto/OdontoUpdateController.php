@@ -34,7 +34,7 @@ class OdontoUpdateController extends Controller
         return redirect()->back()->with('success', 'Paciente atualizado com sucesso!');
     }
 
-        public function updateService(Request $request, $idService)
+    public function updateService(Request $request, $idService)
     {
         $servico = DB::table('FAESA_CLINICA_SERVICO')->where('ID_SERVICO_CLINICA', $idService)->first();
 
@@ -48,6 +48,21 @@ class OdontoUpdateController extends Controller
             ]);
 
         return redirect()->back()->with('success', 'Paciente atualizado com sucesso!');
+    }
+
+    public function updateBox(Request $request, $idBox)
+    {
+        $box = DB::table('FAESA_CLINICA_BOXES')->where('ID_BOX_CLINICA', $idBox)->first();
+
+        DB::table('FAESA_CLINICA_BOXES')
+            ->where('ID_BOX_CLINICA', $idBox)
+            ->update([
+                'ID_CLINICA' => 2,
+                'DESCRICAO' => $request->input('descricao'),
+                'ATIVO' => $request->input('status')
+            ]);
+
+        return redirect()->back()->with('success', 'Box atualizado com sucesso!');
     }
 
     public function updateAgenda(Request $request, $id)

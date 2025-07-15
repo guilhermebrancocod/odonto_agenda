@@ -7,6 +7,8 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
+use function Laravel\Prompts\select;
+
 class OdontoConsultController extends Controller
 {
 
@@ -88,6 +90,26 @@ class OdontoConsultController extends Controller
         return response()->json($agendamentos);
     }
 
+        public function buscarBoxes(Request $request)
+    {
+        $boxesId = $request->input('boxesId');
+
+        $query = DB::table('FAESA_CLINICA_BOXES')
+            ->select(
+                'DESCRICAO',
+                'ATIVO',
+            )
+            ->where('ID_CLINICA', '=', 2);
+
+        if ($boxesId) {
+            $query->where('ID_BOX_CLINICA', $boxesId);
+        }
+
+        $boxes = $query->get();
+
+        return response()->json($boxes);
+    }
+
     public function listaPacienteId($pacienteId = null)
     {
         $query = DB::table('FAESA_CLINICA_PACIENTE')
@@ -108,6 +130,41 @@ class OdontoConsultController extends Controller
         return response()->json($pacientes);
     }
 
+    public function listaServicosId($servicoId = null)
+    {
+        $query = DB::table('FAESA_CLINICA_SERVICO')
+            ->select('ID_SERVICO_CLINICA', 'SERVICO_CLINICA_DESC');
+
+        if ($servicoId) {
+            $servico = $query->where('ID_SERVICO_CLINICA', $servicoId)->first();
+
+            if (!$servico) {
+                return response()->json(['erro' => 'Serviço não encontrado'], 404);
+            }
+
+            return response()->json($servico);
+        }
+
+        // Se $pacienteId for vazio, retorna todos os pacientes
+        $servicos = $query->get();
+        return response()->json($servicos);
+    }
+
+    public function services(Request $request)
+    {
+        $query = DB::table('FAESA_CLINICA_SERVICO')
+            ->select('ID_SERVICO_CLINICA', 'SERVICO_CLINICA_DESC');
+
+        if ($request->has('query')) {
+            $search = $request->query('query');
+            $query->where('SERVICO_CLINICA_DESC', 'like', '%' . $search . '%')
+                ->where('ID_CLINICA', '=', 2);
+        }
+
+        $servicos = $query->get();
+
+        return response()->json($servicos);
+    }
 
     public function listaAgendamentoId($pacienteId)
     {
@@ -220,5 +277,20 @@ class OdontoConsultController extends Controller
             ->get();
 
         return response()->json($servicos);
+    }
+
+    public function fSelectBox(Request $request)
+    {
+        $query_box = $request->input('search-input');
+
+        $selectBox = DB::table('FAESA_CLINICA_BOXES')
+            ->select('DESCRICAO')
+            ->where(function ($query) use ($query_box) {
+                $query->where('DESCRICAO', 'like', '%' . $query_box . '%');
+            })
+            ->where('ID_CLINICA', '=', 2)
+            ->get();
+
+        return view('odontologia/consult_box', compact('selectBox', 'query_box'));
     }
 }

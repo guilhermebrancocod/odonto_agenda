@@ -16,10 +16,10 @@
     <div id="navbar-container"></div>
     <div style="margin-left:220px; padding: 30px; border-radius: 10px; background-color: #fff; box-shadow: 0 4px 12px rgba(0,0,0,0.05); width: 100%;">
         <div style="text-align: center; margin-bottom: 30px;">
-            <h3 style="margin: 0; font-size: 24px; color: #333;">Cadastro de serviços</h3>
+            <h3 style="margin: 0; font-size: 24px; color: #333;">Cadastro de boxes de atendimento</h3>
         </div>
         <form id="form" class="row g-3 needs-validation"
-            action="{{ isset($servico) ? route('updateService', $servico->ID_SERVICO_CLINICA) : route('createService') }}"
+            action="{{ isset($box) ? route('updateBox', $box->ID_BOX_CLINICA) : route('createBox') }}"
             method="POST">
             @csrf
             @if(isset($paciente))
@@ -30,23 +30,20 @@
                 <h5>Detalhes</h5>
                 <div class="linha-flex"></div>
             </div>
-            <div class="row g-3" style="margin: 20px 0;">
+            <div class="row g-3 align-items-center" style="margin: 20px 0; display: flex;">
                 <div style="flex: 1;">
                     <label for="descricao" style="font-size: 14px; color: #666;">Descrição</label>
                     <input type="text" id="descricao" name="descricao" class="form-control"
-                        value="{{ old('descricao', $servico->SERVICO_CLINICA_DESC ?? '') }}" style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 6px; font-size: 14px;" maxlength="255">
+                        value="{{ old('descricao', $servico->SERVICO_CLINICA_DESC ?? '') }}"
+                        style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 6px; font-size: 14px;" maxlength="25">
                 </div>
                 <div style="flex: 0.5;">
-                    <label for="valor" style="font-size: 14px; color: #666;">Valor</label>
-                    <input type="text" id="valor" name="valor" class="form-control"
-                        value="{{ old('valor', $servico->VALOR_SERVICO ?? '') }}" style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 6px; font-size: 14px;" maxlength="10">
-                </div>
-                <input type="hidden" name="permite_simultaneo" value="N">
-                <div class="form-check" style="margin-left: 7px; font-family: 'Poppins', sans-serif; font-size: 14px;">
-                    <input class="form-check-input" type="checkbox" name="permite_simultaneo" id="permite_simultaneo" value="S">
-                    <label class="form-check-label" for="permite_simultaneo">
-                        Permite atendimento simultâneo
-                    </label>
+                    <label for="status" style="font-size: 14px; color: #666;">Status</label>
+                    <select id="status" name="status" class="form-select"
+                        style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 6px; font-size: 14px;">
+                        <option value="S" {{ old('status', $servico->ATIVO ?? '') == 'S' ? 'selected' : '' }}>Ativo</option>
+                        <option value="N" {{ old('status', $servico->ATIVO ?? '') == 'N' ? 'selected' : '' }}>Inativo</option>
+                    </select>
                 </div>
             </div>
             <div style="display: flex; justify-content: space-between; gap: 10px;">
@@ -86,7 +83,7 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datepicker/1.10.0/locales/bootstrap-datepicker.pt-BR.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.mask/1.14.16/jquery.mask.min.js"></script>
     <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mdb-ui-kit/7.1.0/mdb.min.js"></script>
-    <script type="module" src="/js/odontologia/create_service.js"></script>
+    <script type="module" src="/js/odontologia/create_box.js"></script>
 </body>
 
 </html>

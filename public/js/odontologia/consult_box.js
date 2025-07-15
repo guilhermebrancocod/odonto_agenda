@@ -3,22 +3,22 @@ import { Modal } from 'https://cdnjs.cloudflare.com/ajax/libs/mdb-ui-kit/7.1.0/m
 
 
 function carregarTodosBox() {
-    const $select = $('#selectBox');
+    const $select = $('#selectBoxes');
     const $tbody = $('#table-box tbody');
 
     $.ajax({
-        url: '/getServices',
+        url: '/getBoxes',
         dataType: 'json',
         data: { query: '' },
         success: function (data) {
             $select.empty();
             $tbody.empty();
 
-            data.forEach(servico => {
+            data.forEach(box => {
                 // Adiciona ao select
                 const newOption = new Option(
-                    servico.SERVICO_CLINICA_DESC,
-                    servico.ID_SERVICO_CLINICA,
+                    box.DESCRICAO,
+                    box.ID_BOX_CLINICA,
                     false,
                     false
                 );
@@ -27,15 +27,14 @@ function carregarTodosBox() {
                 // Adiciona à tabela
                 const html = `
                     <tr>
-                        <td>${servico.SERVICO_CLINICA_DESC}</td>
-                        <td>${servico.VALOR_SERVICO != null && servico.VALOR_SERVICO !== '' ? 'R$ ' + parseFloat(servico.VALOR_SERVICO).toFixed(2) : ''}</td>
-                        <td>${servico.PERMITE_ATENDIMENTO_SIMULTANEO == 1 ? 'Sim' : 'Não'}</td>
+                        <td>${box.DESCRICAO}</td>
+                        <td>${box.ATIVO}</td>
                         <td>
                             <button 
                                 type="button" 
                                 class="edit-patient btn btn-link p-0 m-0 border-0" 
                                 style="color: inherit;" 
-                                data-id="${servico.ID_SERVICO_CLINICA}">
+                                data-id="${box.ID_BOX_CLINICA}">
                                 <i class="fa fa-pencil-alt"></i>
                             </button>
                         </td>
@@ -53,14 +52,14 @@ function carregarTodosBox() {
 }
 
 $(document).ready(function () {
-    const $select = $('#selectService');
+    const $select = $('#selectBox');
 
     $select.select2({
-        placeholder: "Busque o serviço",
+        placeholder: "Busque o boxes",
         allowClear: true,
         minimumInputLength: 0,
         ajax: {
-            url: '/getServices',
+            url: '/getBoxes',
             dataType: 'json',
             delay: 250,
             data: function (params) {
@@ -69,8 +68,8 @@ $(document).ready(function () {
             processResults: function (data) {
                 return {
                     results: data.map(p => ({
-                        id: p.ID_SERVICO_CLINICA,
-                        text: p.SERVICO_CLINICA_DESC
+                        id: p.ID_BOX_CLINICA,
+                        text: p.DESCRICAO
 
                     }))
                 };
@@ -85,14 +84,12 @@ $(document).ready(function () {
             document.querySelector('.select2-container--open .select2-search__field')?.focus();
         }, 0);
     });
-
-    // 👇 Única chamada necessária ao carregar
-    carregarTodosServicos();
+    carregarTodosBox();
 });
 
 // Evento ao selecionar um paciente no select2
 $('#selectService').on('select2:select', function (e) {
-    const servicoId = e.params.data.id;
+    const boxId = e.params.data.id;
 
     // Busca os dados completos do paciente via AJAX
     $.ajax({
@@ -136,7 +133,7 @@ const addPatient = document.getElementById('add');
 
 addPatient.addEventListener('click', function (event) {
     event.preventDefault();
-    window.location.href = '/odontologia/criarservico';
+    window.location.href = '/odontologia/criarbox';
 });
 
 const navbarContainer = document.getElementById('navbar-container');

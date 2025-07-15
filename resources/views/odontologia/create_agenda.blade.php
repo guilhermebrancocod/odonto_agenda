@@ -150,15 +150,11 @@
                     </select>
                 </div>
                 <!-- Serviço -->
-                <div class="col-md-4">
-                    <label for="servico" class="form-label">Serviço</label>
-                    <select id="servico" name="servico" class="form-select">
-                        <option value=""></option>
-                        <option value="1" {{ old('servico', $agenda->ID_SERVICO ?? '') == '1' ? 'selected' : '' }}>Limpeza</option>
-                        <option value="2" {{ old('servico', $agenda->ID_SERVICO ?? '') == '2' ? 'selected' : '' }}>Retirada canal</option>
+                <div class="col-md-4" style="overflow: hidden;">
+                    <label class="form-label">Serviço</label>
+                    <select id="form-select" class="form-select" name="servico">
                     </select>
                 </div>
-
                 <!-- Valor -->
                 @php
                 $pagto = old('pagto');

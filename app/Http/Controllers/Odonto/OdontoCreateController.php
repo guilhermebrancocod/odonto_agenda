@@ -157,7 +157,6 @@ class OdontoCreateController extends Controller
 
     public function createService(Request $request)
     {
-        // Cadastro do paciente
         $idService = DB::table('FAESA_CLINICA_SERVICO')->insertGetId([
             'ID_CLINICA' => 2,
             'SERVICO_CLINICA_DESC' => $request->input('descricao'),
@@ -166,5 +165,15 @@ class OdontoCreateController extends Controller
             'PERMITE_ATENDIMENTO_SIMULTANEO' => $request->boolean('permite_simultaneo')
         ]);
         return redirect()->back()->with('success', 'Serviço cadastrado com sucesso!');
+    }
+
+    public function createBox(Request $request)
+    {
+        $idBox = DB::table('FAESA_CLINICA_BOXES')->insertGetId([
+            'ID_CLINICA' => 2,
+            'DESCRICAO' => $request->input('descricao'),
+            'ATIVO' => $request->input('status'),
+        ]);
+        return redirect()->back()->with('success', 'Box cadastrado com sucesso!');
     }
 }
