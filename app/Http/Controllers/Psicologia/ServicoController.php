@@ -10,9 +10,14 @@ class ServicoController extends Controller
 {
     public function criarServico(Request $request)
     {
+        $request->merge([
+            'VALOR_SERVICO' => $request->input('VALOR_SERVICO') !== '' ? $request->input('VALOR_SERVICO') : null,
+        ]);
+
         $validated = $request->validate([
             'ID_CLINICA' => 'required|integer|min:1',
             'SERVICO_CLINICA_DESC' => 'required|string|min:1|max:255',
+            'VALOR_SERVICO' => 'nullable|numeric',
         ]);
 
         FaesaClinicaServico::create($validated);
@@ -22,10 +27,9 @@ class ServicoController extends Controller
 
     // PESQUISA OS SERVIÇOS DISPONÍVES
     // UTILIZADO NA PÁGINA DE CRIAÇÃO DE AGENDAMENTO AO TENTAR SELECIONAR SERVIÇO
-    // Método para buscar serviços (com filtro opcional)
     public function getServicos(Request $request)
     {
-        $search = $request->query('search', '');
+        $search = trim($request->query('search', '')); // Trim para evitar conflitos
 
         $query = FaesaClinicaServico::query();
         if ($search) {
@@ -43,6 +47,7 @@ class ServicoController extends Controller
         $validated = $request->validate([
             'SERVICO_CLINICA_DESC' => 'required|string|max:255',
             'COD_INTERNO_SERVICO_CLINICA' => 'required|integer|min:0',
+            'VALOR_SERVICO' => 'nullable|numeric'
         ]);
 
         $servico = FaesaClinicaServico::find($id);
