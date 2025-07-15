@@ -352,29 +352,33 @@
                 });
         });
 
-        document.getElementById('btn-deletar-servico').addEventListener('click', () => {
-            if (!confirm('Tem certeza que deseja excluir este serviço?')) return;
-            const id = document.getElementById('edit-servico-id').value;
+       document.getElementById('btn-deletar-servico').addEventListener('click', () => {
+    if (!confirm('Tem certeza que deseja excluir este serviço?')) return;
+    const id = document.getElementById('edit-servico-id').value;
 
-            fetch(`/psicologia/servicos/${id}`, {
-                method: 'DELETE',
-                headers: {
-                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
-                }
-            })
-                .then(res => {
-                    if (!res.ok) throw new Error('Erro ao excluir.');
-                    return res.json();
-                })
-                .then(() => {
-                    showAlert('Serviço excluído com sucesso!', 'success');
-                    editarServicoModal.hide();
-                    carregarServicos(searchInput.value);
-                })
-                .catch(err => {
-                    showModalAlert(err.message, 'warning');
-                });
-        });
+    fetch(`/psicologia/servicos/${id}`, {
+        method: 'DELETE',
+        headers: {
+            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+        }
+    })
+    .then(async res => {
+        if (!res.ok) {
+            const data = await res.json();
+            throw new Error(data.message || 'Erro ao excluir.');
+        }
+        return res.json();
+    })
+    .then(() => {
+        showAlert('Serviço excluído com sucesso!', 'success');
+        editarServicoModal.hide();
+        carregarServicos(searchInput.value);
+    })
+    .catch(err => {
+        showModalAlert(err.message, 'warning'); // mostra mensagem do backend na modal
+    });
+});
+
     });
 </script>
 
