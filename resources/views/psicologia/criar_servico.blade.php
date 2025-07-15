@@ -210,7 +210,7 @@
                             </div>
                             <div class="mb-3">
                                 <label class="form-label">Código Interno</label>
-                                <input type="text" id="edit-servico-cod" name="COD_INTERNO_SERVICO_CLINICA" class="form-control" required />
+                                <input type="text" id="edit-servico-cod" name="COD_INTERNO_SERVICO_CLINICA" class="form-control"/>
                             </div>
                             <div class="mb-3">
                                 <label class="form-label">Valor Serviço</label>
@@ -311,7 +311,10 @@ document.addEventListener('DOMContentLoaded', () => {
                     btn.addEventListener('click', () => {
                         document.getElementById('edit-servico-id').value = btn.dataset.id;
                         document.getElementById('edit-servico-desc').value = btn.dataset.desc;
-                        document.getElementById('edit-servico-cod').value = btn.dataset.cod;
+
+                        // Se for '--', envia vazio para o campo para não quebrar a validação
+                        document.getElementById('edit-servico-cod').value = (btn.dataset.cod === '--') ? '' : btn.dataset.cod;
+
                         document.getElementById('edit-valor-servico').value = btn.dataset.valor;
                         document.getElementById('edit-permite-simultaneo').checked = (btn.dataset.permite === 'S');
                         editarServicoModal.show();
@@ -397,7 +400,6 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 });
 </script>
-
 
 </body>
 </html>
