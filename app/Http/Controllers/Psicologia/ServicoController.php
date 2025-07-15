@@ -75,7 +75,8 @@ class ServicoController extends Controller
     {
         $search = trim($request->query('search', ''));
 
-        $query = FaesaClinicaServico::query();
+        $query = FaesaClinicaServico::where('ID_CLINICA', 1); // FILTRO FIXO AQUI
+
         if ($search) {
             $query->where('SERVICO_CLINICA_DESC', 'LIKE', "%{$search}%");
         }
@@ -85,7 +86,7 @@ class ServicoController extends Controller
         // Substituir null ou 0 no código interno por texto customizado
         $servicos->transform(function($item) {
             if (is_null($item->COD_INTERNO_SERVICO_CLINICA) || $item->COD_INTERNO_SERVICO_CLINICA == 0) {
-                $item->COD_INTERNO_SERVICO_CLINICA = '--'; // ou 'Não definido', ou outro texto que preferir
+                $item->COD_INTERNO_SERVICO_CLINICA = '--';
             }
             return $item;
         });
