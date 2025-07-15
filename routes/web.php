@@ -249,3 +249,4 @@ Route::get('/psicologia/agendamentos-calendar', [AgendamentoController::class, '
 
 Route::get('/psicologia/servicos', [ServicoController::class, 'getServicos']);
 Route::put('/psicologia/servicos/{id}', [ServicoController::class, 'atualizarServico']);
+Route::delete('/psicologia/servicos/{id}', [ServicoController::class, 'deletarServico']);

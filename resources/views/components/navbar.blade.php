@@ -14,9 +14,6 @@
     crossorigin="anonymous">
 </script>
 
-{{-- Custom CSS Sets --}}
-@vite('resources/css/app.css')
-
 <style>
     body {
         font-family: "Montserrat", sans-serif;
