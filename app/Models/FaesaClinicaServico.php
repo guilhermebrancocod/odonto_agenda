@@ -16,7 +16,9 @@ class FaesaClinicaServico extends Model
     protected $fillable = [
         'ID_CLINICA',
         'SERVICO_CLINICA_DESC',
-        'COD_INTERNO_SERVICO_CLINICA'
+        'COD_INTERNO_SERVICO_CLINICA',
+        'VALOR_SERVICO',
+        'PERMITE_ATENDIMENTO_SIMULTANEO'
     ];
 
     /**

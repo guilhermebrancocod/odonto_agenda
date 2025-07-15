@@ -17,19 +17,15 @@
             font-family: "Montserrat", sans-serif;
             background-color: #f8f9fa;
         }
-
-        /* Container com 70% da largura da tela e altura quase toda */
         #content-wrapper {
             width: 70vw;
-            height: 90vh; /* quase toda altura */
-            margin: auto; /* centralizar horizontalmente */
+            height: 90vh;
+            margin: auto;
             display: flex;
             gap: 24px;
-            overflow: hidden; /* evita scroll externo */
-            align-items: stretch; /* cards com mesma altura */
+            overflow: hidden;
+            align-items: stretch;
         }
-
-        /* Cada main ocupa metade do container */
         main {
             background-color: #ffffff;
             padding: 24px;
@@ -40,25 +36,19 @@
             flex-direction: column;
             overflow: hidden;
         }
-
-        /* Formulario e conteúdo crescem para preencher verticalmente */
         form {
             flex-grow: 1;
-            overflow-y: auto; /* scroll se form ficar muito alto */
+            overflow-y: auto;
         }
-
-        /* Ajusta o titulo */
         h2 {
             font-size: 24px;
             color: #333;
             margin-bottom: 16px;
         }
-
         h5 {
             margin-bottom: 12px;
             font-weight: 600;
         }
-
         #salvar {
             background-color: #007bff;
             color: #fff;
@@ -69,250 +59,347 @@
             cursor: pointer;
             transition: background-color 0.3s ease, box-shadow 0.3s ease;
         }
-
         #salvar:hover {
             background-color: #0056b3;
             box-shadow: 0 0.5rem 1rem rgba(0,0,0,0.15);
         }
-
-        /* Lista de serviços com scroll vertical */
         #servicos-lista {
             flex-grow: 1;
             overflow-y: auto;
             max-height: 100%;
         }
-
-        /* Tabela cheia na largura */
-        table {
-            width: 100%;
-        }
-
         @media (max-width: 768px) {
             #content-wrapper {
                 flex-direction: column;
                 width: 90vw;
                 height: auto;
             }
-
             main {
                 width: 100%;
             }
+        }
+        /* ALERT FIXO NO TOPO */
+        #alert-container {
+            position: fixed;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 1055;
+            width: auto;
+            max-width: 90%;
+            pointer-events: none;
         }
     </style>
 </head>
 
 <body>
-    @include('components.navbar')
+@include('components.navbar')
 
-    <div id="content-wrapper">
-        <!-- Formulário de criação -->
-        <main>
-            <div class="text-center">
-                <h2>Cadastro de Serviço</h2>
+<div id="alert-container"></div>
+
+<div id="content-wrapper">
+    <main>
+        <div class="text-center">
+            <h2>Cadastro de Serviço</h2>
+        </div>
+
+        @if ($errors->any())
+            <div class="alert alert-danger">
+                <ul class="mb-0">
+                    @foreach ($errors->all() as $erro)
+                        <li>{{ $erro }}</li>
+                    @endforeach
+                </ul>
+            </div>
+        @endif
+
+        @if(session('success'))
+            <script>
+                document.addEventListener('DOMContentLoaded', () => {
+                    showAlert("{{ session('success') }}", 'success');
+                });
+            </script>
+        @endif
+
+        <form class="needs-validation" action="{{ route('criarServico-Psicologia') }}" method="POST" novalidate>
+            @csrf
+
+            <input type="hidden" name="ID_CLINICA" value="1">
+
+            <h5>Dados do Serviço</h5>
+            <hr>
+
+            <div class="mb-3">
+                <label for="nome-servico" class="form-label text-muted" style="font-size: 14px;">
+                    Nome do Serviço
+                </label>
+                <input type="text"
+                       id="nome-servico"
+                       name="SERVICO_CLINICA_DESC"
+                       class="form-control"
+                       required>
             </div>
 
-            @if ($errors->any())
-                <div class="alert alert-danger">
-                    <ul class="mb-0">
-                        @foreach ($errors->all() as $erro)
-                            <li>{{ $erro }}</li>
-                        @endforeach
-                    </ul>
-                </div>
-            @endif
-
-            @if(session('success'))
-                <div class="alert alert-success">
-                    {{ session('success') }}
-                </div>
-            @endif
-
-            <form class="needs-validation" action="{{ route('criarServico-Psicologia') }}" method="POST" novalidate>
-                @csrf
-
-                <input type="hidden" name="ID_CLINICA" value="1">
-
-                <h5>Dados do Serviço</h5>
-                <hr>
-
-                <!-- DESCRIÇÃO DO SERVICO - NOME -->
-                <div class="mb-3">
-                    <label for="nome-servico" class="form-label text-muted" style="font-size: 14px;">
-                        Nome do Serviço
-                    </label>
-                    <input type="text"
-                        id="nome-servico"
-                        name="SERVICO_CLINICA_DESC"
-                        class="form-control"
-                        required>
-                </div>
-
-                <!-- CÓD INTERNO SERVICO CLINICA -->
-                <div class="mb-3">
-                    <label for="cod-interno-servico" class="form-label text-muted" style="font-size: 14px;">
-                        Código Interno do Serviço
-                    </label>
-                    <input type="number"
-                        id="cod-interno-servico"
-                        name="COD_INTERNO_SERVICO_CLINICA"
-                        class="form-control"
-                        min="0"
-                        value="0"
-                        required>
-                </div>
-
-                <div class="text-end">
-                    <button id="salvar" type="submit">
-                        Salvar
-                    </button>
-                </div>
-            </form>
-        </main>
-
-        <!-- Card de consulta e edição -->
-        <main style="overflow-y:auto; max-height: 80vh;">
-            <h2 class="text-center mb-4">Consulta e Edição de Serviços</h2>
-
-            <input type="text" id="search-servico" class="form-control mb-3" placeholder="Buscar serviço por nome..." />
-
-            <div id="servicos-lista" style="max-height: 65vh; overflow-y:auto;">
-                <!-- Lista de serviços carregada via JS -->
-                <table class="table table-striped table-hover">
-                    <thead>
-                        <tr>
-                            <th>ID</th>
-                            <th>Descrição</th>
-                            <th>Código Interno</th>
-                            <th>Ações</th>
-                        </tr>
-                    </thead>
-                    <tbody id="servicos-tbody">
-                        <tr><td colspan="4" class="text-center">Carregando...</td></tr>
-                    </tbody>
-                </table>
+            <div class="mb-3">
+                <label for="cod-interno-servico" class="form-label text-muted" style="font-size: 14px;">
+                    Código Interno do Serviço
+                </label>
+                <input type="text"
+                       id="cod-interno-servico"
+                       name="COD_INTERNO_SERVICO_CLINICA"
+                       class="form-control"
+                       value="">
             </div>
 
-            <!-- Modal para edição -->
-            <div class="modal fade" id="editarServicoModal" tabindex="-1" aria-labelledby="editarServicoModalLabel" aria-hidden="true">
-                <div class="modal-dialog">
-                    <div class="modal-content">
-                        <form id="form-editar-servico">
-                            <div class="modal-header">
-                                <h5 class="modal-title" id="editarServicoModalLabel">Editar Serviço</h5>
-                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fechar"></button>
+            <div class="mb-3">
+                <label for="valor-servico" class="form-label">Valor do Serviço</label>
+                <div class="input-group">
+                    <span class="input-group-text">R$</span>
+                    <input type="text" id="valor-servico" name="VALOR_SERVICO" class="form-control" placeholder="0,00">
+                </div>
+            </div>
+
+            <div class="form-check mb-3">
+                <input class="form-check-input" type="checkbox" value="1" id="permiteSimultaneo" name="PERMITE_ATENDIMENTO_SIMULTANEO">
+                <label class="form-check-label" for="permiteSimultaneo">
+                    Permite atendimento simultâneo
+                </label>
+            </div>
+
+            <div class="text-end">
+                <button id="salvar" type="submit">Salvar</button>
+            </div>
+        </form>
+    </main>
+
+    <main style="overflow-y:auto; max-height: 80vh;">
+        <h2 class="text-center mb-4">Consulta e Edição de Serviços</h2>
+        <input type="text" id="search-servico" class="form-control mb-3" placeholder="Buscar serviço por nome..." />
+
+        <div id="servicos-lista" style="max-height: 65vh; overflow-y:auto;">
+            <table class="table table-striped table-hover">
+                <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Descrição</th>
+                    <th>Código Interno</th>
+                    <th>Valor</th>
+                    <th>Ações</th>
+                </tr>
+                </thead>
+                <tbody id="servicos-tbody">
+                <tr><td colspan="5" class="text-center">Carregando...</td></tr>
+                </tbody>
+            </table>
+        </div>
+
+        <div class="modal fade" id="editarServicoModal" tabindex="-1" aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div id="modal-alert-container"></div>
+                    <form id="form-editar-servico">
+                        <div class="modal-header">
+                            <h5 class="modal-title">Editar Serviço</h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                        </div>
+                        <div class="modal-body">
+                            <input type="hidden" id="edit-servico-id" name="ID_SERVICO_CLINICA" />
+                            <div class="mb-3">
+                                <label class="form-label">Descrição</label>
+                                <input type="text" id="edit-servico-desc" name="SERVICO_CLINICA_DESC" class="form-control" required />
                             </div>
-                            <div class="modal-body">
-                                <input type="hidden" id="edit-servico-id" name="ID_SERVICO_CLINICA" />
-                                <div class="mb-3">
-                                    <label for="edit-servico-desc" class="form-label">Descrição</label>
-                                    <input type="text" id="edit-servico-desc" name="SERVICO_CLINICA_DESC" class="form-control" required />
-                                </div>
-                                <div class="mb-3">
-                                    <label for="edit-servico-cod" class="form-label">Código Interno</label>
-                                    <input type="number" id="edit-servico-cod" name="COD_INTERNO_SERVICO_CLINICA" class="form-control" min="0" required />
-                                </div>
+                            <div class="mb-3">
+                                <label class="form-label">Código Interno</label>
+                                <input type="text" id="edit-servico-cod" name="COD_INTERNO_SERVICO_CLINICA" class="form-control"/>
                             </div>
-                            <div class="modal-footer">
+                            <div class="mb-3">
+                                <label class="form-label">Valor Serviço</label>
+                                <input type="text" id="edit-valor-servico" name="VALOR_SERVICO" class="form-control">
+                            </div>
+                            <div class="form-check mb-3">
+                                <input class="form-check-input" type="checkbox" id="edit-permite-simultaneo" name="PERMITE_ATENDIMENTO_SIMULTANEO">
+                                <label class="form-check-label" for="edit-permite-simultaneo">
+                                    Permite atendimento simultâneo
+                                </label>
+                            </div>
+                        </div>
+                        <div class="modal-footer d-flex justify-content-between">
+                            <button type="button" class="btn btn-danger" id="btn-deletar-servico">Excluir</button>
+                            <div>
                                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
                                 <button type="submit" class="btn btn-primary">Salvar Alterações</button>
                             </div>
-                        </form>
-                    </div>
+                        </div>
+                    </form>
                 </div>
-            </div> <!-- FECHOU O MODAL CORRETAMENTE -->
-        </main>
-    </div>
+            </div>
+        </div>
+    </main>
+</div>
 
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/mdb-ui-kit/7.1.0/mdb.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/mdb-ui-kit/7.1.0/mdb.min.js"></script>
 
-    <script>
-        document.addEventListener('DOMContentLoaded', () => {
-            const servicosTbody = document.getElementById('servicos-tbody');
-            const searchInput = document.getElementById('search-servico');
+<script>
+function showAlert(message, type = 'success') {
+    const alertContainer = document.getElementById('alert-container');
+    const alert = document.createElement('div');
+    alert.className = `alert alert-${type} alert-dismissible fade show mt-2`;
+    alert.role = 'alert';
+    alert.style.pointerEvents = 'auto';
+    alert.innerHTML = `
+        ${message}
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    `;
 
-            const editarServicoModal = new bootstrap.Modal(document.getElementById('editarServicoModal'));
-            const formEditarServico = document.getElementById('form-editar-servico');
+    alertContainer.appendChild(alert);
 
-            function carregarServicos(search = '') {
-                fetch(`/psicologia/servicos?search=${encodeURIComponent(search)}`)
-                    .then(res => res.json())
-                    .then(servicos => {
-                        servicosTbody.innerHTML = '';
-                        if (servicos.length === 0) {
-                            servicosTbody.innerHTML = `<tr><td colspan="4" class="text-center">Nenhum serviço encontrado.</td></tr>`;
-                            return;
-                        }
-                        servicos.forEach(s => {
-                            const tr = document.createElement('tr');
-                            tr.innerHTML = `
-                                <td>${s.ID_SERVICO_CLINICA}</td>
-                                <td>${s.SERVICO_CLINICA_DESC}</td>
-                                <td>${s.COD_INTERNO_SERVICO_CLINICA}</td>
-                                <td>
-                                    <button class="btn btn-sm btn-primary btn-editar" data-id="${s.ID_SERVICO_CLINICA}" data-desc="${s.SERVICO_CLINICA_DESC}" data-cod="${s.COD_INTERNO_SERVICO_CLINICA}">Editar</button>
-                                </td>
-                            `;
-                            servicosTbody.appendChild(tr);
-                        });
+    setTimeout(() => {
+        alert.classList.remove('show');
+        alert.classList.add('hide');
+        setTimeout(() => alert.remove(), 300);
+    }, 4000);
+}
 
-                        // Adiciona evento nos botões de editar
-                        document.querySelectorAll('.btn-editar').forEach(btn => {
-                            btn.addEventListener('click', () => {
-                                document.getElementById('edit-servico-id').value = btn.dataset.id;
-                                document.getElementById('edit-servico-desc').value = btn.dataset.desc;
-                                document.getElementById('edit-servico-cod').value = btn.dataset.cod;
-                                editarServicoModal.show();
-                            });
-                        });
-                    })
-                    .catch(() => {
-                        servicosTbody.innerHTML = `<tr><td colspan="4" class="text-center text-danger">Erro ao carregar serviços.</td></tr>`;
-                    });
-            }
+function showModalAlert(message, type = 'danger') {
+    const modalAlertContainer = document.getElementById('modal-alert-container');
+    modalAlertContainer.innerHTML = `
+        <div class="alert alert-${type} alert-dismissible fade show m-3 mb-0">
+            ${message}
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    `;
+}
 
-            // Carregar lista ao iniciar
-            carregarServicos();
+document.addEventListener('DOMContentLoaded', () => {
+    const servicosTbody = document.getElementById('servicos-tbody');
+    const searchInput = document.getElementById('search-servico');
+    const editarServicoModal = new bootstrap.Modal(document.getElementById('editarServicoModal'));
+    const formEditarServico = document.getElementById('form-editar-servico');
 
-            // Buscar ao digitar
-            searchInput.addEventListener('input', () => {
-                carregarServicos(searchInput.value);
-            });
-
-            // Submissão do formulário de edição
-            formEditarServico.addEventListener('submit', e => {
-                e.preventDefault();
-
-                const id = document.getElementById('edit-servico-id').value;
-                const desc = document.getElementById('edit-servico-desc').value;
-                const cod = document.getElementById('edit-servico-cod').value;
-
-                fetch(`/psicologia/servicos/${id}`, {
-                    method: 'PUT',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
-                    },
-                    body: JSON.stringify({
-                        SERVICO_CLINICA_DESC: desc,
-                        COD_INTERNO_SERVICO_CLINICA: Number(cod)  // converte para número
-                    })
-                })
-                .then(res => {
-                    if (!res.ok) throw new Error('Erro ao salvar');
-                    return res.json();
-                })
-                .then(() => {
-                    alert('Serviço atualizado com sucesso!');
-                    editarServicoModal.hide();
-                    carregarServicos(searchInput.value);
-                })
-                .catch(() => {
-                    alert('Erro ao atualizar serviço.');
+    function carregarServicos(search = '') {
+        fetch(`/psicologia/servicos?search=${encodeURIComponent(search)}`)
+            .then(res => res.json())
+            .then(servicos => {
+                servicosTbody.innerHTML = '';
+                if (servicos.length === 0) {
+                    servicosTbody.innerHTML = `<tr><td colspan="5" class="text-center">Nenhum serviço encontrado.</td></tr>`;
+                    return;
+                }
+                servicos.forEach(s => {
+                    const valorFormatado = parseFloat(s.VALOR_SERVICO ?? 0).toFixed(2);
+                    const tr = document.createElement('tr');
+                    tr.innerHTML = `
+                        <td>${s.ID_SERVICO_CLINICA}</td>
+                        <td>${s.SERVICO_CLINICA_DESC}</td>
+                        <td>${s.COD_INTERNO_SERVICO_CLINICA}</td>
+                        <td>R$ ${valorFormatado}</td>
+                        <td>
+                            <button class="btn btn-sm btn-primary btn-editar"
+                                data-id="${s.ID_SERVICO_CLINICA}"
+                                data-desc="${s.SERVICO_CLINICA_DESC}"
+                                data-cod="${s.COD_INTERNO_SERVICO_CLINICA}"
+                                data-valor="${s.VALOR_SERVICO ?? 0}"
+                                data-permite="${s.PERMITE_ATENDIMENTO_SIMULTANEO}">
+                                Editar
+                            </button>
+                        </td>
+                    `;
+                    servicosTbody.appendChild(tr);
                 });
+
+                document.querySelectorAll('.btn-editar').forEach(btn => {
+                    btn.addEventListener('click', () => {
+                        document.getElementById('edit-servico-id').value = btn.dataset.id;
+                        document.getElementById('edit-servico-desc').value = btn.dataset.desc;
+
+                        // Se for '--', envia vazio para o campo para não quebrar a validação
+                        document.getElementById('edit-servico-cod').value = (btn.dataset.cod === '--') ? '' : btn.dataset.cod;
+
+                        document.getElementById('edit-valor-servico').value = btn.dataset.valor;
+                        document.getElementById('edit-permite-simultaneo').checked = (btn.dataset.permite === 'S');
+                        editarServicoModal.show();
+                    });
+                });
+            })
+            .catch(() => {
+                servicosTbody.innerHTML = `<tr><td colspan="5" class="text-center text-danger">Erro ao carregar serviços.</td></tr>`;
             });
+    }
+
+    carregarServicos();
+
+    searchInput.addEventListener('input', () => {
+        carregarServicos(searchInput.value);
+    });
+
+    formEditarServico.addEventListener('submit', e => {
+        e.preventDefault();
+
+        const id = document.getElementById('edit-servico-id').value;
+        const desc = document.getElementById('edit-servico-desc').value;
+        const cod = document.getElementById('edit-servico-cod').value;
+        let valor = document.getElementById('edit-valor-servico').value.trim();
+        valor = valor.replace(',', '.');
+        valor = parseFloat(valor);
+        if (isNaN(valor)) valor = 0;
+
+        const permiteSimultaneo = document.getElementById('edit-permite-simultaneo').checked ? 'S' : 'N';
+
+        fetch(`/psicologia/servicos/${id}`, {
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+            },
+            body: JSON.stringify({
+                SERVICO_CLINICA_DESC: desc,
+                COD_INTERNO_SERVICO_CLINICA: cod,
+                VALOR_SERVICO: valor,
+                PERMITE_ATENDIMENTO_SIMULTANEO: permiteSimultaneo
+            })
+        })
+        .then(res => {
+            if (!res.ok) throw new Error('Erro ao salvar');
+            return res.json();
+        })
+        .then(() => {
+            showAlert('Serviço atualizado com sucesso!', 'success');
+            editarServicoModal.hide();
+            carregarServicos(searchInput.value);
+        })
+        .catch(() => {
+            showModalAlert('Erro ao atualizar serviço. Verifique os campos ou tente novamente.', 'danger');
         });
+    });
 
-    </script>
+    document.getElementById('btn-deletar-servico').addEventListener('click', () => {
+        if (!confirm('Tem certeza que deseja excluir este serviço?')) return;
+        const id = document.getElementById('edit-servico-id').value;
+
+        fetch(`/psicologia/servicos/${id}`, {
+            method: 'DELETE',
+            headers: {
+                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+            }
+        })
+        .then(async res => {
+            if (!res.ok) {
+                const data = await res.json();
+                throw new Error(data.message || 'Erro ao excluir.');
+            }
+            return res.json();
+        })
+        .then(() => {
+            showAlert('Serviço excluído com sucesso!', 'success');
+            editarServicoModal.hide();
+            carregarServicos(searchInput.value);
+        })
+        .catch(err => {
+            showModalAlert(err.message, 'warning');
+        });
+    });
+});
+</script>
+
 </body>
-
 </html>

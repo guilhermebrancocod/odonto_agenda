@@ -276,4 +276,6 @@ Route::get('/psicologia/agendamento/{id}', [AgendamentoController::class, 'show'
 Route::get('/psicologia/agendamentos-calendar', [AgendamentoController::class, 'getAgendamentosForCalendar']);
 
 Route::get('/psicologia/servicos', [ServicoController::class, 'getServicos']);
+Route::post('/psicologia/criar-servico', [ServicoController::class, 'criarServico']);
 Route::put('/psicologia/servicos/{id}', [ServicoController::class, 'atualizarServico']);
+Route::delete('/psicologia/servicos/{id}', [ServicoController::class, 'deletarServico']);
