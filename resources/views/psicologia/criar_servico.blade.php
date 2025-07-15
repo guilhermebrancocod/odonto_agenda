@@ -159,6 +159,13 @@
                 </div>
             </div>
 
+            <div class="form-check mb-3">
+                <input class="form-check-input" type="checkbox" value="1" id="permiteSimultaneo" name="PERMITE_ATENDIMENTO_SIMULTANEO">
+                <label class="form-check-label" for="permiteSimultaneo">
+                    Permite atendimento simultâneo
+                </label>
+            </div>
+
             <div class="text-end">
                 <button id="salvar" type="submit">Salvar</button>
             </div>
@@ -209,6 +216,12 @@
                                 <label class="form-label">Valor Serviço</label>
                                 <input type="text" id="edit-valor-servico" name="VALOR_SERVICO" class="form-control">
                             </div>
+                            <div class="form-check mb-3">
+                                <input class="form-check-input" type="checkbox" id="edit-permite-simultaneo" name="PERMITE_ATENDIMENTO_SIMULTANEO">
+                                <label class="form-check-label" for="edit-permite-simultaneo">
+                                    Permite atendimento simultâneo
+                                </label>
+                            </div>
                         </div>
                         <div class="modal-footer d-flex justify-content-between">
                             <button type="button" class="btn btn-danger" id="btn-deletar-servico">Excluir</button>
@@ -227,160 +240,164 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/mdb-ui-kit/7.1.0/mdb.min.js"></script>
 
 <script>
-    function showAlert(message, type = 'success') {
-        const alertContainer = document.getElementById('alert-container');
-        const alert = document.createElement('div');
-        alert.className = `alert alert-${type} alert-dismissible fade show mt-2`;
-        alert.role = 'alert';
-        alert.style.pointerEvents = 'auto';
-        alert.innerHTML = `
+function showAlert(message, type = 'success') {
+    const alertContainer = document.getElementById('alert-container');
+    const alert = document.createElement('div');
+    alert.className = `alert alert-${type} alert-dismissible fade show mt-2`;
+    alert.role = 'alert';
+    alert.style.pointerEvents = 'auto';
+    alert.innerHTML = `
+        ${message}
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    `;
+
+    alertContainer.appendChild(alert);
+
+    setTimeout(() => {
+        alert.classList.remove('show');
+        alert.classList.add('hide');
+        setTimeout(() => alert.remove(), 300);
+    }, 4000);
+}
+
+function showModalAlert(message, type = 'danger') {
+    const modalAlertContainer = document.getElementById('modal-alert-container');
+    modalAlertContainer.innerHTML = `
+        <div class="alert alert-${type} alert-dismissible fade show m-3 mb-0">
             ${message}
             <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-        `;
+        </div>
+    `;
+}
 
-        alertContainer.appendChild(alert);
+document.addEventListener('DOMContentLoaded', () => {
+    const servicosTbody = document.getElementById('servicos-tbody');
+    const searchInput = document.getElementById('search-servico');
+    const editarServicoModal = new bootstrap.Modal(document.getElementById('editarServicoModal'));
+    const formEditarServico = document.getElementById('form-editar-servico');
 
-        // Remover automaticamente após 4 segundos
-        setTimeout(() => {
-            alert.classList.remove('show');
-            alert.classList.add('hide');
-            setTimeout(() => alert.remove(), 300);
-        }, 4000);
-    }
-
-    function showModalAlert(message, type = 'danger') {
-        const modalAlertContainer = document.getElementById('modal-alert-container');
-        modalAlertContainer.innerHTML = `
-            <div class="alert alert-${type} alert-dismissible fade show m-3 mb-0">
-                ${message}
-                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-            </div>
-        `;
-    }
-
-    document.addEventListener('DOMContentLoaded', () => {
-        const servicosTbody = document.getElementById('servicos-tbody');
-        const searchInput = document.getElementById('search-servico');
-        const editarServicoModal = new bootstrap.Modal(document.getElementById('editarServicoModal'));
-        const formEditarServico = document.getElementById('form-editar-servico');
-
-        function carregarServicos(search = '') {
-            fetch(`/psicologia/servicos?search=${encodeURIComponent(search)}`)
-                .then(res => res.json())
-                .then(servicos => {
-                    servicosTbody.innerHTML = '';
-                    if (servicos.length === 0) {
-                        servicosTbody.innerHTML = `<tr><td colspan="5" class="text-center">Nenhum serviço encontrado.</td></tr>`;
-                        return;
-                    }
-                    servicos.forEach(s => {
-                        const valorFormatado = parseFloat(s.VALOR_SERVICO ?? 0).toFixed(2);
-                        const tr = document.createElement('tr');
-                        tr.innerHTML = `
-                            <td>${s.ID_SERVICO_CLINICA}</td>
-                            <td>${s.SERVICO_CLINICA_DESC}</td>
-                            <td>${s.COD_INTERNO_SERVICO_CLINICA}</td>
-                            <td>R$ ${valorFormatado}</td>
-                            <td>
-                                <button class="btn btn-sm btn-primary btn-editar"
-                                    data-id="${s.ID_SERVICO_CLINICA}"
-                                    data-desc="${s.SERVICO_CLINICA_DESC}"
-                                    data-cod="${s.COD_INTERNO_SERVICO_CLINICA}"
-                                    data-valor="${s.VALOR_SERVICO ?? 0}">
-                                    Editar
-                                </button>
-                            </td>
-                        `;
-                        servicosTbody.appendChild(tr);
-                    });
-
-                    document.querySelectorAll('.btn-editar').forEach(btn => {
-                        btn.addEventListener('click', () => {
-                            document.getElementById('edit-servico-id').value = btn.dataset.id;
-                            document.getElementById('edit-servico-desc').value = btn.dataset.desc;
-                            document.getElementById('edit-servico-cod').value = btn.dataset.cod;
-                            document.getElementById('edit-valor-servico').value = btn.dataset.valor;
-                            editarServicoModal.show();
-                        });
-                    });
-                })
-                .catch(() => {
-                    servicosTbody.innerHTML = `<tr><td colspan="5" class="text-center text-danger">Erro ao carregar serviços.</td></tr>`;
+    function carregarServicos(search = '') {
+        fetch(`/psicologia/servicos?search=${encodeURIComponent(search)}`)
+            .then(res => res.json())
+            .then(servicos => {
+                servicosTbody.innerHTML = '';
+                if (servicos.length === 0) {
+                    servicosTbody.innerHTML = `<tr><td colspan="5" class="text-center">Nenhum serviço encontrado.</td></tr>`;
+                    return;
+                }
+                servicos.forEach(s => {
+                    const valorFormatado = parseFloat(s.VALOR_SERVICO ?? 0).toFixed(2);
+                    const tr = document.createElement('tr');
+                    tr.innerHTML = `
+                        <td>${s.ID_SERVICO_CLINICA}</td>
+                        <td>${s.SERVICO_CLINICA_DESC}</td>
+                        <td>${s.COD_INTERNO_SERVICO_CLINICA}</td>
+                        <td>R$ ${valorFormatado}</td>
+                        <td>
+                            <button class="btn btn-sm btn-primary btn-editar"
+                                data-id="${s.ID_SERVICO_CLINICA}"
+                                data-desc="${s.SERVICO_CLINICA_DESC}"
+                                data-cod="${s.COD_INTERNO_SERVICO_CLINICA}"
+                                data-valor="${s.VALOR_SERVICO ?? 0}"
+                                data-permite="${s.PERMITE_ATENDIMENTO_SIMULTANEO}">
+                                Editar
+                            </button>
+                        </td>
+                    `;
+                    servicosTbody.appendChild(tr);
                 });
-        }
 
-        carregarServicos();
-
-        searchInput.addEventListener('input', () => {
-            carregarServicos(searchInput.value);
-        });
-
-        formEditarServico.addEventListener('submit', e => {
-            e.preventDefault();
-
-            const id = document.getElementById('edit-servico-id').value;
-            const desc = document.getElementById('edit-servico-desc').value;
-            const cod = document.getElementById('edit-servico-cod').value;
-            let valor = document.getElementById('edit-valor-servico').value.trim();
-            valor = valor.replace(',', '.');
-            valor = parseFloat(valor);
-            if (isNaN(valor)) valor = 0;
-
-            fetch(`/psicologia/servicos/${id}`, {
-                method: 'PUT',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
-                },
-                body: JSON.stringify({
-                    SERVICO_CLINICA_DESC: desc,
-                    COD_INTERNO_SERVICO_CLINICA: cod,
-                    VALOR_SERVICO: valor,
-                })
+                document.querySelectorAll('.btn-editar').forEach(btn => {
+                    btn.addEventListener('click', () => {
+                        document.getElementById('edit-servico-id').value = btn.dataset.id;
+                        document.getElementById('edit-servico-desc').value = btn.dataset.desc;
+                        document.getElementById('edit-servico-cod').value = btn.dataset.cod;
+                        document.getElementById('edit-valor-servico').value = btn.dataset.valor;
+                        document.getElementById('edit-permite-simultaneo').checked = (btn.dataset.permite === 'S');
+                        editarServicoModal.show();
+                    });
+                });
             })
-                .then(res => {
-                    if (!res.ok) throw new Error('Erro ao salvar');
-                    return res.json();
-                })
-                .then(() => {
-                    showAlert('Serviço atualizado com sucesso!', 'success');
-                    editarServicoModal.hide();
-                    carregarServicos(searchInput.value);
-                })
-                .catch(() => {
-                    showModalAlert('Erro ao atualizar serviço. Verifique os campos ou tente novamente.', 'danger');
-                });
-        });
+            .catch(() => {
+                servicosTbody.innerHTML = `<tr><td colspan="5" class="text-center text-danger">Erro ao carregar serviços.</td></tr>`;
+            });
+    }
 
-       document.getElementById('btn-deletar-servico').addEventListener('click', () => {
-    if (!confirm('Tem certeza que deseja excluir este serviço?')) return;
-    const id = document.getElementById('edit-servico-id').value;
+    carregarServicos();
 
-    fetch(`/psicologia/servicos/${id}`, {
-        method: 'DELETE',
-        headers: {
-            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
-        }
-    })
-    .then(async res => {
-        if (!res.ok) {
-            const data = await res.json();
-            throw new Error(data.message || 'Erro ao excluir.');
-        }
-        return res.json();
-    })
-    .then(() => {
-        showAlert('Serviço excluído com sucesso!', 'success');
-        editarServicoModal.hide();
+    searchInput.addEventListener('input', () => {
         carregarServicos(searchInput.value);
-    })
-    .catch(err => {
-        showModalAlert(err.message, 'warning'); // mostra mensagem do backend na modal
+    });
+
+    formEditarServico.addEventListener('submit', e => {
+        e.preventDefault();
+
+        const id = document.getElementById('edit-servico-id').value;
+        const desc = document.getElementById('edit-servico-desc').value;
+        const cod = document.getElementById('edit-servico-cod').value;
+        let valor = document.getElementById('edit-valor-servico').value.trim();
+        valor = valor.replace(',', '.');
+        valor = parseFloat(valor);
+        if (isNaN(valor)) valor = 0;
+
+        const permiteSimultaneo = document.getElementById('edit-permite-simultaneo').checked ? 'S' : 'N';
+
+        fetch(`/psicologia/servicos/${id}`, {
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+            },
+            body: JSON.stringify({
+                SERVICO_CLINICA_DESC: desc,
+                COD_INTERNO_SERVICO_CLINICA: cod,
+                VALOR_SERVICO: valor,
+                PERMITE_ATENDIMENTO_SIMULTANEO: permiteSimultaneo
+            })
+        })
+        .then(res => {
+            if (!res.ok) throw new Error('Erro ao salvar');
+            return res.json();
+        })
+        .then(() => {
+            showAlert('Serviço atualizado com sucesso!', 'success');
+            editarServicoModal.hide();
+            carregarServicos(searchInput.value);
+        })
+        .catch(() => {
+            showModalAlert('Erro ao atualizar serviço. Verifique os campos ou tente novamente.', 'danger');
+        });
+    });
+
+    document.getElementById('btn-deletar-servico').addEventListener('click', () => {
+        if (!confirm('Tem certeza que deseja excluir este serviço?')) return;
+        const id = document.getElementById('edit-servico-id').value;
+
+        fetch(`/psicologia/servicos/${id}`, {
+            method: 'DELETE',
+            headers: {
+                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+            }
+        })
+        .then(async res => {
+            if (!res.ok) {
+                const data = await res.json();
+                throw new Error(data.message || 'Erro ao excluir.');
+            }
+            return res.json();
+        })
+        .then(() => {
+            showAlert('Serviço excluído com sucesso!', 'success');
+            editarServicoModal.hide();
+            carregarServicos(searchInput.value);
+        })
+        .catch(err => {
+            showModalAlert(err.message, 'warning');
+        });
     });
 });
-
-    });
 </script>
+
 
 </body>
 </html>
