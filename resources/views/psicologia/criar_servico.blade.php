@@ -35,6 +35,7 @@
             display: flex;
             flex-direction: column;
             overflow: hidden;
+            border: 1.8px solid #dee2e6;
         }
         form {
             flex-grow: 1;
@@ -68,6 +69,39 @@
             overflow-y: auto;
             max-height: 100%;
         }
+
+        /* Estilo atualizado para a tabela ficar com linhas tipo card */
+        table {
+            border-collapse: separate;
+            border-spacing: 0 12px; /* espaço vertical entre as linhas */
+            width: 100%;
+        }
+        thead tr th:first-child {
+            border-top-left-radius: 12px;
+            border-bottom-left-radius: 12px;
+        }
+        thead tr th:last-child {
+            border-top-right-radius: 12px;
+            border-bottom-right-radius: 12px;
+        }
+        tbody tr {
+            background: #fff;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+            border-radius: 12px;
+            transition: box-shadow 0.3s ease;
+        }
+        tbody tr:hover {
+            box-shadow: 0 6px 16px rgba(0,0,0,0.12);
+        }
+        tbody tr td:first-child {
+            border-top-left-radius: 12px;
+            border-bottom-left-radius: 12px;
+        }
+        tbody tr td:last-child {
+            border-top-right-radius: 12px;
+            border-bottom-right-radius: 12px;
+        }
+
         @media (max-width: 768px) {
             #content-wrapper {
                 flex-direction: column;
@@ -121,14 +155,20 @@
             </script>
         @endif
 
+        <!-- FORMULÁRIO DE CRIAÇÃO DE SERVIÇO -->
         <form class="needs-validation" action="{{ route('criarServico-Psicologia') }}" method="POST" novalidate>
+
             @csrf
 
+            <!-- ID DA CLINICA - NO CASO PSICOLOGIA -->
             <input type="hidden" name="ID_CLINICA" value="1">
 
-            <h5>Dados do Serviço</h5>
+            <!-- TÍTULO -->
+            <h5 class="mt-3">Dados do Serviço</h5>
+
             <hr>
 
+            <!-- NOME DO SERVIÇO -->
             <div class="mb-3">
                 <label for="nome-servico" class="form-label text-muted" style="font-size: 14px;">
                     Nome do Serviço
@@ -140,6 +180,7 @@
                        required>
             </div>
 
+            <!-- CÓDIGO INTERNO DO SERVIÇO -->
             <div class="mb-3">
                 <label for="cod-interno-servico" class="form-label text-muted" style="font-size: 14px;">
                     Código Interno do Serviço
@@ -151,6 +192,7 @@
                        value="">
             </div>
 
+            <!-- VALOR DO SERVIÇO -->
             <div class="mb-3">
                 <label for="valor-servico" class="form-label">Valor do Serviço</label>
                 <div class="input-group">
@@ -159,21 +201,28 @@
                 </div>
             </div>
 
-            <div class="form-check mb-3">
+            <!-- CHECKBOX PERMISSÃO ATENDIMENTO SIMULTÂNEO -->
+            <div class="form-check mb-3 ms-3">
                 <input class="form-check-input" type="checkbox" value="1" id="permiteSimultaneo" name="PERMITE_ATENDIMENTO_SIMULTANEO">
                 <label class="form-check-label" for="permiteSimultaneo">
                     Permite atendimento simultâneo
                 </label>
             </div>
 
+            <!-- BOTÃO DE SALVAR | SUBMIT -->
             <div class="text-end">
                 <button id="salvar" type="submit">Salvar</button>
             </div>
+            
         </form>
     </main>
 
-    <main style="overflow-y:auto; max-height: 80vh;">
+    <main style="overflow-y:auto; max-height: 90vh;">
+
+        <!-- TITULO LISTAGEM DE PACIENTE -->
         <h2 class="text-center mb-4">Consulta e Edição de Serviços</h2>
+
+        <!-- INPUT DE BUSCA -->
         <input type="text" id="search-servico" class="form-control mb-3" placeholder="Buscar serviço por nome..." />
 
         <div id="servicos-lista" style="max-height: 65vh; overflow-y:auto;">
@@ -236,6 +285,7 @@
         </div>
     </main>
 </div>
+
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/mdb-ui-kit/7.1.0/mdb.min.js"></script>
 

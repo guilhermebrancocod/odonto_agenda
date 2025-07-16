@@ -128,7 +128,7 @@ Route::get('/criar-servico', function () {
 
 Route::post('/criar-servico/criar', [ServicoController::class, 'criarServico'])->name('criarServico-Psicologia');
 
-Route::get('/pesquisar-servico', [ServicoController::class, 'getServico'])->name('pesquisarServico-Psicologia');
+Route::get('/psicologia/pesquisar-servico', [ServicoController::class, 'getServicos'])->name('pesquisarServico-Psicologia');
 
 Route::get('/odontologia/criarservico', function () {
     return view('odontologia/create_servico');

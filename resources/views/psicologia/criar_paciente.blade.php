@@ -14,12 +14,17 @@
             margin: 0;
         }
         #content-container {
-            height: calc(100vh - 56px); /* altura total - altura da navbar */
+            height: calc(100vh - 56px);
             overflow-y: auto;
             padding: 20px;
             display: flex;
-            justify-content: center;
-            align-items: flex-start;
+            flex-direction: column;
+            align-items: stretch;
+            width: 100%;
+        }
+        main {
+            max-width: 1600px;
+            margin: 0 auto;
         }
     </style>
 </head>
@@ -51,7 +56,7 @@
                 </div>
             @endif
 
-            <form action="{{ route('criarPaciente-Psicologia') }}" method="POST" class="needs-validation" novalidate>
+            <form action="{{ route('criarPaciente-Psicologia') }}" method="POST" class="needs-validation">
                 @csrf
 
                 <!-- Dados Pessoais -->
@@ -125,6 +130,22 @@
                 <div class="mb-3">
                     <label for="telefone" class="form-label">Telefone</label>
                     <input type="text" id="telefone" name="FONE_PACIENTE" class="form-control" />
+                </div>
+
+                <!-- Campos Observação e Status corrigidos -->
+                <div class="mb-3">
+                    <label for="observacao" class="form-label">Observações</label>
+                    <textarea id="observacao" name="OBSERVACAO" class="form-control" rows="4"></textarea>
+                </div>
+
+                <div class="mb-3">
+                    <label for="status" class="form-label">Status</label>
+                    <select id="status" name="STATUS" class="form-select" required>
+                        <option value="" selected>Selecione</option>
+                        <option value="Em espera">Em espera</option>
+                        <option value="Em tratamento">Em tratamento</option>
+                        <option value="Tratamento finalizado">Tratamento finalizado</option>
+                    </select>
                 </div>
 
                 <div class="text-end">
