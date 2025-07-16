@@ -18,6 +18,8 @@ class PacienteController extends Controller
      */
     public function criarPaciente(Request $request)
     {
+        // dd($request);
+
         $validated = $request->validate([
             'CPF_PACIENTE' => 'required|string|unique:FAESA_CLINICA_PACIENTE,CPF_PACIENTE',
             'NOME_COMPL_PACIENTE' => 'required|string|max:255',
@@ -29,8 +31,9 @@ class PacienteController extends Controller
             'BAIRRO' => 'nullable|string|max:50',
             'UF' => 'nullable|string|size:2',
             'CEP' => 'nullable|string|max:9',
-            'FONE_PACIENTE' => 'required|nullable|string|max:20',
-            'E_MAIL_PACIENTE' => 'required|nullable|email|max:255', // removido o unique aqui
+            'FONE_PACIENTE' => 'required|string|max:20',
+            'E_MAIL_PACIENTE' => 'required|email|max:255',
+            'OBSERVACAO' => 'nullable|string|max:500',
         ], [
             'CPF_PACIENTE.required' => 'Por favor, informe o CPF do paciente.',
             'CPF_PACIENTE.unique' => 'Este CPF já está cadastrado.',
