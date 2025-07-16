@@ -21,16 +21,42 @@
         #servicos-list button {
             cursor: pointer;
         }
+
+         #recorrenciaCampos.show {
+            display: flex !important;
+            animation: fadeInSlide 0.3s ease-in-out;
+        }
+
+        @keyframes fadeInSlide {
+            from {
+                opacity: 0;
+                transform: translateY(-5px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
     </style>
 </head>
 <body>
 
 @include('components.navbar')
 
-<div id="content-wrapper" class="bg-light">
-    <div class="bg-white p-4 rounded shadow-sm w-100" style="max-width: 1000px;">
+@if ($errors->any())
+    <div class="alert alert-danger">
+        <ul class="mb-0">
+            @foreach ($errors->all() as $error)
+                <li>{{ $error }}</li>
+            @endforeach
+        </ul>
+    </div>
+@endif
 
-        <!-- TITULO -->
+<div id="content-wrapper" class="bg-light">
+    <div class="bg-white p-4 rounded shadow-sm w-100 w-md-75 w-lg-50">
+
+        <!-- TÍTULO -->
         <div class="text-center mb-3">
             <h2 class="fs-4 mb-0">Agendamento</h2>
         </div>
@@ -48,22 +74,15 @@
         <div id="paciente-selecionado" class="mb-3"></div>
 
         <!-- FORM DE AGENDAMENTO -->
-        <form action="{{ route('criarAgendamento-Psicologia') }}" method="POST" id="agendamento-form" class="mt-2 w-100">
+        <form action="{{ route('criarAgendamento-Psicologia') }}" method="POST" id="agendamento-form" class="w-100">
             @csrf
 
-            <!-- ID DO USUARIO QUE SERÁ ENVIADO COM O FORMULARIO -->
             <input type="hidden" name="paciente_id" id="paciente_id" />
-
-            <!-- ID DO SERVICO QUE SERÁ ENVIADO COM O FORMULARIO -->
             <input type="hidden" name="id_servico" id="id_servico" />
-
-            <!-- HASH DA RECORRENCIA -->
             <input type="hidden" name="recorrencia" id="recorrencia" />
-
-            <!-- STATUS DO AGENDAMENTO PADRÃO -->
             <input type="hidden" name="status_agend" value="Em aberto" />
 
-            <!-- SUTBITULO DO FORMULARIO DE AGENDAMENTO -->
+            <!-- SUBTÍTULO -->
             <div class="mb-2">
                 <h5 class="mb-0">Horário</h5>
                 <hr class="mt-1">
@@ -73,86 +92,100 @@
 
                 <!-- CHECKBOX TEM RECORRÊNCIA -->
                 <div class="col-12 mb-2">
-                    <div class="form-check">
+                    <div class="form-check form-switch">
                         <input class="form-check-input" type="checkbox" value="1" id="temRecorrencia" name="tem_recorrencia">
-                        <label class="form-check-label" for="temRecorrencia">
-                            Tem recorrência?
+                        <label class="form-check-label fw-semibold" for="temRecorrencia">
+                            <i class="fas fa-redo-alt me-1 text-primary"></i> Ativar recorrência
+                            <span id="recorrenciaBadge" class="badge bg-success ms-2 d-none">Ativa</span>
                         </label>
                     </div>
                 </div>
 
                 <!-- DIA -->
-                <div class="col-sm-6 col-md-2">
+                <div class="col-sm-6 col-md-3">
                     <label for="data" class="form-label">Dia</label>
-                    <input type="date" id="data" name="dia_agend" class="form-control" required>
+                    <input type="date" id="data" name="dia_agend" class="form-control">
                 </div>
 
-                <!-- HORARIO INICIAL -->
-                <div class="col-sm-6 col-md-2">
+                <!-- HORÁRIO INÍCIO -->
+                <div class="col-sm-6 col-md-3">
                     <label for="hr_ini" class="form-label">Horário Início</label>
-                    <input type="time" id="hr_ini" name="hr_ini" class="form-control" required>
+                    <input type="time" id="hr_ini" name="hr_ini" class="form-control">
                 </div>
 
-                <!-- HORARIO FINAL -->
-                <div class="col-sm-6 col-md-2">
+                <!-- HORÁRIO FIM -->
+                <div class="col-sm-6 col-md-3">
                     <label for="hr_fim" class="form-label">Horário Fim</label>
-                    <input type="time" id="hr_fim" name="hr_fim" class="form-control" required>
+                    <input type="time" id="hr_fim" name="hr_fim" class="form-control">
                 </div>
 
-                <!-- CAMPOS DE RECORRÊNCIA (INICIALMENTE OCULTOS) -->
-                <div id="recorrenciaCampos" class="col-12 row g-2 mt-2" style="display: none;">
-                    <!-- SELEÇÃO DE DIAS DA SEMANA -->
-                    <div class="col-sm-6 col-md-6">
-                        <label for="dias_semana" class="form-label">Dias da Semana</label>
-                            <select id="dias_semana" name="dias_semana[]" class="form-select" multiple>
-                                <option value="1">Segunda-feira</option>
-                                <option value="2">Terça-feira</option>
-                                <option value="3">Quarta-feira</option>
-                                <option value="4">Quinta-feira</option>
-                                <option value="5">Sexta-feira</option>
-                                <option value="6">Sábado</option>
-                                <option value="0">Domingo</option>
-                            </select>
-                            <small class="text-muted">Segure Ctrl (Windows) ou Cmd (Mac) para selecionar vários dias.</small>
-                    </div>
-
-                    <!-- DATA FINAL DA RECORRÊNCIA -->
-                    <div class="col-sm-6 col-md-4">
-                        <label for="data_fim_recorrencia" class="form-label">Data Fim Recorrência</label>
-                        <input type="date" id="data_fim_recorrencia" name="data_fim_recorrencia" class="form-control">
-                    </div>
-                </div>
-
-                <!-- SERVICO -->
+                <!-- SERVIÇO -->
                 <div class="col-sm-6 col-md-3 position-relative">
                     <label for="servico" class="form-label">Serviço</label>
-                    <input type="text" id="servico" name="servico" class="form-control" autocomplete="off" required>
-                    <!-- LISTA DE SERVICOS COM BASE NA PESQUISA -->
+                    <input type="text" id="servico" name="servico" class="form-control" autocomplete="off">
                     <div id="servicos-list" class="list-group position-absolute w-100" style="z-index: 1000;"></div>
                 </div>
 
-                <!-- VALOR -->
-                <div class="col-sm-6 col-md-3">
-                    <label for="valor_agend" class="form-label">Valor</label>
-                    <div class="input-group">
-                        <span class="input-group-text">R$</span>
-                        <input type="text" name="valor_agend" id="valor_agend" class="form-control" aria-label="Valor em reais com vírgula e duas casas decimais">
+                <!-- CAMPOS DE RECORRÊNCIA -->
+                <div id="recorrenciaCampos" class="col-12 mt-2 d-none">
+                    <div class="card border-primary">
+                        <div class="card-body">
+                            <h6 class="card-title text-primary mb-3">
+                                <i class="fas fa-calendar-alt me-1"></i> Configuração de Recorrência
+                            </h6>
+                            <div class="row g-2">
+                                <!-- DIAS DA SEMANA -->
+                                <!-- DIAS DA SEMANA (NOVA SELEÇÃO) -->
+                                <div class="col-md-8">
+                                    <label class="form-label">Dias da Semana</label>
+                                    <div id="diasSemanaBtns" class="d-flex flex-wrap gap-2">
+                                        <button type="button" class="btn btn-outline-primary btn-sm" data-dia="0">Dom</button>
+                                        <button type="button" class="btn btn-outline-primary btn-sm" data-dia="1">Seg</button>
+                                        <button type="button" class="btn btn-outline-primary btn-sm" data-dia="2">Ter</button>
+                                        <button type="button" class="btn btn-outline-primary btn-sm" data-dia="3">Qua</button>
+                                        <button type="button" class="btn btn-outline-primary btn-sm" data-dia="4">Qui</button>
+                                        <button type="button" class="btn btn-outline-primary btn-sm" data-dia="5">Sex</button>
+                                        <button type="button" class="btn btn-outline-primary btn-sm" data-dia="6">Sáb</button>
+                                    </div>
+                                    <small class="text-muted">Clique nos dias desejados para selecionar.</small>
+                                </div>
+
+                                <!-- DATA FIM -->
+                                <div class="col-md-4">
+                                    <label for="data_fim_recorrencia" class="form-label">Data Fim</label>
+                                    <input type="date" id="data_fim_recorrencia" name="data_fim_recorrencia" class="form-control">
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </div>
 
-                <!-- OBSERVACOES -->
-                <div class="input-group">
-                    <textarea name="observacoes" id="observacoes" class="form-control" placeholder="Observações..." rows="5" cols="50" style="height: 100px;"></textarea>
+                <!-- VALOR -->
+                <div class="col-sm-6 col-md-3 mt-2">
+                    <label for="valor_agend" class="form-label">Valor</label>
+                    <div class="input-group">
+                        <span class="input-group-text">R$</span>
+                        <input type="text" name="valor_agend" id="valor_agend" class="form-control" placeholder="0,00">
+                    </div>
                 </div>
 
-                <!-- BOTAO DE SUBMIT -->
-                <div class="col-12 text-end mt-2">
-                    <button type="submit" class="btn btn-success">Agendar</button>
+                <!-- OBSERVAÇÕES -->
+                <div class="col-12 mt-2">
+                    <label for="observacoes" class="form-label">Observações</label>
+                    <textarea name="observacoes" id="observacoes" class="form-control" placeholder="Observações..." rows="3"></textarea>
+                </div>
+
+                <!-- BOTÃO SUBMIT -->
+                <div class="col-12 text-end mt-3">
+                    <button type="submit" class="btn btn-success">
+                        <i class="fas fa-check-circle me-1"></i> Agendar
+                    </button>
                 </div>
             </div>
         </form>
     </div>
 </div>
+
 
 <!-- Scripts -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/mdb-ui-kit/7.1.0/mdb.min.js"></script>
@@ -305,10 +338,9 @@ const recorrenciaCampos = document.getElementById('recorrenciaCampos');
 
 temRecorrenciaCheckbox.addEventListener('change', function() {
     if (this.checked) {
-        recorrenciaCampos.style.display = 'flex'; // mostra os campos
+        recorrenciaCampos.classList.add('show');
     } else {
-        recorrenciaCampos.style.display = 'none'; // esconde os campos
-        // limpa os campos se desmarcar
+        recorrenciaCampos.classList.remove('show');
         document.getElementById('dias_semana').selectedIndex = -1;
         document.getElementById('data_fim_recorrencia').value = '';
     }
@@ -329,6 +361,146 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     });
 });
+
+// SELEÇÃO DE DIAS DA SEMANA
+document.addEventListener('DOMContentLoaded', function() {
+    const diasSemanaBtns = document.querySelectorAll('#diasSemanaBtns button');
+    const diasSemanaContainer = document.getElementById('diasSemanaContainer'); // Container para os inputs hidden
+
+    // Se não existir, vamos criar esse container escondido para os inputs hidden
+    if (!diasSemanaContainer) {
+        const container = document.createElement('div');
+        container.id = 'diasSemanaContainer';
+        container.style.display = 'none';
+        document.getElementById('agendamento-form').appendChild(container);
+    }
+
+    const container = document.getElementById('diasSemanaContainer');
+
+    diasSemanaBtns.forEach(btn => {
+        btn.addEventListener('click', function() {
+            this.classList.toggle('active');
+            this.classList.toggle('btn-primary');
+            this.classList.toggle('btn-outline-primary');
+
+            // Remove todos os inputs antigos
+            container.innerHTML = '';
+
+            // Pega os dias selecionados
+            const diasSelecionados = Array.from(diasSemanaBtns)
+                .filter(b => b.classList.contains('active'))
+                .map(b => b.getAttribute('data-dia'));
+
+            // Para cada dia selecionado, cria um input hidden com name dias_semana[]
+            diasSelecionados.forEach(dia => {
+                const input = document.createElement('input');
+                input.type = 'hidden';
+                input.name = 'dias_semana[]';
+                input.value = dia;
+                container.appendChild(input);
+            });
+        });
+    });
+
+    // Limpa seleção e inputs ao desativar recorrência
+    document.getElementById('temRecorrencia').addEventListener('change', function() {
+        if (!this.checked) {
+            diasSemanaBtns.forEach(btn => {
+                btn.classList.remove('active', 'btn-primary');
+                btn.classList.add('btn-outline-primary');
+            });
+            container.innerHTML = '';
+        }
+    });
+});
+
+
+// FUNÇÃO DE MENSAGENS DE ERRO CASO USUÁRIO NÃO INFORME ALGUM DOS CAMPOS OBRIGATÓRIOS
+function showError(input, message) {
+    // Verifica se já existe mensagem, remove para não duplicar
+    const existingError = input.parentNode.querySelector('.error-message');
+    if (existingError) {
+        existingError.remove();
+    }
+    // Cria o elemento de mensagem
+    const errorDiv = document.createElement('div');
+    errorDiv.className = 'error-message text-danger small mb-1';
+    errorDiv.textContent = message;
+    // Insere antes do input dentro do mesmo container
+    input.parentNode.insertBefore(errorDiv, input);
+}
+
+// Remove todas as mensagens de erro antes da validação
+function clearErrors(form) {
+    const errors = form.querySelectorAll('.error-message');
+    errors.forEach(err => err.remove());
+}
+
+document.getElementById('agendamento-form').addEventListener('submit', function(e) {
+    clearErrors(this); // limpa mensagens anteriores
+
+    let isValid = true;
+
+    // Validar paciente selecionado (paciente_id hidden)
+    const pacienteId = document.getElementById('paciente_id').value.trim();
+    if (!pacienteId) {
+        showError(document.getElementById('search-input'), 'Selecione um paciente antes de continuar.');
+        isValid = false;
+    }
+
+    // Validar serviço selecionado (id_servico hidden)
+    const idServico = document.getElementById('id_servico').value.trim();
+    if (!idServico) {
+        showError(document.getElementById('servico'), 'Selecione um serviço válido antes de continuar.');
+        isValid = false;
+    }
+
+    // Validar data
+    const data = document.getElementById('data').value.trim();
+    if (!data) {
+        showError(document.getElementById('data'), 'Selecione uma data.');
+        isValid = false;
+    }
+
+    // Validar horário início
+    const hrIni = document.getElementById('hr_ini').value.trim();
+    if (!hrIni) {
+        showError(document.getElementById('hr_ini'), 'Informe o horário de início.');
+        isValid = false;
+    }
+
+    // Validar horário fim
+    const hrFim = document.getElementById('hr_fim').value.trim();
+    if (!hrFim) {
+        showError(document.getElementById('hr_fim'), 'Informe o horário de término.');
+        isValid = false;
+    }
+
+    // Validação simples para horário fim ser maior que início
+    if (hrIni && hrFim && hrFim <= hrIni) {
+        showError(document.getElementById('hr_fim'), 'O horário fim deve ser maior que o início.');
+        isValid = false;
+    }
+
+    // Validação da recorrência: se checkbox está marcado, data fim é obrigatória
+    const temRecorrenciaChecked = document.getElementById('temRecorrencia').checked;
+    const dataFimRecorrencia = document.getElementById('data_fim_recorrencia').value.trim();
+
+    if (temRecorrenciaChecked && !dataFimRecorrencia) {
+        showError(document.getElementById('data_fim_recorrencia'), 'Informe a data final da recorrência.');
+        isValid = false;
+    }
+
+    if (!isValid) {
+        e.preventDefault(); // impede o envio do form
+        const firstError = this.querySelector('.error-message');
+        if (firstError) {
+            const inputErro = firstError.nextElementSibling;
+            if (inputErro) inputErro.focus();
+        }
+    }
+});
+
 </script>
 
 </body>
