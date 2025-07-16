@@ -113,7 +113,7 @@ class AgendamentoController extends Controller
                         'ID_CLINICA' => $idClinica,
                         'ID_PACIENTE' => $request->paciente_id,
                         'ID_SERVICO' => $request->id_servico,
-                        'DT_AGEND' => $data->format('Y-m-d'),
+                        'DT_AGEND' => $data->format('d-m-Y'),
                         'HR_AGEND_INI' => $request->hr_ini,
                         'HR_AGEND_FIN' => $request->hr_fim,
                         'STATUS_AGEND' => 'Em aberto',
@@ -167,8 +167,8 @@ class AgendamentoController extends Controller
         $agendamentos = FaesaClinicaAgendamento::with('paciente')->get();
 
         $events = $agendamentos->map(function($agendamento) {
-            $dateOnly = substr($agendamento->DT_AGEND, 0, 10); // Pega só "YYYY-MM-DD"
-            $horaInicio = substr($agendamento->HR_AGEND_INI, 0, 8); // Pega só "HH:mm:ss"
+            $dateOnly = substr($agendamento->DT_AGEND, 0, 10);
+            $horaInicio = substr($agendamento->HR_AGEND_INI, 0, 8);
             $horaFim = substr($agendamento->HR_AGEND_FIN, 0, 8);
 
             $start = Carbon::parse("{$dateOnly} {$horaInicio}")->toIso8601String();

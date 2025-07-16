@@ -8,6 +8,9 @@
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700&display=swap" rel="stylesheet" />
     <link href="https://cdnjs.cloudflare.com/ajax/libs/mdb-ui-kit/7.1.0/mdb.min.css" rel="stylesheet" />
 
+    <!-- Flatpickr CSS -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css" />
+
     <style>
         html, body { height: 100%; margin: 0; }
         #content-wrapper {
@@ -54,7 +57,7 @@
 @endif
 
 <div id="content-wrapper" class="bg-light">
-    <div class="bg-white p-4 rounded shadow-sm w-100 w-md-75 w-lg-50">
+    <div class="bg-white p-4 rounded shadow-sm w-80 w-md-75 w-lg-50">
 
         <!-- TÍTULO -->
         <div class="text-center mb-3">
@@ -189,6 +192,11 @@
 
 <!-- Scripts -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/mdb-ui-kit/7.1.0/mdb.min.js"></script>
+<!-- Flatpickr JS -->
+<script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+
+<!-- Flatpckr pt-br -->
+<script src="https://cdn.jsdelivr.net/npm/flatpickr/dist/l10n/pt.js"></script>
 
 <script>
 
@@ -500,6 +508,38 @@ document.getElementById('agendamento-form').addEventListener('submit', function(
         }
     }
 });
+
+// Inicializa o flatpickr para o campo de data
+flatpickr("#data", {
+    dateFormat: "Y-m-d",
+    locale: "pt",
+    minDate: "today"
+});
+
+// Inicializa o flatpickr para os campos de hora (início e fim)
+flatpickr("#hr_ini", {
+    enableTime: true,
+    noCalendar: true,
+    dateFormat: "H:i",
+    time_24hr: true,
+    minuteIncrement: 15,
+});
+
+flatpickr("#hr_fim", {
+    enableTime: true,
+    noCalendar: true,
+    dateFormat: "H:i",
+    time_24hr: true,
+    minuteIncrement: 15,
+});
+
+flatpickr("#data_fim_recorrencia", {
+    dateFormat: "Y-m-d",
+    locale: "pt",
+    minDate: "today"
+});
+
+flatpickr.localize(flatpickr.l10ns.pt);
 
 </script>
 
