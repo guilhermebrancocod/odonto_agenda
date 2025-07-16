@@ -30,43 +30,33 @@
                 <h5>Detalhes</h5>
                 <div class="linha-flex"></div>
             </div>
-            <div class="row g-3" style="margin: 20px 0; display: flex; align-items: flex-end;">
-                <div style="flex: 0.5;">
-                    <label for="box" style="font-size: 14px; color: #666;">Box</label>
-                    <select id="box" name="box" class="form-select"
-                        style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 6px; font-size: 14px;">
-                        <option value="S">Ativo</option>
-                        <option value="N">Inativo</option>
-                    </select>
+            <div class="row fields-bloco" style="margin: 20px 0; display: flex; gap: 40px; align-items: flex-start;">
+                <div class="col-esquerda" style="flex: 1;">
+                    <div style="margin-bottom: 15px;">
+                        <label for="disciplina" style="font-size: 14px; color: #666;">Disciplina</label>
+                        <select id="disciplina" name="disciplina" class="form-select"
+                            style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 6px; font-size: 14px;">
+                        </select>
+                    </div>
+                    <div style="margin-bottom: 15px;">
+                        <label for="hr_ini" style="font-size: 14px; color: #666;">Hora Inicial</label>
+                        <input type="text" id="hr_ini" name="hr_ini" class="form-control"
+                            style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 6px; font-size: 14px;"
+                            maxlength="10">
+                    </div>
+                    <div>
+                        <label for="hr_fim" style="font-size: 14px; color: #666;">Hora Final</label>
+                        <input type="text" id="hr_fim" name="hr_fim" class="form-control"
+                            style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 6px; font-size: 14px;"
+                            maxlength="10">
+                    </div>
                 </div>
-                <div style="flex: 0.5;">
-                    <label for="disciplina" style="font-size: 14px; color: #666;">Disciplina</label>
-                    <select id="disciplina" name="disciplina" class="form-select"
-                        style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 6px; font-size: 14px;">
-                        <option value="S">Ativo</option>
-                        <option value="N">Inativo</option>
-                    </select>
-                </div>
-                <div style="flex: 0.2;">
-                    <label for="hr_ini" style="font-size: 14px; color: #666;">Hora Inicial</label>
-                    <input type="text" id="hr_ini" name="hr_ini" class="form-control"
-                        value="{{ old('descricao', $servico->SERVICO_CLINICA_DESC ?? '') }}"
-                        style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 6px; font-size: 14px;" maxlength="25">
-                </div>
-                <div style="flex: 0.2;">
-                    <label for="hr_fim" style="font-size: 14px; color: #666;">Hora Final</label>
-                    <input type="text" id="hr_fim" name="hr_fim" class="form-control"
-                        value="{{ old('descricao', $servico->SERVICO_CLINICA_DESC ?? '') }}"
-                        style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 6px; font-size: 14px;" maxlength="25">
-                </div>
-                <div style="flex: 0.1;">
-                    <!-- Empurra o botão pra baixo -->
-                    <button id="adicionar" name="adicionar" type="button"
-                        style="background-color: #007bff; color: #fff; border: none; 
-                    padding: 10px 15px; font-size: 12px; 
-                    border-radius: 6px; cursor: pointer;">
-                        <i class="fas fa-plus"></i>
-                    </button>
+                <div class="col-direita" style="flex: 1;">
+                    <label style="font-size: 14px; color: #666;">Selecionar Box</label>
+                    <div id="boxes-container"
+                        style="margin-top: 5px; border: 1px solid #ddd; border-radius: 6px; padding: 10px; max-height: 180px; overflow-y: auto; background-color: #f9f9f9;">
+                        <!-- Boxes preenchidos via JS -->
+                    </div>
                 </div>
             </div>
             <div style="display: flex; justify-content: space-between; gap: 10px;">
