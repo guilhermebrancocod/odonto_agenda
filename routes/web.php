@@ -140,6 +140,10 @@ Route::get('/odontologia/criarbox', function () {
 
 Route::get('/odontologia/agendamentos', [OdontoConsultController::class, 'getAgendamentos']);
 
+Route::get('/odontologia/disciplinas',[OdontoConsultController::class, 'getDisciplinas']);
+
+Route::get('/odontologia/boxes',[OdontoConsultController::class, 'getBoxes']);
+
 Route::get('/odontologia/criarpaciente', [OdontoCreateController::class, 'showForm'])->name('criarpaciente');
 Route::get('/odontologia/criarpaciente/{pacienteId}', [OdontoCreateController::class, 'editPatient'])->name('editPatient');
 
