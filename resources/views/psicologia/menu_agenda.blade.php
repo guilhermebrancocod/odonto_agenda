@@ -66,14 +66,11 @@
                 right: "dayGridDay,timeGridWeek,dayGridMonth",
             },
             slotMinTime: "08:00:00",
-            slotMaxTime: "19:00:00",
+            slotMaxTime: "20:30:00",
             businessHours: {
                 daysOfWeek: [1, 2, 3, 4, 5, 6],
                 startTime: "08:00",
-                endTime: "18:00",
-            },
-            eventDidMount: function (info) {
-                info.el.setAttribute("title", info.event.extendedProps.description);
+                endTime: "20:30",
             },
             buttonText: {
                 today: "Hoje",
@@ -90,9 +87,7 @@
             },
             events: '/psicologia/agendamentos-calendar',
 
-            // Aqui a mágica do clique no evento:
             eventClick: function(info) {
-                // Preenche o modal com os dados do evento clicado
                 document.getElementById('modalPaciente').textContent = info.event.title;
 
                 // Formatar a data/hora para mostrar bonitinho:

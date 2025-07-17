@@ -114,7 +114,7 @@ class AgendamentoController extends Controller
                     'DT_AGEND' => $dataAgendamento->format('d-m-Y'),
                     'HR_AGEND_INI' => $request->hr_ini,
                     'HR_AGEND_FIN' => $request->hr_fim,
-                    'STATUS_AGEND' => 'Em aberto',
+                    'STATUS_AGEND' => 'Agendado',
                     'RECORRENCIA' => $request->recorrencia ?? null,
                     'VALOR_AGEND' => $valorAgend,
                     'OBSERVACOES' => $request->observacoes,
@@ -137,7 +137,7 @@ class AgendamentoController extends Controller
                     'DT_AGEND' => $data->format('d-m-Y'),
                     'HR_AGEND_INI' => $request->hr_ini,
                     'HR_AGEND_FIN' => $request->hr_fim,
-                    'STATUS_AGEND' => 'Em aberto',
+                    'STATUS_AGEND' => 'Agendado',
                     'RECORRENCIA' => $request->recorrencia ?? null,
                     'VALOR_AGEND' => $valorAgend,
                     'OBSERVACOES' => $request->observacoes,
@@ -159,7 +159,7 @@ class AgendamentoController extends Controller
                         'DT_AGEND' => $data->format('d-m-Y'),
                         'HR_AGEND_INI' => $request->hr_ini,
                         'HR_AGEND_FIN' => $request->hr_fim,
-                        'STATUS_AGEND' => 'Em aberto',
+                        'STATUS_AGEND' => 'Agendado',
                         'RECORRENCIA' => $request->recorrencia ?? null,
                         'VALOR_AGEND' => $valorAgend,
                         'OBSERVACOES' => $request->observacoes,
@@ -188,7 +188,7 @@ class AgendamentoController extends Controller
                         'DT_AGEND' => $data->format('d-m-Y'),
                         'HR_AGEND_INI' => $request->hr_ini,
                         'HR_AGEND_FIN' => $request->hr_fim,
-                        'STATUS_AGEND' => 'Em aberto',
+                        'STATUS_AGEND' => 'Agendado',
                         'RECORRENCIA' => $request->recorrencia,
                         'VALOR_AGEND' => $valorAgend,
                         'OBSERVACOES' => $request->observacoes,
@@ -205,7 +205,7 @@ class AgendamentoController extends Controller
                 'DT_AGEND' => $request->dia_agend,
                 'HR_AGEND_INI' => $request->hr_ini,
                 'HR_AGEND_FIN' => $request->hr_fim,
-                'STATUS_AGEND' => 'Em aberto',
+                'STATUS_AGEND' => 'Agendado',
                 'RECORRENCIA' => null,
                 'VALOR_AGEND' => $valorAgend,
                 'OBSERVACOES' => $request->observacoes,
@@ -240,21 +240,30 @@ class AgendamentoController extends Controller
             $dateOnly = substr($agendamento->DT_AGEND, 0, 10);
             $horaInicio = substr($agendamento->HR_AGEND_INI, 0, 8);
             $horaFim = substr($agendamento->HR_AGEND_FIN, 0, 8);
+            $status = $agendamento->STATUS_AGEND;
 
             $start = Carbon::parse("{$dateOnly} {$horaInicio}")->toIso8601String();
             $end = Carbon::parse("{$dateOnly} {$horaFim}")->toIso8601String();
+
+            // Define a cor conforme o status
+            $cor = match($status) {
+                'Agendado' => '#0d6efd',    // azul
+                'Presente' => '#28a745',    // verde
+                'Cancelado' => '#dc3545',    // vermelho
+                default => '#6c757d',        // cinza para outros casos
+            };
 
             return [
                 'id' => $agendamento->ID_AGENDAMENTO,
                 'title' => $agendamento->paciente ? $agendamento->paciente->NOME_COMPL_PACIENTE : 'Agendamento',
                 'start' => $start,
                 'end' => $end,
-                'color' => '#007bff',
+                'status' => $status,
                 'description' => $agendamento->OBSERVACOES ?? '',
+                'color' => $cor,  // A cor para o evento no FullCalendar
             ];
         });
 
         return response()->json($events);
     }
-
 }

@@ -622,7 +622,7 @@
     }
 </script> -->
 
-<!-- FLATÍCKER PARA MELHORAR VISUALIZAÇÃO DE DIAS E HORÁRIOS -->
+<!-- FLATPICKR PARA MELHORAR VISUALIZAÇÃO DE DIAS E HORÁRIOS -->
 <script>
     // Inicializa o flatpickr para o campo de data
     flatpickr("#data", {
