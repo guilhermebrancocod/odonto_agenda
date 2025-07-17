@@ -201,12 +201,10 @@
                 </div>
             </div>
 
-            <!-- CHECKBOX PERMISSÃO ATENDIMENTO SIMULTÂNEO -->
-            <div class="form-check mb-3 ms-3">
-                <input class="form-check-input" type="checkbox" value="1" id="permiteSimultaneo" name="PERMITE_ATENDIMENTO_SIMULTANEO">
-                <label class="form-check-label" for="permiteSimultaneo">
-                    Permite atendimento simultâneo
-                </label>
+            <!-- OBSERVACAO DO SERVIÇO -->
+            <div class="mb-3">
+                <label for="observacao-servico" class="form-label">Observações</label>
+                <textarea id="observacao-servico" name="OBSERVACAO" class="form-control"></textarea>
             </div>
 
             <!-- BOTÃO DE SALVAR | SUBMIT -->
@@ -229,7 +227,6 @@
             <table class="table table-striped table-hover">
                 <thead>
                 <tr>
-                    <th>ID</th>
                     <th>Descrição</th>
                     <th>Código Interno</th>
                     <th>Valor</th>
@@ -265,7 +262,11 @@
                                 <label class="form-label">Valor Serviço</label>
                                 <input type="text" id="edit-valor-servico" name="VALOR_SERVICO" class="form-control">
                             </div>
-                            <div class="form-check mb-3">
+                            <div class="mb-3">
+                                <label for="observacao-servico" class="form-label">Observações</label>
+                                <textarea id="edit-observacao-servico" name="OBSERVACAO" class="form-control"></textarea>
+                            </div>
+                            <div class="d-none form-check mb-3">
                                 <input class="form-check-input" type="checkbox" id="edit-permite-simultaneo" name="PERMITE_ATENDIMENTO_SIMULTANEO">
                                 <label class="form-check-label" for="edit-permite-simultaneo">
                                     Permite atendimento simultâneo
@@ -290,35 +291,35 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/mdb-ui-kit/7.1.0/mdb.min.js"></script>
 
 <script>
-function showAlert(message, type = 'success') {
-    const alertContainer = document.getElementById('alert-container');
-    const alert = document.createElement('div');
-    alert.className = `alert alert-${type} alert-dismissible fade show mt-2`;
-    alert.role = 'alert';
-    alert.style.pointerEvents = 'auto';
-    alert.innerHTML = `
-        ${message}
-        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-    `;
-
-    alertContainer.appendChild(alert);
-
-    setTimeout(() => {
-        alert.classList.remove('show');
-        alert.classList.add('hide');
-        setTimeout(() => alert.remove(), 300);
-    }, 4000);
-}
-
-function showModalAlert(message, type = 'danger') {
-    const modalAlertContainer = document.getElementById('modal-alert-container');
-    modalAlertContainer.innerHTML = `
-        <div class="alert alert-${type} alert-dismissible fade show m-3 mb-0">
+    function showAlert(message, type = 'success') {
+        const alertContainer = document.getElementById('alert-container');
+        const alert = document.createElement('div');
+        alert.className = `alert alert-${type} alert-dismissible fade show mt-2`;
+        alert.role = 'alert';
+        alert.style.pointerEvents = 'auto';
+        alert.innerHTML = `
             ${message}
             <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-        </div>
-    `;
-}
+        `;
+
+        alertContainer.appendChild(alert);
+
+        setTimeout(() => {
+            alert.classList.remove('show');
+            alert.classList.add('hide');
+            setTimeout(() => alert.remove(), 300);
+        }, 4000);
+    }
+
+    function showModalAlert(message, type = 'danger') {
+        const modalAlertContainer = document.getElementById('modal-alert-container');
+        modalAlertContainer.innerHTML = `
+            <div class="alert alert-${type} alert-dismissible fade show m-3 mb-0">
+                ${message}
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+        `;
+    }
 
 document.addEventListener('DOMContentLoaded', () => {
     const servicosTbody = document.getElementById('servicos-tbody');
@@ -339,7 +340,6 @@ document.addEventListener('DOMContentLoaded', () => {
                     const valorFormatado = parseFloat(s.VALOR_SERVICO ?? 0).toFixed(2);
                     const tr = document.createElement('tr');
                     tr.innerHTML = `
-                        <td>${s.ID_SERVICO_CLINICA}</td>
                         <td>${s.SERVICO_CLINICA_DESC}</td>
                         <td>${s.COD_INTERNO_SERVICO_CLINICA}</td>
                         <td>R$ ${valorFormatado}</td>
@@ -349,7 +349,8 @@ document.addEventListener('DOMContentLoaded', () => {
                                 data-desc="${s.SERVICO_CLINICA_DESC}"
                                 data-cod="${s.COD_INTERNO_SERVICO_CLINICA}"
                                 data-valor="${s.VALOR_SERVICO ?? 0}"
-                                data-permite="${s.PERMITE_ATENDIMENTO_SIMULTANEO}">
+                                data-observacao="${s.OBSERVACAO ? s.OBSERVACAO : ''}"
+                            >
                                 Editar
                             </button>
                         </td>
@@ -364,9 +365,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
                         // Se for '--', envia vazio para o campo para não quebrar a validação
                         document.getElementById('edit-servico-cod').value = (btn.dataset.cod === '--') ? '' : btn.dataset.cod;
-
                         document.getElementById('edit-valor-servico').value = btn.dataset.valor;
                         document.getElementById('edit-permite-simultaneo').checked = (btn.dataset.permite === 'S');
+                        document.getElementById('edit-observacao-servico').value = btn.dataset.observacao ?? '';
                         editarServicoModal.show();
                     });
                 });
@@ -389,6 +390,8 @@ document.addEventListener('DOMContentLoaded', () => {
         const desc = document.getElementById('edit-servico-desc').value;
         const cod = document.getElementById('edit-servico-cod').value;
         let valor = document.getElementById('edit-valor-servico').value.trim();
+        const observacao = document.getElementById('edit-observacao-servico').value;
+
         valor = valor.replace(',', '.');
         valor = parseFloat(valor);
         if (isNaN(valor)) valor = 0;
@@ -405,7 +408,8 @@ document.addEventListener('DOMContentLoaded', () => {
                 SERVICO_CLINICA_DESC: desc,
                 COD_INTERNO_SERVICO_CLINICA: cod,
                 VALOR_SERVICO: valor,
-                PERMITE_ATENDIMENTO_SIMULTANEO: permiteSimultaneo
+                PERMITE_ATENDIMENTO_SIMULTANEO: permiteSimultaneo,
+                OBSERVACAO: observacao
             })
         })
         .then(res => {

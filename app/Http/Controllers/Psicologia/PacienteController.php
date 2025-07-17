@@ -16,42 +16,105 @@ class PacienteController extends Controller
      * @return \Illuminate\Http\RedirectResponse Redireciona de volta à página anterior com uma mensagem de status.
      * @throws \Illuminate\Validation\ValidationException Se algum dado da requisição falhar na validação.
      */
-    public function criarPaciente(Request $request)
-    {
-        // dd($request);
+    public function criarAgendamento(Request $request)
+{
+    $idClinica = 1;
 
-        $validated = $request->validate([
-            'CPF_PACIENTE' => 'required|string|unique:FAESA_CLINICA_PACIENTE,CPF_PACIENTE',
-            'NOME_COMPL_PACIENTE' => 'required|string|max:255',
-            'DT_NASC_PACIENTE' => 'required|date',
-            'SEXO_PACIENTE' => 'required|in:M,F,O',
-            'ENDERECO' => 'nullable|string|max:100',
-            'END_NUM' => 'nullable|string|max:10',
-            'END_COMPL' => 'nullable|string|max:255',
-            'BAIRRO' => 'nullable|string|max:50',
-            'UF' => 'nullable|string|size:2',
-            'CEP' => 'nullable|string|max:9',
-            'FONE_PACIENTE' => 'required|string|max:20',
-            'E_MAIL_PACIENTE' => 'required|email|max:255',
-            'OBSERVACAO' => 'nullable|string|max:500',
-        ], [
-            'CPF_PACIENTE.required' => 'Por favor, informe o CPF do paciente.',
-            'CPF_PACIENTE.unique' => 'Este CPF já está cadastrado.',
-            'NOME_COMPL_PACIENTE.required' => 'Por favor, informe o nome completo do paciente.',
-            'DT_NASC_PACIENTE.required' => 'Por favor, informe a data de nascimento.',
-            'DT_NASC_PACIENTE.date' => 'Informe uma data de nascimento válida.',
-            'SEXO_PACIENTE.required' => 'Por favor, selecione o sexo do paciente.',
-            'SEXO_PACIENTE.in' => 'Sexo selecionado inválido.',
-            'E_MAIL_PACIENTE.required' => 'Por favor, informe o e-mail do paciente.',
-            'E_MAIL_PACIENTE.email' => 'Informe um e-mail válido.',
-            'FONE_PACIENTE.required' => 'Por favor, informe o celular do paciente.',
-        ]
-        );
-
-        FaesaClinicaPaciente::create($validated);
-
-        return redirect()->back()->with('success', 'Paciente criado com sucesso!');
+    if ($request->has('valor_agend')) {
+        $request->merge([
+            'valor_agend' => str_replace(',', '.', $request->valor_agend),
+        ]);
     }
+
+    $request->validate([
+        'paciente_id' => 'required|integer',
+        'id_servico' => 'required|integer',
+        'servico' => 'required|string',
+        'dia_agend' => 'required|date',
+        'hr_ini' => 'required',
+        'hr_fim' => 'required',
+        'status_agend' => 'required|string',
+        'id_agend_remarcado' => 'nullable|integer',
+        'recorrencia' => 'nullable|string|max:64',
+        'tem_recorrencia' => 'nullable|string',
+        'valor_agend' => 'nullable|numeric',
+        'observacoes' => 'nullable|string',
+        'dias_semana' => 'nullable|array',
+        'dias_semana.*' => 'in:0,1,2,3,4,5,6',
+        'data_fim_recorrencia' => 'nullable|date|after_or_equal:dia_agend',
+    ]);
+
+    $valorAgend = $request->valor_agend ? str_replace(',', '.', $request->valor_agend) : null;
+
+    $servicoDescricao = strtolower(trim($request->input('servico', '')));
+
+    if (in_array($servicoDescricao, ['triagem', 'plantão', 'plantao'])) {
+        // Criação automática de 3 agendamentos semanais
+        $dataInicio = Carbon::parse($request->dia_agend);
+        $uuidRecorrencia = Str::uuid()->toString();
+
+        for ($i = 0; $i < 3; $i++) {
+            $dataAgendamento = $dataInicio->addWeeksNoOverflow($i)->copy();
+
+            $dados = [
+                'ID_CLINICA' => $idClinica,
+                'ID_PACIENTE' => $request->paciente_id,
+                'ID_SERVICO' => $request->id_servico,
+                'DT_AGEND' => $dataAgendamento->format('Y-m-d'),
+                'HR_AGEND_INI' => $request->hr_ini,
+                'HR_AGEND_FIN' => $request->hr_fim,
+                'STATUS_AGEND' => 'Em aberto',
+                'RECORRENCIA' => $uuidRecorrencia,
+                'VALOR_AGEND' => $valorAgend,
+                'OBSERVACOES' => $request->observacoes,
+            ];
+
+            FaesaClinicaAgendamento::create($dados);
+        }
+    }
+    elseif ($request->input('tem_recorrencia') === "1") {
+        $diasSemana = $request->input('dias_semana', []);
+        $dataInicio = Carbon::parse($request->dia_agend);
+        $dataFim = Carbon::parse($request->data_fim_recorrencia);
+
+        for ($data = $dataInicio->copy(); $data->lte($dataFim); $data->addDay()) {
+            if (in_array($data->dayOfWeek, $diasSemana)) {
+                $dados = [
+                    'ID_CLINICA' => $idClinica,
+                    'ID_PACIENTE' => $request->paciente_id,
+                    'ID_SERVICO' => $request->id_servico,
+                    'DT_AGEND' => $data->format('Y-m-d'),
+                    'HR_AGEND_INI' => $request->hr_ini,
+                    'HR_AGEND_FIN' => $request->hr_fim,
+                    'STATUS_AGEND' => 'Em aberto',
+                    'RECORRENCIA' => $request->recorrencia ?? Str::uuid()->toString(),
+                    'VALOR_AGEND' => $valorAgend,
+                    'OBSERVACOES' => $request->observacoes,
+                ];
+                FaesaClinicaAgendamento::create($dados);
+            }
+        }
+    }
+    else {
+        $dados = [
+            'ID_CLINICA' => $idClinica,
+            'ID_PACIENTE' => $request->paciente_id,
+            'ID_SERVICO' => $request->id_servico,
+            'DT_AGEND' => $request->dia_agend,
+            'HR_AGEND_INI' => $request->hr_ini,
+            'HR_AGEND_FIN' => $request->hr_fim,
+            'STATUS_AGEND' => 'Em aberto',
+            'RECORRENCIA' => null,
+            'VALOR_AGEND' => $valorAgend,
+            'OBSERVACOES' => $request->observacoes,
+        ];
+
+        FaesaClinicaAgendamento::create($dados);
+    }
+
+    return redirect('/psicologia/criar-agendamento/')->with('success', 'Agendamento(s) criado(s) com sucesso!');
+}
+
 
     /**
      * Recupera e retorna uma coleção de Pacientes, com opção de busca por nome

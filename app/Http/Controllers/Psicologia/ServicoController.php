@@ -20,10 +20,6 @@ class ServicoController extends Controller
             $request->merge(['VALOR_SERVICO' => null]);
         }
 
-        // Ajuste do campo permite atendimento simultâneo
-        $permiteAtendimento = $request->has('PERMITE_ATENDIMENTO_SIMULTANEO') ? 'S' : 'N';
-        $request->merge(['PERMITE_ATENDIMENTO_SIMULTANEO' => $permiteAtendimento]);
-
         // Ajuste do código interno: se vazio ou 0, define como null
         if (!$request->filled('COD_INTERNO_SERVICO_CLINICA') || $request->input('COD_INTERNO_SERVICO_CLINICA') == 0) {
             $request->merge(['COD_INTERNO_SERVICO_CLINICA' => null]);
@@ -34,7 +30,7 @@ class ServicoController extends Controller
             'SERVICO_CLINICA_DESC' => 'required|string|min:1|max:255',
             'COD_INTERNO_SERVICO_CLINICA' => 'nullable|integer|min:0',
             'VALOR_SERVICO' => 'nullable|numeric',
-            'PERMITE_ATENDIMENTO_SIMULTANEO' => 'required|in:S,N',
+            'OBSERVACAO' => 'nullable|max:500',
         ]);
 
         if (isset($validated['VALOR_SERVICO'])) {
@@ -75,7 +71,7 @@ class ServicoController extends Controller
     {
         $search = trim($request->query('search', ''));
 
-        $query = FaesaClinicaServico::where('ID_CLINICA', 1); // FILTRO FIXO AQUI
+        $query = FaesaClinicaServico::where('ID_CLINICA', 1); // FILTRO FIXO PARA CLÍNICA DE PSICOLOGIA
 
         if ($search) {
             $query->where('SERVICO_CLINICA_DESC', 'LIKE', "%{$search}%");
@@ -113,7 +109,7 @@ class ServicoController extends Controller
             'SERVICO_CLINICA_DESC' => 'required|string|max:255',
             'COD_INTERNO_SERVICO_CLINICA' => 'nullable|integer|min:0',
             'VALOR_SERVICO' => 'nullable',
-            'PERMITE_ATENDIMENTO_SIMULTANEO' => 'required|in:S,N',
+            'OBSERVACAO' => 'nullable|max:500',
         ]);
 
         // Ajuste do valor (troca vírgula por ponto)
