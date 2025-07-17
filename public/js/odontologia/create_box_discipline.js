@@ -5,19 +5,19 @@ const navbarContainer = document.getElementById('navbar-container');
 const navbar = createNavBar();
 navbarContainer.appendChild(navbar);
 
+
+
 document.addEventListener('DOMContentLoaded', function () {
     fetch('/odontologia/disciplinas')
         .then(response => response.json())
         .then(data => {
             const select = document.getElementById('disciplina');
-
-
             select.innerHTML = '<option value="">Selecione a disciplina</option>';
 
             data.forEach(item => {
                 const option = document.createElement('option');
-                option.value = item.DISCIPLINA;
-                option.textContent = item.DISCIPLINA;
+                option.value = item.DISCIPLINA + item.NOME;
+                option.textContent = `${item.NOME} (${item.DISCIPLINA}) `;
                 select.appendChild(option);
             });
         })
@@ -37,7 +37,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 const checkbox = document.createElement('input');
                 checkbox.type = 'checkbox';
                 checkbox.name = 'boxes[]';
-                checkbox.value = item.DESCRICAO;
+                checkbox.value = item.ID_BOX_CLINICA;
                 checkbox.id = `box_${item.ID_BOX_CLINICA.replace(/\s+/g, '_')}`;
 
                 const label = document.createElement('label');

@@ -2,39 +2,42 @@ import { createNavBar } from '/js/odontologia/navbar.js';
 import { Modal } from 'https://cdnjs.cloudflare.com/ajax/libs/mdb-ui-kit/7.1.0/mdb.es.min.js';
 
 
-function carregarTodosServicos() {
-    const $select = $('#selectBox');
-    const $tbody = $('#table-box tbody');
+function carregarTodosBox() {
+    const $select = $('#selectBoxDiscipline');
+    const $tbody = $('#box-discipline tbody');
 
     $.ajax({
-        url: '/getServices',
+        url: '/getBoxDisciplines',
         dataType: 'json',
         data: { query: '' },
         success: function (data) {
             $select.empty();
             $tbody.empty();
 
-            data.forEach(servico => {
+            data.forEach(disciplines => {
                 // Adiciona ao select
                 const newOption = new Option(
-                    servico.SERVICO_CLINICA_DESC,
-                    servico.ID_SERVICO_CLINICA,
+                    disciplines.DISCIPLINA,
+                    disciplines.ID_BOX,
                     false,
                     false
                 );
                 $select.append(newOption);
 
+                // Adiciona à tabela
                 const html = `
                     <tr>
-                        <td>${servico.SERVICO_CLINICA_DESC}</td>
-                        <td>${servico.VALOR_SERVICO != null && servico.VALOR_SERVICO !== '' ? 'R$ ' + parseFloat(servico.VALOR_SERVICO).toFixed(2) : ''}</td>
-                        <td>${servico.DISCIPLINA}</td>
+                        <td>${disciplines.DISCIPLINA}</td>
+                        <td>${disciplines.ID_BOX}</td>
+                        <td>${disciplines.DIA_SEMANA}</td>
+                        <td>${disciplines.HR_INICIO}</td>
+                        <td>${disciplines.HR_FIM}</td>
                         <td>
                             <button 
                                 type="button" 
                                 class="edit-patient btn btn-link p-0 m-0 border-0" 
                                 style="color: inherit;" 
-                                data-id="${servico.ID_SERVICO_CLINICA}">
+                                data-id="${disciplines.ID_BOX_DISCIPLINA}">
                                 <i class="fa fa-pencil-alt"></i>
                             </button>
                         </td>
@@ -52,14 +55,14 @@ function carregarTodosServicos() {
 }
 
 $(document).ready(function () {
-    const $select = $('#selectService');
+    const $select = $('#selectBoxDiscipline');
 
     $select.select2({
-        placeholder: "Busque o serviço",
+        placeholder: "Busque por box, disciplinas, dia de semana ou hora",
         allowClear: true,
         minimumInputLength: 0,
         ajax: {
-            url: '/getServices',
+            url: '/getBoxes',
             dataType: 'json',
             delay: 250,
             data: function (params) {
@@ -68,8 +71,8 @@ $(document).ready(function () {
             processResults: function (data) {
                 return {
                     results: data.map(p => ({
-                        id: p.ID_SERVICO_CLINICA,
-                        text: p.SERVICO_CLINICA_DESC
+                        id: p.ID_BOX_CLINICA,
+                        text: p.DESCRICAO
 
                     }))
                 };
@@ -84,13 +87,12 @@ $(document).ready(function () {
             document.querySelector('.select2-container--open .select2-search__field')?.focus();
         }, 0);
     });
-
-    carregarTodosServicos();
+    carregarTodosBox();
 });
 
 // Evento ao selecionar um paciente no select2
 $('#selectService').on('select2:select', function (e) {
-    const servicoId = e.params.data.id;
+    const boxId = e.params.data.id;
 
     // Busca os dados completos do paciente via AJAX
     $.ajax({
@@ -102,7 +104,7 @@ $('#selectService').on('select2:select', function (e) {
                     <tr>
                         <td>${servico.SERVICO_CLINICA_DESC}</td>
                         <td>${servico.VALOR_SERVICO != null && servico.VALOR_SERVICO !== '' ? 'R$ ' + parseFloat(servico.VALOR_SERVICO).toFixed(2) : ''}</td>
-                        <td>${servico.DISCIPLINA}</td>
+                        <td>${servico.PERMITE_ATENDIMENTO_SIMULTANEO == 1 ? 'Sim' : 'Não'}</td>
                         <td>
                             <button 
                                 type="button" 
@@ -134,7 +136,7 @@ const addPatient = document.getElementById('add');
 
 addPatient.addEventListener('click', function (event) {
     event.preventDefault();
-    window.location.href = '/odontologia/criarservico';
+    window.location.href = '/odontologia/criarboxdisciplina';
 });
 
 const navbarContainer = document.getElementById('navbar-container');

@@ -171,7 +171,6 @@
                         value="{{ old('valor', $agenda->VALOR_AGEND ?? '') }}"
                         {{ $valorDisabled }}>
                 </div>
-
                 <div class="col-md-8">
                     <label for="obs" class="form-label">Observações</label>
                     <input type="text" id="obs" name="obs" class="form-control"

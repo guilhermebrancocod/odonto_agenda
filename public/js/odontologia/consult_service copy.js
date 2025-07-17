@@ -4,7 +4,7 @@ import { Modal } from 'https://cdnjs.cloudflare.com/ajax/libs/mdb-ui-kit/7.1.0/m
 
 function carregarTodosServicos() {
     const $select = $('#selectBox');
-    const $tbody = $('#table-box tbody');
+    const $tbody = $('#table box tbody');
 
     $.ajax({
         url: '/getServices',

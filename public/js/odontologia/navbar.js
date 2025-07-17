@@ -134,7 +134,7 @@ function createNavBar() {
       <li><a href="/odontologia/consultarpaciente"><i class="fas fa-users"></i>Paciente</a></li>
       <li><a href="/odontologia/consultarservico"><i class="fas fa-hammer"></i>Serviço</a></li>
       <li><a href="/odontologia/consultarbox"><i class="fas fa-hospital"></i>Box de atendimento</a></li>
-      <li><a href="/odontologia/criarboxdisciplina"><i class="fas fa-file"></i>Disciplinas por box</a></li>
+      <li><a href="/odontologia/consultardisciplinabox"><i class="fas fa-file"></i>Disciplinas por box</a></li>
       <li><a href="/odontologia/relatorio"><i class="fas fa-chart-bar"></i>Relatório</a></li>
     </ul>
 

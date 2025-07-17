@@ -41,12 +41,13 @@
                     <input type="text" id="valor" name="valor" class="form-control"
                         value="{{ old('valor', $servico->VALOR_SERVICO ?? '') }}" style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 6px; font-size: 14px;" maxlength="10">
                 </div>
-                <input type="hidden" name="permite_simultaneo" value="N">
-                <div class="form-check" style="margin-left: 7px; font-family: 'Poppins', sans-serif; font-size: 14px;">
-                    <input class="form-check-input" type="checkbox" name="permite_simultaneo" id="permite_simultaneo" value="S">
-                    <label class="form-check-label" for="permite_simultaneo">
-                        Permite atendimento simultâneo
-                    </label>
+            </div>
+            <div class="row g-3" style="margin: 20px 0;">
+                <div style="flex: 1;">
+                    <label style="font-size: 14px; color: #666;">Selecionar Disciplina</label>
+                    <div id="boxes-discipline"
+                        style="margin-top: 5px; border: 1px solid #ddd; border-radius: 6px; padding: 10px; max-height: 200px; overflow-y: auto; background-color: #f9f9f9;">
+                    </div>
                 </div>
             </div>
             <div style="display: flex; justify-content: space-between; gap: 10px;">

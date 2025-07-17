@@ -19,7 +19,7 @@
             <h3 style="margin: 0; font-size: 24px; color: #333;">Vincular box com disciplina</h3>
         </div>
         <form id="form" class="row g-3 needs-validation"
-            action="{{ isset($box) ? route('updateBox', $box->ID_BOX_CLINICA) : route('createBox') }}"
+            action="{{ isset($box) ? route('updateBoxDiscipline', $box->ID_BOX_CLINICA) : route('createBoxDiscipline') }}"
             method="POST">
             @csrf
             @if(isset($paciente))
@@ -32,30 +32,45 @@
             </div>
             <div class="row fields-bloco" style="margin: 20px 0; display: flex; gap: 40px; align-items: flex-start;">
                 <div class="col-esquerda" style="flex: 1;">
-                    <div style="margin-bottom: 15px;">
-                        <label for="disciplina" style="font-size: 14px; color: #666;">Disciplina</label>
-                        <select id="disciplina" name="disciplina" class="form-select"
-                            style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 6px; font-size: 14px;">
-                        </select>
+                    <div style="display: flex; justify-content: space-between; gap: 10px; margin-bottom: 15px;">
+                        <div style="flex: 1;">
+                            <label for="disciplina" style="font-size: 14px; color: #666;">Disciplina</label>
+                            <select id="disciplina" name="disciplina" class="form-select"
+                                style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 6px; font-size: 14px;">
+                            </select>
+                        </div>
+                        <div style="flex: 1;">
+                            <label for="dia_semana" style="font-size: 14px; color: #666;">Dia da semana</label>
+                            <select id="dia_semana" name="dia_semana" class="form-select"
+                                style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 6px; font-size: 14px;">
+                                <option value=""></option>
+                                <option value="segunda">Segunda-feira</option>
+                                <option value="terça">Terça-feira</option>
+                                <option value="quarta">Quarta-feira</option>
+                                <option value="quinta">Quinta-feira</option>
+                                <option value="sexta">Sexta-feira</option>
+                            </select>
+                        </div>
                     </div>
-                    <div style="margin-bottom: 15px;">
-                        <label for="hr_ini" style="font-size: 14px; color: #666;">Hora Inicial</label>
-                        <input type="text" id="hr_ini" name="hr_ini" class="form-control"
-                            style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 6px; font-size: 14px;"
-                            maxlength="10">
-                    </div>
-                    <div>
-                        <label for="hr_fim" style="font-size: 14px; color: #666;">Hora Final</label>
-                        <input type="text" id="hr_fim" name="hr_fim" class="form-control"
-                            style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 6px; font-size: 14px;"
-                            maxlength="10">
+                    <div style="display: flex; justify-content: space-between; gap: 10px; margin-bottom: 15px;">
+                        <div style="flex: 1;">
+                            <label for="hr_inicio" style="font-size: 14px; color: #666;">Hora Inicial</label>
+                            <input type="time" id="hr_inicio" name="hr_inicio" class="form-control"
+                                style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 6px; font-size: 14px;"
+                                maxlength="10">
+                        </div>
+                        <div style="flex: 1;">
+                            <label for="hr_fim" style="font-size: 14px; color: #666;">Hora Final</label>
+                            <input type="time" id="hr_fim" name="hr_fim" class="form-control"
+                                style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 6px; font-size: 14px;"
+                                maxlength="10">
+                        </div>
                     </div>
                 </div>
                 <div class="col-direita" style="flex: 1;">
                     <label style="font-size: 14px; color: #666;">Selecionar Box</label>
                     <div id="boxes-container"
                         style="margin-top: 5px; border: 1px solid #ddd; border-radius: 6px; padding: 10px; max-height: 180px; overflow-y: auto; background-color: #f9f9f9;">
-                        <!-- Boxes preenchidos via JS -->
                     </div>
                 </div>
             </div>
@@ -63,7 +78,7 @@
                 <button id="voltar" name="voltar" type="submit" style="background-color: #007bff; color: #fff; border: none; padding: 10px 20px; font-size: 14px; border-radius: 6px; cursor: pointer;">
                     Voltar
                 </button>
-                <button id="salvar" name="salvar" type="submit" onclick="saveGroupData()" style="background-color: #007bff; color: #fff; border: none; padding: 10px 20px; font-size: 14px; border-radius: 6px; cursor: pointer;">
+                <button id="salvar" name="salvar" type="submit" style="background-color: #007bff; color: #fff; border: none; padding: 10px 20px; font-size: 14px; border-radius: 6px; cursor: pointer;">
                     Salvar
                 </button>
             </div>

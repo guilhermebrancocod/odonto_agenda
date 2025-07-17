@@ -157,13 +157,21 @@ class OdontoCreateController extends Controller
 
     public function createService(Request $request)
     {
-        $idService = DB::table('FAESA_CLINICA_SERVICO')->insertGetId([
-            'ID_CLINICA' => 2,
-            'SERVICO_CLINICA_DESC' => $request->input('descricao'),
-            'COD_INTERNO_SERVICO_CLINICA' => 0,
-            'VALOR_SERVICO' => $request->input('valor'),
-            'PERMITE_ATENDIMENTO_SIMULTANEO' => $request->boolean('permite_simultaneo')
-        ]);
+        $disciplines = $request->input('disciplines');
+
+        if (!$disciplines || count($disciplines) === 0) {
+            return redirect()->back()->with('error', 'Nenhum box foi selecionado.');
+        }
+
+        foreach ($disciplines as $discipline) {
+            $idService = DB::table('FAESA_CLINICA_SERVICO')->insertGetId([
+                'ID_CLINICA' => 2,
+                'SERVICO_CLINICA_DESC' => $request->input('descricao'),
+                'COD_INTERNO_SERVICO_CLINICA' => 0,
+                'VALOR_SERVICO' => $request->input('valor'),
+                'DISCIPLINA' => $discipline
+            ]);
+        }
         return redirect()->back()->with('success', 'Serviço cadastrado com sucesso!');
     }
 
@@ -175,5 +183,28 @@ class OdontoCreateController extends Controller
             'ATIVO' => $request->input('status'),
         ]);
         return redirect()->back()->with('success', 'Box cadastrado com sucesso!');
+    }
+
+    public function createBoxDiscipline(Request $request)
+    {
+        $boxes = $request->input('boxes');
+
+        if (!$boxes || count($boxes) === 0) {
+            return redirect()->back()->with('error', 'Nenhum box foi selecionado.');
+        }
+
+        foreach ($boxes as $boxId) {
+            $idBoxDiscipline = DB::table('FAESA_CLINICA_BOX_DISCIPLINA')->insertGetId([
+                'ID_CLINICA' => 2,
+                'ID_BOX' => $boxId,
+                'DISCIPLINA' => $request->input('disciplina'),
+                'DIA_SEMANA' => $request->input('dia_semana'),
+                'HR_INICIO' => $request->input('hr_inicio'),
+                'HR_FIM' => $request->input('hr_fim'),
+                'DT_CADASTRO' => now(),
+
+            ]);
+        }
+        return redirect()->back()->with('success', ' Disciplina e dia da semana vinculado a um ou mais boxes!');
     }
 }

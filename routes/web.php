@@ -157,7 +157,7 @@ Route::post('/odontologia/criarbox', [OdontoCreateController::class, 'createBox'
 Route::put('/criarbox/{idBox}', [OdontoUpdateController::class, 'updateBox'])->name('updateBox');
 
 Route::post('/odontologia/criarboxdisciplina', [OdontoCreateController::class, 'createBoxDiscipline'])->name('createBoxDiscipline');
-Route::put('/criarbox/{idBox}', [OdontoUpdateController::class, 'updateBoxDiscipline'])->name('updateBoxDiscipline');
+Route::put('/criarboxdisciplina/{idBoxDiscipline}', [OdontoUpdateController::class, 'updateBoxDiscipline'])->name('updateBoxDiscipline');
 
 Route::post('/alterarstatus/{agendaId}', [OdontoUpdateController::class, 'editStatus'])->name('editStatus');
 
@@ -171,6 +171,8 @@ Route::get('/getServices', [OdontoConsultController::class, 'buscarServicos']);
 Route::get('/getAgenda', [OdontoConsultController::class, 'buscarAgendamentos']);
 
 Route::get('/getBoxes', [OdontoConsultController::class, 'buscarBoxes']);
+
+Route::get('/getBoxDisciplines', [OdontoConsultController::class, 'buscarBoxeDisciplinas']);
 
 Route::get('/paciente/{pacienteId}', [OdontoConsultController::class, 'listaPacienteId']);
 
@@ -189,6 +191,8 @@ Route::get('/odontologia/consultarpaciente', [OdontoConsultController::class, 'f
 Route::get('/odontologia/consultarservico', [OdontoConsultController::class, 'fSelectService'])->name('selectService');
 
 Route::get('/odontologia/consultarbox', [OdontoConsultController::class, 'fSelectBox'])->name('selectBox');
+
+Route::get('/odontologia/consultardisciplinabox', [OdontoConsultController::class, 'fSelectBoxDiscipline'])->name('selectBoxDiscipline');
 
 Route::get('/odontologia/consultaragenda', [OdontoConsultController::class, 'fSelectAgenda'])->name('selectAgenda');
 
@@ -246,6 +250,10 @@ Route::get('/consultarservico', function () {
 Route::get('/consultarbox', function () {
     return view('odontologia/consult_box');
 })->name('consultarbox');
+
+Route::get('/consultardisciplinabox', function () {
+    return view('odontologia/consult_box_discipline');
+})->name('consultardisciplinabox');
 
 // CRIAÇÃO DE AGENDA
 Route::get('/psicologia/criar-agenda', function () {

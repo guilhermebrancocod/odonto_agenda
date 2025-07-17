@@ -103,4 +103,23 @@ class OdontoUpdateController extends Controller
 
         return response()->json(['success' => true, 'message' => 'Status atualizado com sucesso']);
     }
+
+    public function updateBoxDiscipline(Request $request, $idBoxDiscipline)
+    {
+        $idBoxDiscipline = DB::table('FAESA_CLINICA_BOX_DISCIPLINA')->where('ID_BOX_DISCIPLINA', $idBoxDiscipline)->first();
+
+        DB::table('FAESA_CLINICA_BOX_DISCIPLINA')
+            ->where('ID_BOX_CLINICA', $idBoxDiscipline)
+            ->update([
+                'ID_CLINICA' => 2,
+                'ID_BOX' => $request->input('ID_BOX_CLINICA'),
+                'DISCIPLINA' => $request->input('disciplina'),
+                'DIA_SEMANA' => $request->input('status'),
+                'HR_INICIO' => $request->input('hr_inicio'),
+                'HR_FIM' => $request->input('hr_fim'),
+                'DT_CADASTRO' => $request->input(getdate())
+            ]);
+
+        return redirect()->back()->with('success', 'Disciplinas e/ou Box atualizado com sucesso!');
+    }
 }
