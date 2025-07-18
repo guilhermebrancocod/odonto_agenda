@@ -48,12 +48,13 @@
                 <div class="linha-flex"></div>
             </div>
             <div class="datatable" style="margin-top:15px">
-                <table class="table datatable-table" id="table-patient">
+                <table class="table datatable-table" id="table-service">
                     <thead class="datatable-header">
                         <tr style="padding-left: 1rem;">
                             <th>Descrição</th>
                             <th>Valor</th>
                             <th>Disciplina</th>
+                            <th>Ativo</th>
                             <th>Editar</th>
                         </tr>
                     </thead>

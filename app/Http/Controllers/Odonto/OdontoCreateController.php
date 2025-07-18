@@ -169,11 +169,24 @@ class OdontoCreateController extends Controller
                 'SERVICO_CLINICA_DESC' => $request->input('descricao'),
                 'COD_INTERNO_SERVICO_CLINICA' => 0,
                 'VALOR_SERVICO' => $request->input('valor'),
+                'ATIVO' => $request->input('ativo'),
                 'DISCIPLINA' => $discipline
             ]);
         }
         return redirect()->back()->with('success', 'Serviço cadastrado com sucesso!');
     }
+
+    public function editService($idService)
+    {
+        $servico = DB::table('FAESA_CLINICA_SERVICO')->where('ID_SERVICO_CLINICA', $idService)->first();
+
+        if (!$servico) {
+            return redirect('/odontologia/consultarservico')->with('error', 'Serviço não encontrado.');
+        }
+
+        return view('odontologia.create_service', compact('servico'));
+    }
+
 
     public function createBox(Request $request)
     {

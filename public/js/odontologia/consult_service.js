@@ -3,8 +3,8 @@ import { Modal } from 'https://cdnjs.cloudflare.com/ajax/libs/mdb-ui-kit/7.1.0/m
 
 
 function carregarTodosServicos() {
-    const $select = $('#selectBox');
-    const $tbody = $('#table-box tbody');
+    const $select = $('#selectService');
+    const $tbody = $('#table-service tbody');
 
     $.ajax({
         url: '/getServices',
@@ -19,6 +19,7 @@ function carregarTodosServicos() {
                 const newOption = new Option(
                     servico.SERVICO_CLINICA_DESC,
                     servico.ID_SERVICO_CLINICA,
+                    servico.DISCIPLINA,
                     false,
                     false
                 );
@@ -29,10 +30,11 @@ function carregarTodosServicos() {
                         <td>${servico.SERVICO_CLINICA_DESC}</td>
                         <td>${servico.VALOR_SERVICO != null && servico.VALOR_SERVICO !== '' ? 'R$ ' + parseFloat(servico.VALOR_SERVICO).toFixed(2) : ''}</td>
                         <td>${servico.DISCIPLINA}</td>
+                        <td>${servico.ATIVO}</td>
                         <td>
                             <button 
                                 type="button" 
-                                class="edit-patient btn btn-link p-0 m-0 border-0" 
+                                class="editService btn btn-link p-0 m-0 border-0" 
                                 style="color: inherit;" 
                                 data-id="${servico.ID_SERVICO_CLINICA}">
                                 <i class="fa fa-pencil-alt"></i>
@@ -69,7 +71,8 @@ $(document).ready(function () {
                 return {
                     results: data.map(p => ({
                         id: p.ID_SERVICO_CLINICA,
-                        text: p.SERVICO_CLINICA_DESC
+                        text: p.SERVICO_CLINICA_DESC,
+                        discipline: p.DISCIPLINA
 
                     }))
                 };
@@ -94,7 +97,7 @@ $('#selectService').on('select2:select', function (e) {
 
     // Busca os dados completos do paciente via AJAX
     $.ajax({
-        url: `/servicos/${servicoId}`,
+        url: `/editService/${servicoId}`,
         type: 'GET',
         dataType: 'json',
         success: function (servico) {
@@ -103,10 +106,11 @@ $('#selectService').on('select2:select', function (e) {
                         <td>${servico.SERVICO_CLINICA_DESC}</td>
                         <td>${servico.VALOR_SERVICO != null && servico.VALOR_SERVICO !== '' ? 'R$ ' + parseFloat(servico.VALOR_SERVICO).toFixed(2) : ''}</td>
                         <td>${servico.DISCIPLINA}</td>
+                        <td>${servico.ATIVO}</td>
                         <td>
                             <button 
                                 type="button" 
-                                class="edit-patient btn btn-link p-0 m-0 border-0" 
+                                class="edit-service btn btn-link p-0 m-0 border-0" 
                                 style="color: inherit;" 
                                 data-id="${servico.ID_SERVICO_CLINICA}">
                                 <i class="fa fa-pencil-alt"></i>
@@ -124,10 +128,10 @@ $('#selectService').on('select2:select', function (e) {
 });
 
 // Evento para editar servico
-$(document).on('click', '.edit-patient', function (event) {
+$(document).on('click', '.editService', function (event) {
     event.preventDefault();
     const servicoId = $(this).data('id');
-    window.location.href = `/odontologia/criarservico/${servicoId}`;
+    window.location.href = `/criarservico/${servicoId}`;
 });
 
 const addPatient = document.getElementById('add');

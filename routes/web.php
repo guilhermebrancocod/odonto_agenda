@@ -151,6 +151,7 @@ Route::post('/odontologia/criarpaciente', [OdontoCreateController::class, 'fCrea
 Route::put('/updatePatient/{id}', [OdontoUpdateController::class, 'updatePatient'])->name('updatePatient');
 
 Route::post('/odontologia/criarservico', [OdontoCreateController::class, 'createService'])->name('createService');
+Route::get('/criarservico/{idService}', [OdontoCreateController::class, 'editService'])->name('editService');
 Route::put('/criarservico/{idService}', [OdontoUpdateController::class, 'updateService'])->name('updateService');
 
 Route::post('/odontologia/criarbox', [OdontoCreateController::class, 'createBox'])->name('createBox');
@@ -244,7 +245,7 @@ Route::get('/consultarpaciente', function () {
 })->name('consultarpaciente');
 
 Route::get('/consultarservico', function () {
-    return view('odontologia/consult_service');
+    return view('odontologia/consult_servico');
 })->name('consultarservico');
 
 Route::get('/consultarbox', function () {

@@ -23,7 +23,11 @@ document.addEventListener('DOMContentLoaded', function () {
                 const label = document.createElement('label');
                 label.style.marginLeft = '6px';
                 label.htmlFor = checkbox.id;
-                label.textContent = ' ' + '('+item.DISCIPLINA +')'+ ' ' + item.NOME;
+                label.textContent = ' ' + '(' + item.DISCIPLINA + ')' + ' ' + item.NOME;
+
+                if (disciplinasSelecionadas.includes(item.DISCIPLINA)) {
+                    checkbox.checked = true;
+                }
 
                 div.appendChild(checkbox);
                 div.appendChild(label);

@@ -286,7 +286,7 @@ class OdontoConsultController extends Controller
             ->where('ID_CLINICA', '=', 2)
             ->get();
 
-        return view('odontologia/consult_service', compact('selectService', 'query_servico'));
+        return view('odontologia/consult_servico', compact('selectService', 'query_servico'));
     }
 
     public function buscarServicos(Request $request)
@@ -294,7 +294,7 @@ class OdontoConsultController extends Controller
         $query = $request->input('query');
 
         $servicos = DB::table('FAESA_CLINICA_SERVICO')
-            ->select('ID_SERVICO_CLINICA', 'SERVICO_CLINICA_DESC', 'VALOR_SERVICO', 'DISCIPLINA')
+            ->select('ID_SERVICO_CLINICA', 'SERVICO_CLINICA_DESC', 'VALOR_SERVICO', 'DISCIPLINA','ATIVO')
             ->where('SERVICO_CLINICA_DESC', 'like', '%' . $query . '%')
             ->where('ID_CLINICA', '=', 2)
             ->get();

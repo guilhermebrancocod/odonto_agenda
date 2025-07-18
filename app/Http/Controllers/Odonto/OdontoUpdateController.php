@@ -36,18 +36,42 @@ class OdontoUpdateController extends Controller
 
     public function updateService(Request $request, $idService)
     {
+        $disciplinas = $request->input('disciplines', []);
+
         $servico = DB::table('FAESA_CLINICA_SERVICO')->where('ID_SERVICO_CLINICA', $idService)->first();
 
-        DB::table('FAESA_CLINICA_SERVICO')
-            ->where('ID_SERVICO_CLINICA', $idService)
-            ->update([
+        if (!$servico) {
+            return redirect()->back()->with('error', 'Serviço não encontrado!');
+        }
+
+        $temAgendamento = DB::table('FAESA_CLINICA_AGENDAMENTO')
+            ->where('ID_SERVICO', $idService)
+            ->exists();
+
+        if ($temAgendamento) {
+            // Apenas desativa o serviço
+            DB::table('FAESA_CLINICA_SERVICO')
+                ->where('ID_SERVICO_CLINICA', $idService)
+                ->update(['ATIVO' => 'N']);
+        } else {
+            // Deleta o serviço
+            DB::table('FAESA_CLINICA_SERVICO')
+                ->where('ID_SERVICO_CLINICA', $idService)
+                ->delete();
+        }
+
+        foreach ($disciplinas as $disciplina) {
+            DB::table('FAESA_CLINICA_SERVICO')->insert([
                 'ID_CLINICA' => 2,
                 'SERVICO_CLINICA_DESC' => $request->input('descricao'),
                 'COD_INTERNO_SERVICO_CLINICA' => 0,
-                'VALOR_SERVICO' => $request->input('valor')
-            ]);
+                'DISCIPLINA' => $disciplina,
+                'VALOR_SERVICO' => $request->input('valor'),
 
-        return redirect()->back()->with('success', 'Paciente atualizado com sucesso!');
+            ]);
+        }
+
+        return redirect()->back()->with('success', 'Serviço atualizado com sucesso!');
     }
 
     public function updateBox(Request $request, $idBox)
