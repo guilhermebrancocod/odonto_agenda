@@ -249,6 +249,12 @@
                             <td>${status}</td>
                             <td>
                                 <a href="/psicologia/agendamento/${ag.ID_AGENDAMENTO}" class="btn btn-sm btn-primary">Visualizar</a>
+                                <a href="/psicologia/agendamento/${ag.ID_AGENDAMENTO}/editar" class="btn btn-sm btn-warning">Editar</a>
+                                <form action="/psicologia/agendamento/${ag.ID_AGENDAMENTO}" method="POST" style="display:inline;" onsubmit="return confirm('Confirma a exclusão deste agendamento?');">
+                                    <input type="hidden" name="_method" value="DELETE" />
+                                    <input type="hidden" name="_token" value="${document.querySelector('meta[name=csrf-token]').content}" />
+                                    <button type="submit" class="btn btn-sm btn-danger">Excluir</button>
+                                </form>
                             </td>
                         `;
                         agendamentosTbody.appendChild(row);

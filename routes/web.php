@@ -112,7 +112,7 @@ Route::post('/psicologia/criar-agendamento/criar', [AgendamentoController::class
 
 Route::get('/consultar-agendamento', function () {
     return view('psicologia.consultar_agendamento');
-});
+})->name('listagem-agendamentos');
 Route::post('/consultar-agendamento/consultar', [AgendamentoController::class, 'getAgendamento'])->name('getAgendamento');
 
 
@@ -283,7 +283,7 @@ Route::post('/psicologia/criar-servico/criar', [ServicoController::class, 'criar
 
 Route::get('/psicologia/get-agendamento', [AgendamentoController::class, 'getAgendamento'])->name('getAgendamento');
 
-Route::get('/psicologia/agendamento/{id}', [AgendamentoController::class, 'show'])->name('agendamento.show');
+Route::get('/psicologia/agendamento/{id}', [AgendamentoController::class, 'showAgendamento'])->name('agendamento.show');
 
 // routes/web.php ou routes/api.php
 Route::get('/psicologia/agendamentos-calendar', [AgendamentoController::class, 'getAgendamentosForCalendar']);
@@ -292,3 +292,12 @@ Route::get('/psicologia/servicos', [ServicoController::class, 'getServicos']);
 Route::post('/psicologia/criar-servico', [ServicoController::class, 'criarServico']);
 Route::put('/psicologia/servicos/{id}', [ServicoController::class, 'atualizarServico']);
 Route::delete('/psicologia/servicos/{id}', [ServicoController::class, 'deletarServico']);
+
+// Para exibir o formulário de edição
+Route::get('/psicologia/agendamento/{id}/editar', [AgendamentoController::class, 'editAgendamento'])->name('agendamento.edit');
+
+// Para atualizar
+Route::put('/psicologia/agendamento/{id}', [AgendamentoController::class, 'updateAgendamento'])->name('agendamento.update');
+
+Route::delete('/psicologia/agendamento/{id}', [AgendamentoController::class, 'deleteAgendamento'])
+     ->name('psicologia.agendamento.delete');

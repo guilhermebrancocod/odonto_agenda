@@ -10,69 +10,68 @@ use Carbon\Carbon;
 
 class AgendamentoController extends Controller
 {
-
     // GET AGENDAMENTO
     public function getAgendamento(Request $request)
-{
-    $query = FaesaClinicaAgendamento::with([
-        'paciente',
-        'servico',
-        'clinica',
-        'agendamentoOriginal',
-        'remarcacoes'
-    ]);
+    {
+        $query = FaesaClinicaAgendamento::with([
+            'paciente',
+            'servico',
+            'clinica',
+            'agendamentoOriginal',
+            'remarcacoes'
+        ])
+        ->where('ID_CLINICA', 1);
 
-    if ($request->filled('search')) {
-        $search = $request->input('search');
-        $query->whereHas('paciente', function($q) use ($search) {
-            $q->where('NOME_COMPL_PACIENTE', 'like', "%{$search}%")
-              ->orWhere('CPF_PACIENTE', 'like', "%{$search}%");
-        });
-    }
-
-    if ($request->filled('date')) {
-        try {
-            $date = Carbon::parse($request->input('date'))->format('Y-m-d');
-            $query->where('DT_AGEND', $date);
-        } catch (\Exception $e) {
-            // ignora data inválida
+        if ($request->filled('search')) {
+            $search = $request->input('search');
+            $query->whereHas('paciente', function($q) use ($search) {
+                $q->where('NOME_COMPL_PACIENTE', 'like', "%{$search}%")
+                ->orWhere('CPF_PACIENTE', 'like', "%{$search}%");
+            });
         }
+
+        if ($request->filled('date')) {
+            try {
+                $date = Carbon::parse($request->input('date'))->format('Y-m-d');
+                $query->where('DT_AGEND', $date);
+            } catch (\Exception $e) {
+                // ignora data inválida
+            }
+        }
+
+        if ($request->filled('start_time')) {
+            $startTime = $request->input('start_time');
+            $query->where('HR_AGEND_INI', '>=', $startTime);
+        }
+
+        if ($request->filled('end_time')) {
+            $endTime = $request->input('end_time');
+            $query->where('HR_AGEND_FIN', '<=', $endTime);
+        }
+
+        if ($request->filled('status')) {
+            $query->where('STATUS_AGEND', $request->input('status'));
+        }
+
+        if ($request->filled('service')) {
+            $service = $request->input('service');
+            $query->whereHas('servico', function($q) use ($service) {
+                $q->where('SERVICO_CLINICA_DESC', 'like', "%{$service}%");
+            });
+        }
+
+        $query->orderBy('DT_AGEND', 'desc');
+
+        // Pega o parâmetro limit (padrão 10)
+        $limit = (int) $request->input('limit', 10);
+
+        // Opcional: define limite máximo para evitar consultas muito grandes
+        $limit = min($limit, 100);
+
+        $agendamentos = $query->limit($limit)->get();
+
+        return response()->json($agendamentos);
     }
-
-    if ($request->filled('start_time')) {
-        $startTime = $request->input('start_time');
-        $query->where('HR_AGEND_INI', '>=', $startTime);
-    }
-
-    if ($request->filled('end_time')) {
-        $endTime = $request->input('end_time');
-        $query->where('HR_AGEND_FIN', '<=', $endTime);
-    }
-
-    if ($request->filled('status')) {
-        $query->where('STATUS_AGEND', $request->input('status'));
-    }
-
-    if ($request->filled('service')) {
-        $service = $request->input('service');
-        $query->whereHas('servico', function($q) use ($service) {
-            $q->where('SERVICO_CLINICA_DESC', 'like', "%{$service}%");
-        });
-    }
-
-    $query->orderBy('DT_AGEND', 'desc');
-
-    // Pega o parâmetro limit (padrão 10)
-    $limit = (int) $request->input('limit', 10);
-
-    // Opcional: define limite máximo para evitar consultas muito grandes
-    $limit = min($limit, 100);
-
-    $agendamentos = $query->limit($limit)->get();
-
-    return response()->json($agendamentos);
-}
-
 
     // CRIAR AGENDAMENTO
     public function criarAgendamento(Request $request)
@@ -232,22 +231,22 @@ class AgendamentoController extends Controller
         return redirect('/psicologia/criar-agendamento/')->with('success', 'Agendamento criado com sucesso!');
     }
 
-    public function show($id)
-{
-    $agendamento = FaesaClinicaAgendamento::with([
-        'paciente',
-        'servico',
-        'clinica',
-        'agendamentoOriginal',
-        'remarcacoes'
-    ])->find($id);
+    public function showAgendamento($id)
+    {
+        $agendamento = FaesaClinicaAgendamento::with([
+            'paciente',
+            'servico',
+            'clinica',
+            'agendamentoOriginal',
+            'remarcacoes'
+        ])->find($id);
 
-    if (!$agendamento) {
-        abort(404, 'Agendamento não encontrado');
+        if (!$agendamento) {
+            abort(404, 'Agendamento não encontrado');
+        }
+
+        return view('psicologia.agendamento_show', compact('agendamento'));
     }
-
-    return view('psicologia.agendamento_show', compact('agendamento'));
-}
 
     public function getAgendamentosForCalendar()
     {
@@ -282,5 +281,47 @@ class AgendamentoController extends Controller
         });
 
         return response()->json($events);
+    }
+
+    // RETORNA VIEW DE EDIÇÃO DE AGENDAMENTO
+    public function editAgendamento($id)
+    {
+        $agendamento = FaesaClinicaAgendamento::with('paciente', 'servico')->findOrFail($id);
+        return view('psicologia.editar_agendamento', compact('agendamento'));
+    }
+
+    // CONTROLLER DE EDIÇÃO DE PACIENTE
+    public function updateAgendamento(Request $request, $id)
+    {
+        $request->validate([
+            'date' => 'required|date',
+            'start_time' => 'required',
+            'end_time' => 'required',
+            'status' => 'required|string',
+        ]);
+
+        $agendamento = FaesaClinicaAgendamento::findOrFail($id);
+        $agendamento->DT_AGEND = $request->input('date');
+        $agendamento->HR_AGEND_INI = $request->input('start_time');
+        $agendamento->HR_AGEND_FIN = $request->input('end_time');
+        $agendamento->STATUS_AGEND = $request->input('status');
+        $agendamento->save();
+
+        return redirect()->route('listagem-agendamentos', $agendamento->ID_AGENDAMENTO)
+                         ->with('success', 'Agendamento atualizado com sucesso!');
+    }
+
+    // FUNÇÃO DE EXCLUSÃO DE AGENDAMENTP
+    public function deleteAgendamento(Request $request, $id)
+    {
+        // Busca o agendamento pelo ID ou falha (404)
+        $agendamento = FaesaClinicaAgendamento::findOrFail($id);
+
+        // Exclui o agendamento
+        $agendamento->delete();
+
+        // Redireciona para a lista ou outra rota com mensagem de sucesso
+        return redirect()->route('listagem-agendamentos')
+                        ->with('success', 'Agendamento excluído com sucesso!');
     }
 }
