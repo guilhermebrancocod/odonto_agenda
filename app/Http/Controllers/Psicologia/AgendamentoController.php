@@ -13,49 +13,66 @@ class AgendamentoController extends Controller
 
     // GET AGENDAMENTO
     public function getAgendamento(Request $request)
-    {
-        $query = FaesaClinicaAgendamento::with([
-            'paciente',
-            'servico',
-            'clinica',
-            'agendamentoOriginal',
-            'remarcacoes'
-        ]);
+{
+    $query = FaesaClinicaAgendamento::with([
+        'paciente',
+        'servico',
+        'clinica',
+        'agendamentoOriginal',
+        'remarcacoes'
+    ]);
 
-        if ($request->filled('search')) {
-            $search = $request->input('search');
-            $query->whereHas('paciente', function($q) use ($search) {
-                $q->where('NOME_COMPL_PACIENTE', 'like', "%{$search}%")
-                ->orWhere('CPF_PACIENTE', 'like', "%{$search}%");
-            });
-        }
-
-        if ($request->filled('paciente_id')) {
-            $query->where('ID_PACIENTE', $request->input('paciente_id'));
-        }
-
-        if ($request->filled('dt_agend')) {
-            $query->whereDate('DT_AGEND', Carbon::parse($request->input('dt_agend'))->format('Y-m-d'));
-        }
-
-        if ($request->filled('status_agend')) {
-            $query->where('STATUS_AGEND', $request->input('status_agend'));
-        }
-
-        $query->orderBy('DT_AGEND', 'desc');
-
-        // Se não enviou nenhum filtro (nenhum parâmetro), limitar a 5 registros
-        if (!$request->filled('search') &&
-            !$request->filled('paciente_id') &&
-            !$request->filled('dt_agend') &&
-            !$request->filled('status_agend')) {
-            $agendamentos = $query->limit(5)->get();
-        } else {
-            $agendamentos = $query->get();
-        }
-
-        return response()->json($agendamentos);
+    if ($request->filled('search')) {
+        $search = $request->input('search');
+        $query->whereHas('paciente', function($q) use ($search) {
+            $q->where('NOME_COMPL_PACIENTE', 'like', "%{$search}%")
+              ->orWhere('CPF_PACIENTE', 'like', "%{$search}%");
+        });
     }
+
+    if ($request->filled('date')) {
+        try {
+            $date = Carbon::parse($request->input('date'))->format('Y-m-d');
+            $query->where('DT_AGEND', $date);
+        } catch (\Exception $e) {
+            // ignora data inválida
+        }
+    }
+
+    if ($request->filled('start_time')) {
+        $startTime = $request->input('start_time');
+        $query->where('HR_AGEND_INI', '>=', $startTime);
+    }
+
+    if ($request->filled('end_time')) {
+        $endTime = $request->input('end_time');
+        $query->where('HR_AGEND_FIN', '<=', $endTime);
+    }
+
+    if ($request->filled('status')) {
+        $query->where('STATUS_AGEND', $request->input('status'));
+    }
+
+    if ($request->filled('service')) {
+        $service = $request->input('service');
+        $query->whereHas('servico', function($q) use ($service) {
+            $q->where('SERVICO_CLINICA_DESC', 'like', "%{$service}%");
+        });
+    }
+
+    $query->orderBy('DT_AGEND', 'desc');
+
+    // Pega o parâmetro limit (padrão 10)
+    $limit = (int) $request->input('limit', 10);
+
+    // Opcional: define limite máximo para evitar consultas muito grandes
+    $limit = min($limit, 100);
+
+    $agendamentos = $query->limit($limit)->get();
+
+    return response()->json($agendamentos);
+}
+
 
     // CRIAR AGENDAMENTO
     public function criarAgendamento(Request $request)

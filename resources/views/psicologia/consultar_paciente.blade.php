@@ -8,6 +8,9 @@
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700&display=swap" rel="stylesheet" />
     <link href="https://cdnjs.cloudflare.com/ajax/libs/mdb-ui-kit/7.1.0/mdb.min.css" rel="stylesheet" />
 
+    <!-- BOOTSTRAP ICONS -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.1/font/bootstrap-icons.min.css">
+
     <meta name="csrf-token" content="{{ csrf_token() }}">
 
     <style>
@@ -15,16 +18,16 @@
             height: 100%;
             margin: 0;
         }
-        #content-wrapper {
-            height: calc(100vh - 56px); /* altura padrão da navbar Bootstrap */
+         #content-wrapper {
+            height: calc(100vh - 56px);
             overflow-y: auto;
             padding: 16px;
             display: flex;
-            justify-content: center;
-            align-items: flex-start;
+            flex-direction: column;
+            align-items: stretch;
+            width: 100%;
             background-color: #f8f9fa;
-        }
-
+        
         /* ADICIONA SCROLL CASO EXCEDA O MÁXIMO DE ALTURA DEFINIDO */
         .modal-body {
             max-height: 60vh;
@@ -38,7 +41,7 @@
     @include('components.navbar')
 
     <div id="content-wrapper">
-        <div class="bg-white p-4 rounded shadow-sm w-100" style="max-width: 1100px;">
+        <div class="bg-white p-4 rounded shadow-sm w-100" style="">
             <h2 class="mb-4 text-center">Consultar Paciente</h2>
 
             <!-- Formulário de pesquisa -->
@@ -119,7 +122,10 @@
 
                         <!-- NOME DO PACIENTE -->
                         <div class="mb-3">
-                            <label for="editPacienteNome" class="form-label">Nome</label>
+                            <label for="editPacienteNome" class="form-label">
+                                <i class="bi bi-person"></i>
+                                Nome
+                            </label>
                             <input type="text" class="form-control" id="editPacienteNome" name="nome">
                         </div>
                         
