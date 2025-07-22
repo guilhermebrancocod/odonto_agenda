@@ -1,6 +1,4 @@
-import { createNavBar } from '/js/odontologia/navbar.js';
-import { Modal } from 'https://cdnjs.cloudflare.com/ajax/libs/mdb-ui-kit/7.1.0/mdb.es.min.js';
-
+import { createNavBar } from './navbar.js';
 
 function carregarTodosServicos() {
     const $select = $('#selectService');
@@ -29,7 +27,7 @@ function carregarTodosServicos() {
                     <tr>
                         <td>${servico.SERVICO_CLINICA_DESC}</td>
                         <td>${servico.VALOR_SERVICO != null && servico.VALOR_SERVICO !== '' ? 'R$ ' + parseFloat(servico.VALOR_SERVICO).toFixed(2) : ''}</td>
-                        <td>${servico.DISCIPLINA}</td>
+                        <td>${servico.DISCIPLINA ? servico.DISCIPLINA : ''}</td>
                         <td>${servico.ATIVO}</td>
                         <td>
                             <button 
@@ -138,7 +136,7 @@ const addPatient = document.getElementById('add');
 
 addPatient.addEventListener('click', function (event) {
     event.preventDefault();
-    window.location.href = '/odontologia/criarservico';
+    window.location.href = 'criarservico';
 });
 
 const navbarContainer = document.getElementById('navbar-container');

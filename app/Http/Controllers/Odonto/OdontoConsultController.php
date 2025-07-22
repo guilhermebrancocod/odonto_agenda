@@ -98,6 +98,7 @@ class OdontoConsultController extends Controller
             ->select(
                 'DESCRICAO',
                 'ATIVO',
+                'ID_BOX_CLINICA'
             )
             ->where('ID_CLINICA', '=', 2);
 
@@ -116,6 +117,7 @@ class OdontoConsultController extends Controller
 
         $query = DB::table('FAESA_CLINICA_BOX_DISCIPLINA')
             ->select(
+                'ID_BOX_DISCIPLINA',
                 'DISCIPLINA',
                 'ID_BOX',
                 'DIA_SEMANA',
@@ -125,7 +127,7 @@ class OdontoConsultController extends Controller
             ->where('ID_CLINICA', '=', 2);
 
         if ($boxesDisciplineId) {
-            $query->where('ID_BOX_CLINICA', $boxesDisciplineId);
+            $query->where('ID_BOX_DISCIPLINA', $boxesDisciplineId);
         }
 
         $boxesDisciplines = $query->get();
@@ -175,13 +177,13 @@ class OdontoConsultController extends Controller
 
     public function services(Request $request)
     {
-        $query = DB::table('FAESA_CLINICA_SERVICO')
-            ->select('ID_SERVICO_CLINICA', 'SERVICO_CLINICA_DESC');
+        $query = DB::table('FAESA_CLINICA_SERVICO as s')
+            ->join('FAESA_CLINICA_SERVICO_DISCIPLINA as sd', 'sd.ID_SERVICO_CLINICA', '=', 's.ID_SERVICO_CLINICA')
+            ->select('s.ID_SERVICO_CLINICA', 's.SERVICO_CLINICA_DESC', 'sd.DISCIPLINA');
 
         if ($request->has('query')) {
             $search = $request->query('query');
-            $query->where('SERVICO_CLINICA_DESC', 'like', '%' . $search . '%')
-                ->where('ID_CLINICA', '=', 2);
+            $query->where('s.SERVICO_CLINICA_DESC', 'like', '%' . $search . '%');
         }
 
         $servicos = $query->get();
@@ -240,6 +242,7 @@ class OdontoConsultController extends Controller
             ->join('FAESA_CLINICA_PACIENTE', 'FAESA_CLINICA_AGENDAMENTO.ID_PACIENTE', '=', 'FAESA_CLINICA_PACIENTE.ID_PACIENTE')
             ->select(
                 'FAESA_CLINICA_AGENDAMENTO.ID_AGENDAMENTO as id',
+                'FAESA_CLINICA_AGENDAMENTO.ID_SERVICO as servicoId',
                 'FAESA_CLINICA_AGENDAMENTO.DT_AGEND',
                 'FAESA_CLINICA_AGENDAMENTO.HR_AGEND_INI',
                 'FAESA_CLINICA_AGENDAMENTO.HR_AGEND_FIN',
@@ -255,6 +258,7 @@ class OdontoConsultController extends Controller
             ->map(function ($item) {
                 return [
                     'id' => $item->id,
+                    'servicoId' => $item->servicoId,
                     'title' => $item->paciente,
                     'start' => $item->DT_AGEND . 'T' . substr($item->HR_AGEND_INI, 0, 5),
                     'end' => $item->DT_AGEND . 'T' . substr($item->HR_AGEND_FIN, 0, 5),
@@ -293,8 +297,20 @@ class OdontoConsultController extends Controller
     {
         $query = $request->input('query');
 
-        $servicos = DB::table('FAESA_CLINICA_SERVICO')
-            ->select('ID_SERVICO_CLINICA', 'SERVICO_CLINICA_DESC', 'VALOR_SERVICO', 'DISCIPLINA','ATIVO')
+        $servicos =  DB::table('FAESA_CLINICA_SERVICO')
+            ->select(
+                'FAESA_CLINICA_SERVICO.ID_SERVICO_CLINICA',
+                'SERVICO_CLINICA_DESC',
+                'VALOR_SERVICO',
+                'FAESA_CLINICA_SERVICO_DISCIPLINA.DISCIPLINA',
+                'ATIVO'
+            )
+            ->leftJoin(
+                'FAESA_CLINICA_SERVICO_DISCIPLINA',
+                'FAESA_CLINICA_SERVICO_DISCIPLINA.ID_SERVICO_CLINICA',
+                '=',
+                'FAESA_CLINICA_SERVICO.ID_SERVICO_CLINICA'
+            )
             ->where('SERVICO_CLINICA_DESC', 'like', '%' . $query . '%')
             ->where('ID_CLINICA', '=', 2)
             ->get();
@@ -347,8 +363,8 @@ class OdontoConsultController extends Controller
     public function getBoxes(Request $request)
     {
         $query = DB::table('FAESA_CLINICA_BOXES')
-            ->select('FAESA_CLINICA_BOXES.DESCRICAO', 'FAESA_CLINICA_BOXES.ID_BOX_CLINICA')
-            ->where('FAESA_CLINICA_BOXES.ATIVO', '=', 'S');
+            ->select('DESCRICAO', 'ID_BOX_CLINICA')
+            ->where('ATIVO', '=', 'S');
 
         if ($request->has('query')) {
             $search = $request->query('query');
@@ -377,5 +393,33 @@ class OdontoConsultController extends Controller
             ->get();
 
         return view('odontologia/consult_box_discipline', compact('selectBoxDiscipline', 'query_box_discipline'));
+    }
+
+    public function getBoxeServicos($servicoId)
+    {
+  
+        // Busca a disciplina associada ao serviço
+        $query_servico = DB::table('FAESA_CLINICA_SERVICO_DISCIPLINA')
+            ->join('FAESA_CLINICA_SERVICO', 'FAESA_CLINICA_SERVICO.ID_SERVICO_CLINICA', '=', 'FAESA_CLINICA_SERVICO_DISCIPLINA.ID_SERVICO_CLINICA')
+            ->select('FAESA_CLINICA_SERVICO_DISCIPLINA.DISCIPLINA')
+            ->where('FAESA_CLINICA_SERVICO.ID_CLINICA', '=', 2)
+            ->where('FAESA_CLINICA_SERVICO.ID_SERVICO_CLINICA', '=', $servicoId)
+            ->first();
+
+        if (!$query_servico) {
+            return response()->json([], 404);
+        }
+
+        $disciplina = $query_servico->DISCIPLINA;
+
+        // Busca os boxes compatíveis com a disciplina
+        $boxes = DB::table('FAESA_CLINICA_BOX_DISCIPLINA')
+            ->join('FAESA_CLINICA_BOXES', 'FAESA_CLINICA_BOXES.ID_BOX_CLINICA', '=', 'FAESA_CLINICA_BOX_DISCIPLINA.ID_BOX')
+            ->select('DESCRICAO', 'ATIVO', 'ID_BOX_CLINICA')
+            ->where('FAESA_CLINICA_BOXES.ID_CLINICA', '=', 2)
+            ->where('FAESA_CLINICA_BOX_DISCIPLINA.DISCIPLINA', '=', $disciplina)
+            ->get();
+
+        return response()->json($boxes);
     }
 }

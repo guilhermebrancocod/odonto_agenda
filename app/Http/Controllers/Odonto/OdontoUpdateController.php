@@ -38,36 +38,26 @@ class OdontoUpdateController extends Controller
     {
         $disciplinas = $request->input('disciplines', []);
 
-        $servico = DB::table('FAESA_CLINICA_SERVICO')->where('ID_SERVICO_CLINICA', $idService)->first();
-
-        if (!$servico) {
-            return redirect()->back()->with('error', 'Serviço não encontrado!');
-        }
-
-        $temAgendamento = DB::table('FAESA_CLINICA_AGENDAMENTO')
-            ->where('ID_SERVICO', $idService)
-            ->exists();
-
-        if ($temAgendamento) {
-            // Apenas desativa o serviço
-            DB::table('FAESA_CLINICA_SERVICO')
-                ->where('ID_SERVICO_CLINICA', $idService)
-                ->update(['ATIVO' => 'N']);
-        } else {
-            // Deleta o serviço
-            DB::table('FAESA_CLINICA_SERVICO')
-                ->where('ID_SERVICO_CLINICA', $idService)
-                ->delete();
-        }
-
-        foreach ($disciplinas as $disciplina) {
-            DB::table('FAESA_CLINICA_SERVICO')->insert([
+        // Atualiza os dados do serviço
+        DB::table('FAESA_CLINICA_SERVICO')
+            ->where('ID_SERVICO_CLINICA', $idService)
+            ->update([
                 'ID_CLINICA' => 2,
                 'SERVICO_CLINICA_DESC' => $request->input('descricao'),
-                'COD_INTERNO_SERVICO_CLINICA' => 0,
-                'DISCIPLINA' => $disciplina,
                 'VALOR_SERVICO' => $request->input('valor'),
+                'ATIVO' => empty($disciplinas) ? 'N' : 'S',
+            ]);
 
+        // Remove todas as disciplinas associadas anteriormente
+        DB::table('FAESA_CLINICA_SERVICO_DISCIPLINA')
+            ->where('ID_SERVICO_CLINICA', $idService)
+            ->delete();
+
+        // Se houver disciplinas marcadas, associa novamente
+        foreach ($disciplinas as $disciplina) {
+            DB::table('FAESA_CLINICA_SERVICO_DISCIPLINA')->insert([
+                'ID_SERVICO_CLINICA' => $idService,
+                'DISCIPLINA' => $disciplina
             ]);
         }
 
@@ -130,20 +120,56 @@ class OdontoUpdateController extends Controller
 
     public function updateBoxDiscipline(Request $request, $idBoxDiscipline)
     {
-        $idBoxDiscipline = DB::table('FAESA_CLINICA_BOX_DISCIPLINA')->where('ID_BOX_DISCIPLINA', $idBoxDiscipline)->first();
+        $disciplina = $request->input('disciplina');
+        $diaSemana = $request->input('dia_semana');
+        $hrInicio = $request->input('hr_inicio');
+        $hrFim = $request->input('hr_fim');
+        $boxesSelecionados = $request->input('boxes', []); // boxes marcados no form
 
-        DB::table('FAESA_CLINICA_BOX_DISCIPLINA')
-            ->where('ID_BOX_CLINICA', $idBoxDiscipline)
-            ->update([
+        // Busca boxes já cadastrados no banco para essa disciplina
+        $boxesAntigos = DB::table('FAESA_CLINICA_BOX_DISCIPLINA')
+            ->where('ID_BOX_DISCIPLINA', $idBoxDiscipline)
+            ->pluck('ID_BOX')
+            ->toArray();
+
+        // Calcula boxes a adicionar (estão no novo, mas não estavam no banco)
+        $boxesParaAdicionar = array_diff($boxesSelecionados, $boxesAntigos);
+
+        // Calcula boxes a remover (estavam no banco, mas não estão no novo)
+        $boxesParaRemover = array_diff($boxesAntigos, $boxesSelecionados);
+
+        // Remove os desmarcados
+        if (!empty($boxesParaRemover)) {
+            DB::table('FAESA_CLINICA_BOX_DISCIPLINA')
+                ->where('ID_BOX_DISCIPLINA', $idBoxDiscipline)
+                ->whereIn('ID_BOX', $boxesParaRemover)
+                ->delete();
+        }
+
+        // Adiciona os novos
+        foreach ($boxesParaAdicionar as $boxId) {
+            DB::table('FAESA_CLINICA_BOX_DISCIPLINA')->insert([
                 'ID_CLINICA' => 2,
-                'ID_BOX' => $request->input('ID_BOX_CLINICA'),
-                'DISCIPLINA' => $request->input('disciplina'),
-                'DIA_SEMANA' => $request->input('status'),
-                'HR_INICIO' => $request->input('hr_inicio'),
-                'HR_FIM' => $request->input('hr_fim'),
-                'DT_CADASTRO' => $request->input(getdate())
+                'ID_BOX' => $boxId,
+                'DISCIPLINA' => $disciplina,
+                'DIA_SEMANA' => $diaSemana,
+                'HR_INICIO' => $hrInicio,
+                'HR_FIM' => $hrFim,
+                'DT_CADASTRO' => now()
+            ]);
+        }
+
+        // Atualiza os campos comuns da disciplina (caso precise atualizar o horário, por exemplo)
+        DB::table('FAESA_CLINICA_BOX_DISCIPLINA')
+            ->where('ID_BOX_DISCIPLINA', $idBoxDiscipline)
+            ->update([
+                'DISCIPLINA' => $disciplina,
+                'DIA_SEMANA' => $diaSemana,
+                'HR_INICIO' => $hrInicio,
+                'HR_FIM' => $hrFim,
+                'DT_CADASTRO' => now()
             ]);
 
-        return redirect()->back()->with('success', 'Disciplinas e/ou Box atualizado com sucesso!');
+        return redirect()->back()->with('success', 'Disciplinas e boxes atualizados com sucesso!');
     }
 }

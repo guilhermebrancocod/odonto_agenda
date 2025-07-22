@@ -159,20 +159,13 @@ class OdontoCreateController extends Controller
     {
         $disciplines = $request->input('disciplines');
 
-        if (!$disciplines || count($disciplines) === 0) {
-            return redirect()->back()->with('error', 'Nenhum box foi selecionado.');
-        }
-
-        foreach ($disciplines as $discipline) {
-            $idService = DB::table('FAESA_CLINICA_SERVICO')->insertGetId([
-                'ID_CLINICA' => 2,
-                'SERVICO_CLINICA_DESC' => $request->input('descricao'),
-                'COD_INTERNO_SERVICO_CLINICA' => 0,
-                'VALOR_SERVICO' => $request->input('valor'),
-                'ATIVO' => $request->input('ativo'),
-                'DISCIPLINA' => $discipline
-            ]);
-        }
+        $idService = DB::table('FAESA_CLINICA_SERVICO')->insertGetId([
+            'ID_CLINICA' => 2,
+            'SERVICO_CLINICA_DESC' => $request->input('descricao'),
+            'COD_INTERNO_SERVICO_CLINICA' => 0,
+            'VALOR_SERVICO' => $request->input('valor'),
+            'ATIVO' => $request->input('ativo')
+        ]);
         return redirect()->back()->with('success', 'Serviço cadastrado com sucesso!');
     }
 
@@ -198,6 +191,17 @@ class OdontoCreateController extends Controller
         return redirect()->back()->with('success', 'Box cadastrado com sucesso!');
     }
 
+    public function editBox($idBox)
+    {
+        $box = DB::table('FAESA_CLINICA_BOXES')->where('ID_BOX_CLINICA', $idBox)->first();
+
+        if (!$box) {
+            return redirect('odontologia/consultarbox')->with('error', 'Serviço não encontrado.');
+        }
+
+        return view('odontologia.create_box', compact('box'));
+    }
+
     public function createBoxDiscipline(Request $request)
     {
         $boxes = $request->input('boxes');
@@ -219,5 +223,24 @@ class OdontoCreateController extends Controller
             ]);
         }
         return redirect()->back()->with('success', ' Disciplina e dia da semana vinculado a um ou mais boxes!');
+    }
+
+    public function editBoxDiscipline($idBoxDiscipline)
+    {
+        $BoxDiscipline = DB::table('FAESA_CLINICA_BOX_DISCIPLINA')->where('ID_BOX_DISCIPLINA', $idBoxDiscipline)->first();
+
+        if (!$BoxDiscipline) {
+            return redirect('odontologia/criarboxdisciplina')->with('error', 'Serviço não encontrado.');
+        }
+
+        return view('odontologia.create_box_discipline', compact('BoxDiscipline'));
+    }
+
+    public function defineLocalAtendimento($agendaId, $boxId)
+    {
+        DB::table('FAESA_CLINICA_LOCAL_AGENDAMENTO')->inserGetId([
+            'ID_AGENDAMENTO' => $agendaId,
+            'ID_BOX' => $boxId
+        ]);
     }
 }

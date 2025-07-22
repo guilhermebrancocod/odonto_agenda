@@ -150,7 +150,7 @@
                     </select>
                 </div>
                 <!-- Serviço -->
-                <div class="col-md-4" style="overflow: hidden;">
+                <div class="col-md-4">
                     <label class="form-label">Serviço</label>
                     <select id="form-select" class="form-select" name="servico">
                     </select>

@@ -1,4 +1,4 @@
-import { createNavBar } from '/js/odontologia/navbar.js';
+import { createNavBar } from './navbar.js';
 
 $('.datepicker').datepicker({
     format: 'dd/mm/yyyy',
