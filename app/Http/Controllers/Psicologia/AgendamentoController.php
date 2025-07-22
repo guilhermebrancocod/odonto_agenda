@@ -95,12 +95,26 @@ class AgendamentoController extends Controller
             'status_agend' => 'required|string',
             'id_agend_remarcado' => 'nullable|integer',
             'recorrencia' => 'nullable|string|max:64',
-            'tem_recorrencia' => 'nullable|string',
+            'tem_recorrencia' => 'nullable|in:0,1',
+            'duracao_meses_recorrencia' => 'nullable|integer|in:1,2,3,4,5,6,7,8,9,10,11,12',
             'valor_agend' => 'nullable|numeric',
             'observacoes' => 'nullable|string',
             'dias_semana' => 'nullable|array',
             'dias_semana.*' => 'in:0,1,2,3,4,5,6',
-            'data_fim_recorrencia' => 'nullable|date|after_or_equal:dia_agend',
+            'data_fim_recorrencia' => [
+                'nullable',
+                'date',
+                'after_or_equal:dia_agend',
+                function ($attribute, $value, $fail) use ($request) {
+                    if ($request->filled('dia_agend') && $value) {
+                        $dataInicio = Carbon::parse($request->input('dia_agend'));
+                        $dataFim = Carbon::parse($value);
+                        if ($dataFim->greaterThan($dataInicio->copy()->addYear())) {
+                            $fail('A data final da recorrência não pode ultrapassar 1 ano em relação à data de início.');
+                        }
+                    }
+                },
+            ],
         ], [
             'paciente_id.required' => 'Selecione um paciente antes de continuar.',
             'id_servico.required' => 'Selecione um serviço antes de continuar.',
@@ -108,19 +122,31 @@ class AgendamentoController extends Controller
             'hr_ini.required' => 'Informe o horário de início.',
             'hr_fim.required' => 'Informe o horário de término.',
             'valor_agend.numeric' => 'Informe um valor válido para o agendamento.',
-            'data_fim_recorrencia.after_or_equal' => 'A data final da recorrência deve ser igual ou posterior ao dia do agendamento.'
+            'data_fim_recorrencia.after_or_equal' => 'A data final da recorrência deve ser igual ou posterior ao dia do agendamento.',
         ]);
 
-        $valorAgend = $request->valor_agend ? str_replace(',', '.', $request->valor_agend) : null;
+        $valorAgend = $request->valor_agend ?? null;
         $servico = FaesaClinicaServico::find($request->id_servico);
 
         /**
-         * ✅ 1) Se marcada recorrência, priorize-a ignorando os prazos fixos.
+         * ✅ 1) Caso marcada a recorrência manual
          */
         if ($request->input('tem_recorrencia') === "1") {
             $diasSemana = $request->input('dias_semana', []);
             $dataInicio = Carbon::parse($request->dia_agend);
-            $dataFim = Carbon::parse($request->data_fim_recorrencia);
+
+            // Se selecionou duração em meses, calcula a data final da recorrência
+            if ($request->filled('duracao_meses_recorrencia')) {
+                $meses = (int) $request->duracao_meses_recorrencia;
+                $dataFim = $dataInicio->copy()->addMonths($meses);
+            }
+            // Se enviou data_fim_recorrencia direta, usa ela
+            elseif ($request->filled('data_fim_recorrencia')) {
+                $dataFim = Carbon::parse($request->data_fim_recorrencia);
+            } else {
+                // fallback padrão: 1 mês
+                $dataFim = $dataInicio->copy()->addMonth();
+            }
 
             $agendamentosCriados = [];
 
@@ -148,129 +174,25 @@ class AgendamentoController extends Controller
         }
 
         /**
-         * ✅ 2) Caso NÃO esteja marcada recorrência, aplica regra conforme o serviço.
+         * ✅ 2) Se não marcada a recorrência manual, seguem as regras padrão:
+         *      - triagem / plantão: 3 agendamentos semanais
+         *      - psicodiagnóstico: 6 meses semanais
+         *      - psicoterapia / educação: 1 ano semanal
+         *      - se o serviço tiver tempo recorrência em meses, usa esse tempo
          */
+
+        $dataInicio = Carbon::parse($request->dia_agend);
+
         if ($servico && in_array(strtolower($servico->SERVICO_CLINICA_DESC), ['triagem', 'plantão'])) {
-            $dataInicio = Carbon::parse($request->dia_agend);
             for ($i = 0; $i < 3; $i++) {
                 $dataAgendamento = $dataInicio->copy()->addWeeks($i);
-                $dados = [
-                    'ID_CLINICA' => $idClinica,
-                    'ID_PACIENTE' => $request->paciente_id,
-                    'ID_SERVICO' => $request->id_servico,
-                    'DT_AGEND' => $dataAgendamento->format('d-m-Y'),
-                    'HR_AGEND_INI' => $request->hr_ini,
-                    'HR_AGEND_FIN' => $request->hr_fim,
-                    'STATUS_AGEND' => 'Agendado',
-                    'RECORRENCIA' => null,
-                    'VALOR_AGEND' => $valorAgend,
-                    'OBSERVACOES' => $request->observacoes,
-                ];
-                FaesaClinicaAgendamento::create($dados);
+                $this->criarAgendamentoSimples($request, $dataAgendamento, $valorAgend, $idClinica);
             }
+
             return redirect('/psicologia/criar-agendamento/')
                 ->with('success', 'Gerados 3 agendamentos, 1 por semana!');
         }
-
-        if ($servico && strtolower($servico->SERVICO_CLINICA_DESC) === 'psicodiagnóstico') {
-            $dataInicio = Carbon::parse($request->dia_agend);
-            $dataFim = $dataInicio->copy()->addMonths(6);
-
-            for ($data = $dataInicio->copy(); $data->lte($dataFim); $data->addWeek()) {
-                $dados = [
-                    'ID_CLINICA' => $idClinica,
-                    'ID_PACIENTE' => $request->paciente_id,
-                    'ID_SERVICO' => $request->id_servico,
-                    'DT_AGEND' => $data->format('d-m-Y'),
-                    'HR_AGEND_INI' => $request->hr_ini,
-                    'HR_AGEND_FIN' => $request->hr_fim,
-                    'STATUS_AGEND' => 'Agendado',
-                    'RECORRENCIA' => null,
-                    'VALOR_AGEND' => $valorAgend,
-                    'OBSERVACOES' => $request->observacoes,
-                ];
-                FaesaClinicaAgendamento::create($dados);
-            }
-            return redirect('/psicologia/criar-agendamento/')
-                ->with('success', 'Atendimentos semanais gerados para 6 meses.');
-        }
-
-        if ($servico && in_array(strtolower($servico->SERVICO_CLINICA_DESC), ['psicoterapia', 'educação'])) {
-            $dataInicio = Carbon::parse($request->dia_agend);
-            $dataFim = $dataInicio->copy()->addYear();
-
-            for ($data = $dataInicio->copy(); $data->lte($dataFim); $data->addWeek()) {
-                $dados = [
-                    'ID_CLINICA' => $idClinica,
-                    'ID_PACIENTE' => $request->paciente_id,
-                    'ID_SERVICO' => $request->id_servico,
-                    'DT_AGEND' => $data->format('d-m-Y'),
-                    'HR_AGEND_INI' => $request->hr_ini,
-                    'HR_AGEND_FIN' => $request->hr_fim,
-                    'STATUS_AGEND' => 'Agendado',
-                    'RECORRENCIA' => null,
-                    'VALOR_AGEND' => $valorAgend,
-                    'OBSERVACOES' => $request->observacoes,
-                ];
-                FaesaClinicaAgendamento::create($dados);
-            }
-            return redirect('/psicologia/criar-agendamento/')
-                ->with('success', 'Atendimentos semanais gerados para 1 ano.');
-        }
-
-        /**
-        * ✅ 2) Caso NÃO esteja marcada recorrência manual,
-        * usa a recorrência padrão do serviço, se houver.
-        */
-
-        if ($servico && $servico->TEMPO_RECORRENCIA_MESES && $servico->TEMPO_RECORRENCIA_MESES > 0) {
-            // converte para inteiro (meses)
-            $meses = (int) $servico->TEMPO_RECORRENCIA_MESES;
-
-            $dataInicio = Carbon::parse($request->dia_agend);
-            $dataFim = $dataInicio->copy()->addMonths($meses);
-
-            for ($data = $dataInicio->copy(); $data->lte($dataFim); $data->addWeek()) {
-                $dados = [
-                    'ID_CLINICA' => $idClinica,
-                    'ID_PACIENTE' => $request->paciente_id,
-                    'ID_SERVICO' => $request->id_servico,
-                    'DT_AGEND' => $data->format('d-m-Y'),
-                    'HR_AGEND_INI' => $request->hr_ini,
-                    'HR_AGEND_FIN' => $request->hr_fim,
-                    'STATUS_AGEND' => 'Agendado',
-                    'RECORRENCIA' => null,
-                    'VALOR_AGEND' => $valorAgend,
-                    'OBSERVACOES' => $request->observacoes,
-                ];
-                FaesaClinicaAgendamento::create($dados);
-            }
-
-            return redirect('/psicologia/criar-agendamento/')
-                ->with('success', 'Atendimentos semanais gerados conforme recorrência padrão do serviço.');
-        }
-
-        /**
-         * ✅ Caso não caia em nenhuma condição acima, cria um único agendamento simples.
-         */
-        $dados = [
-            'ID_CLINICA' => $idClinica,
-            'ID_PACIENTE' => $request->paciente_id,
-            'ID_SERVICO' => $request->id_servico,
-            'DT_AGEND' => $request->dia_agend,
-            'HR_AGEND_INI' => $request->hr_ini,
-            'HR_AGEND_FIN' => $request->hr_fim,
-            'STATUS_AGEND' => 'Agendado',
-            'RECORRENCIA' => null,
-            'VALOR_AGEND' => $valorAgend,
-            'OBSERVACOES' => $request->observacoes,
-        ];
-        FaesaClinicaAgendamento::create($dados);
-
-        return redirect('/psicologia/criar-agendamento/')
-            ->with('success', 'Agendamento criado com sucesso!');
     }
-
 
     public function showAgendamento($id)
     {

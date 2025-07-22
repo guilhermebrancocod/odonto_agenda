@@ -155,14 +155,33 @@
 
             <div class="row g-2">
 
-                <!-- CHECKBOX TEM RECORRÊNCIA -->
+                <!-- CHECKBOX TEM RECORRÊNCIA E SELETOR DE DURAÇÃO -->
                 <div class="col-12 mb-2">
-                    <div class="form-check form-switch">
+                    <div class="form-check form-switch d-flex align-items-center gap-3">
                         <input class="form-check-input" type="checkbox" value="1" id="temRecorrencia" name="tem_recorrencia">
-                        <label class="form-check-label fw-semibold" for="temRecorrencia">
+                        <label class="form-check-label fw-semibold mb-0" for="temRecorrencia">
                             <i class="fas fa-redo-alt me-1 text-primary"></i> Ativar recorrência
                             <span id="recorrenciaBadge" class="badge bg-success ms-2 d-none">Ativa</span>
                         </label>
+
+                        <div id="duracaoMesesContainer" style="display:none; min-width: 150px;">
+                            <label for="duracao_meses_recorrencia" class="form-label mb-0">Duração (meses)</label>
+                            <select id="duracao_meses_recorrencia" name="duracao_meses_recorrencia" class="form-select form-select-sm" aria-label="Duração da recorrência em meses">
+                                <option value="" selected>Selecione</option>
+                                <option value="1">1 mês</option>
+                                <option value="2">2 meses</option>
+                                <option value="3">3 meses</option>
+                                <option value="4">4 meses</option>
+                                <option value="5">5 meses</option>
+                                <option value="6">6 meses</option>
+                                <option value="7">7 meses</option>
+                                <option value="8">8 meses</option>
+                                <option value="9">9 meses</option>
+                                <option value="10">10 meses</option>
+                                <option value="11">11 meses</option>
+                                <option value="12">12 meses</option>
+                            </select>
+                        </div>
                     </div>
                 </div>
 
@@ -734,6 +753,23 @@
             inputValor.value = '';
         }
     }
+</script>
+
+<!-- MOSTRA OU ESCONDE SELEÇÃO DE MESES PARA AGENDAMENTO RECORRENTE PERSONALIZADO -->
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+    const temRecorrenciaCheckbox = document.getElementById('temRecorrencia');
+    const duracaoMesesContainer = document.getElementById('duracaoMesesContainer');
+
+    temRecorrenciaCheckbox.addEventListener('change', function() {
+        if (this.checked) {
+            duracaoMesesContainer.style.display = 'block';
+        } else {
+            duracaoMesesContainer.style.display = 'none';
+            document.getElementById('duracao_meses_recorrencia').value = '';
+        }
+    });
+    });
 </script>
 
 </body>
