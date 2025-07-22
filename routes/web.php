@@ -10,6 +10,7 @@ use App\Http\Controllers\Psicologia\ServicoController;
 use App\Http\Controllers\LoginController;
 use App\Http\Controllers\Psicologia\ClinicaController;
 use App\Models\FaesaClinicaServico;
+use App\Models\FaesaClinicaPaciente;
 
 use App\Http\Middleware\AuthMiddleware;
 use App\Http\Middleware\CheckClinicaMiddleware;
@@ -96,6 +97,18 @@ Route::get('/criar-paciente', function () {
     return view('psicologia/criar_paciente');
 })->name('criarpaciente_psicologia');
 
+Route::get('/api/buscar-pacientes', function () {
+    $query = request()->input('query', '');
+
+    $pacientes = FaesaClinicaPaciente::where(function ($q) use ($query) {
+            $q->where('NOME_COMPL_PACIENTE', 'like', "%{$query}%")
+              ->orWhere('CPF_PACIENTE', 'like', "%{$query}%");
+        })
+        ->limit(10)
+        ->get(['ID_PACIENTE', 'NOME_COMPL_PACIENTE', 'CPF_PACIENTE']);
+
+    return response()->json($pacientes);
+});
 
 Route::post('/criar-paciente/criar', [PacienteController::class, 'criarPaciente'])->name('criarPaciente-Psicologia');
 

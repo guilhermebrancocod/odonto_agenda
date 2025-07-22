@@ -125,11 +125,14 @@
         </div>
 
         <!-- FORM DE BUSCA DE PACIENTE -->
-        <form id="search-form" class="d-flex mb-3" role="search">
+        <form id="search-form" class="d-flex mb-3 position-relative" role="search" autocomplete="off">
             <div class="input-group">
                 <input id="search-input" name="search" type="search" class="form-control" placeholder="Pesquisar paciente">
                 <button type="submit" class="btn btn-primary">Pesquisar</button>
             </div>
+
+            <!-- Lista fixa de resultados em dropdown -->
+            <div id="pacientes-list" class="list-group position-absolute w-100" style="z-index: 1000; top: 100%; left: 0;"></div>
         </form>
 
         <!-- LISTA DE PACIENTES ENCONTRADOS PARA AGENDAMENTO -->
@@ -774,60 +777,137 @@
 
 <!-- JOGA PARA PÁGINA DE CRIAÇÃO DE SERVIÇO CASO SERVIÇO DIGITADO NÃO EXISTA -->
 <script>
-document.addEventListener('DOMContentLoaded', function () {
-    const servicoInput = document.getElementById('servico');
-    const servicosList = document.getElementById('servicos-list');
+    document.addEventListener('DOMContentLoaded', function () {
+        const servicoInput = document.getElementById('servico');
+        const servicosList = document.getElementById('servicos-list');
+        let timeout = null;
+
+        servicoInput.addEventListener('input', function () {
+            clearTimeout(timeout);
+            const query = this.value.trim();
+
+            if (!query) {
+                servicosList.innerHTML = '';
+                return;
+            }
+
+            timeout = setTimeout(() => {
+                fetch(`/api/buscar-servicos?query=${encodeURIComponent(query)}`)
+                    .then(response => response.json())
+                    .then(data => {
+                        servicosList.innerHTML = '';
+                        if (data.length > 0) {
+                            data.forEach(servico => {
+                                const item = document.createElement('a');
+                                item.href = '#';
+                                item.className = 'list-group-item list-group-item-action';
+                                item.textContent = servico.SERVICO_CLINICA_DESC;
+                                item.addEventListener('click', function (e) {
+                                    e.preventDefault();
+                                    servicoInput.value = servico.SERVICO_CLINICA_DESC;
+                                    servicosList.innerHTML = '';
+                                });
+                                servicosList.appendChild(item);
+                            });
+                        } else {
+                            // Se não houver resultados, mostra a opção de criar serviço
+                            const item = document.createElement('a');
+                            item.href = '/psicologia/criar-servico';
+                            item.className = 'list-group-item list-group-item-action list-group-item-warning';
+                            item.innerHTML = `<i class="fas fa-plus-circle me-2"></i> Criar novo serviço "${query}"`;
+                            servicosList.appendChild(item);
+                        }
+                    })
+                    .catch(error => {
+                        console.error(error);
+                    });
+            }, 300);
+        });
+
+        // Fecha a lista ao clicar fora
+        document.addEventListener('click', function (e) {
+            if (!servicosList.contains(e.target) && e.target !== servicoInput) {
+                servicosList.innerHTML = '';
+            }
+        });
+    });
+</script>
+
+<!-- JOGA PARA PÁGINA DE CRIAÇÃO DE PACIENTE CASO PACIENTE DIGITADO NÃO EXISTA -->
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+    const pacienteInput = document.getElementById('search-input');
+    const pacientesList = document.getElementById('pacientes-list');
+    const form = document.getElementById('search-form');
     let timeout = null;
 
-    servicoInput.addEventListener('input', function () {
-        clearTimeout(timeout);
-        const query = this.value.trim();
-
+    function buscarPacientes(query) {
         if (!query) {
-            servicosList.innerHTML = '';
+            pacientesList.innerHTML = '';
             return;
         }
 
-        timeout = setTimeout(() => {
-            fetch(`/api/buscar-servicos?query=${encodeURIComponent(query)}`)
-                .then(response => response.json())
-                .then(data => {
-                    servicosList.innerHTML = '';
-                    if (data.length > 0) {
-                        data.forEach(servico => {
-                            const item = document.createElement('a');
-                            item.href = '#';
-                            item.className = 'list-group-item list-group-item-action';
-                            item.textContent = servico.SERVICO_CLINICA_DESC;
-                            item.addEventListener('click', function (e) {
-                                e.preventDefault();
-                                servicoInput.value = servico.SERVICO_CLINICA_DESC;
-                                servicosList.innerHTML = '';
-                            });
-                            servicosList.appendChild(item);
-                        });
-                    } else {
-                        // Se não houver resultados, mostra a opção de criar serviço
+        fetch(`/api/buscar-pacientes?query=${encodeURIComponent(query)}`)
+            .then(response => response.json())
+            .then(data => {
+                pacientesList.innerHTML = '';
+
+                if (data.length > 0) {
+                    data.forEach(paciente => {
                         const item = document.createElement('a');
-                        item.href = '/psicologia/criar-servico';
-                        item.className = 'list-group-item list-group-item-action list-group-item-warning';
-                        item.innerHTML = `<i class="fas fa-plus-circle me-2"></i> Criar novo serviço "${query}"`;
-                        servicosList.appendChild(item);
-                    }
-                })
-                .catch(error => {
-                    console.error(error);
-                });
+                        item.href = '#';
+                        item.className = 'list-group-item list-group-item-action';
+                        item.textContent = `${paciente.NOME_COMPL_PACIENTE} (${paciente.CPF_PACIENTE})`;
+                        item.addEventListener('click', function (e) {
+                            e.preventDefault();
+                            pacienteInput.value = paciente.NOME_COMPL_PACIENTE;
+                            // NÃO limpamos aqui para manter a lista visível
+                        });
+                        pacientesList.appendChild(item);
+                    });
+                } else {
+                    const item = document.createElement('a');
+                    item.href = `/psicologia/criar-paciente?nome=${encodeURIComponent(query)}`;
+                    item.className = 'list-group-item list-group-item-action list-group-item-warning';
+                    item.innerHTML = `<i class="fas fa-plus-circle me-2"></i> Criar novo paciente "${query}"`;
+                    pacientesList.appendChild(item);
+                }
+            })
+            .catch(error => {
+                console.error('Erro ao buscar pacientes:', error);
+            });
+    }
+
+    pacienteInput.addEventListener('input', function () {
+        clearTimeout(timeout);
+        const query = this.value.trim();
+
+        timeout = setTimeout(() => {
+            buscarPacientes(query);
         }, 300);
     });
 
-    // Fecha a lista ao clicar fora
-    document.addEventListener('click', function (e) {
-        if (!servicosList.contains(e.target) && e.target !== servicoInput) {
-            servicosList.innerHTML = '';
-        }
+    // Impede que o formulário feche o dropdown ao pesquisar
+    form.addEventListener('submit', function (e) {
+        e.preventDefault(); // Remove se quiser submeter a busca pra outra página
+
+        const query = pacienteInput.value.trim();
+        if (query) {
+            buscarPacientes(query);
+            // Aqui você pode fazer a lógica que quiser ao pesquisar,
+            // ex: carregar resultados numa tabela, modal, etc
+            }
+        });
+
+        // Fecha a lista só quando clicar fora do formulário
+        document.addEventListener('click', function (e) {
+            if (!form.contains(e.target)) {
+                pacientesList.innerHTML = '';
+            }
+        });
+
     });
-});
+
 </script>
 
 </script>
