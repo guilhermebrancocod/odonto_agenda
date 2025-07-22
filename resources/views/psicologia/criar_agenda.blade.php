@@ -90,7 +90,7 @@
         }
     }
     #info-observacao:hover {
-        color: #0a58ca; /* azul mais forte ao passar mouse */
+        color: #0a58ca;
     }
     </style>
 </head>
@@ -156,7 +156,7 @@
             <div class="row g-2">
 
                 <!-- CHECKBOX TEM RECORRÊNCIA -->
-                <!-- <div class="col-12 mb-2">
+                <div class="col-12 mb-2">
                     <div class="form-check form-switch">
                         <input class="form-check-input" type="checkbox" value="1" id="temRecorrencia" name="tem_recorrencia">
                         <label class="form-check-label fw-semibold" for="temRecorrencia">
@@ -164,7 +164,7 @@
                             <span id="recorrenciaBadge" class="badge bg-success ms-2 d-none">Ativa</span>
                         </label>
                     </div>
-                </div> -->
+                </div>
 
                 <!-- SERVIÇO -->
                 <div class="col-sm-6 col-md-3 position-relative" style="position: relative;">

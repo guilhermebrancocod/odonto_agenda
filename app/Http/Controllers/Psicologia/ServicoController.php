@@ -11,33 +11,31 @@ class ServicoController extends Controller
     // CRIAÇÃO DE SERVIÇO
     public function criarServico(Request $request)
     {
-        // Ajuste do valor do serviço
-        if ($request->filled('VALOR_SERVICO')) {
-            $valor = str_replace(',', '.', $request->input('VALOR_SERVICO'));
-            $valor = number_format((float)$valor, 2, '.', '');
+        // ✅ Ajuste de valor do serviço
+        $valorInput = $request->input('VALOR_SERVICO');
+        if ($valorInput) {
+            $valor = str_replace(['.', ','], ['', '.'], $valorInput);
             $request->merge(['VALOR_SERVICO' => $valor]);
         } else {
             $request->merge(['VALOR_SERVICO' => null]);
         }
 
-        // Ajuste do código interno: se vazio ou 0, define como null
+        // ✅ Ajuste do código interno (null se vazio ou 0)
         if (!$request->filled('COD_INTERNO_SERVICO_CLINICA') || $request->input('COD_INTERNO_SERVICO_CLINICA') == 0) {
             $request->merge(['COD_INTERNO_SERVICO_CLINICA' => null]);
         }
 
+        // ✅ Validação
         $validated = $request->validate([
             'ID_CLINICA' => 'required|integer|min:1',
             'SERVICO_CLINICA_DESC' => 'required|string|min:1|max:255',
             'COD_INTERNO_SERVICO_CLINICA' => 'nullable|integer|min:0',
             'VALOR_SERVICO' => 'nullable|numeric',
-            'OBSERVACAO' => 'nullable|max:500',
+            'OBSERVACAO' => 'nullable|string|max:500',
+            'TEMPO_RECORRENCIA_MESES' => 'nullable|integer|min:0',
         ]);
 
-        if (isset($validated['VALOR_SERVICO'])) {
-            $validated['VALOR_SERVICO'] = (float)str_replace(',', '.', $validated['VALOR_SERVICO']);
-        }
-
-        // Verificação duplicidade nome
+        // ✅ Verificação de duplicidade por nome
         $existeNome = FaesaClinicaServico::where('SERVICO_CLINICA_DESC', $validated['SERVICO_CLINICA_DESC'])
             ->where('ID_CLINICA', $validated['ID_CLINICA'])
             ->exists();
@@ -48,7 +46,7 @@ class ServicoController extends Controller
                 ->withInput();
         }
 
-        // Verificação duplicidade código apenas se não for null
+        // ✅ Verificação de duplicidade por código interno se informado
         if (!is_null($validated['COD_INTERNO_SERVICO_CLINICA'])) {
             $existeCodigo = FaesaClinicaServico::where('COD_INTERNO_SERVICO_CLINICA', $validated['COD_INTERNO_SERVICO_CLINICA'])
                 ->where('ID_CLINICA', $validated['ID_CLINICA'])
@@ -61,9 +59,10 @@ class ServicoController extends Controller
             }
         }
 
+        // ✅ Criação do serviço
         FaesaClinicaServico::create($validated);
 
-        return redirect()->back()->with('success', 'Serviço criado com sucesso');
+        return redirect()->back()->with('success', 'Serviço criado com sucesso.');
     }
 
     // PESQUISA OS SERVIÇOS DISPONÍVEIS
@@ -95,21 +94,26 @@ class ServicoController extends Controller
     {
         // Ajustar input antes da validação para evitar erro de "deve ser inteiro"
         $input = $request->all();
+
+        // Ajusta código interno para null se vazio ou '--'
         if (isset($input['COD_INTERNO_SERVICO_CLINICA'])) {
             $cod = $input['COD_INTERNO_SERVICO_CLINICA'];
             if ($cod === '--' || trim($cod) === '') {
                 $input['COD_INTERNO_SERVICO_CLINICA'] = null;
             }
         }
+
         // Atualiza os dados do request para a validação
         $request->replace($input);
 
-        // Agora valida normalmente
+        // Validação, incluindo campos que aparecem no formulário de edição
         $validated = $request->validate([
             'SERVICO_CLINICA_DESC' => 'required|string|max:255',
             'COD_INTERNO_SERVICO_CLINICA' => 'nullable|integer|min:0',
             'VALOR_SERVICO' => 'nullable',
             'OBSERVACAO' => 'nullable|max:500',
+            'TEMPO_RECORRENCIA_MESES' => 'nullable|integer|min:0',
+            'PERMITE_ATENDIMENTO_SIMULTANEO' => 'nullable|string|in:S,N',
         ]);
 
         // Ajuste do valor (troca vírgula por ponto)
@@ -150,6 +154,11 @@ class ServicoController extends Controller
             if ($existeCodigo) {
                 return response()->json(['message' => 'Já existe um serviço com este código interno nesta clínica.'], 422);
             }
+        }
+
+        // Se PERMITE_ATENDIMENTO_SIMULTANEO não foi enviado, define padrão como 'N'
+        if (!isset($validated['PERMITE_ATENDIMENTO_SIMULTANEO'])) {
+            $validated['PERMITE_ATENDIMENTO_SIMULTANEO'] = 'N';
         }
 
         $servico->update($validated);

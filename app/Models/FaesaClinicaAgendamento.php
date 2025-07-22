@@ -27,7 +27,7 @@ class FaesaClinicaAgendamento extends Model
         'VALOR_AGEND',
         'OBSERVACOES',
         'CREATED_AT',
-        'UPDATED_AT'
+        'UPDATED_AT',
     ];
 
     protected $casts = [
