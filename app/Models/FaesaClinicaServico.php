@@ -19,7 +19,8 @@ class FaesaClinicaServico extends Model
         'COD_INTERNO_SERVICO_CLINICA',
         'VALOR_SERVICO',
         'DISCIPLINA',
-        'OBSERVACAO'
+        'OBSERVACAO',
+        'TEMPO_RECORRENCIA_MESES',
     ];
 
     /**

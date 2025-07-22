@@ -35,7 +35,7 @@
 
     <!-- Conteúdo rolável -->
     <div id="content-container" class="bg-light">
-        <main class="bg-white p-4 rounded shadow-sm w-100" style="max-width: 1200px;">
+        <main class="bg-white p-4 rounded shadow-sm w-100" style="">
             <div class="text-center mb-4">
                 <h2 class="fs-4 mb-0" style="color: #333;">Cadastro de Paciente</h2>
             </div>
@@ -142,7 +142,7 @@
                     <label for="status" class="form-label">Status</label>
                     <select id="status" name="STATUS" class="form-select" required>
                         <option value="" selected>Selecione</option>
-                        <option value="Em espera">Em espera</option>
+                        <option value="Agendado">Agendado</option>
                         <option value="Em tratamento">Em tratamento</option>
                         <option value="Tratamento finalizado">Tratamento finalizado</option>
                     </select>

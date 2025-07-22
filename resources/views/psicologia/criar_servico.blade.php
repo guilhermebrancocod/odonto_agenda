@@ -177,6 +177,7 @@
                        id="nome-servico"
                        name="SERVICO_CLINICA_DESC"
                        class="form-control"
+                       value="{{ old('SERVICO_CLINICA_DESC') }}"
                        required>
             </div>
 
@@ -189,7 +190,7 @@
                        id="cod-interno-servico"
                        name="COD_INTERNO_SERVICO_CLINICA"
                        class="form-control"
-                       value="">
+                       value="{{ old('COD_INTERNO_SERVICO_CLINICA') }}">
             </div>
 
             <!-- VALOR DO SERVIÇO -->
@@ -197,14 +198,23 @@
                 <label for="valor-servico" class="form-label">Valor do Serviço</label>
                 <div class="input-group">
                     <span class="input-group-text">R$</span>
-                    <input type="text" id="valor-servico" name="VALOR_SERVICO" class="form-control" placeholder="0,00">
+                    <input type="text" id="valor-servico" name="VALOR_SERVICO" class="form-control" placeholder="0,00" value="{{ old('VALOR_SERVICO') }}">
                 </div>
+            </div>
+
+            <!-- TEMPO DE RECORRÊNCIA PADRÃO -->
+            <div class="mb-3">
+                <label for="tempo_recorrencia_meses" class="form-label">
+                    Tempo de recorrência padrão (meses)
+                </label>
+                <input type="number" min="0" step="1" name="TEMPO_RECORRENCIA_MESES" id="edit-tempo_recorrencia_meses" class="form-control" placeholder="Ex: 6" value="{{ old('tempo_recorrencia_meses') }}">
+                <small class="text-muted">Deixe em branco ou 0 se o serviço não tiver recorrência padrão.</small>
             </div>
 
             <!-- OBSERVACAO DO SERVIÇO -->
             <div class="mb-3">
                 <label for="observacao-servico" class="form-label">Observações</label>
-                <textarea id="observacao-servico" name="OBSERVACAO" class="form-control"></textarea>
+                <textarea id="observacao-servico" name="OBSERVACAO" class="form-control" value="{{ old('OBSERVACAO') }}"></textarea>
             </div>
 
             <!-- BOTÃO DE SALVAR | SUBMIT -->
@@ -262,6 +272,12 @@
                                 <label class="form-label">Valor Serviço</label>
                                 <input type="text" id="edit-valor-servico" name="VALOR_SERVICO" class="form-control">
                             </div>
+                            <div class="mb-3">
+                                <label for="" class="form-label">
+                                    Tempo de recorrência padrão (meses)
+                                </label>
+                                <input type="number" min="0" step="1" id="edit-tempo-recorrencia-meses" class="form-control" placeholder="Ex: 6">
+                            </div>                      
                             <div class="mb-3">
                                 <label for="observacao-servico" class="form-label">Observações</label>
                                 <textarea id="edit-observacao-servico" name="OBSERVACAO" class="form-control"></textarea>
@@ -350,6 +366,7 @@ document.addEventListener('DOMContentLoaded', () => {
                                 data-cod="${s.COD_INTERNO_SERVICO_CLINICA}"
                                 data-valor="${s.VALOR_SERVICO ?? 0}"
                                 data-observacao="${s.OBSERVACAO ? s.OBSERVACAO : ''}"
+                                data-tempo="${s.TEMPO_RECORRENCIA_MESES ?? ''}"
                             >
                                 Editar
                             </button>
@@ -364,10 +381,12 @@ document.addEventListener('DOMContentLoaded', () => {
                         document.getElementById('edit-servico-desc').value = btn.dataset.desc;
 
                         // Se for '--', envia vazio para o campo para não quebrar a validação
+                        // VALORES ATUAIS PARA EDIÇÃO NO MODAL DE EDIÇÃO    
                         document.getElementById('edit-servico-cod').value = (btn.dataset.cod === '--') ? '' : btn.dataset.cod;
                         document.getElementById('edit-valor-servico').value = btn.dataset.valor;
                         document.getElementById('edit-permite-simultaneo').checked = (btn.dataset.permite === 'S');
                         document.getElementById('edit-observacao-servico').value = btn.dataset.observacao ?? '';
+                        document.getElementById('edit-tempo-recorrencia-meses').value = btn.dataset.tempo ?? '';
                         editarServicoModal.show();
                     });
                 });
@@ -391,6 +410,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const cod = document.getElementById('edit-servico-cod').value;
         let valor = document.getElementById('edit-valor-servico').value.trim();
         const observacao = document.getElementById('edit-observacao-servico').value;
+        const tempoRecorrencia = document.getElementById('edit-tempo-recorrencia-meses').value;
 
         valor = valor.replace(',', '.');
         valor = parseFloat(valor);
@@ -409,7 +429,8 @@ document.addEventListener('DOMContentLoaded', () => {
                 COD_INTERNO_SERVICO_CLINICA: cod,
                 VALOR_SERVICO: valor,
                 PERMITE_ATENDIMENTO_SIMULTANEO: permiteSimultaneo,
-                OBSERVACAO: observacao
+                OBSERVACAO: observacao,
+                TEMPO_RECORRENCIA_MESES: tempoRecorrencia
             })
         })
         .then(res => {

@@ -9,6 +9,8 @@ use App\Http\Controllers\Psicologia\AgendamentoController;
 use App\Http\Controllers\Psicologia\ServicoController;
 use App\Http\Controllers\LoginController;
 use App\Http\Controllers\Psicologia\ClinicaController;
+use App\Models\FaesaClinicaServico;
+use App\Models\FaesaClinicaPaciente;
 
 use App\Http\Middleware\AuthMiddleware;
 use App\Http\Middleware\CheckClinicaMiddleware;
@@ -95,6 +97,18 @@ Route::get('/criar-paciente', function () {
     return view('psicologia/criar_paciente');
 })->name('criarpaciente_psicologia');
 
+Route::get('/api/buscar-pacientes', function () {
+    $query = request()->input('query', '');
+
+    $pacientes = FaesaClinicaPaciente::where(function ($q) use ($query) {
+            $q->where('NOME_COMPL_PACIENTE', 'like', "%{$query}%")
+              ->orWhere('CPF_PACIENTE', 'like', "%{$query}%");
+        })
+        ->limit(10)
+        ->get(['ID_PACIENTE', 'NOME_COMPL_PACIENTE', 'CPF_PACIENTE']);
+
+    return response()->json($pacientes);
+});
 
 Route::post('/criar-paciente/criar', [PacienteController::class, 'criarPaciente'])->name('criarPaciente-Psicologia');
 
@@ -112,7 +126,7 @@ Route::post('/psicologia/criar-agendamento/criar', [AgendamentoController::class
 
 Route::get('/consultar-agendamento', function () {
     return view('psicologia.consultar_agendamento');
-});
+})->name('listagem-agendamentos');
 Route::post('/consultar-agendamento/consultar', [AgendamentoController::class, 'getAgendamento'])->name('getAgendamento');
 
 
@@ -285,11 +299,21 @@ Route::get('psicologia/criar-servico', function () {
     return view('psicologia/criar_servico');
 });
 
+Route::get('/api/buscar-servicos', function () {
+    $query = request()->input('query', '');
+    $servicos = FaesaClinicaServico::where('SERVICO_CLINICA_DESC', 'like', "%{$query}%")
+        ->where('ID_CLINICA', 1)
+        ->limit(10)
+        ->get(['ID_SERVICO_CLINICA', 'SERVICO_CLINICA_DESC']);
+
+    return response()->json($servicos);
+});
+
 Route::post('/psicologia/criar-servico/criar', [ServicoController::class, 'criarServico'])->name('criarServico-Psicologia');
 
 Route::get('/psicologia/get-agendamento', [AgendamentoController::class, 'getAgendamento'])->name('getAgendamento');
 
-Route::get('/psicologia/agendamento/{id}', [AgendamentoController::class, 'show'])->name('agendamento.show');
+Route::get('/psicologia/agendamento/{id}', [AgendamentoController::class, 'showAgendamento'])->name('agendamento.show');
 
 // routes/web.php ou routes/api.php
 Route::get('/psicologia/agendamentos-calendar', [AgendamentoController::class, 'getAgendamentosForCalendar']);
@@ -298,3 +322,12 @@ Route::get('/psicologia/servicos', [ServicoController::class, 'getServicos']);
 Route::post('/psicologia/criar-servico', [ServicoController::class, 'criarServico']);
 Route::put('/psicologia/servicos/{id}', [ServicoController::class, 'atualizarServico']);
 Route::delete('/psicologia/servicos/{id}', [ServicoController::class, 'deletarServico']);
+
+// Para exibir o formulário de edição
+Route::get('/psicologia/agendamento/{id}/editar', [AgendamentoController::class, 'editAgendamento'])->name('agendamento.edit');
+
+// Para atualizar
+Route::put('/psicologia/agendamento/{id}', [AgendamentoController::class, 'updateAgendamento'])->name('agendamento.update');
+
+Route::delete('/psicologia/agendamento/{id}', [AgendamentoController::class, 'deleteAgendamento'])
+     ->name('psicologia.agendamento.delete');

@@ -8,6 +8,9 @@
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700&display=swap" rel="stylesheet" />
     <link href="https://cdnjs.cloudflare.com/ajax/libs/mdb-ui-kit/7.1.0/mdb.min.css" rel="stylesheet" />
 
+    <!-- Flatpickr CSS -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+
     <meta name="csrf-token" content="{{ csrf_token() }}">
 
     <style>
@@ -17,11 +20,29 @@
             overflow-y: auto;
             padding: 16px;
             display: flex;
-            justify-content: center;
-            align-items: flex-start;
+            flex-direction: column;
+            align-items: stretch;
+            width: 100%;
             background-color: #f8f9fa;
         }
         .modal-body { max-height: 60vh; overflow-y: auto; }
+        /* Espaçamento para o container do limit select */
+        #limit-container {
+            margin-top: 12px;
+            display: flex;
+            justify-content: flex-end;
+            align-items: center;
+            gap: 8px;
+        }
+        #limit-container label {
+            font-weight: 600;
+        }
+        .flatpickr-input {
+            background-image: none !important;
+        }
+        .flatpickr-calendar-arrow {
+            display: none !important;
+        }
     </style>
 </head>
 
@@ -29,22 +50,105 @@
     @include('components.navbar')
 
     <div id="content-wrapper">
-        <div class="bg-white p-4 rounded shadow-sm w-100" style="max-width: 1100px;">
+        <div class="bg-white p-4 rounded shadow-sm w-100" style="">
             <h2 class="mb-4 text-center">Consultar Agendamento</h2>
 
-            <form id="search-form" class="w-100 mb-4 d-flex flex-column flex-md-row gap-3 align-items-stretch align-items-md-end">
-                <div class="flex-fill">
-                    <input
-                        id="search-input"
-                        name="search"
-                        type="search"
-                        class="form-control form-control-lg"
-                        placeholder="Digite o nome ou CPF do paciente"
-                    />
-                </div>
-                <div>
-                    <button type="submit" class="btn btn-primary btn-lg w-100">Pesquisar</button>
-                </div>
+            <form id="search-form" class="w-100 mb-4">
+            <div class="row g-3">
+    <div class="col-md-4">
+        <div class="input-group">
+            <span class="input-group-text">
+                <i class="bi bi-person"></i>
+            </span>
+            <input
+                id="search-input"
+                name="search"
+                type="search"
+                class="form-control"
+                placeholder="Nome ou CPF do paciente"
+            />
+        </div>
+    </div>
+
+    <div class="col-md-2">
+        <div class="input-group">
+            <span class="input-group-text">
+                <i class="bi bi-calendar"></i>
+            </span>
+            <input
+                id="date-input"
+                name="date"
+                type="date"
+                class="form-control"
+                placeholder="Data"
+            />
+        </div>
+    </div>
+
+    <div class="col-md-2">
+        <div class="input-group">
+            <span class="input-group-text">
+                <i class="bi bi-clock"></i>
+            </span>
+            <input
+                id="start-time-input"
+                name="start_time"
+                type="time"
+                class="form-control"
+                placeholder="Hora Início"
+            />
+        </div>
+    </div>
+
+    <div class="col-md-2">
+        <div class="input-group">
+            <span class="input-group-text">
+                <i class="bi bi-clock"></i>
+            </span>
+            <input
+                id="end-time-input"
+                name="end_time"
+                type="time"
+                class="form-control"
+                placeholder="Hora Fim"
+            />
+        </div>
+    </div>
+
+    <div class="col-md-2">
+        <div class="input-group">
+            <span class="input-group-text">
+                <i class="bi bi-list-check"></i>
+            </span>
+            <select id="status-input" name="status" class="form-select">
+                <option value="">Status</option>
+                <option value="Agendado">Agendado</option>
+                <option value="Em atendimento">Em atendimento</option>
+                <option value="Finalizado">Finalizado</option>
+            </select>
+        </div>
+    </div>
+
+    <div class="col-md-3">
+        <div class="input-group">
+            <span class="input-group-text">
+                <i class="bi bi-briefcase"></i>
+            </span>
+            <input
+                id="service-input"
+                name="service"
+                type="text"
+                class="form-control"
+                placeholder="Serviço"
+            />
+        </div>
+    </div>
+
+    <div class="col-md-2">
+        <button type="submit" class="btn btn-primary w-100">Pesquisar</button>
+    </div>
+</div>
+
             </form>
 
             <div class="w-100">
@@ -69,6 +173,18 @@
                         </tbody>
                     </table>
                 </div>
+
+                <!-- Seletor de limite de registros abaixo da tabela -->
+                <div id="limit-container">
+                    <label for="limit-select">Limitar resultados:</label>
+                    <select id="limit-select" class="form-select" style="width: auto;">
+                        <option value="5">5</option>
+                        <option value="10" selected>10</option>
+                        <option value="20">20</option>
+                        <option value="50">50</option>
+                        <option value="100">100</option>
+                    </select>
+                </div>
             </div>
         </div>
     </div>
@@ -76,15 +192,31 @@
     <!-- Scripts -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/mdb-ui-kit/7.1.0/mdb.min.js"></script>
-    <script>
-        const searchForm = document.getElementById('search-form');
-        const searchInput = document.getElementById('search-input');
-        const agendamentosTbody = document.getElementById('agendamentos-tbody');
+    <!-- Flatpickr JS -->
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
 
-        function carregarAgendamentos(search = '') {
-            const url = search
-                ? `/psicologia/get-agendamento?search=${encodeURIComponent(search)}`
-                : `/psicologia/get-agendamento`;
+    <script>
+        const agendamentosTbody = document.getElementById('agendamentos-tbody');
+        const searchForm = document.getElementById('search-form');
+        const limitSelect = document.getElementById('limit-select');
+
+        // Função para coletar filtros atuais (do formulário) e o limite selecionado
+        function getFilters() {
+            return {
+                search: document.getElementById('search-input').value.trim(),
+                date: document.getElementById('date-input').value,
+                start_time: document.getElementById('start-time-input').value,
+                end_time: document.getElementById('end-time-input').value,
+                status: document.getElementById('status-input').value,
+                service: document.getElementById('service-input').value.trim(),
+                limit: limitSelect.value,
+            };
+        }
+
+        // Função que carrega agendamentos conforme filtros
+        function carregarAgendamentos(params = {}) {
+            const urlParams = new URLSearchParams(params).toString();
+            const url = `/psicologia/get-agendamento` + (urlParams ? `?${urlParams}` : '');
 
             fetch(url)
                 .then(response => response.json())
@@ -102,7 +234,7 @@
                     agendamentos.forEach(ag => {
                         const paciente = ag.paciente ? ag.paciente.NOME_COMPL_PACIENTE : '-';
                         const servico = ag.servico ? ag.servico.SERVICO_CLINICA_DESC : '-';
-                        const data = ag.DT_AGEND ? new Date(ag.DT_AGEND).toLocaleDateString('pt-BR') : '-';
+                        const data = ag.DT_AGEND ? ag.DT_AGEND.substring(0, 10).split('-').reverse().join('/') : '-';
                         const horaIni = ag.HR_AGEND_INI ? ag.HR_AGEND_INI.substring(0, 5) : '-';
                         const horaFim = ag.HR_AGEND_FIN ? ag.HR_AGEND_FIN.substring(0, 5) : '-';
                         const status = ag.STATUS_AGEND ?? '-';
@@ -117,6 +249,12 @@
                             <td>${status}</td>
                             <td>
                                 <a href="/psicologia/agendamento/${ag.ID_AGENDAMENTO}" class="btn btn-sm btn-primary">Visualizar</a>
+                                <a href="/psicologia/agendamento/${ag.ID_AGENDAMENTO}/editar" class="btn btn-sm btn-warning">Editar</a>
+                                <form action="/psicologia/agendamento/${ag.ID_AGENDAMENTO}" method="POST" style="display:inline;" onsubmit="return confirm('Confirma a exclusão deste agendamento?');">
+                                    <input type="hidden" name="_method" value="DELETE" />
+                                    <input type="hidden" name="_token" value="${document.querySelector('meta[name=csrf-token]').content}" />
+                                    <button type="submit" class="btn btn-sm btn-danger">Excluir</button>
+                                </form>
                             </td>
                         `;
                         agendamentosTbody.appendChild(row);
@@ -132,16 +270,56 @@
                 });
         }
 
+        // Ao enviar o formulário, carrega agendamentos com filtros atuais e limite selecionado
         searchForm.addEventListener('submit', function(e) {
             e.preventDefault();
-            const search = searchInput.value.trim();
-            carregarAgendamentos(search);
+            carregarAgendamentos(getFilters());
         });
 
-        // Carrega os últimos 5 agendamentos quando a página for carregada
+        // Ao mudar o limite, recarrega automaticamente com filtros atuais
+        limitSelect.addEventListener('change', () => {
+            carregarAgendamentos(getFilters());
+        });
+
+        // Carrega a lista ao abrir a página com limite padrão 10
         document.addEventListener('DOMContentLoaded', () => {
-            carregarAgendamentos();
+            carregarAgendamentos(getFilters());
         });
     </script>
+
+
+    <!-- FLATPICKR PARA MELHORAR VISUALIZAÇÃO DE DIAS E HORÁRIOS -->
+    <script>
+        flatpickr("#date-input", {
+            dateFormat: "Y-m-d",   
+            altInput: true,
+            altFormat: "d-m-Y",
+            locale: "pt",
+            minDate: "today"
+        });
+
+        flatpickr("#start-time-input", {
+            enableTime: true,
+            noCalendar: true,
+            dateFormat: "H:i",
+            time_24hr: true,
+            minuteIncrement: 15,
+            altInput: true,
+            altFormat: "H:i"
+        });
+
+        flatpickr("#end-time-input", {
+            enableTime: true,
+            noCalendar: true,
+            dateFormat: "H:i",
+            time_24hr: true,
+            minuteIncrement: 15,
+            altInput: true,
+            altFormat: "H:i"
+        });
+
+        flatpickr.localize(flatpickr.l10ns.pt);
+    </script>
+
 </body>
 </html>
