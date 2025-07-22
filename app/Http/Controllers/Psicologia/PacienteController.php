@@ -9,112 +9,11 @@ use Illuminate\Database\Eloquent\Collection;
 
 class PacienteController extends Controller
 {
-    /**
-     * Cria um novo registro de Paciente no Banco de Dados
-     * 
-     * @param Request @request Dados da Requisição HTTP
-     * @return \Illuminate\Http\RedirectResponse Redireciona de volta à página anterior com uma mensagem de status.
-     * @throws \Illuminate\Validation\ValidationException Se algum dado da requisição falhar na validação.
-     */
-    public function criarAgendamento(Request $request)
+    
+    public function createPacinete(Request $request)
     {
-        $idClinica = 1;
 
-        if ($request->has('valor_agend')) {
-            $request->merge([
-                'valor_agend' => str_replace(',', '.', $request->valor_agend),
-            ]);
-        }
-
-        $request->validate([
-            'paciente_id' => 'required|integer',
-            'id_servico' => 'required|integer',
-            'servico' => 'required|string',
-            'dia_agend' => 'required|date',
-            'hr_ini' => 'required',
-            'hr_fim' => 'required',
-            'status_agend' => 'required|string',
-            'id_agend_remarcado' => 'nullable|integer',
-            'recorrencia' => 'nullable|string|max:64',
-            'tem_recorrencia' => 'nullable|string',
-            'valor_agend' => 'nullable|numeric',
-            'observacoes' => 'nullable|string',
-            'dias_semana' => 'nullable|array',
-            'dias_semana.*' => 'in:0,1,2,3,4,5,6',
-            'data_fim_recorrencia' => 'nullable|date|after_or_equal:dia_agend',
-        ]);
-
-        $valorAgend = $request->valor_agend ? str_replace(',', '.', $request->valor_agend) : null;
-
-        $servicoDescricao = strtolower(trim($request->input('servico', '')));
-
-        if (in_array($servicoDescricao, ['triagem', 'plantão', 'plantao'])) {
-            // Criação automática de 3 agendamentos semanais
-            $dataInicio = Carbon::parse($request->dia_agend);
-            $uuidRecorrencia = Str::uuid()->toString();
-
-            for ($i = 0; $i < 3; $i++) {
-                $dataAgendamento = $dataInicio->addWeeksNoOverflow($i)->copy();
-
-                $dados = [
-                    'ID_CLINICA' => $idClinica,
-                    'ID_PACIENTE' => $request->paciente_id,
-                    'ID_SERVICO' => $request->id_servico,
-                    'DT_AGEND' => $dataAgendamento->format('Y-m-d'),
-                    'HR_AGEND_INI' => $request->hr_ini,
-                    'HR_AGEND_FIN' => $request->hr_fim,
-                    'STATUS_AGEND' => 'Em aberto',
-                    'RECORRENCIA' => $uuidRecorrencia,
-                    'VALOR_AGEND' => $valorAgend,
-                    'OBSERVACOES' => $request->observacoes,
-                ];
-
-                FaesaClinicaAgendamento::create($dados);
-            }
-        }
-        elseif ($request->input('tem_recorrencia') === "1") {
-            $diasSemana = $request->input('dias_semana', []);
-            $dataInicio = Carbon::parse($request->dia_agend);
-            $dataFim = Carbon::parse($request->data_fim_recorrencia);
-
-            for ($data = $dataInicio->copy(); $data->lte($dataFim); $data->addDay()) {
-                if (in_array($data->dayOfWeek, $diasSemana)) {
-                    $dados = [
-                        'ID_CLINICA' => $idClinica,
-                        'ID_PACIENTE' => $request->paciente_id,
-                        'ID_SERVICO' => $request->id_servico,
-                        'DT_AGEND' => $data->format('Y-m-d'),
-                        'HR_AGEND_INI' => $request->hr_ini,
-                        'HR_AGEND_FIN' => $request->hr_fim,
-                        'STATUS_AGEND' => 'Em aberto',
-                        'RECORRENCIA' => $request->recorrencia ?? Str::uuid()->toString(),
-                        'VALOR_AGEND' => $valorAgend,
-                        'OBSERVACOES' => $request->observacoes,
-                    ];
-                    FaesaClinicaAgendamento::create($dados);
-                }
-            }
-        }
-        else {
-            $dados = [
-                'ID_CLINICA' => $idClinica,
-                'ID_PACIENTE' => $request->paciente_id,
-                'ID_SERVICO' => $request->id_servico,
-                'DT_AGEND' => $request->dia_agend,
-                'HR_AGEND_INI' => $request->hr_ini,
-                'HR_AGEND_FIN' => $request->hr_fim,
-                'STATUS_AGEND' => 'Em aberto',
-                'RECORRENCIA' => null,
-                'VALOR_AGEND' => $valorAgend,
-                'OBSERVACOES' => $request->observacoes,
-            ];
-
-            FaesaClinicaAgendamento::create($dados);
-        }
-
-        return redirect('/psicologia/criar-agendamento/')->with('success', 'Agendamento(s) criado(s) com sucesso!');
     }
-
 
     /**
      * Recupera e retorna uma coleção de Pacientes, com opção de busca por nome
