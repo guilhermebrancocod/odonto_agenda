@@ -772,6 +772,66 @@
     });
 </script>
 
+<!-- JOGA PARA PÁGINA DE CRIAÇÃO DE SERVIÇO CASO SERVIÇO DIGITADO NÃO EXISTA -->
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    const servicoInput = document.getElementById('servico');
+    const servicosList = document.getElementById('servicos-list');
+    let timeout = null;
+
+    servicoInput.addEventListener('input', function () {
+        clearTimeout(timeout);
+        const query = this.value.trim();
+
+        if (!query) {
+            servicosList.innerHTML = '';
+            return;
+        }
+
+        timeout = setTimeout(() => {
+            fetch(`/api/buscar-servicos?query=${encodeURIComponent(query)}`)
+                .then(response => response.json())
+                .then(data => {
+                    servicosList.innerHTML = '';
+                    if (data.length > 0) {
+                        data.forEach(servico => {
+                            const item = document.createElement('a');
+                            item.href = '#';
+                            item.className = 'list-group-item list-group-item-action';
+                            item.textContent = servico.SERVICO_CLINICA_DESC;
+                            item.addEventListener('click', function (e) {
+                                e.preventDefault();
+                                servicoInput.value = servico.SERVICO_CLINICA_DESC;
+                                servicosList.innerHTML = '';
+                            });
+                            servicosList.appendChild(item);
+                        });
+                    } else {
+                        // Se não houver resultados, mostra a opção de criar serviço
+                        const item = document.createElement('a');
+                        item.href = '/psicologia/criar-servico';
+                        item.className = 'list-group-item list-group-item-action list-group-item-warning';
+                        item.innerHTML = `<i class="fas fa-plus-circle me-2"></i> Criar novo serviço "${query}"`;
+                        servicosList.appendChild(item);
+                    }
+                })
+                .catch(error => {
+                    console.error(error);
+                });
+        }, 300);
+    });
+
+    // Fecha a lista ao clicar fora
+    document.addEventListener('click', function (e) {
+        if (!servicosList.contains(e.target) && e.target !== servicoInput) {
+            servicosList.innerHTML = '';
+        }
+    });
+});
+</script>
+
+</script>
+
 </body>
 
 </html>

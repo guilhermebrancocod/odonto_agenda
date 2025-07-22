@@ -9,6 +9,7 @@ use App\Http\Controllers\Psicologia\AgendamentoController;
 use App\Http\Controllers\Psicologia\ServicoController;
 use App\Http\Controllers\LoginController;
 use App\Http\Controllers\Psicologia\ClinicaController;
+use App\Models\FaesaClinicaServico;
 
 use App\Http\Middleware\AuthMiddleware;
 use App\Http\Middleware\CheckClinicaMiddleware;
@@ -277,6 +278,16 @@ Route::get('/psicologia/consultar-agendamento', function () {
 // CRIAÇÃO DE SERVIÇO
 Route::get('psicologia/criar-servico', function () {
     return view('psicologia/criar_servico');
+});
+
+Route::get('/api/buscar-servicos', function () {
+    $query = request()->input('query', '');
+    $servicos = FaesaClinicaServico::where('SERVICO_CLINICA_DESC', 'like', "%{$query}%")
+        ->where('ID_CLINICA', 1)
+        ->limit(10)
+        ->get(['ID_SERVICO_CLINICA', 'SERVICO_CLINICA_DESC']);
+
+    return response()->json($servicos);
 });
 
 Route::post('/psicologia/criar-servico/criar', [ServicoController::class, 'criarServico'])->name('criarServico-Psicologia');
