@@ -20,8 +20,9 @@ class AgendamentoController extends Controller
             'agendamentoOriginal',
             'remarcacoes'
         ])
-        ->where('ID_CLINICA', 1);
+        ->where('ID_CLINICA', 1); // CLÍNICA DE PSICOLOGIA
 
+        // SE REQUEST VEM COM PARAMETRO SEARCH PREENCHIDO
         if ($request->filled('search')) {
             $search = $request->input('search');
             $query->whereHas('paciente', function($q) use ($search) {
@@ -30,12 +31,13 @@ class AgendamentoController extends Controller
             });
         }
 
+        // SE O REQUEST VEM COM PARAMETRO DATE PREENCHIDO:
         if ($request->filled('date')) {
             try {
-                $date = Carbon::parse($request->input('date'))->format('Y-m-d');
+                $date = Carbon::parse($request->input('date'))->format('Y-m-d'); // CONVERTE PARA FORMATO Y-m-d COM CARBON
                 $query->where('DT_AGEND', $date);
             } catch (\Exception $e) {
-                // ignora data inválida
+                // IGNORA DATA INVÁLIDA
             }
         }
 

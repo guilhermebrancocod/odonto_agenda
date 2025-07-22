@@ -311,6 +311,12 @@
                     const listGroup = document.createElement('div');
                     listGroup.classList.add('list-group');
 
+                    // SE QUANTIDADE DE PACIENTES É MAIOR QUE 5
+                    if(pacientes.length > 5) {
+                        listGroup.style.maxHeight = '250px';
+                        listGroup.style.overflowY = 'auto';
+                    }
+
                     pacientes.forEach(paciente => {
                         const item = document.createElement('button');
                         item.type = 'button';
