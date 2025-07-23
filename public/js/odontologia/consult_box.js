@@ -1,4 +1,4 @@
-import { createNavBar } from '/js/odontologia/navbar.js';
+import { createNavBar } from './navbar.js';
 import { Modal } from 'https://cdnjs.cloudflare.com/ajax/libs/mdb-ui-kit/7.1.0/mdb.es.min.js';
 
 
@@ -32,7 +32,7 @@ function carregarTodosBox() {
                         <td>
                             <button 
                                 type="button" 
-                                class="edit-patient btn btn-link p-0 m-0 border-0" 
+                                class="edit-box btn btn-link p-0 m-0 border-0" 
                                 style="color: inherit;" 
                                 data-id="${box.ID_BOX_CLINICA}">
                                 <i class="fa fa-pencil-alt"></i>
@@ -93,28 +93,27 @@ $('#selectService').on('select2:select', function (e) {
 
     // Busca os dados completos do paciente via AJAX
     $.ajax({
-        url: `/servicos/${servicoId}`,
+        url: `/criarbox/${boxId}`,
         type: 'GET',
         dataType: 'json',
-        success: function (servico) {
+        success: function (box) {
             const html = `
                     <tr>
-                        <td>${servico.SERVICO_CLINICA_DESC}</td>
-                        <td>${servico.VALOR_SERVICO != null && servico.VALOR_SERVICO !== '' ? 'R$ ' + parseFloat(servico.VALOR_SERVICO).toFixed(2) : ''}</td>
-                        <td>${servico.PERMITE_ATENDIMENTO_SIMULTANEO == 1 ? 'Sim' : 'Não'}</td>
+                        <td>${box.DESCRICAO}</td>
+                        <td>${box.ATIVO}</td>
                         <td>
                             <button 
                                 type="button" 
-                                class="edit-patient btn btn-link p-0 m-0 border-0" 
+                                class="edit-box btn btn-link p-0 m-0 border-0" 
                                 style="color: inherit;" 
-                                data-id="${servico.ID_SERVICO_CLINICA}">
+                                data-id="${box.ID_BOX_CLINICA}">
                                 <i class="fa fa-pencil-alt"></i>
                             </button>
                         </td>
                     </tr>
-            `;
+                `;
             // Atualiza o corpo da tabela com apenas o paciente selecionado
-            $('#table-patient tbody').html(html);
+            $('#table-box tbody').html(html);
         },
         error: function () {
             alert("Erro ao buscar os dados do paciente.");
@@ -123,10 +122,10 @@ $('#selectService').on('select2:select', function (e) {
 });
 
 // Evento para editar servico
-$(document).on('click', '.edit-patient', function (event) {
+$(document).on('click', '.edit-box', function (event) {
     event.preventDefault();
-    const servicoId = $(this).data('id');
-    window.location.href = `/odontologia/criarservico/${servicoId}`;
+    const boxId = $(this).data('id');
+    window.location.href = `/odontologia/criarbox/${boxId}`;
 });
 
 const addPatient = document.getElementById('add');

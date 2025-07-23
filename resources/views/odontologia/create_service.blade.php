@@ -97,16 +97,16 @@
         });
     </script>
     @endif
-
+    </script>
     @php
     $disciplinas = old('disciplines');
     if (!$disciplinas && isset($servico)) {
-    $disciplinas = is_array($servico->DISCIPLINA)
-    ? $servico->DISCIPLINA
-    : explode(',', $servico->DISCIPLINA ?? '');
+    $disciplinas = DB::table('FAESA_CLINICA_SERVICO_DISCIPLINA')
+    ->where('ID_SERVICO_CLINICA', $servico->ID_SERVICO_CLINICA)
+    ->pluck('DISCIPLINA')
+    ->toArray();
     }
     @endphp
-
     <script>
         const disciplinasSelecionadas = @json($disciplinas);
     </script>

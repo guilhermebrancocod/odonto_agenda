@@ -22,7 +22,7 @@
             action="{{ isset($box) ? route('updateBox', $box->ID_BOX_CLINICA) : route('createBox') }}"
             method="POST">
             @csrf
-            @if(isset($paciente))
+            @if(isset($box))
             @method('PUT')
             @endif
             @csrf
@@ -34,7 +34,7 @@
                 <div style="flex: 1;">
                     <label for="descricao" style="font-size: 14px; color: #666;">Descrição</label>
                     <input type="text" id="descricao" name="descricao" class="form-control"
-                        value="{{ old('descricao', $servico->SERVICO_CLINICA_DESC ?? '') }}"
+                        value="{{ old('descricao', $box->DESCRICAO ?? '') }}"
                         style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 6px; font-size: 14px;" maxlength="25">
                 </div>
                 <div style="flex: 0.5;">

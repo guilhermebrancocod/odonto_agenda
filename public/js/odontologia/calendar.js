@@ -58,54 +58,87 @@ document.addEventListener('DOMContentLoaded', function () {
 
             info.el.style.backgroundColor = color;
         },
-        eventClick: function (info) {
-            Swal.fire({
-                title: 'Detalhes do Agendamento',
-                html: `
-                <strong>Paciente:</strong> ${info.event.title}<br>
-                <strong>Observações:</strong> ${info.event.extendedProps.observacoes || 'Sem observações'}<br>
-                <strong>Status:</strong>
-                <span style="color: ${info.event.extendedProps.status === 'Agendado' ? '#007bff' :    // azul
-                        info.event.extendedProps.status === 'Presente' ? '#28a745' :    // verde
-                            info.event.extendedProps.status === 'Cancelado' ? '#dc3545' :   // vermelho
-                                '#6c757d'                                                       // cinza (outros)
-                    }">
+        eventClick: async function (info) {
+            try {
+                // Busca os locais (boxes) do serviço
+                const response = await fetch(`/odontologia/boxeservicos/${info.event.extendedProps.servicoId}`);
+                const boxes = await response.json();
+
+                // Monta as opções do select
+                let boxOptions = '';
+                boxes.forEach(box => {
+                    boxOptions += `<option value="${box.ID_BOX_CLINICA}">${box.DESCRICAO}</option>`;
+                });
+
+                // Exibe o alerta com o select de locais
+                Swal.fire({
+                    title: '🦷 Detalhes do Agendamento',
+                    html: `
+        <div style="text-align: left; font-size: 16px;">
+            <p><strong>Paciente:</strong> ${info.event.title}</p>
+            <p><strong>Observações:</strong> ${info.event.extendedProps.observacoes || 'Sem observações'}</p>
+            <p><strong>Status:</strong>
+                <span style="color: ${info.event.extendedProps.status === 'Agendado' ? '#007bff' :
+                            info.event.extendedProps.status === 'Presente' ? '#28a745' :
+                                info.event.extendedProps.status === 'Cancelado' ? '#dc3545' :
+                                    '#6c757d'}">
                     ${info.event.extendedProps.status || 'Não informado'}
                 </span>
-                <br><br>
-                <label for="new-status">Alterar status:</label>
-                <select id="new-status" class="swal2-select">
+            </p>
+            <div style="margin-top: 15px;">
+                <label for="box-select" style="font-weight: bold;">Selecionar Local (Box):</label><br>
+                <select id="box-select" class="swal2-select" style="width: 40%; margin-top: 5px;">
+                    ${boxOptions}
+                </select>
+            </div>
+            <div style="margin-top: 15px;">
+                <label for="new-status" style="font-weight: bold;">Alterar status:</label><br>
+                <select id="new-status" class="swal2-select" style="width: 40%; margin-top: 5px;">
                     <option value="Agendado">Agendado</option>
                     <option value="Presente">Presente</option>
                     <option value="Cancelado">Cancelado</option>
                 </select>
-            `,
-                icon: 'info',
-                showCancelButton: true,
-                confirmButtonText: 'Confirmar',
-                cancelButtonText: 'Cancelar',
-                preConfirm: () => {
-                    const newStatus = $('#new-status').val();
-                    return fetch(`/alterarstatus/${info.event.id}`, {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json',
-                            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
-                        },
-                        body: JSON.stringify({ status: newStatus })
-                    }).then(res => {
-                        if (!res.ok) throw new Error("Erro ao atualizar status");
-                        return res.json();
-                    });
-                }
-            }).then(result => {
-                if (result.isConfirmed) {
-                    Swal.fire('Atualizado!', 'O status foi alterado.', 'success');
-                    calendar.refetchEvents(); // Use API correta do FullCalendar
-                }
-            });
-        }
+            </div>
+        </div>
+    `,
+                    icon: 'info',
+                    customClass: {
+                        popup: 'swal2-popup-clinica'
+                    },
+                    showCancelButton: true,
+                    confirmButtonText: '💾 Confirmar',
+                    cancelButtonText: 'Cancelar',
+                    preConfirm: () => {
+                        const newStatus = document.getElementById('new-status').value;
+                        const selectedBox = document.getElementById('box-select').value;
 
+                        return fetch(`/alterarstatus/${info.event.id}`, {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+                            },
+                            body: JSON.stringify({
+                                status: newStatus,
+                                box: selectedBox
+                            })
+                        }).then(res => {
+                            if (!res.ok) throw new Error('Erro ao atualizar');
+                            return res.json();
+                        });
+                    }
+                }).then(result => {
+                    if (result.isConfirmed) {
+                        Swal.fire('Atualizado!', 'Status e local atualizados com sucesso.', 'success');
+                        calendar.refetchEvents();
+                    }
+                });
+
+            } catch (error) {
+                console.error('Erro ao buscar boxes:', error);
+                Swal.fire('Erro', 'Falha ao buscar os locais.', 'error');
+            }
+        }
     });
 
     calendar.render();

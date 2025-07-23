@@ -1,4 +1,4 @@
-import { createNavBar } from '/js/odontologia/navbar.js';
+import { createNavBar } from './navbar.js';
 
 const navbarContainer = document.getElementById('navbar-container');
 const navbar = createNavBar();
@@ -20,14 +20,15 @@ document.addEventListener('DOMContentLoaded', function () {
                 checkbox.value = item.DISCIPLINA;
                 checkbox.id = `${item.DISCIPLINA.replace(/\s+/g, '_')}`;
 
+                // ✅ Marca o checkbox se estiver associado
+                if (Array.isArray(disciplinasSelecionadas) && disciplinasSelecionadas.includes(item.DISCIPLINA)) {
+                    checkbox.checked = true;
+                }
+
                 const label = document.createElement('label');
                 label.style.marginLeft = '6px';
                 label.htmlFor = checkbox.id;
-                label.textContent = ' ' + '(' + item.DISCIPLINA + ')' + ' ' + item.NOME;
-
-                if (disciplinasSelecionadas.includes(item.DISCIPLINA)) {
-                    checkbox.checked = true;
-                }
+                label.textContent = `(${item.DISCIPLINA}) ${item.NOME}`;
 
                 div.appendChild(checkbox);
                 div.appendChild(label);

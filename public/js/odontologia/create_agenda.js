@@ -1,4 +1,4 @@
-import { createNavBar } from '/js/odontologia/navbar.js';
+import { createNavBar } from './navbar.js';
 import { Modal } from 'https://cdnjs.cloudflare.com/ajax/libs/mdb-ui-kit/7.1.0/mdb.es.min.js';
 
 $('.datepicker').datepicker({
@@ -59,10 +59,9 @@ $(document).ready(function () {
     const $select = $('#form-select');
 
     $select.select2({
-        placeholder: "Busque o serviço",
+        placeholder: "Busque o serviços",
         allowClear: true,
         minimumInputLength: 0,
-        dropdownParent: $('#form-select').parent(),
         ajax: {
             url: '/servicos',
             dataType: 'json',
@@ -74,7 +73,7 @@ $(document).ready(function () {
                 return {
                     results: data.map(p => ({
                         id: p.ID_SERVICO_CLINICA,
-                        text: p.SERVICO_CLINICA_DESC
+                        text: p.SERVICO_CLINICA_DESC +' '+'(' + p.DISCIPLINA + ')'
                     }))
                 };
             },

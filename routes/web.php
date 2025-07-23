@@ -169,15 +169,21 @@ Route::get('/criarservico/{idService}', [OdontoCreateController::class, 'editSer
 Route::put('/criarservico/{idService}', [OdontoUpdateController::class, 'updateService'])->name('updateService');
 
 Route::post('/odontologia/criarbox', [OdontoCreateController::class, 'createBox'])->name('createBox');
-Route::put('/criarbox/{idBox}', [OdontoUpdateController::class, 'updateBox'])->name('updateBox');
+Route::get('odontologia/criarbox/{boxId}', [OdontoCreateController::class, 'editBox'])->name('editBox');
+Route::put('/criarbox/{boxId}', [OdontoUpdateController::class, 'updateBox'])->name('updateBox');
 
 Route::post('/odontologia/criarboxdisciplina', [OdontoCreateController::class, 'createBoxDiscipline'])->name('createBoxDiscipline');
+Route::get('/odontologia/criarboxdisciplina/{idBoxDiscipline}', [OdontoCreateController::class, 'editBoxDiscipline'])->name('editBoxDiscipline');
 Route::put('/criarboxdisciplina/{idBoxDiscipline}', [OdontoUpdateController::class, 'updateBoxDiscipline'])->name('updateBoxDiscipline');
 
 Route::post('/alterarstatus/{agendaId}', [OdontoUpdateController::class, 'editStatus'])->name('editStatus');
 
+Route::post('/definelocalatendimento/{agendaId,boxId}',[OdontoCreateController::class,'defineLocalAtendimento'])->name('defineLocalAtendimento');
+
 Route::post('/odontologia/criaragenda', [OdontoCreateController::class, 'fCreateAgenda'])->name('createAgenda');
 Route::get('/odontologia/criaragenda/{agendaId}', [OdontoCreateController::class, 'editAgenda'])->name('editAgenda');
+
+Route::get('/odontologia/boxeservicos/{servicoId}', [OdontoConsultController::class, 'getBoxeServicos']);
 
 Route::get('/getPacientes', [OdontoConsultController::class, 'buscarPacientes']);
 
@@ -238,7 +244,7 @@ Route::middleware([AuthMiddleware::class, CheckClinicaMiddleware::class])->prefi
     })->name('criaragenda_odontologia');
 
     Route::get('/criarservico', function () {
-        return view('odontologia/create_servico');
+        return view('odontologia/create_service');
     })->name('criarservico_odontologia');
 
     Route::get('/criarbox', function () {

@@ -1,4 +1,4 @@
-import { createNavBar } from '/js/odontologia/navbar.js';
+import { createNavBar } from './navbar.js';
 
 const add = document.getElementById('add');
 const navbarContainer = document.getElementById('navbar-container');
@@ -16,8 +16,13 @@ document.addEventListener('DOMContentLoaded', function () {
 
             data.forEach(item => {
                 const option = document.createElement('option');
-                option.value = item.DISCIPLINA + item.NOME;
+                option.value = item.DISCIPLINA
                 option.textContent = `${item.NOME} (${item.DISCIPLINA}) `;
+
+                if (item.DISCIPLINA === disciplinaSelecionada) {
+                    option.selected = true;
+                }
+
                 select.appendChild(option);
             });
         })
@@ -39,6 +44,10 @@ document.addEventListener('DOMContentLoaded', function () {
                 checkbox.name = 'boxes[]';
                 checkbox.value = item.ID_BOX_CLINICA;
                 checkbox.id = `box_${item.ID_BOX_CLINICA.replace(/\s+/g, '_')}`;
+
+                if (Array.isArray(boxesSelecionados) && boxesSelecionados.includes(item.ID_BOX_CLINICA)) {
+                    checkbox.checked = true;
+                }
 
                 const label = document.createElement('label');
                 label.style.marginLeft = '6px';
