@@ -49,106 +49,135 @@
 <body>
     @include('components.navbar')
 
+    <!-- CONTEÚDO PRINCIPAL -->
     <div id="content-wrapper">
-        <div class="bg-white p-4 rounded shadow-sm w-100" style="">
+
+        <!-- INFORMA ERROS DE VALIDAÇÃO DO BACKEND EM CASOS DE SUBMISSÃO DE FORMULÁRIO -->
+        @if($errors->any())
+            <div class="alert alert-danger">
+                <ul class="mb-0">
+                    @foreach($errors->all() as $erro)
+                        <li>{{ $erro }}</li>
+                    @endforeach
+                </ul>
+            </div>
+        @endif
+
+        <!-- MOSTRA MENSAGEM DE SUCESSO AO USUARIO APÓS UMA AÇÃO BEM SUCEDIDA -->
+        @if(session('success'))
+            <div class="alert alert-success">
+                {{ session('success') }}
+            </div>
+        @endif
+
+        <div class="bg-white p-4 rounded shadow-sm w-100">
+
+            <!-- TITULO DA PÁGINA -->
             <h2 class="mb-4 text-center">Consultar Agendamento</h2>
 
+            <!-- CAMPOS DE PESQUISA - FILTRO -->
             <form id="search-form" class="w-100 mb-4">
-            <div class="row g-3">
-    <div class="col-md-4">
-        <div class="input-group">
-            <span class="input-group-text">
-                <i class="bi bi-person"></i>
-            </span>
-            <input
-                id="search-input"
-                name="search"
-                type="search"
-                class="form-control"
-                placeholder="Nome ou CPF do paciente"
-            />
-        </div>
-    </div>
+                <div class="row g-3">
 
-    <div class="col-md-2">
-        <div class="input-group">
-            <span class="input-group-text">
-                <i class="bi bi-calendar"></i>
-            </span>
-            <input
-                id="date-input"
-                name="date"
-                type="date"
-                class="form-control"
-                placeholder="Data"
-            />
-        </div>
-    </div>
+                    <!-- PESQUISA POR NOME DO PACIENTE OU CPF -->
+                    <div class="col-md-4">
+                        <div class="input-group">
+                            <span class="input-group-text">
+                                <i class="bi bi-person"></i>
+                            </span>
+                            <input
+                                id="search-input"
+                                name="search"
+                                type="search"
+                                class="form-control"
+                                placeholder="Nome ou CPF do paciente"
+                            />
+                        </div>
+                    </div>
 
-    <div class="col-md-2">
-        <div class="input-group">
-            <span class="input-group-text">
-                <i class="bi bi-clock"></i>
-            </span>
-            <input
-                id="start-time-input"
-                name="start_time"
-                type="time"
-                class="form-control"
-                placeholder="Hora Início"
-            />
-        </div>
-    </div>
+                    <!-- PESQUISA POR DATA -->
+                    <div class="col-md-2">
+                        <div class="input-group">
+                            <span class="input-group-text">
+                                <i class="bi bi-calendar"></i>
+                            </span>
+                            <input
+                                id="date-input"
+                                name="date"
+                                type="date"
+                                class="form-control"
+                                placeholder="Data"
+                            />
+                        </div>
+                    </div>
 
-    <div class="col-md-2">
-        <div class="input-group">
-            <span class="input-group-text">
-                <i class="bi bi-clock"></i>
-            </span>
-            <input
-                id="end-time-input"
-                name="end_time"
-                type="time"
-                class="form-control"
-                placeholder="Hora Fim"
-            />
-        </div>
-    </div>
+                    <!-- PESQUISA POR HORA DE INÍCIO  -->
+                    <div class="col-md-2">
+                        <div class="input-group">
+                            <span class="input-group-text">
+                                <i class="bi bi-clock"></i>
+                            </span>
+                            <input
+                                id="start-time-input"
+                                name="start_time"
+                                type="time"
+                                class="form-control"
+                                placeholder="Hora Início"
+                            />
+                        </div>
+                    </div>
 
-    <div class="col-md-2">
-        <div class="input-group">
-            <span class="input-group-text">
-                <i class="bi bi-list-check"></i>
-            </span>
-            <select id="status-input" name="status" class="form-select">
-                <option value="">Status</option>
-                <option value="Agendado">Agendado</option>
-                <option value="Em atendimento">Em atendimento</option>
-                <option value="Finalizado">Finalizado</option>
-            </select>
-        </div>
-    </div>
+                    <!-- PESQUISA POR HORA FINAL -->
+                    <div class="col-md-2">
+                        <div class="input-group">
+                            <span class="input-group-text">
+                                <i class="bi bi-clock"></i>
+                            </span>
+                            <input
+                                id="end-time-input"
+                                name="end_time"
+                                type="time"
+                                class="form-control"
+                                placeholder="Hora Fim"
+                            />
+                        </div>
+                    </div>
 
-    <div class="col-md-3">
-        <div class="input-group">
-            <span class="input-group-text">
-                <i class="bi bi-briefcase"></i>
-            </span>
-            <input
-                id="service-input"
-                name="service"
-                type="text"
-                class="form-control"
-                placeholder="Serviço"
-            />
-        </div>
-    </div>
+                    <!-- PESQUISA POR STATUS DO AGENDAMENTO -->
+                    <div class="col-md-2">
+                        <div class="input-group">
+                            <span class="input-group-text">
+                                <i class="bi bi-list-check"></i>
+                            </span>
+                            <select id="status-input" name="status" class="form-select">
+                                <option value="">Status</option>
+                                <option value="Agendado">Agendado</option>
+                                <option value="Em atendimento">Em atendimento</option>
+                                <option value="Finalizado">Finalizado</option>
+                            </select>
+                        </div>
+                    </div>
 
-    <div class="col-md-2">
-        <button type="submit" class="btn btn-primary w-100">Pesquisar</button>
-    </div>
-</div>
+                    <!-- PESQUISA POR SERVIÇO -->
+                    <div class="col-md-3">
+                        <div class="input-group">
+                            <span class="input-group-text">
+                                <i class="bi bi-briefcase"></i>
+                            </span>
+                            <input
+                                id="service-input"
+                                name="service"
+                                type="text"
+                                class="form-control"
+                                placeholder="Serviço"
+                            />
+                        </div>
+                    </div>
 
+                    <div class="col-md-2">
+                        <button type="submit" class="btn btn-primary w-100">Pesquisar</button>
+                    </div>
+                </div>
             </form>
 
             <div class="w-100">
@@ -176,7 +205,7 @@
 
                 <!-- Seletor de limite de registros abaixo da tabela -->
                 <div id="limit-container">
-                    <label for="limit-select">Limitar resultados:</label>
+                    <label for="limit-select">Mostrar:</label>
                     <select id="limit-select" class="form-select" style="width: auto;">
                         <option value="5">5</option>
                         <option value="10" selected>10</option>
@@ -295,7 +324,8 @@
             altInput: true,
             altFormat: "d-m-Y",
             locale: "pt",
-            minDate: "today"
+            minDate: "today",
+            allowInput: true,
         });
 
         flatpickr("#start-time-input", {

@@ -191,7 +191,7 @@
                     <input type="text" id="telefone" name="FONE_PACIENTE" class="form-control" value="{{ old('FONE_PACIENTE') }}"/>
                 </div>
 
-                <!-- Campos Observação e Status corrigidos -->
+                <!-- CAMPO DE OBSERVAÇÃO -->
                 <div class="mb-3">
                     <label for="observacao" class="form-label">Observações</label>
                     <textarea id="observacao" name="OBSERVACAO" class="form-control" rows="4">{{ old('OBSERVACAO') }}</textarea>
@@ -227,6 +227,7 @@
             cepInput.addEventListener('blur', function() {
                 let cep = cepInput.value.replace(/\D/g, '');
 
+                // precisa colocar traço
                 if (cep.length !== 8) {
                     alert('CEP inválido. Digite 8 números.');
                     return;

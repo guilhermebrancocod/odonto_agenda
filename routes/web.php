@@ -112,11 +112,14 @@ Route::get('/api/buscar-pacientes', function () {
 
 Route::post('/criar-paciente/criar', [PacienteController::class, 'createPaciente'])->name('criarPaciente-Psicologia');
 
-Route::get('/editar-paciente', function () {
+
+// EDIÇAÕ DE PACIENTE
+Route::get('psicologia//editar-paciente', function () {
     return view('psicologia/editar_paciente');
 })->name('editarPaciente-Psicologia');
 
-Route::post('/editar-paciente/{id}', [PacienteController::class, 'editarPaciente'])->name('editarPaciente-Psicologia');
+Route::post('/psicologia/editar-paciente/{id}', [PacienteController::class, 'editarPaciente'])->name('editarPaciente-Psicologia');
+
 
 Route::get('/psicologia/criar-agendamento', function () {
     return view('psicologia/criar_agenda');

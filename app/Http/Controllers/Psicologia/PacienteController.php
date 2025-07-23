@@ -6,10 +6,11 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\FaesaClinicaPaciente;
 use Illuminate\Database\Eloquent\Collection;
+use Carbon\Carbon;
 
 class PacienteController extends Controller
 {
-    
+    // CRIA PACIENTE
     public function createPaciente(Request $request)
     {
         $validatedData = $request->validate([
@@ -63,36 +64,53 @@ class PacienteController extends Controller
         return redirect('/psicologia/criar-paciente')->with('success','Paciente criado com sucesso!');
     }
 
-    /**
-     * Recupera e retorna uma coleção de Pacientes, com opção de busca por nome
-     * 
-     * @param Request $request A instância da requisição HTTP. Pode conter o parâmetro 'search'.
-     * @return \Illuminate\Http\JsonResponse Retorna uma resposta JSON contendo uma coleção
-     * de objetos FaesaClinicaPaciente.
-     */
+    // BUSCA PACIENTE
     public function getPaciente(Request $request)
     {
         $search = $request->query('search');
 
-        // SE PARAMETRO SEARCH VEM PREENCHIDO, PESQUISA POR NOME E POR CPF
+        // Começa a query base
         if ($search) {
             $pacientes = FaesaClinicaPaciente::where(function ($query) use ($search) {
                 $query->where('NOME_COMPL_PACIENTE', 'LIKE', "%{$search}%")
-                      ->orWhere('CPF_PACIENTE', 'LIKE', "%{$search}%");
-            })->get();
+                    ->orWhere('CPF_PACIENTE', 'LIKE', "%{$search}%");
+            });
         } else {
-            $pacientes = FaesaClinicaPaciente::orderBy('ID_PACIENTE', 'DESC')->limit(10)->get();
+            $pacientes = FaesaClinicaPaciente::orderBy('ID_PACIENTE', 'DESC')->limit(100);
         }
+
+        // Filtro por DATA DE NASCIMENTO
+        if ($request->filled('DT_NASC_PACIENTE')) {
+            try {
+                $date = Carbon::parse($request->input('DT_NASC_PACIENTE'))->format('Y-m-d');
+                $pacientes = $pacientes->where('DT_NASC_PACIENTE', $date);
+            } catch (\Exception $e) {
+                // Ignora data inválida
+            }
+        }
+
+        // Filtro por STATUS
+        if ($request->filled('STATUS')) {
+            $pacientes = $pacientes->where('STATUS', $request->input('STATUS'));
+        }
+
+        // Filtro por SEXO
+        if ($request->filled('SEXO_PACIENTE')) {
+            $pacientes = $pacientes->where('SEXO_PACIENTE', $request->input('SEXO_PACIENTE'));
+        }
+
+        // Filtro por TELEFONE
+        if ($request->filled('FONE_PACIENTE')) {
+            $pacientes = $pacientes->where('FONE_PACIENTE', 'LIKE', '%' . $request->input('FONE_PACIENTE') . '%');
+        }
+
+        // Executa a query no final
+        $pacientes = $pacientes->get();
 
         return response()->json($pacientes);
     }
 
-
-    /**
-     * Identifica e altera um Paciente em específico
-     * 
-     * @param Request $request A instância da requisição HTTP. Pode conter o parâmetro 'search'.
-     */
+    // EDITA PACIENTE
     public function editarPaciente(Request $request, $id)
     {
         $validatedData = $request->validate([
@@ -111,6 +129,7 @@ class PacienteController extends Controller
             'municipio'  => 'nullable|string|max:255',
         ]);
 
+        // CASO NÃO ENCONTRE O PACIENTE
         $paciente = FaesaClinicaPaciente::find($id);
         if (!$paciente) {
             return response()->json(['message' => 'Paciente não encontrado'], 404);
@@ -133,8 +152,22 @@ class PacienteController extends Controller
         $paciente->save();
 
         return response()->json([
-            'message' => 'Paciente atualizado com sucesso',
-            'paciente' => $paciente,
+            'message' => 'Paciente atualizado com sucesso.',
+            'paciente' => $paciente
         ]);
+    }
+
+    // DELETE PACIENTE
+    public function deletePaciente($id)
+    {
+        $paciente = FaesaClinicaPaciente::find($id);
+
+        if(!$paciente) {
+            return response()->json(['message' => 'Paciente não encontrado'], 404);
+        }
+
+        $paciente->delete();
+
+        return redirect('/psicologia/consultar-paciente')->with('success','Registro de paciente excluído com sucesso.');
     }
 }
