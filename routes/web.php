@@ -110,7 +110,7 @@ Route::get('/api/buscar-pacientes', function () {
     return response()->json($pacientes);
 });
 
-Route::post('/criar-paciente/criar', [PacienteController::class, 'criarPaciente'])->name('criarPaciente-Psicologia');
+Route::post('/criar-paciente/criar', [PacienteController::class, 'createPaciente'])->name('criarPaciente-Psicologia');
 
 Route::get('/editar-paciente', function () {
     return view('psicologia/editar_paciente');
