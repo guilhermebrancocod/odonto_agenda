@@ -168,7 +168,9 @@ class PacienteController extends Controller
 
         // VERIFICA SE PACIENTE TEM AGENDAMENTOS ASSOCIADOS
         if(FaesaClinicaAgendamento::where('ID_PACIENTE', $id)->exists()) {
-            return redirect('/psicologia/consultar-paciente')->with('error','Não é possível excluir o paciente, pois ele possui agendamentos associados.');
+            return response()->json([
+                'message' => 'Não é possível excluir o paciente, pois ele possui agendamentos associados.',
+            ], 400);
         }
 
         try {

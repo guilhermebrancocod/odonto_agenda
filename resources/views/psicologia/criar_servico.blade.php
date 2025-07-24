@@ -227,7 +227,7 @@
 
     <main style="overflow-y:auto; max-height: 90vh;">
 
-        <!-- TITULO LISTAGEM DE PACIENTE -->
+        <!-- TITULO LISTAGEM DE SERVICOS -->
         <h2 class="text-center mb-4">Consulta e Edição de Serviços</h2>
 
         <!-- INPUT DE BUSCA -->

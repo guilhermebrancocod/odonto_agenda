@@ -443,7 +443,7 @@
                 });
             });
         }
-        
+
         // ATUALIZA LIMITE DE VISUALIZAÇÃO
         function atualizarVisualizacaoLimite() {
             const linhas = pacientesTbody.querySelectorAll('tr');
@@ -629,7 +629,7 @@
                 },
             })
             .then(response => {
-                if (!response.ok) throw new Error('Erro ao excluir paciente.');
+                if (!response.ok) throw new Error('Erro ao excluir paciente - Paciente com agendamento vinculado');
                 return response.json();
             })
             .then(data => {
@@ -639,7 +639,7 @@
             })
             .catch(error => {
                 console.error(error);
-                alert('Erro ao excluir paciente.');
+                alert('Erro ao excluir paciente - Paciente com agendamento vinculado');
             });
         }
 

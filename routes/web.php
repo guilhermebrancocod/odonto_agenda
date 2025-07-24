@@ -9,9 +9,9 @@ use App\Http\Controllers\Psicologia\AgendamentoController;
 use App\Http\Controllers\Psicologia\ServicoController;
 use App\Http\Controllers\LoginController;
 use App\Http\Controllers\Psicologia\ClinicaController;
+use App\Http\Controllers\Psicologia\SalaController;
 use App\Models\FaesaClinicaServico;
 use App\Models\FaesaClinicaPaciente;
-
 use App\Http\Middleware\AuthMiddleware;
 use App\Http\Middleware\CheckClinicaMiddleware;
 
@@ -337,3 +337,16 @@ Route::put('/psicologia/agendamento/{id}', [AgendamentoController::class, 'updat
 
 Route::delete('/psicologia/agendamento/{id}', [AgendamentoController::class, 'deleteAgendamento'])
      ->name('psicologia.agendamento.delete');
+
+
+// SALAS
+Route::get('/psicologia/criar-sala', function () {
+    return view('/psicologia/criar_sala');
+})->name('salas_psicologia');
+
+Route::post('/psicologia/salas/criar', [SalaController::class, 'createSala'])->name('criarSala-Psicologia');
+
+Route::get('/psicologia/salas/listar', [SalaController::class, 'listSalas'])->name('listarSalas-Psicologia');
+
+Route::get('/psicologia/salas/{id}', [SalaController::class, 'getSala'])->name('getSala-Psicologia');
+
