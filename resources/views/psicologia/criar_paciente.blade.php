@@ -271,9 +271,10 @@
     <script>
         document.addEventListener('DOMContentLoaded', function () {
             flatpickr("#dt_nasc", {
-            dateFormat: "d/m/Y",
+            dateFormat: "d-m-Y",
             maxDate: "today",
             locale: "pt",
+            allowInput: true,
             defaultDate: "{{ old('DT_NASC_PACIENTE') ?? '' }}"
             });
         });

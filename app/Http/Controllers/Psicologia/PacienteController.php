@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Psicologia;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\FaesaClinicaPaciente;
+use App\Models\FaesaClinicaAgendamento;
 use Illuminate\Database\Eloquent\Collection;
 use Carbon\Carbon;
 
@@ -165,8 +166,19 @@ class PacienteController extends Controller
             return response()->json(['message' => 'Paciente não encontrado'], 404);
         }
 
-        $paciente->delete();
+        // VERIFICA SE PACIENTE TEM AGENDAMENTOS ASSOCIADOS
+        if(FaesaClinicaAgendamento::where('ID_PACIENTE', $id)->exists()) {
+            return redirect('/psicologia/consultar-paciente')->with('error','Não é possível excluir o paciente, pois ele possui agendamentos associados.');
+        }
 
-        return redirect('/psicologia/consultar-paciente')->with('success','Registro de paciente excluído com sucesso.');
+        try {
+            $paciente->delete();
+            return response()->json(['message' => 'Registro de paciente excluído com sucesso.'], 200);
+        } catch (\Exception $e) {
+            return response()->json([
+                'message' => 'Erro ao excluir o paciente.',
+                'error' => $e->getMessage(),
+            ], 500);
+        }
     }
 }

@@ -225,6 +225,26 @@
         </div>
     </div>
 
+    <!-- MODAL DE CONFIRMAÇÃO DE EXCLUSÃO DE PACIENTE -->
+    <div class="modal fade" id="confirmDeleteModal" tabindex="-1" aria-labelledby="confirmDeleteModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="confirmDeleteModalLabel">Excluir Paciente</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fechar"></button>
+                </div>
+                <div class="modal-body">
+                    <p id="modal-delete-nome">Deseja excluir este paciente?</p>
+                    <p class="text-danger">Essa ação não pode ser desfeita.</p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="button" class="btn btn-danger" id="confirm-delete-btn">Excluir</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- MODAL DE EDIÇÃO DO PACIENTE -->
     <div class="modal fade" id="editPacienteModal" tabindex="-1" aria-labelledby="editPacienteModalLabel" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered modal-lg">
@@ -384,6 +404,7 @@
             return `${day}/${month}/${year}`;
         }
 
+        // ATIVA EVENTOS DE EDIÇÃO DOS PACIENTES
         function ativarEventosEditar() {
             document.querySelectorAll('.editar-btn').forEach(button => {
                 button.addEventListener('click', () => {
@@ -409,6 +430,21 @@
             });
         }
 
+        // ATIVA EVENTOS DE EXCLUSÃO DOS PACIENTES
+        function ativarEventosDeletar() {
+            document.querySelectorAll('.excluir-btn').forEach(button => {
+                button.addEventListener('click', () => {
+                    selectedPaciente = {
+                        id: button.getAttribute('data-id'),
+                        nome: button.getAttribute('data-nome'),
+                    };
+                    document.getElementById('modal-delete-nome').textContent = `Deseja excluir o paciente: ${selectedPaciente.nome}?`;
+                    new bootstrap.Modal(document.getElementById('confirmDeleteModal')).show();
+                });
+            });
+        }
+        
+        // ATUALIZA LIMITE DE VISUALIZAÇÃO
         function atualizarVisualizacaoLimite() {
             const linhas = pacientesTbody.querySelectorAll('tr');
             linhas.forEach((linha, idx) => {
@@ -474,12 +510,18 @@
                                 data-municipio="${paciente.MUNICIPIO ?? ''}">
                                 Editar
                             </button>
+                            <button type="button" class="btn btn-sm btn-danger excluir-btn"
+                                data-id="${paciente.ID_PACIENTE}"
+                                data-nome="${paciente.NOME_COMPL_PACIENTE ?? 'Paciente'}">
+                                Excluir
+                            </button>
                         </td>
                     `;
                     pacientesTbody.appendChild(row);
                 });
 
                 ativarEventosEditar();
+                ativarEventosDeletar();
                 atualizarVisualizacaoLimite();
             })
             .catch(err => {
@@ -492,7 +534,7 @@
 
         // PREENCHE FORMULÁRIO DE EDIÇÃO COM DADOS DO PACIENTE SELECIONADO
         function abrirModalEdicao() {
-            if (!selectedPaciente) return;
+            
 
             document.getElementById('editPacienteNome').value = selectedPaciente.nome;
             const cpfInput = document.getElementById('editPacienteCPF');
@@ -512,6 +554,12 @@
 
             bootstrap.Modal.getInstance(document.getElementById('confirmEditModal')).hide();
             new bootstrap.Modal(document.getElementById('editPacienteModal')).show();
+        }
+
+        function abrirModalExclusao() {
+            if (!selectedPaciente) return;
+            bootstrap.Modal.getInstance(document.getElementById('confirmDeleteModal')).hide();
+            new bootstrap.Modal(document.getElementById('confirmDeleteModal')).show();
         }
 
         // Envia formulário de edição via fetch
@@ -562,6 +610,39 @@
                 });
         }
 
+        function enviarExclusao(e) {
+            e.preventDefault();
+            
+            if (!selectedPaciente || !selectedPaciente.id) {
+                alert('Paciente não selecionado.');
+                return;
+            }
+
+            if (!confirm(`Tem certeza que deseja excluir o paciente: ${selectedPaciente.nome}?`)) {
+                return;
+            }
+
+            fetch(`/psicologia/excluir-paciente/${selectedPaciente.id}`, {
+                method: 'DELETE',
+                headers: {
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
+                },
+            })
+            .then(response => {
+                if (!response.ok) throw new Error('Erro ao excluir paciente.');
+                return response.json();
+            })
+            .then(data => {
+                alert('Paciente excluído com sucesso.');
+                bootstrap.Modal.getInstance(document.getElementById('confirmDeleteModal')).hide();
+                buscarPacientes(); // Recarrega tabela sem refresh
+            })
+            .catch(error => {
+                console.error(error);
+                alert('Erro ao excluir paciente.');
+            });
+        }
+
         // === EVENTOS ===
 
         // Submissão do formulário de busca
@@ -581,6 +662,9 @@
 
         // Submissão do formulário de edição
         document.getElementById('editPacienteForm').addEventListener('submit', enviarEdicao);
+
+        // Submissão formulário de exclusão
+        document.getElementById('confirm-delete-btn').addEventListener('click', enviarExclusao);
 
         // Busca inicial ao carregar página
         window.addEventListener('DOMContentLoaded', () => {
