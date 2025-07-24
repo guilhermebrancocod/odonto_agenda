@@ -85,7 +85,6 @@ class PacienteController extends Controller
                 $date = Carbon::parse($request->input('DT_NASC_PACIENTE'))->format('Y-m-d');
                 $pacientes = $pacientes->where('DT_NASC_PACIENTE', $date);
             } catch (\Exception $e) {
-                // Ignora data inválida
             }
         }
 

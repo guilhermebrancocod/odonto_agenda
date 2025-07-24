@@ -223,6 +223,7 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/mdb-ui-kit/7.1.0/mdb.min.js"></script>
     <!-- Flatpickr JS -->
     <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr/dist/l10n/pt.js"></script> <!-- Adiciona Linguagem em Português -->
 
     <script>
         const agendamentosTbody = document.getElementById('agendamentos-tbody');

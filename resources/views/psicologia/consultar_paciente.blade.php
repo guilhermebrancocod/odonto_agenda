@@ -362,7 +362,6 @@
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/mdb-ui-kit/7.1.0/mdb.min.js"></script>
 
-
     <script>
         // === CONSTANTES E VARIÁVEIS GLOBAIS ===
         const searchForm = document.getElementById('search-form');
@@ -427,10 +426,10 @@
         function buscarPacientes() {
             const filtros = {
                 search: searchInput.value.trim(), // NOME OU CPF
-                date: dt_nasc_paciente_input.value,
-                status: statusInput.value,
-                sexo: sexoInput.value,
-                telefone: telefoneInput.value,
+                DT_NASC_PACIENTE: dt_nasc_paciente_input.value,
+                STATUS: statusInput.value,
+                SEXO_PACIENTE: sexoInput.value,
+                FONE_PACIENTE: telefoneInput.value,
             };
 
             const queryString = montarQueryParams(filtros);
@@ -593,11 +592,21 @@
     <script>
         document.addEventListener('DOMContentLoaded', function () {
             const initializeFlatpickr = () => {
-                const input = document.querySelector("#editPacienteDTNASC");
-                if (input._flatpickr) input._flatpickr.destroy();
-                flatpickr(input, {
+                const inputEdit = document.querySelector("#editPacienteDTNASC");
+                if (inputEdit._flatpickr) inputEdit._flatpickr.destroy();
+                flatpickr(inputEdit, {
                     altInput: true,
-                    altFormat: "d/m/Y",
+                    altFormat: "d-m-Y",
+                    allowInput: true,
+                    dateFormat: "Y-m-d",
+                    maxDate: "today",
+                    locale: "pt",
+                });
+                const inputSearch = document.querySelector("#DT_NASC_PACIENTE-input");
+                if (inputSearch._flatpickr) inputSearch._flatpickr.destroy();
+                flatpickr(inputSearch, {
+                    altInput: true,
+                    altFormat: "d-m-Y",
                     allowInput: true,
                     dateFormat: "Y-m-d",
                     maxDate: "today",
