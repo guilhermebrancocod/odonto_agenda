@@ -68,17 +68,25 @@ class ServicoController extends Controller
     // PESQUISA OS SERVIÇOS DISPONÍVEIS
     public function getServicos(Request $request)
     {
-        $search = trim($request->input('search', ''));
+        $search = trim($request->query('search', ''));
 
-        $query = FaesaClinicaSala::query();
+        $query = FaesaClinicaServico::where('ID_CLINICA', 1); // FILTRO FIXO PARA CLÍNICA DE PSICOLOGIA
 
         if ($search) {
-            $query->where('DESCRICAO', 'like', '%' . $search . '%');
+            $query->where('SERVICO_CLINICA_DESC', 'LIKE', "%{$search}%");
         }
 
-        $salas = $query->orderBy('DESCRICAO', 'desc')->get();
+        $servicos = $query->orderBy('ID_SERVICO_CLINICA', 'desc')->get();
 
-        return response()->json($salas);
+        // Substituir null ou 0 no código interno por texto customizado
+        $servicos->transform(function($item) {
+            if (is_null($item->COD_INTERNO_SERVICO_CLINICA) || $item->COD_INTERNO_SERVICO_CLINICA == 0) {
+                $item->COD_INTERNO_SERVICO_CLINICA = '--';
+            }
+            return $item;
+        });
+
+        return response()->json($servicos);
     }
 
     // ATUALIZAÇÃO DE SERVIÇO

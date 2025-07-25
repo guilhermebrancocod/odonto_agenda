@@ -10,6 +10,7 @@ use App\Http\Controllers\Psicologia\ServicoController;
 use App\Http\Controllers\LoginController;
 use App\Http\Controllers\Psicologia\ClinicaController;
 use App\Http\Controllers\Psicologia\SalaController;
+use App\Http\Controllers\Psicologia\HorarioController;
 use App\Models\FaesaClinicaServico;
 use App\Models\FaesaClinicaPaciente;
 use App\Http\Middleware\AuthMiddleware;
@@ -339,6 +340,10 @@ Route::delete('/psicologia/agendamento/{id}', [AgendamentoController::class, 'de
      ->name('psicologia.agendamento.delete');
 
 
+
+
+
+
 // SALAS
 Route::get('/psicologia/criar-sala', function () {
     return view('/psicologia/criar_sala');
@@ -350,3 +355,13 @@ Route::get('/psicologia/salas/listar', [SalaController::class, 'listSalas'])->na
 
 Route::get('/psicologia/salas/{id}', [SalaController::class, 'getSala'])->name('getSala-Psicologia');
 
+
+
+// HORÁRIOS
+Route::get('/psicologia/criar-horario', function () {
+    return view('psicologia/criar_horario');
+});
+
+Route::post('/psicologia/horarios/criar', [HorarioController::class, 'createHorario'])->name('criarHorario-Psicologia');
+
+Route::post('/psicologia/horarios/listar', [HorarioController::class, 'listHorarios'])->name('listarHorarios-Psicologia');

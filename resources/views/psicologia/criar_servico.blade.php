@@ -18,7 +18,7 @@
             background-color: #f8f9fa;
         }
         #content-wrapper {
-            width: 70vw;
+            width: 80vw;
             height: 90vh;
             margin: auto;
             display: flex;
@@ -70,10 +70,9 @@
             max-height: 100%;
         }
 
-        /* Estilo atualizado para a tabela ficar com linhas tipo card */
         table {
             border-collapse: separate;
-            border-spacing: 0 12px; /* espaço vertical entre as linhas */
+            border-spacing: 0 12px;
             width: 100%;
         }
         thead tr th:first-child {

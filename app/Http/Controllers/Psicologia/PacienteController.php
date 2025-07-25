@@ -168,7 +168,7 @@ class PacienteController extends Controller
 
         // VERIFICA SE PACIENTE TEM AGENDAMENTOS ASSOCIADOS
         if(FaesaClinicaAgendamento::where('ID_PACIENTE', $id)->exists()) {
-            return response()->json([
+             return response()->json([
                 'message' => 'Não é possível excluir o paciente, pois ele possui agendamentos associados.',
             ], 400);
         }

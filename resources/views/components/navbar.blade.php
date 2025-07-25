@@ -138,7 +138,7 @@
         <!-- CADASTRAR PACIENTE -->
         <li class="list-group-item rounded-1 p-0 overflow-hidden ">
             <a href="/psicologia/criar-paciente" class="link-agendar d-flex align-items-center gap-2 p-2">
-                <i class="fas fa-user-plus"></i> Criar Paciente
+                <i class="bi bi-person-add"></i> Criar Paciente
             </a>
         </li>
 
@@ -146,7 +146,7 @@
         <!-- CONSULTAR PACIENTE -->
         <li class="list-group-item rounded-1 p-0 overflow-hidden ">
             <a href="/psicologia/consultar-paciente" class="link-agendar d-flex align-items-center gap-2 p-2">
-                <i class="fas fa-users"></i> Pacientes
+                <i class="bi bi-people"></i> Pacientes
             </a>
         </li>
 
@@ -154,7 +154,7 @@
         <!-- CADASTRAR SERVIÇO -->
         <li class="list-group-item rounded-1 p-0 overflow-hidden ">
             <a href="/psicologia/criar-servico" class="link-agendar d-flex align-items-center gap-2 p-2">
-                <i class="bi bi-hammer"></i>Serviços
+                <i class="bi bi-gear"></i> Serviços
             </a>
         </li>
 
@@ -163,6 +163,14 @@
         <li class="list-group-item rounded-1 p-0 overflow-hidden ">
             <a href="/psicologia/criar-sala" class="link-agendar d-flex align-items-center gap-2 p-2">
                 <i class="bi bi-door-open"></i> Salas
+            </a>
+        </li>
+
+
+        <!-- HORÁRIOS -->
+        <li class="list-group-item rounded-1 p-0 overflow-hidden ">
+            <a href="/psicologia/criar-horario" class="link-agendar d-flex align-items-center gap-2 p-2">
+                <i class="bi bi-alarm"></i> Horários
             </a>
         </li>
 
@@ -216,19 +224,31 @@
             <!-- CADASTRAR PACIENTE -->
             <li class="list-group-item p-0 overflow-hidden ">
                 <a href="/psicologia/criar-paciente" class="link-agendar d-flex align-items-center gap-2 p-2">
-                    <i class="fas fa-user-plus"></i> Cadastrar Paciente
+                    <i class="bi bi-person-add"></i> Cadastrar Paciente
                 </a>
             </li>
             <!-- CONSULTAR PACIENTE -->
             <li class="list-group-item p-0 overflow-hidden ">
                 <a href="/psicologia/consultar-paciente" class="link-agendar d-flex align-items-center gap-2 p-2">
-                    <i class="fas fa-users"></i> Pacientes
+                    <i class="bi bi-people"></i> Pacientes
                 </a>
             </li>
             <!-- CADASTRAR SERVIÇO -->
             <li class="list-group-item p-0 overflow-hidden ">
                 <a href="/psicologia/criar-servico" class="link-agendar d-flex align-items-center gap-2 p-2">
-                    <i class="bi bi-hammer"></i> Cadastrar Serviço
+                    <i class="bi bi-gear"></i> Cadastrar Serviço
+                </a>
+            </li>
+            <!-- CADASTRAR SALA -->
+            <li class="list-group-item rounded-1 p-0 overflow-hidden ">
+                <a href="/psicologia/criar-sala" class="link-agendar d-flex align-items-center gap-2 p-2">
+                    <i class="bi bi-door-open"></i> Salas
+                </a>
+            </li>
+            <!-- HORÁRIOS -->
+            <li class="list-group-item rounded-1 p-0 overflow-hidden ">
+                <a href="/psicologia/criar-horario" class="link-agendar d-flex align-items-center gap-2 p-2">
+                    <i class="bi bi-alarm"></i> Horários
                 </a>
             </li>
             <!-- RELATÓRIO -->

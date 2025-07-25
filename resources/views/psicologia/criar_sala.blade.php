@@ -18,7 +18,7 @@
             background-color: #f8f9fa;
         }
         #content-wrapper {
-            width: 70vw;
+            width: 80vw;
             height: 90vh;
             margin: auto;
             display: flex;
@@ -105,7 +105,7 @@
         @media (max-width: 768px) {
             #content-wrapper {
                 flex-direction: column;
-                width: 90vw;
+                width: 95vw;
                 height: auto;
             }
             main {
@@ -278,7 +278,7 @@
                 .then(salas => {
                     salasTBody.innerHTML = '';
 
-                    // NENGUMA SALA ENCONTRADA
+                    // NENHUMA SALA ENCONTRADA
                     if (salas.length === 0) {
                         salasTBody.innerHTML = `
                             <tr>

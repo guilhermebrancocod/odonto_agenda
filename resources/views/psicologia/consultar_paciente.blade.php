@@ -158,6 +158,8 @@
 
             </form>
 
+            <hr>
+
 
             <!-- RESULTADOS - TABELA -->
             <div class="w-100">
