@@ -118,9 +118,9 @@
                         @endphp
 
                         @foreach (['segunda', 'terca', 'quarta', 'quinta', 'sexta', 'sabado'] as $dia)
-                        <option value="{{ $dia }}" {{ in_array($dia, $diasSelecionados) ? 'selected' : '' }}>
-                            {{ ucfirst($dia) }}-feira
-                        </option>
+                            <option value="{{ $dia }}" {{ in_array($dia, $diasSelecionados) ? 'selected' : '' }}>
+                                {{ ucfirst($dia) }}-feira
+                            </option>
                         @endforeach
                     </select>
                 </div>

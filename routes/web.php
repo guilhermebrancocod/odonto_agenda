@@ -9,9 +9,10 @@ use App\Http\Controllers\Psicologia\AgendamentoController;
 use App\Http\Controllers\Psicologia\ServicoController;
 use App\Http\Controllers\LoginController;
 use App\Http\Controllers\Psicologia\ClinicaController;
+use App\Http\Controllers\Psicologia\SalaController;
+use App\Http\Controllers\Psicologia\HorarioController;
 use App\Models\FaesaClinicaServico;
 use App\Models\FaesaClinicaPaciente;
-
 use App\Http\Middleware\AuthMiddleware;
 use App\Http\Middleware\CheckClinicaMiddleware;
 
@@ -110,13 +111,16 @@ Route::get('/api/buscar-pacientes', function () {
     return response()->json($pacientes);
 });
 
-Route::post('/criar-paciente/criar', [PacienteController::class, 'criarPaciente'])->name('criarPaciente-Psicologia');
+Route::post('/criar-paciente/criar', [PacienteController::class, 'createPaciente'])->name('criarPaciente-Psicologia');
 
-Route::get('/editar-paciente', function () {
+
+// EDIÇAÕ DE PACIENTE
+Route::get('psicologia//editar-paciente', function () {
     return view('psicologia/editar_paciente');
 })->name('editarPaciente-Psicologia');
 
-Route::post('/editar-paciente/{id}', [PacienteController::class, 'editarPaciente'])->name('editarPaciente-Psicologia');
+Route::post('/psicologia/editar-paciente/{id}', [PacienteController::class, 'editarPaciente'])->name('editarPaciente-Psicologia');
+
 
 Route::get('/psicologia/criar-agendamento', function () {
     return view('psicologia/criar_agenda');
@@ -291,6 +295,9 @@ Route::get('/psicologia/consultar-paciente/', function () {
 // CONSULTA DE PACIENTE
 Route::get('/psicologia/consultar-paciente/buscar/', [PacienteController::class, 'getPaciente'])->name('getPaciente');
 
+//DELETE DE PACIENTE - PSICOLOGIA
+Route::delete('psicologia/excluir-paciente/{id}', [PacienteController::class, 'deletePaciente'])->name('deletePaciente-Psicologia');
+
 // CONSULTA DE AGENDAMENTO
 Route::get('/psicologia/consultar-agendamento', function () {
     return view('psicologia.consultar_agendamento');
@@ -333,3 +340,31 @@ Route::put('/psicologia/agendamento/{id}', [AgendamentoController::class, 'updat
 
 Route::delete('/psicologia/agendamento/{id}', [AgendamentoController::class, 'deleteAgendamento'])
      ->name('psicologia.agendamento.delete');
+
+
+
+
+
+
+// SALAS
+Route::get('/psicologia/criar-sala', function () {
+    return view('psicologia.criar_sala');
+})->name('salas_psicologia');
+
+Route::post('/psicologia/salas/criar', [SalaController::class, 'createSala'])->name('criarSala-Psicologia');
+
+Route::get('/psicologia/salas/listar', [SalaController::class, 'listSalas'])->name('listarSalas-Psicologia');
+
+Route::put('/psicologia/salas/{id}', [SalaController::class, 'updateSala'])->name('atualizarSala-Psicologia');
+
+
+
+
+// HORÁRIOS
+Route::get('/psicologia/criar-horario/', function () {
+    return view('psicologia/criar_horario');
+})->name('criarHorarioView-Psicologia');
+
+Route::get('/psicologia/horarios/listar', [HorarioController::class, 'listHorarios'])->name('listarHorarios-Psicologia');
+
+Route::post('/psicologia/horarios/criar-horario', [HorarioController::class, 'createHorario'])->name('criarHorario-Psicologia');

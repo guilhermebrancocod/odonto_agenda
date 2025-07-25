@@ -127,7 +127,7 @@
         <!-- FORM DE BUSCA DE PACIENTE -->
         <form id="search-form" class="d-flex mb-3" role="search">
             <div class="input-group">
-                <input id="search-input" name="search" type="search" class="form-control" placeholder="Pesquisar paciente">
+                <input id="search-input" name="search" type="search" class="form-control" placeholder="Pesquisar paciente" value="{{ old('search') }}">
                 <button type="submit" class="btn btn-primary">Pesquisar</button>
             </div>
         </form>
@@ -193,7 +193,7 @@
                         <i class="fas fa-info-circle"></i>
                     </span>
                     </label>
-                    <input type="text" id="servico" name="servico" class="form-control" autocomplete="off" value="">
+                    <input type="text" id="servico" name="servico" class="form-control" autocomplete="off" value="{{old('servico')}}">
                     
                     <div id="servicos-list" class="list-group position-absolute w-100" style="z-index: 1000;"></div>
                 </div>
@@ -340,7 +340,7 @@
                         const item = document.createElement('button');
                         item.type = 'button';
                         item.classList.add('list-group-item', 'list-group-item-action');
-                        item.textContent = `${paciente.NOME_COMPL_PACIENTE} (${paciente.CPF_PACIENTE}) - ${new Date(paciente.DT_NASC_PACIENTE).toLocaleDateString('pt-BR')}`;
+                        item.textContent = `${paciente.NOME_COMPL_PACIENTE} (${paciente.CPF_PACIENTE}) - Nasc: ${formatarDataBR(paciente.DT_NASC_PACIENTE)}`;
                         item.addEventListener('click', () => {
                             pacienteSelecionadoDiv.innerHTML = 
                             `<div class="alert alert-success d-flex justify-content-between align-items-center">
@@ -369,6 +369,13 @@
                     pacientesList.innerHTML = `<div class="alert alert-danger">Erro ao buscar pacientes.</div>`;
                     console.error(error);
                 });
+
+            function formatarDataBR(dateStr) {
+                if (!dateStr) return '-';
+                const cleanedDate = dateStr.split('T')[0];
+                const [year, month, day] = cleanedDate.split('-');
+                return `${day}/${month}/${year}`;
+            }
         });
 </script>
 

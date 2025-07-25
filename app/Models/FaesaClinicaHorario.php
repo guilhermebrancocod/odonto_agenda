@@ -4,13 +4,13 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 
-class FaesaClinicaHorarioBloq extends Model
+class FaesaClinicaHorario extends Model
 {
-    protected $table = 'FAESA_CLINICA_HORARIO_BLOQ';
+    protected $table = 'FAESA_CLINICA_HORARIO';
 
     protected $primaryKey = 'ID_BLOQUEIO';
 
-    public $timestamps = false;
+    public $timestamps = true;
 
     protected $fillable = [
         'ID_BLOQUEIO',
