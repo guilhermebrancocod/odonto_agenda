@@ -5,32 +5,30 @@ namespace app\Http\Controllers\Psicologia;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use App\Models\FaesaClinicaSala;
+use Illuminate\Validation\Rule;
 
 class SalaController extends Controller
 {
     public function createSala(Request $request)
     {
         $idClinica = $request->input('id_clinica');
-        
+
         $validatedData = $request->validate([
-            'DESCRICAO' => 'required|string|max:255',
+            'DESCRICAO' => 'required|string|max:255|unique:FAESA_CLINICA_SALA,DESCRICAO',
         ], [
             'DESCRICAO.required' => 'A descrição da Sala é obrigatória',
+            'DESCRICAO.unique' => 'Já existe uma sala com essa descrição.',
             'DESCRICAO.string' => 'A descrição da sala não pode ser numérica',
             'DESCRICAO.max' => 'A descrição da sala não pode ter mais de 255 caracteres',
         ]);
-
-        // Verifica se a clínica existe
-        if (FaesaClinicaSala::where('DESCRICAO', $validatedData['DESCRICAO'])->exists()) {
-            return response()->json(['error' => 'ID da clínica não fornecido'], 400);
-        }
 
         $sala = new FaesaClinicaSala();
         $sala->DESCRICAO = $validatedData['DESCRICAO'];
         $sala->save();
 
-        return redirect()->route('/psicologia/criar-sala')->with('success', 'Sala criada com sucesso!');
-    }
+        return redirect()->route('salas_psicologia')->with('success', 'Sala criada com sucesso!');
+}
+
 
     public function getSala()
     {
@@ -39,7 +37,27 @@ class SalaController extends Controller
 
     public function updateSala(Request $request, $id)
     {
+        $requestData = $request->json()->all();
 
+        $validatedData = validator($requestData, [
+            'DESCRICAO' => [
+                'required',
+                'string',
+                'max:255',
+                Rule::unique('FAESA_CLINICA_SALA', 'DESCRICAO')->ignore($id, 'ID_SALA_CLINICA'),
+            ],
+            'ATIVO' => 'required|in:S,N',
+        ], [
+            'DESCRICAO.required' => 'A descrição da Sala é obrigatória',
+            'DESCRICAO.unique' => 'Já existe uma sala com essa descrição.',
+            'DESCRICAO.string' => 'A descrição da sala não pode ser numérica',
+            'DESCRICAO.max' => 'A descrição da sala não pode ter mais de 255 caracteres',
+        ])->validate();
+
+        $sala = FaesaClinicaSala::findOrFail($id);
+        $sala->update($validatedData);
+
+        return response()->json(['message' => 'Sala atualizada com sucesso!']);
     }
 
     public function deleteSala($id)
@@ -57,7 +75,7 @@ class SalaController extends Controller
             $query->where('DESCRICAO', 'like', '%' . $search . '%');
         }
 
-        $salas = $query->orderBy('CREATED_AT', 'desc')->get();
+        $salas = $query->orderBy('DESCRICAO', 'desc')->get();
 
         return response()->json($salas);
     }

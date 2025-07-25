@@ -127,7 +127,7 @@
         <!-- FORM DE BUSCA DE PACIENTE -->
         <form id="search-form" class="d-flex mb-3" role="search">
             <div class="input-group">
-                <input id="search-input" name="search" type="search" class="form-control" placeholder="Pesquisar paciente">
+                <input id="search-input" name="search" type="search" class="form-control" placeholder="Pesquisar paciente" value="{{ old('search') }}">
                 <button type="submit" class="btn btn-primary">Pesquisar</button>
             </div>
         </form>
@@ -193,7 +193,7 @@
                         <i class="fas fa-info-circle"></i>
                     </span>
                     </label>
-                    <input type="text" id="servico" name="servico" class="form-control" autocomplete="off" value="">
+                    <input type="text" id="servico" name="servico" class="form-control" autocomplete="off" value="{{old('servico')}}">
                     
                     <div id="servicos-list" class="list-group position-absolute w-100" style="z-index: 1000;"></div>
                 </div>

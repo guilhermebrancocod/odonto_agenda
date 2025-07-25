@@ -138,14 +138,15 @@
         </div>
 
         @if ($errors->any())
-            <div class="alert alert-danger">
-                <ul class="mb-0">
-                    @foreach ($errors->all() as $erro)
-                        <li>{{ $erro }}</li>
-                    @endforeach
-                </ul>
-            </div>
-        @endif
+        <script>
+            document.addEventListener('DOMContentLoaded', () => {
+                @foreach ($errors->all() as $erro)
+                    showAlert("{{ $erro }}", 'danger');
+                @endforeach
+            });
+        </script>
+    @endif
+
 
         @if(session('success'))
             <script>
@@ -212,6 +213,7 @@
             </table>
         </div>
 
+        <!-- MODAL DE EDIÇÃO DE SALA -->
         <div class="modal fade" id="editarSalaModal" tabindex="-1" aria-hidden="true">
         <div class="modal-dialog">
                 <div class="modal-content">
@@ -238,7 +240,10 @@
                             <!-- EDIÇÃO DE STATUS DA SALA -->
                             <div>
                                 <label class="form-label">Status</label>
-                                <textarea id="edit-sala-status" name="ATIVO" class="form-control"></textarea>
+                                <select id="edit-sala-status" name="ATIVO" class="form-select" required>
+                                    <option value="S">Ativo</option>
+                                    <option value="N">Inativo</option>
+                                </select>
                             </div>
                         </div>
 
@@ -263,6 +268,38 @@
 
 
 <script>
+
+    // FUNÇÃO PARA EXIBIR ALERTAS
+    function showAlert(message, type = 'success') {
+        const alertContainer = document.getElementById('alert-container');
+        const alert = document.createElement('div');
+        alert.className = `alert alert-${type} alert-dismissible fade show mt-2`;
+        alert.role = 'alert';
+        alert.style.pointerEvents = 'auto';
+        alert.innerHTML = `
+            ${message}
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        `;
+
+        alertContainer.appendChild(alert);
+
+        setTimeout(() => {
+            alert.classList.remove('show');
+            alert.classList.add('hide');
+            setTimeout(() => alert.remove(), 300);
+        }, 4000);
+    }
+
+    function showModalAlert(message, type = 'danger') {
+        const modalAlertContainer = document.getElementById('modal-alert-container');
+        modalAlertContainer.innerHTML = `
+            <div class="alert alert-${type} alert-dismissible fade show m-3 mb-0">
+                ${message}
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+        `;
+    }
+
     document.addEventListener('DOMContentLoaded', () => {
 
         // === VARIÁVEIS GLOBAIS ===
@@ -293,11 +330,12 @@
                         const tr = document.createElement('tr');
                         tr.innerHTML = `
                             <td>${sala.DESCRICAO}</td>
-                            <td>${sala.ATIVO ? 'Ativo' : 'Inativo'}</td>
+                            <td>${sala.ATIVO === 'S' ? 'Ativo' : 'Inativo'}</td>
                             <td>
                                 <button class="btn btn-primary btn-sm btn-editar"
                                     data-id="${sala.ID_SALA_CLINICA}"
-                                    data-desc="${sala.DESCRICAO}">
+                                    data-desc="${sala.DESCRICAO}"
+                                    data-status="${sala.ATIVO}">
                                     Editar
                                 </button>
                             </td>
@@ -309,6 +347,7 @@
                         btn.addEventListener('click', () => {
                             document.getElementById('edit-sala-id').value = btn.dataset.id;
                             document.getElementById('edit-sala-desc').value = btn.dataset.desc;
+                            document.getElementById('edit-sala-status').value = btn.dataset.status;
                             editarSalaModal.show();
                         });
                     });
@@ -331,6 +370,39 @@
             carregarSalas(searchInput.value);
         });
 
+        // === FUNÇÃO PARA EDITAR SALAS ===
+        formEditarSala.addEventListener('submit', e => {
+            e.preventDefault();
+
+            const desc = document.getElementById('edit-sala-desc').value;
+            const status = document.getElementById('edit-sala-status').value;
+            const id = document.getElementById('edit-sala-id').value;
+
+            fetch(`{{ route('atualizarSala-Psicologia', ['id' => 'ID_PLACEHOLDER']) }}`.replace('ID_PLACEHOLDER', id), {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+                },
+                body: JSON.stringify({
+                    DESCRICAO: desc,
+                    ATIVO: status
+                })
+            })
+            .then(res => {
+                if (!res.ok) throw new Error('Erro ao salvar');
+                return res.json();
+            })
+            .then(() => {
+                showAlert('Sala atualizada com sucesso!', 'success');
+                editarSalaModal.hide();
+                carregarSalas(searchInput.value);
+            })
+            .catch(error => {
+                console.error('Erro ao atualizar sala:', error);
+                showModalAlert('Erro ao atualizar sala. Tente novamente.', 'danger');
+            });
+        }); 
     });
 </script>
 

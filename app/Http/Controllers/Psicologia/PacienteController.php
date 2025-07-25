@@ -17,7 +17,7 @@ class PacienteController extends Controller
         $validatedData = $request->validate([
             'NOME_COMPL_PACIENTE' => 'required|string|max:255',
             'DT_NASC_PACIENTE' => 'nullable|date',
-            'CPF_PACIENTE' => 'required|string|max:14|unique:FAESA_CLINICA_PACIENTE,CPF_PACIENTE',
+            'CPF_PACIENTE' => 'required|string|max:14|unique:FAESA_CLINICA_PACIENTE,CPF_PACIENTE|regex:/^\d{3}\.?\d{3}\.?\d{3}-?\d{2}$/',
             'SEXO_PACIENTE' => 'required|string|in:M,F,O',
             'CEP' => 'required|string|max:20',
             'ENDERECO' => 'required|string|max:255',
@@ -27,13 +27,14 @@ class PacienteController extends Controller
             'municipio' => 'required|string|max:255',
             'UF' => 'required|string|max:2',
             'E_MAIL_PACIENTE' => 'nullable|email|max:255',
-            'FONE_PACIENTE' => 'required|string|max:20',
+            'FONE_PACIENTE' => 'required|string|max:20|regex:/^\(?\d{2}\)?\s?\d{4,5}-?\d{4}$/',
             'OBSERVACAO' => 'nullable|string',
             'STATUS' => 'required|string|max:50|in:Em espera'
         ], [
             'NOME_COMPL_PACIENTE.required' => 'Informe o nome do paciente antes de continuar.',
             'CPF_PACIENTE.required' => 'Informe o CPF do paciente antes de continuar.',
             'CPF_PACIENTE.unique' => 'Este CPF já está cadastrado no sistema. Por favor, verifique',
+            'CPF_PACIENTE.regex' => 'Informe um CPF válido, usando apenas números ou no formato 000.000.000-00.',
             'SEXO_PACIENTE.required' => 'Informe o sexo do paciente antes de continuar.',
             'CEP.required' => 'Informe o CPF do endereço do paciente antes de continuar.',
             'ENDERECO.required' => 'Informe o endereço do paciente antes de continuar',
@@ -42,8 +43,9 @@ class PacienteController extends Controller
             'municipio.required' => 'Informe o municipio do paciente antes de continuar',
             'UF.required' => 'Informe o estado (UF) do endereço do paciente antes de continuar.',
             'FONE_PACIENTE.required' => 'Informe o telefone do paciente antes de continuar.',
+            'FONE_PACIENTE.regex' => 'Informe um telefone válido, usando apenas números ou no formato correto.',
         ]);
-
+        
         $paciente = new FaesaClinicaPaciente();
         $paciente->NOME_COMPL_PACIENTE=$validatedData['NOME_COMPL_PACIENTE'];
         $paciente->CPF_PACIENTE=$validatedData['CPF_PACIENTE'];

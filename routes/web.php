@@ -346,14 +346,15 @@ Route::delete('/psicologia/agendamento/{id}', [AgendamentoController::class, 'de
 
 // SALAS
 Route::get('/psicologia/criar-sala', function () {
-    return view('/psicologia/criar_sala');
+    return view('psicologia.criar_sala');
 })->name('salas_psicologia');
 
 Route::post('/psicologia/salas/criar', [SalaController::class, 'createSala'])->name('criarSala-Psicologia');
 
 Route::get('/psicologia/salas/listar', [SalaController::class, 'listSalas'])->name('listarSalas-Psicologia');
 
-Route::get('/psicologia/salas/{id}', [SalaController::class, 'getSala'])->name('getSala-Psicologia');
+Route::put('/psicologia/salas/{id}', [SalaController::class, 'updateSala'])->name('atualizarSala-Psicologia');
+
 
 
 

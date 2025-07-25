@@ -12,6 +12,14 @@ class FaesaClinicaSala extends Model
 
     public $timestamps = true;
 
+    protected $fillable = [
+        'ID_CLINICA',
+        'DESCRICAO',
+        'ATIVO',
+        'CREATED_AT',
+        'UPDATED_AT',
+    ];
+
     public function agendamentos(): BelongsTo
     {
         return $this->hasMany(FaesaClinicaAgendamento::class, 'LOCAL', 'ID_SALA_CLINICA');
