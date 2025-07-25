@@ -10,7 +10,7 @@ class FaesaClinicaHorario extends Model
 
     protected $primaryKey = 'ID_BLOQUEIO';
 
-    public $timestamps = false;
+    public $timestamps = true;
 
     protected $fillable = [
         'ID_BLOQUEIO',

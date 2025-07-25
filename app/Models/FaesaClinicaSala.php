@@ -10,7 +10,7 @@ class FaesaClinicaSala extends Model
 
     protected $primaryKey = 'ID_SALA_CLINICA';
 
-    public $timestamps = false;
+    public $timestamps = true;
 
     public function agendamentos(): BelongsTo
     {

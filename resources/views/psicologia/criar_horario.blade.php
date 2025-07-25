@@ -181,8 +181,8 @@
                 <label for="TIPO_HORARIO" class="form-label">Tipo de Horário</label>
                 <select id="TIPO_HORARIO" name="TIPO_HORARIO" class="form-select" required>
                     <option value="" disabled selected>Selecione o tipo de horário</option>
-                    <option value="A">Horário de Atendimento</option>
-                    <option value="B">Horário Bloqueado</option>
+                    <option value="N">Horário de Atendimento</option>
+                    <option value="S">Horário Bloqueado</option>
                 </select>
                 <div class="invalid-feedback">
                     Selecione se o horário é de atendimento ou bloqueado.
@@ -338,7 +338,7 @@
                         const tr = document.createElement('tr');
                         tr.innerHTML = `
                             <td>${horario.DESCRICAO_HORARIO}</td>
-                            <td>${horario.BLOQUEADO ? 'S' : 'N'}</td>
+                            <td>${horario.BLOQUEADO === 'S' ? 'Bloqueio' : 'Atendimento'}</td>
                             <td>
                                 <button class="btn btn-primary btn-sm btn-editar"
                                     data-id="${horario.ID_HORARIO}"

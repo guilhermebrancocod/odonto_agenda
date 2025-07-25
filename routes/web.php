@@ -358,10 +358,10 @@ Route::get('/psicologia/salas/{id}', [SalaController::class, 'getSala'])->name('
 
 
 // HORÁRIOS
-Route::get('/psicologia/criar-horario', function () {
+Route::get('/psicologia/criar-horario/', function () {
     return view('psicologia/criar_horario');
-});
+})->name('criarHorarioView-Psicologia');
 
-Route::post('/psicologia/horarios/criar', [HorarioController::class, 'createHorario'])->name('criarHorario-Psicologia');
+Route::get('/psicologia/horarios/listar', [HorarioController::class, 'listHorarios'])->name('listarHorarios-Psicologia');
 
-Route::post('/psicologia/horarios/listar', [HorarioController::class, 'listHorarios'])->name('listarHorarios-Psicologia');
+Route::post('/psicologia/horarios/criar-horario', [HorarioController::class, 'createHorario'])->name('criarHorario-Psicologia');

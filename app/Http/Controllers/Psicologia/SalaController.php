@@ -57,7 +57,7 @@ class SalaController extends Controller
             $query->where('DESCRICAO', 'like', '%' . $search . '%');
         }
 
-        $salas = $query->orderBy('DESCRICAO', 'desc')->get();
+        $salas = $query->orderBy('CREATED_AT', 'desc')->get();
 
         return response()->json($salas);
     }
