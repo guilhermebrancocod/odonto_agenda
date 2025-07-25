@@ -16,9 +16,9 @@
 <body>
     <div id="navbar-container"></div>
     <div style="margin-left:220px; padding: 30px; border-radius: 10px; background-color: #fff; box-shadow: 0 4px 12px rgba(0,0,0,0.05);width: 100%;">
-        <div style="text-align: center; margin-bottom: 30px;">
-            <h2 style="margin: 0; font-size: 24px; color: #333;">Buscando boxes</h2>
-        </div>
+        <fieldset class="border p-3 rounded mb-3">
+            <legend class="w-auto px-2">Buscando boxes</legend>
+        </fieldset>
         <form id="form-search-boxes" class="row g-3 needs-validation">
             <div class="linha-com-titulo">
                 <h5>Pesquisar</h5>
@@ -51,9 +51,9 @@
                 <table class="table datatable-table" id="table-box">
                     <thead class="datatable-header">
                         <tr style="padding-left: 1rem;">
-                            <th>Descrição</th>
-                            <th>Status</th>
-                            <th>Editar</th>
+                            <th style="width: 70%;">Descrição</th>
+                            <th style="width: 20%;">Status</th>
+                            <th style="width: 10%;">Editar</th>
                         </tr>
                     </thead>
                     <tbody>

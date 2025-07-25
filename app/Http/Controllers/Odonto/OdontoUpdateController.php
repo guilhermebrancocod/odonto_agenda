@@ -18,6 +18,7 @@ class OdontoUpdateController extends Controller
             ->update([
                 'NOME_COMPL_PACIENTE' => $request->input('nome'),
                 'CPF_PACIENTE' => preg_replace('/\D/', '', $request->input('cpf')),
+                'COD_SUS' => $request->input('cod_sus'),
                 'DT_NASC_PACIENTE' => \Carbon\Carbon::createFromFormat('d/m/Y', $request->input('dt_nasc'))->format('Y-m-d'),
                 'SEXO_PACIENTE' => $request->input('sexo'),
                 'CEP' => preg_replace('/\D/', '', $request->input('cep')),
@@ -28,7 +29,10 @@ class OdontoUpdateController extends Controller
                 'MUNICIPIO' => $request->input('cidade'),
                 'UF' => $request->input('estado'),
                 'E_MAIL_PACIENTE' => $request->input('email'),
-                'FONE_PACIENTE' => $request->input('celular')
+                'FONE_PACIENTE' => $request->input('celular'),
+                'NOME_RESPONSAVEL' => $request->input('nome_resposavel'),
+                'CPF_RESPONSAVEL' => $request->input('cpf_responsavel'),
+                'OBSERVACAO' => $request->input('obs_laudo')
             ]);
 
         return redirect()->back()->with('success', 'Paciente atualizado com sucesso!');
@@ -81,8 +85,13 @@ class OdontoUpdateController extends Controller
 
     public function updateAgenda(Request $request, $id)
     {
-
+        
         $agenda = DB::table('FAESA_CLINICA_AGENDAMENTO')->where('ID_AGENDAMENTO', $id)->first();
+        $idBox = $request->input('boxes');
+
+        $descricaoLocal = DB::table('FAESA_CLINICA_BOXES')
+            ->where('ID_BOX_CLINICA', $idBox)
+            ->value('DESCRICAO');
 
         $valor = $request->input('valor') ? str_replace(',', '.', $request->input('valor')) : null;
 
@@ -101,6 +110,13 @@ class OdontoUpdateController extends Controller
                 'RECORRENCIA' => $request->input('recorrencia'),
                 'VALOR_AGEND' => $valor,
                 'OBSERVACOES' => $request->input('obs'),
+                'LOCAL' => $descricaoLocal
+            ]);
+
+        DB::table('FAESA_CLINICA_LOCAL_AGENDAMENTO')
+            ->where('ID_AGENDAMENTO', $id)
+            ->update([
+                'ID_BOX' => $idBox
             ]);
 
         return redirect()->back()->with('success', 'Agendamento atualizado com sucesso!');

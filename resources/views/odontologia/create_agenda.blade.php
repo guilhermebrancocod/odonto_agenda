@@ -20,9 +20,9 @@
 <body>
     <div id="navbar-container"></div>
     <div style="margin-left:220px; padding: 30px; border-radius: 10px; background-color: #fff; box-shadow: 0 4px 12px rgba(0,0,0,0.05);width: 100%;">
-        <div style="text-align: center; margin-bottom: 30px;">
-            <h2 style="margin: 0; font-size: 24px; color: #333;">Agendamento</h2>
-        </div>
+        <fieldset class="border p-3 rounded mb-3">
+            <legend class="w-auto px-2">Agendamento</legend>
+        </fieldset>
         <form class="row g-3 needs-validation"
             action="{{ isset($agenda) ? route('updateAgenda', $agenda->ID_AGENDAMENTO) : route('createAgenda') }}"
             method="POST">
@@ -34,13 +34,15 @@
                 <h5>Paciente</h5>
                 <div class="linha-flex"></div>
             </div>
-            <div style="display: flex; gap: 20px; align-items: flex-end; flex-wrap: wrap; margin: 20px 0;">
-                <select id="selectPatient" name="ID_PACIENTE" class="form-control" style="width: 100%;">
-                    {{-- A opção será carregada via AJAX --}}
-                    @if(old('ID_PACIENTE') && old('NOME_PACIENTE'))
-                    <option value="{{ old('ID_PACIENTE') }}" selected>{{ old('NOME_PACIENTE') }}</option>
-                    @endif
-                </select>
+            <div style="display: flex; align-items: flex-end; gap: 10px; flex-wrap: wrap; margin: 15px 0;">
+                <div style="flex: 1; min-width: 250px;">
+                    <select id="selectPatient" name="ID_PACIENTE" class="form-control" style="width: 100%;">
+                        {{-- A opção será carregada via AJAX --}}
+                        @if(old('ID_PACIENTE') && old('NOME_PACIENTE'))
+                        <option value="{{ old('ID_PACIENTE') }}" selected>{{ old('NOME_PACIENTE') }}</option>
+                        @endif
+                    </select>
+                </div>
                 <div style="flex-shrink: 0;">
                     <button type="button" id="reload"
                         onclick="location.reload();"
@@ -54,36 +56,33 @@
                 <h5>Horário</h5>
                 <div class="linha-flex"></div>
             </div>
-            <div class="row g-3" style="margin: 20px 0;">
-                <!-- Dia Início -->
+            <div class="row g-3" style="margin: 15px 0;">
+                <!-- Data e horário -->
                 <div class="col-md-3">
                     <label for="date" class="form-label">Dia Início</label>
                     <input type="text" id="date" name="date" class="form-control datepicker"
                         value="{{ old('date', isset($agenda->DT_AGEND) ? \Carbon\Carbon::parse($agenda->DT_AGEND)->format('d/m/Y') : '') }}">
                 </div>
 
-                <!-- Dia Fim (caso queira usar futuramente) -->
                 <div class="col-md-3">
                     <label for="date_end" class="form-label">Dia Fim</label>
                     <input type="text" id="date_end" name="date_end" class="form-control datepicker"
                         value="{{ old('date_end', isset($agenda->DT_AGEND) ? \Carbon\Carbon::parse($agenda->DT_AGEND)->format('d/m/Y') : '') }}">
                 </div>
 
-                <!-- Horário Início -->
                 <div class="col-md-3">
                     <label for="hr_ini" class="form-label">Horário Início</label>
                     <input type="text" id="hr_ini" name="hr_ini" class="form-control timepicker"
                         value="{{ old('hr_ini', isset($agenda->HR_AGEND_INI) ? substr($agenda->HR_AGEND_INI, 0, 5) : '') }}">
                 </div>
 
-                <!-- Horário Fim -->
                 <div class="col-md-3">
                     <label for="hr_fim" class="form-label">Horário Fim</label>
                     <input type="text" id="hr_fim" name="hr_fim" class="form-control timepicker"
                         value="{{ old('hr_fim', isset($agenda->HR_AGEND_FIN) ? substr($agenda->HR_AGEND_FIN, 0, 5) : '') }}">
                 </div>
 
-                <!-- Recorrência -->
+                <!-- Tipo de agendamento e dia da semana -->
                 <div class="col-md-4">
                     <label for="recorrencia" class="form-label">Tipo de agendamento</label>
                     <select id="recorrencia" name="recorrencia" class="form-select">
@@ -96,7 +95,6 @@
                     </select>
                 </div>
 
-                <!-- Tipo -->
                 <div class="col-md-4">
                     <label for="dia_semana" class="form-label">Dias da semana</label>
                     <select id="dia_semana" name="dia_semana[]" class="form-select" multiple>
@@ -104,17 +102,11 @@
                         use Carbon\Carbon;
 
                         $diasMap = [
-                        0 => 'domingo',
-                        1 => 'segunda',
-                        2 => 'terca',
-                        3 => 'quarta',
-                        4 => 'quinta',
-                        5 => 'sexta',
-                        6 => 'sabado',
+                        0 => 'domingo', 1 => 'segunda', 2 => 'terca', 3 => 'quarta',
+                        4 => 'quinta', 5 => 'sexta', 6 => 'sabado',
                         ];
 
                         $recorrenciaAtual = old('recorrencia', trim($agenda->RECORRENCIA ?? ''));
-
                         $diasSelecionados = [];
 
                         if ($recorrenciaAtual === 'pontual' && isset($agenda->DT_AGEND)) {
@@ -132,15 +124,14 @@
                         @endforeach
                     </select>
                 </div>
-                <!-- Haverá Pagamento -->
+
+                <!-- Pagamento -->
                 @php
-                // Checa valor enviado pelo formulário (old) ou valor vindo do banco ($agenda)
                 $pagto = old('pagto');
                 if (is_null($pagto) && isset($agenda)) {
                 $pagto = $agenda->VALOR_AGEND !== null ? 'S' : 'N';
                 }
                 @endphp
-
                 <div class="col-md-4">
                     <label for="pagto" class="form-label">Haverá Pagamento?</label>
                     <select id="pagto" name="pagto" class="form-select">
@@ -149,38 +140,30 @@
                         <option value="N" {{ $pagto === 'N' ? 'selected' : '' }}>Não</option>
                     </select>
                 </div>
-                <!-- Serviço -->
-                <div class="col-md-4">
-                    <label class="form-label">Serviço</label>
-                    <select id="form-select" class="form-select" name="servico">
-                    </select>
-                </div>
-                <!-- Valor -->
-                @php
-                $pagto = old('pagto');
-                if (is_null($pagto) && isset($agenda)) {
-                $pagto = $agenda->VALOR_AGEND !== null ? 'S' : 'N';
-                }
 
+                <!-- Serviço e Valor -->
+                <div class="col-md-3">
+                    <label class="form-label">Serviço</label>
+                    <select id="form-select" class="form-select" name="servico"></select>
+                </div>
+
+                @php
                 $valorDisabled = $pagto === 'N' ? 'disabled' : '';
                 @endphp
-
-                <div class="col-md-4">
+                <div class="col-md-3">
                     <label for="valor" class="form-label">Valor</label>
                     <input type="text" id="valor" name="valor" class="form-control"
                         value="{{ old('valor', $agenda->VALOR_AGEND ?? '') }}"
                         {{ $valorDisabled }}>
                 </div>
-                <div class="col-md-8">
-                    <label for="obs" class="form-label">Observações</label>
-                    <input type="text" id="obs" name="obs" class="form-control"
-                        value="{{ old('obs', $agenda->OBSERVACOES ?? '') }}">
-                </div>
-                <!-- Status e Remarcado (apenas edição) -->
+
+                <!-- Status e Remarcado -->
                 @php
                 $status = old('status', $agenda->STATUS_AGEND ?? 'Agendado');
+                $remarcado = old('remarcado', isset($agenda) ? ($agenda->UPDATED_AT ? '1' : '0') : '0');
                 @endphp
-                <div class="col-md-2">
+
+                <div class="col-md-3">
                     <label for="status" class="form-label">Status</label>
                     <select id="status" name="status" class="form-select">
                         <option value="Agendado" {{ $status == 'Agendado' ? 'selected' : '' }}>Agendado</option>
@@ -188,27 +171,30 @@
                         <option value="Cancelado" {{ $status == 'Cancelado' ? 'selected' : '' }}>Cancelado</option>
                     </select>
                 </div>
-                @php
-                $remarcado = old('remarcado', isset($agenda) ? ($agenda->UPDATED_AT ? '1' : '0') : '0');
-                @endphp
 
-                <div class="col-md-2">
+                <div class="col-md-3">
                     <label for="remarcado" class="form-label">Remarcado?</label>
                     <select id="remarcado" name="remarcado" class="form-select" disabled>
                         <option value="0" {{ $remarcado == '0' ? 'selected' : '' }}>Não</option>
                         <option value="1" {{ $remarcado == '1' ? 'selected' : '' }}>Sim</option>
                     </select>
                 </div>
-            </div>
 
-            <div style="text-align: right;flex:1">
-                <button id="btn-agendar" type="submit" style="background-color: #007bff; color: #fff; border: none; padding: 10px 20px; font-size: 14px; border-radius: 6px; cursor: pointer;">
-                    Agendar
-                </button>
+                <!-- Observações -->
+                <div class="col-md-9">
+                    <label for="obs" class="form-label">Observações</label>
+                    <input type="text" id="obs" name="obs" class="form-control"
+                        value="{{ old('obs', $agenda->OBSERVACOES ?? '') }}">
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label">Box de atendimento</label>
+                    <select id="form-select-box" class="form-select" name="boxes"></select>
+                </div>
             </div>
-            <div class="linha-com-titulo">
-                <h5></h5>
-                <div class="linha-flex"></div>
+            <div style="text-align: right;flex:1">
+                <button class="btn btn-primary btn-lg" id="btn-agendar" type="submit" style="background-color: #007bff; color: #fff; border: none; padding: 10px 20px; font-size: 14px; border-radius: 6px; cursor: pointer;">
+                    <i class="bi bi-calendar-plus"></i> Agendar
+                </button>
             </div>
         </form>
     </div>

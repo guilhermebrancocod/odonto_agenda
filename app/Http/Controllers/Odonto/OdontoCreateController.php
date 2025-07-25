@@ -35,6 +35,7 @@ class OdontoCreateController extends Controller
         $idPaciente = DB::table('FAESA_CLINICA_PACIENTE')->insertGetId([
             'NOME_COMPL_PACIENTE' => $request->input('nome'),
             'CPF_PACIENTE' => $cpf,
+            'COD_SUS' => $request->input('cod_sus'),
             'DT_NASC_PACIENTE' => \Carbon\Carbon::createFromFormat('d/m/Y', $request->input('dt_nasc'))->format('Y-m-d'),
             'SEXO_PACIENTE' => $request->input('sexo'),
             'CEP' => preg_replace('/\D/', '', $request->input('cep')),
@@ -46,6 +47,9 @@ class OdontoCreateController extends Controller
             'UF' => $request->input('estado'),
             'E_MAIL_PACIENTE' => $request->input('email'),
             'FONE_PACIENTE' => preg_replace('/\D/', '', $request->input('celular')),
+            'NOME_RESPONSAVEL' => $request->input('nome_resposavel'),
+            'CPF_RESPONSAVEL' => $request->input('cpf_resposavel'),
+            'OBSERVACAO' => $request->input('obs_laudo')
         ]);
 
         return redirect()->back()->with('success', 'Paciente criado com sucesso!');
@@ -59,6 +63,11 @@ class OdontoCreateController extends Controller
     public function fCreateAgenda(Request $request)
     {
         $idClinica = 2;
+        $idBox = $request->input('boxes');
+
+        $descricaoLocal = DB::table('FAESA_CLINICA_BOXES')
+            ->where('ID_BOX_CLINICA', $idBox)
+            ->value('DESCRICAO');
 
         if (!$idClinica) {
             return redirect()->back()->with('error', 'Clínica do paciente não encontrada.');
@@ -93,7 +102,7 @@ class OdontoCreateController extends Controller
 
             while ($dataAtual->lte($dataFim)) {
                 if (in_array($dataAtual->dayOfWeek, $diasNumericosSelecionados)) {
-                    DB::table('FAESA_CLINICA_AGENDAMENTO')->insert([
+                    $idAgendamento =  DB::table('FAESA_CLINICA_AGENDAMENTO')->insertGetId([
                         'ID_CLINICA' => $idClinica,
                         'ID_PACIENTE' => $request->input('ID_PACIENTE'),
                         'ID_SERVICO' => $request->input('servico'),
@@ -105,13 +114,19 @@ class OdontoCreateController extends Controller
                         'RECORRENCIA' => $recorrencia,
                         'VALOR_AGEND' => $request->input('valor'),
                         'OBSERVACOES' => $request->input('obs'),
+                        'LOCAL' => $descricaoLocal
+                    ]);
+
+                    DB::table('FAESA_CLINICA_LOCAL_AGENDAMENTO')->insertGetId([
+                        'ID_AGENDAMENTO' => $idAgendamento,
+                        'ID_BOX' => $request->input('boxes')
                     ]);
                 }
                 $dataAtual->addDay();
             }
         } else {
             // Agendamento pontual
-            DB::table('FAESA_CLINICA_AGENDAMENTO')->insert([
+            $idAgendamento =  DB::table('FAESA_CLINICA_AGENDAMENTO')->insertGetId([
                 'ID_CLINICA' => $idClinica,
                 'ID_PACIENTE' => $request->input('ID_PACIENTE'),
                 'ID_SERVICO' => $request->input('servico'),
@@ -123,6 +138,21 @@ class OdontoCreateController extends Controller
                 'RECORRENCIA' => $recorrencia,
                 'VALOR_AGEND' => $request->input('valor'),
                 'OBSERVACOES' => $request->input('obs'),
+                'LOCAL' => $descricaoLocal
+            ]);
+
+            $disciplina = DB::table('FAESA_CLINICA_SERVICO_DISCIPLINA')
+                ->where('ID_SERVICO_CLINICA', $request->input('servico'))
+                ->value('DISCIPLINA');
+
+            $boxId = DB::table('FAESA_CLINICA_BOX_DISCIPLINA')
+                ->where('DISCIPLINA', $disciplina)
+                ->value('ID_BOX');
+
+            DB::table('FAESA_CLINICA_LOCAL_AGENDAMENTO')->insertGetId([
+                'ID_AGENDAMENTO' => $idAgendamento,
+                'ID_BOX' => $boxId,
+                'DISCIPLINA' => $disciplina
             ]);
         }
 
@@ -166,6 +196,14 @@ class OdontoCreateController extends Controller
             'VALOR_SERVICO' => $request->input('valor'),
             'ATIVO' => $request->input('ativo')
         ]);
+
+        foreach ($disciplines as $disciplina) {
+            DB::table('FAESA_CLINICA_SERVICO_DISCIPLINA')->insert([
+                'ID_SERVICO_CLINICA' => $idService,
+                'DISCIPLINA' => $disciplina
+            ]);
+        }
+
         return redirect()->back()->with('success', 'Serviço cadastrado com sucesso!');
     }
 

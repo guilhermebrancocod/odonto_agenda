@@ -111,28 +111,17 @@ class OdontoConsultController extends Controller
         return response()->json($boxes);
     }
 
-    public function buscarBoxeDisciplinas(Request $request)
+    public function boxesDisciplina($discipline)
     {
-        $boxesDisciplineId = $request->input('boxesDisciplineId');
 
-        $query = DB::table('FAESA_CLINICA_BOX_DISCIPLINA')
-            ->select(
-                'ID_BOX_DISCIPLINA',
-                'DISCIPLINA',
-                'ID_BOX',
-                'DIA_SEMANA',
-                'HR_INICIO',
-                'HR_FIM',
-            )
-            ->where('ID_CLINICA', '=', 2);
+        $boxes = DB::table('FAESA_CLINICA_BOX_DISCIPLINA')
+            ->join('FAESA_CLINICA_BOXES','FAESA_CLINICA_BOXES.ID_BOX_CLINICA','=','FAESA_CLINICA_BOX_DISCIPLINA.ID_BOX')
+            ->select('FAESA_CLINICA_BOXES.ID_BOX_CLINICA','FAESA_CLINICA_BOXES.DESCRICAO')
+            ->where('FAESA_CLINICA_BOX_DISCIPLINA.ID_CLINICA', '=', '2')
+            ->where('FAESA_CLINICA_BOX_DISCIPLINA.DISCIPLINA', trim($discipline))
+            ->get();
 
-        if ($boxesDisciplineId) {
-            $query->where('ID_BOX_DISCIPLINA', $boxesDisciplineId);
-        }
-
-        $boxesDisciplines = $query->get();
-
-        return response()->json($boxesDisciplines);
+        return response()->json($boxes);
     }
 
     public function listaPacienteId($pacienteId = null)

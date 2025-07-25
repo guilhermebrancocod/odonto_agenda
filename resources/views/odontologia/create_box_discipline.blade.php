@@ -15,9 +15,9 @@
 <body>
     <div id="navbar-container"></div>
     <div style="margin-left:220px; padding: 30px; border-radius: 10px; background-color: #fff; box-shadow: 0 4px 12px rgba(0,0,0,0.05); width: 100%;">
-        <div style="text-align: center; margin-bottom: 30px;">
-            <h3 style="margin: 0; font-size: 24px; color: #333;">Vincular box com disciplina</h3>
-        </div>
+        <fieldset class="border p-3 rounded mb-3">
+            <legend class="w-auto px-2">Vinculo de box com disciplina</legend>
+        </fieldset>
         <form id="form" class="row g-3 needs-validation"
             action="{{ isset($BoxDiscipline) ? route('updateBoxDiscipline', $BoxDiscipline->ID_BOX_DISCIPLINA) : route('createBoxDiscipline') }}"
             method="POST">
@@ -36,7 +36,7 @@
                     <div style="flex: 1; margin-bottom: 15px;">
                         <label for="disciplina" style="font-size: 14px; color: #666;">Disciplina</label>
                         <select id="disciplina" name="disciplina" class="form-select"
-                            style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 6px; font-size: 14px;">
+                            style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 6px; font-size: 14px">
                         </select>
                     </div>
                     <div style="display: flex; justify-content: space-between; gap: 10px; margin-bottom: 15px;">

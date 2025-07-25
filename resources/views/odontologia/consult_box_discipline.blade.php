@@ -16,9 +16,9 @@
 <body>
     <div id="navbar-container"></div>
     <div style="margin-left:220px; padding: 30px; border-radius: 10px; background-color: #fff; box-shadow: 0 4px 12px rgba(0,0,0,0.05);width: 100%;">
-        <div style="text-align: center; margin-bottom: 30px;">
-            <h2 style="margin: 0; font-size: 24px; color: #333;">Buscando disciplinas por box</h2>
-        </div>
+        <fieldset class="border p-3 rounded mb-3">
+            <legend class="w-auto px-2">Buscando disciplinas por box</legend>
+        </fieldset>
         <form id="form-search-box-discipline" class="row g-3 needs-validation">
             <div class="linha-com-titulo">
                 <h5>Pesquisar</h5>
