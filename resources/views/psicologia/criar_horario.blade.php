@@ -346,9 +346,10 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/mdb-ui-kit/7.1.0/mdb.min.js"></script>
 
 <!-- FLATPICKR -->
-<!-- Flatpickr JS -->
+<!-- Flatpickr JS --><!-- Flatpickr JS -->
 <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
-<script src="https://cdn.jsdelivr.net/npm/flatpickr/dist/l10n/pt.js"></script> <!-- Adiciona Linguagem em Português -->
+<!-- Flatpckr pt-br -->
+<script src="https://cdn.jsdelivr.net/npm/flatpickr/dist/l10n/pt.js"></script>
 
 <script>
     // === ALERTA GLOBAL ===
@@ -396,6 +397,7 @@
                 .then(horarios => {
                     horariosTbody.innerHTML = '';
 
+                    // CASO NÃO ACHE NENHUM RESULTADO
                     if (horarios.length === 0) {
                         horariosTbody.innerHTML = `
                             <tr>
@@ -457,16 +459,23 @@
 
         document.querySelectorAll('.btn-editar').forEach(btn => {
             btn.addEventListener('click', () => {
-                document.getElementById('edit-horario--id').value = btn.dataset.id;
+                document.getElementById('edit-horario-id').value = btn.dataset.id;
                 document.getElementById('edit-horario-desc').value = btn.dataset.desc;
 
                 // Se for '--', envia vazio para o campo para não quebrar a validação
                 // VALORES ATUAIS PARA EDIÇÃO NO MODAL DE EDIÇÃO    
-                document.getElementById('edit-tipo-horario').value = (btn.dataset.cod === '--') ? '' : btn.dataset.tipo;
-                document.getElementById('edit-valor-servico').value = btn.dataset.valor;
-                document.getElementById('edit-permite-simultaneo').checked = (btn.dataset.permite === 'S');
-                document.getElementById('edit-observacao-servico').value = btn.dataset.observacao ?? '';
-                document.getElementById('edit-tempo-recorrencia-meses').value = btn.dataset.tempo ?? '';
+                document.getElementById('edit-tipo-horario').value = btn.dataset.tipo;
+                document.getElementById('edit-data-horario-inicial').value = btn.dataset.dataInicial;
+                document.getElementById('edit-data-horario-final').value = btn.dataset.dataFinal;
+                document.getElementById('edit-hr-horario-inicial').value = btn.dataset.horarioInicial;
+                document.getElementById('edit-hr-horario-final').value = btn.dataset.horariFinal;
+                document.getElementById('edit-observacao').vaue = btn.dataset.observacao;
+                // const dataInicial = document.getElementById('edit-data-horario-inicial');
+                // const dataFinal = document.getElementById('edit-data-horario-final');
+                // const hrInicial = document.getElementById('edit-hr-horario-inicial');
+                // const hrFinal = document.getElementById('edit-hr-horario-final');
+                // const observacao = document.getElementById('edit-observacao').value;
+
                 editarServicoModal.show();
             });
         });
@@ -581,7 +590,35 @@
             dateFormat: "H:i",
             time_24hr: true,
             allowInput: true,
-        });         
+        });    
+        flatpickr("edit-data-horario-inicial", {
+            enableTime: true,
+            noCalendar: true,
+            dateFormat: "H:i",
+            time_24hr: true,
+            allowInput: true,
+        });
+        flatpickr("edit-data-horario-final", {
+            enableTime: true,
+            noCalendar: true,
+            dateFormat: "H:i",
+            time_24hr: true,
+            allowInput: true,
+        });
+        flatpickr("#edit-hr-horario-inicial", {
+            enableTime: true,
+            noCalendar: true,
+            dateFormat: "H:i",
+            time_24hr: true,
+            allowInput: true,
+        }); 
+        flatpickr("#edit-hr-horario-final", {
+            enableTime: true,
+            noCalendar: true,
+            dateFormat: "H:i",
+            time_24hr: true,
+            allowInput: true,
+        }); 
 </script>
 
 </body>
