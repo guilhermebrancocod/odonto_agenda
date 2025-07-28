@@ -128,7 +128,8 @@ class OdontoUpdateController extends Controller
         $agenda = DB::table('FAESA_CLINICA_AGENDAMENTO')
             ->where('ID_AGENDAMENTO', $agendaId)
             ->update([
-                'STATUS_AGEND' => $request->input('status')
+                'STATUS_AGEND' => $request->input('status'),
+                'MENSAGEM' => $request->input('mensagem')
             ]);
 
         return response()->json(['success' => true, 'message' => 'Status atualizado com sucesso']);
@@ -140,7 +141,7 @@ class OdontoUpdateController extends Controller
         $diaSemana = $request->input('dia_semana');
         $hrInicio = $request->input('hr_inicio');
         $hrFim = $request->input('hr_fim');
-        $boxesSelecionados = $request->input('boxes', []); // boxes marcados no form
+        $boxesSelecionados = $request->input('boxes', []);
 
         // Busca boxes já cadastrados no banco para essa disciplina
         $boxesAntigos = DB::table('FAESA_CLINICA_BOX_DISCIPLINA')

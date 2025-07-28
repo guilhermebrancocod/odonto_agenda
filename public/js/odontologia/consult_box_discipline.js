@@ -2,9 +2,9 @@ import { createNavBar } from './navbar.js';
 
 function maskTime(value) {
     return value
-        .replace(/\D/g, '')                // Remove tudo que não é dígito
-        .replace(/^(\d{2})(\d)/, '$1:$2')  // Insere o :
-        .replace(/^(\d{2}):(\d{2}).*/, '$1:$2'); // Limita a HH:MM
+        .replace(/\D/g, '')                
+        .replace(/^(\d{2})(\d)/, '$1:$2')  
+        .replace(/^(\d{2}):(\d{2}).*/, '$1:$2')
 }
 
 function carregarTodosBoxDiscipline() {
@@ -33,7 +33,7 @@ function carregarTodosBoxDiscipline() {
                 const html = `
                     <tr>
                         <td>${disciplines.DISCIPLINA}</td>
-                        <td>${disciplines.ID_BOX}</td>
+                        <td>${disciplines.DESCRICAO}</td>
                         <td>${disciplines.DIA_SEMANA}</td>
                         <td>${maskTime(disciplines.HR_INICIO)}</td>
                         <td>${maskTime(disciplines.HR_FIM)}</td>
@@ -96,7 +96,7 @@ $(document).ready(function () {
 });
 
 // Evento ao selecionar um paciente no select2
-$('#selectService').on('select2:select', function (e) {
+$('#selectBoxDiscipline').on('select2:select', function (e) {
     const idBoxDiscipline = e.params.data.id;
 
     // Busca os dados completos do paciente via AJAX
@@ -108,7 +108,7 @@ $('#selectService').on('select2:select', function (e) {
             const html = `
                     <tr>
                         <td>${disciplines.DISCIPLINA}</td>
-                        <td>${disciplines.ID_BOX}</td>
+                        <td>${disciplines.DESCRICAO}</td>
                         <td>${disciplines.DIA_SEMANA}</td>
                         <td>${disciplines.HR_INICIO}</td>
                         <td>${disciplines.HR_FIM}</td>

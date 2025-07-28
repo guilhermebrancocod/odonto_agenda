@@ -43,7 +43,7 @@
                 <div style="flex: 0.2;">
                     <label for="cod_sus" style="font-size: 14px; color: #666;">Cartão SUS</label>
                     <input type="text" id="cod_sus" name="cod_sus" class="form-control"
-                        value="{{ old('nome', $paciente->COD_SUS ?? '') }}" style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 6px; font-size: 14px;" maxlength="25">
+                        value="{{ old('cod_sus', $paciente->COD_SUS ?? '') }}" style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 6px; font-size: 14px;" maxlength="25">
                 </div>
                 <div style="flex: 0.7;">
                     <label for="nome" style="font-size: 14px; color: #666;">Nome Completo</label>
@@ -143,7 +143,7 @@
                     <div style="flex: 1;">
                         <label for="cpf_responsavel" style="font-size: 14px; color: #666;">CPF do responsável</label>
                         <input type="text" id="cpf_responsavel" name="cpf_responsavel" class="form-control"
-                            value="{{ old('cpf_resposavel', $paciente->CPF_RESPONSAVEL ?? '') }}" style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 6px; font-size: 14px;" maxlength="20">
+                            value="{{ old('cpf_responsavel', $paciente->CPF_RESPONSAVEL ?? '') }}" style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 6px; font-size: 14px;" maxlength="20">
                     </div>
                 </div>
                 <div style="flex: 1;">

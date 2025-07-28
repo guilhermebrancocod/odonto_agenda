@@ -48,7 +48,7 @@ class OdontoCreateController extends Controller
             'E_MAIL_PACIENTE' => $request->input('email'),
             'FONE_PACIENTE' => preg_replace('/\D/', '', $request->input('celular')),
             'NOME_RESPONSAVEL' => $request->input('nome_resposavel'),
-            'CPF_RESPONSAVEL' => $request->input('cpf_resposavel'),
+            'CPF_RESPONSAVEL' => $request->input('cpf_responsavel'),
             'OBSERVACAO' => $request->input('obs_laudo')
         ]);
 
