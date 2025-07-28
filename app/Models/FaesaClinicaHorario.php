@@ -8,24 +8,26 @@ class FaesaClinicaHorario extends Model
 {
     protected $table = 'FAESA_CLINICA_HORARIO';
 
-    protected $primaryKey = 'ID_BLOQUEIO';
+    protected $primaryKey = 'ID_HORARIO';
 
     public $timestamps = true;
 
     protected $fillable = [
-        'ID_BLOQUEIO',
+        'ID_HORARIO',
         'USUARIO',
-        'DATA_BLOQ_INICIAL',
-        'DATA_BLOQ_FINAL',
-        'HR_BLOQ_INICIAL',
-        'HR_BLOQ_FINAL',
-        'OBSERVACAO_BLOQUEIO',
+        'DT_HORARIO_INICIAL',
+        'DATA_HORARIO_FINAL',
+        'HR_HORARIO_INICIAL',
+        'HR_HORARIO_FINAL',
+        'OBSERVACAO',
+        'BLOQUEADO',
+        'DESCRICAO_HORARIO',
     ];
 
     protected $casts = [
-        'DT_BLOQUEIO_INICIAL' => 'date',
-        'DT_BLOQUEIO_FINAL' => 'date',
-        'HR_BLOQUEIO_INICIAL' => 'string',
-        'HR_BLOQUEIO_FINAL' => 'string',
+        'DT_HORARIO_INICIAL' => 'date',
+        'DATA_HORARIO_FINAL' => 'date',
+        'HR_HORARIO_INICIAL' => 'string',
+        'HR_HORARIO_FINAL' => 'string',
     ];
 }

@@ -64,14 +64,62 @@ class HorarioController extends Controller
 
     public function updateHorario(Request $request, $id)
     {
+        $horario = FaesaClinicaHorario::find($id);
 
+        if(!$horario) {
+            return response()->json(['message' => 'Horário não encontrado!'], 404);
+        }
+
+        $request->validate([
+            'TIPO_HORARIO' => 'required|string|max:1|in:S,N',
+            'DATA_HORARIO_INICIAL' => 'required|date',
+            'DATA_HORARIO_FINAL' => 'required|date|after_or_equal:DATA_HORARIO_INICIAL',
+            'HR_HORARIO_INICIAL' => 'required|date_format:H:i',
+            'HR_HORARIO_FINAL' => 'required|date_format:H:i|after:HR_HORARIO_INICIAL',
+            'DESCRICAO_HORARIO' => 'required|string|max:255',
+            'OBSERVACAO' => 'nullable|string|max:500',
+        ]);
+
+        // Atualiza os campos do horário
+        $horario->BLOQUEADO = $request->TIPO_HORARIO;
+        $horario->DATA_HORARIO_INICIAL = $request->DATA_HORARIO_INICIAL;
+        $horario->DATA_HORARIO_FINAL = $request->DATA_HORARIO_FINAL;
+        $horario->HR_HORARIO_INICIAL = $request->HR_HORARIO_INICIAL;
+        $horario->HR_HORARIO_FINAL = $request->HR_HORARIO_FINAL;
+        $horario->DESCRICAO_HORARIO = $request->DESCRICAO_HORARIO;
+        $horario->OBSERVACAO = $request->OBSERVACAO;
+
+        // Verifica se o horário já existe com os mesmos dados
+        $existingHorario = FaesaClinicaHorario::where('BLOQUEADO', $request->TIPO_HORARIO)
+            ->where('DATA_HORARIO_INICIAL', $request->DATA_HORARIO_INICIAL)
+            ->where('DATA_HORARIO_FINAL', $request->DATA_HORARIO_FINAL)
+            ->where('HR_HORARIO_INICIAL', $request->HR_HORARIO_INICIAL)
+            ->where('HR_HORARIO_FINAL', $request->HR_HORARIO_FINAL)
+            ->where('ID_HORARIO', '!=', $id)
+            ->first();
+
+        if ($existingHorario) {
+            return response()->json(['message' => 'Horário já existe!'], 409);
+        }
+
+        $horario->save();
     }
 
+    // DELETAR HORÁRIO
     public function deleteHorario($id)
     {
+        $horario = FaesaClinicaHorario::find($id);
 
+        if (!$horario) {
+            return response()->json(['message' => 'Horário não encontrado!'], 404);
+        }
+
+        $horario->delete();
+
+        return response()->json(['message' => 'Horário deletado com sucesso!']);
     }
 
+    // LISTAR HORÁRIOS
     public function listHorarios(Request $request)
     {
         $search = trim($request->input('search', ''));

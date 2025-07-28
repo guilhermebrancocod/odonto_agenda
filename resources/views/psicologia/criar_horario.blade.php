@@ -280,6 +280,49 @@
                                     <label class="form-label">Descrição</label>
                                     <input type="text" id="edit-horario-desc" name="HORARIO" class="form-control" required />
                                 </div>
+
+                                <!-- EDIÇÃO DE TIPO DE HORÁRIO -->
+                                <div class="mb-3">
+                                    <label class="form-label">Tipo de Horário</label>
+                                    <select id="edit-tipo-horario" name="TIPO_HORARIO" class="form-select" required>
+                                        <option value="" disabled selected>Selecione o tipo de horário</option>
+                                        <option value="N">Horário de Atendimento</option>
+                                        <option value="S">Horário Bloqueado</option>
+                                    </select>
+                                    <div class="invalid-feedback">
+                                        Selecione se o horário é de atendimento ou bloqueado.
+                                    </div>
+                                </div>
+
+                                <!-- EDIÇÃO DE DATA INICIAL -->
+                                <div class="mb-3">
+                                    <label class="form-label">Data Inicial</label>
+                                    <input type="text" id="edit-data-horario-inicial" name="DATA_HORARIO_INICIAL" class="form-control" required />
+                                </div>
+
+                                <!-- EDIÇÃO DE DATA FINAL -->
+                                <div class="mb-3">
+                                    <label class="form-label">Data Final</label>
+                                    <input type="text" id="edit-data-horario-final" name="DATA_HORARIO_FINAL" class="form-control" required />
+                                </div>
+
+                                <!-- EDIÇÃO DE HORÁRIO INICIAL -->
+                                <div class="mb-3">
+                                    <label class="form-label">Horário Inicial</label>
+                                    <input type="time" id="edit-hr-horario-inicial" name="HR_HORARIO_INICIAL" class="form-control" required />
+                                </div>
+
+                                <!-- EDIÇÃO DE HORÁRIO FINAL -->
+                                <div class="mb-3">
+                                    <label class="form-label">Horário Final</label>
+                                    <input type="time" id="edit-hr-horario-final" name="HR_HORARIO_FINAL" class="form-control" required />
+                                </div>
+
+                                <!-- EDIÇÃO DE OBSERVAÇÃO -->
+                                <div class="mb-3">
+                                    <label class="form-label">Observações</label>
+                                    <textarea id="edit-observacao" name="OBSERVACAO" class="form-control" rows="3">{{ old('OBSERVACAO') }}</textarea>
+                                </div>
                                 
                             <!-- RODAPÉ DO MODAL -->
                             <div class="modal-footer d-flex justify-content-between">
@@ -308,22 +351,51 @@
 <script src="https://cdn.jsdelivr.net/npm/flatpickr/dist/l10n/pt.js"></script> <!-- Adiciona Linguagem em Português -->
 
 <script>
-    document.addEventListener('DOMContentLoaded', () => {
+    // === ALERTA GLOBAL ===
+    function showAlert(message, type = 'success') {
+        const alertContainer = document.getElementById('alert-container');
+        const alert = document.createElement('div');
+        alert.className = `alert alert-${type} alert-dismissible fade show mt-2`;
+        alert.role = 'alert';
+        alert.style.pointerEvents = 'auto';
+        alert.innerHTML = `
+            ${message}
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        `;
+        alertContainer.appendChild(alert);
 
+        setTimeout(() => {
+            alert.classList.remove('show');
+            alert.classList.add('hide');
+            setTimeout(() => alert.remove(), 300);
+        }, 4000);
+    }
+
+    // === ALERTA DENTRO DO MODAL ===
+    function showModalAlert(message, type = 'danger') {
+        const modalAlertContainer = document.getElementById('modal-alert-container');
+        modalAlertContainer.innerHTML = `
+            <div class="alert alert-${type} alert-dismissible fade show m-3 mb-0">
+                ${message}
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+        `;
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
         // === VARIÁVEIS GLOBAIS ===
         const horariosTbody = document.getElementById('horarios-tbody');
         const searchInput = document.getElementById('search-horario');
         const editarHorarioModal = new bootstrap.Modal(document.getElementById('editarHorarioModal'));
         const formEditarHorario = document.getElementById('form-editar-horario');
 
-        // === FUNÇÃO PARA CARREGAR HORÁRIOS ===
+        // === CARREGAR HORÁRIOS ===
         function carregarHorarios(search = '') {
-                fetch(`/psicologia/horarios/listar?search=${encodeURIComponent(search)}`)
+            fetch(`/psicologia/horarios/listar?search=${encodeURIComponent(search)}`)
                 .then(response => response.json())
                 .then(horarios => {
                     horariosTbody.innerHTML = '';
 
-                    // NENHUM HORÁRIO ENCONTRADO
                     if (horarios.length === 0) {
                         horariosTbody.innerHTML = `
                             <tr>
@@ -333,7 +405,6 @@
                         return;
                     }
 
-                    // CASO ENCONTRE HORARIOS
                     horarios.forEach(horario => {
                         const tr = document.createElement('tr');
                         tr.innerHTML = `
@@ -342,7 +413,13 @@
                             <td>
                                 <button class="btn btn-primary btn-sm btn-editar"
                                     data-id="${horario.ID_HORARIO}"
-                                    data-desc="${horario.DESCRICAO_HORARIO}">
+                                    data-desc="${horario.DESCRICAO_HORARIO}"
+                                    data-tipo="${horario.BLOQUEADO}"
+                                    data-dataInicial="${horario.DATA_HORARIO_INICIAL ?? ''}"
+                                    data-dataFinal="${horario.DATA_HORARIO_FINAL ?? ''}"
+                                    data-horarioInicial="${horario.HR_HORARIO_INICIAL ?? ''}"
+                                    data-horarioFinal="${horario.HR_HORARIO_FINAL ?? ''}"
+                                    data-observacao="${horario.OBSERVACAO ?? ''}">
                                     Editar
                                 </button>
                             </td>
@@ -354,6 +431,12 @@
                         btn.addEventListener('click', () => {
                             document.getElementById('edit-horario-id').value = btn.dataset.id;
                             document.getElementById('edit-horario-desc').value = btn.dataset.desc;
+                            document.getElementById('edit-tipo-horario').value = btn.dataset.tipo;
+                            document.getElementById('edit-data-horario-inicial').value = btn.dataset.dataInicial;
+                            document.getElementById('edit-data-horario-final').value = btn.dataset.dataFinal;
+                            document.getElementById('edit-hr-horario-inicial').value = btn.dataset.horarioInicial;
+                            document.getElementById('edit-hr-horario-final').value = btn.dataset.horarioFinal;
+                            document.getElementById('edit-observacao').value = btn.dataset.observacao ?? '';
                             editarHorarioModal.show();
                         });
                     });
@@ -366,16 +449,104 @@
                         </tr>
                     `;
                 });
-        }
+        }   
+
 
         // === CHAMADA INICIAL ===
         carregarHorarios();
 
-        // === PESQUISA AO DIGITAR ===
+        document.querySelectorAll('.btn-editar').forEach(btn => {
+            btn.addEventListener('click', () => {
+                document.getElementById('edit-horario--id').value = btn.dataset.id;
+                document.getElementById('edit-horario-desc').value = btn.dataset.desc;
+
+                // Se for '--', envia vazio para o campo para não quebrar a validação
+                // VALORES ATUAIS PARA EDIÇÃO NO MODAL DE EDIÇÃO    
+                document.getElementById('edit-tipo-horario').value = (btn.dataset.cod === '--') ? '' : btn.dataset.tipo;
+                document.getElementById('edit-valor-servico').value = btn.dataset.valor;
+                document.getElementById('edit-permite-simultaneo').checked = (btn.dataset.permite === 'S');
+                document.getElementById('edit-observacao-servico').value = btn.dataset.observacao ?? '';
+                document.getElementById('edit-tempo-recorrencia-meses').value = btn.dataset.tempo ?? '';
+                editarServicoModal.show();
+            });
+        });
+
+        // === FILTRAR PESQUISA ===
         searchInput.addEventListener('input', () => {
             carregarHorarios(searchInput.value);
         });
 
+        // === DELETAR HORÁRIO ===
+        document.getElementById('btn-deletar-horario').addEventListener('click', () => {
+            if (!confirm('Tem certeza que deseja excluir este horário?')) return;
+
+            const id = document.getElementById('edit-horario-id').value;
+
+            fetch(`/psicologia/horarios/deletar/${id}`, {
+                method: 'DELETE',
+                headers: {
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
+                }
+            })
+                .then(async res => {
+                    if (!res.ok) {
+                        const data = await res.json();
+                        throw new Error(data.message || 'Erro ao excluir.');
+                    }
+                    return res.json();
+                })
+                .then(() => {
+                    showAlert('Horário excluído com sucesso!', 'success');
+                    editarHorarioModal.hide();
+                    carregarHorarios(searchInput.value);
+                })
+                .catch(err => {
+                    showModalAlert(err.message, 'warning');
+                });
+        });
+
+        // === SUBMIT FORMULÁRIO DE EDIÇÃO ===
+        formEditarHorario.addEventListener('submit', (e) => {
+            e.preventDefault();
+
+            const id = document.getElementById('edit-horario-id').value;
+            const desc = document.getElementById('edit-horario-desc').value;
+            const tipo = document.getElementById('edit-tipo-horario').value;
+            const dataInicial = document.getElementById('edit-data-horario-inicial');
+            const dataFinal = document.getElementById('edit-data-horario-final');
+            const hrInicial = document.getElementById('edit-hr-horario-inicial');
+            const hrFinal = document.getElementById('edit-hr-horario-final');
+            const observacao = document.getElementById('edit-observacao').value;
+
+            fetch(`/psicologia/horarios/atualizar/${id}`, {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
+                },
+                body: JSON.stringify({
+                    DESCRICAO_HORARIO: desc,
+                    TIPO_HORARIO: tipo,
+                    DATA_HORARIO_INICIAL: dataInicial.value,
+                    DATA_HORARIO_FINAL: dataFinal.value,
+                    HR_HORARIO_INICIAL: hrInicial.value,
+                    HR_HORARIO_FINAL: hrFinal.value,
+                    OBSERVACAO: observacao
+                })
+            })
+                .then(res => {
+                    if (!res.ok) throw new Error('Erro ao salvar');
+                    return res.json();
+                })
+                .then(() => {
+                    showAlert('Horário atualizado com sucesso!', 'success');
+                    editarHorarioModal.hide();
+                    carregarHorarios(searchInput.value);
+                })
+                .catch(() => {
+                    showModalAlert('Erro ao atualizar horário. Verifique os campos ou tente novamente.', 'danger');
+                });
+        });
     });
 </script>
 
@@ -412,7 +583,6 @@
             allowInput: true,
         });         
 </script>
-
 
 </body>
 </html>

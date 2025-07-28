@@ -366,3 +366,7 @@ Route::get('/psicologia/criar-horario/', function () {
 Route::get('/psicologia/horarios/listar', [HorarioController::class, 'listHorarios'])->name('listarHorarios-Psicologia');
 
 Route::post('/psicologia/horarios/criar-horario', [HorarioController::class, 'createHorario'])->name('criarHorario-Psicologia');
+
+Route::put('/psicologia/horarios/atualizar/{id}', [HorarioController::class, 'updateHorario'])->name('updateHorario-Psicologia');
+
+Route::delete('/psicologia/horarios/deletar/{id}', [HorarioController::class, 'deleteHorario'])->name('deleteHorario-Psicologia');
