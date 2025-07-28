@@ -190,10 +190,10 @@
                     <label for="servico" class="form-label">
                         Serviço
                         <span id="info-observacao">
-                        <i class="fas fa-info-circle"></i>
-                    </span>
+                            <i class="fas fa-info-circle"></i>
+                        </span>
                     </label>
-                    <input type="text" id="servico" name="servico" class="form-control" autocomplete="off" value="{{old('servico')}}">
+                    <input type="text" id="servico" name="servico" class="form-control" autocomplete="off">
                     
                     <div id="servicos-list" class="list-group position-absolute w-100" style="z-index: 1000;"></div>
                 </div>
@@ -256,6 +256,12 @@
                     </div>
                 </div>
 
+                <!-- Mensagem que aparece quando ativa recorrência -->
+                <div id="msg-recorrencia" class="alert alert-info mt-2 d-none">
+                    Caso não selecione dia da semana e/ou data fim, serão gerados agendamentos por 1 mês por padrão.
+                </div>
+
+
                     <!-- VALOR -->
                     <div class="col-sm-6 col-md-3 mt-2">
                         <label for="valor_agend" class="form-label">Valor</label>
@@ -265,6 +271,15 @@
                         </div>
                     </div>
 
+                    <!-- LOCAL -->
+                    <input type="hidden" name="id_sala_clinica" id="id_sala_clinica">
+                    <div class="col-sm-6 col-md-3 mt-2">
+                        <label for="local_agend" class="form-label">Local</label>
+                        <input type="text" name="local_agend" id="local_agend" class="form-control" placeholder="Local do atendimento" value="{{ old('local_agend') }}" autocomplete="off">
+
+                        <div id="local-list" class="list-group position-absolute w-100" style="z-index: 1000;"></div>
+                    </div>
+                    
                 <!-- OBSERVAÇÕES -->
                 <div class="col-12 mt-2">
                     <label for="observacoes" class="form-label">Observações</label>
@@ -381,27 +396,24 @@
 
 <!-- BUSCA DE SERVIÇOS -->
 <script>
-    // INPUT DO SERVIÇO A SER SELECIONADO
     const servicoInput = document.getElementById("servico");
-
-    // LIST DE SERVIÇÕS APÓS PESQUISA
     const servicosList = document.getElementById("servicos-list");
 
-    // SETA O TIMER PARA NULO
+    const localInput = document.getElementById("local_agend");
+    const localList = document.getElementById("local-list");
+
     let timeout = null;
 
+    // =========================
+    // BUSCA DE SERVIÇO
+    // =========================
     servicoInput.addEventListener('input', () => {
-
-        clearTimeout(timeout); // Cancela o temporizador anterior, caso exista.
+        clearTimeout(timeout);
 
         timeout = setTimeout(() => {
-
-            // RESGATA O VALOR DE BUSCA E TIRA ESPAÇOS EM BRANCO
             const query = servicoInput.value.trim();
-
             const infoObs = document.getElementById('info-observacao');
 
-            // Se campo está vazio, limpa lista, id_servico e esconde ícone info
             if (!query) {
                 servicosList.innerHTML = '';
                 document.getElementById('id_servico').value = '';
@@ -410,7 +422,6 @@
                 return;
             }
 
-            // CODIFICA O VALOR DA QUERY POR QUESTÕES DE SEGURANÇA
             fetch(`/psicologia/pesquisar-servico?search=${encodeURIComponent(query)}`)
                 .then(response => response.json())
                 .then(servicos => {
@@ -418,30 +429,24 @@
 
                     if (servicos.length === 0) {
                         servicosList.innerHTML = `<button type="button" class="list-group-item list-group-item-action disabled">Nenhum serviço encontrado</button>`;
-                        document.getElementById('id_servico').value = ''; // limpa id_servico
+                        document.getElementById('id_servico').value = '';
                         infoObs.style.display = 'none';
                         infoObs.title = '';
                         return;
                     }
 
-                    // Tenta encontrar serviço com nome exatamente igual ao digitado (case insensitive)
                     const servicoExato = servicos.find(s => s.SERVICO_CLINICA_DESC.toLowerCase() === query.toLowerCase());
 
                     if (servicoExato) {
-                        // Preenche automaticamente se achou serviço exato
                         aoSelecionarServico(servicoExato);
-                        servicosList.innerHTML = ''; // fecha lista porque já selecionou
+                        servicosList.innerHTML = '';
                         return;
-                    } else {
-                        // Não achou exato, limpa ícone info
-                        infoObs.style.display = 'none';
-                        infoObs.title = '';
                     }
 
-                    // Caso não tenha encontrado exato, limpa id_servico para forçar seleção
                     document.getElementById('id_servico').value = '';
+                    infoObs.style.display = 'none';
+                    infoObs.title = '';
 
-                    // MOSTRA OPÇÕES NA LISTA PARA SELEÇÃO MANUAL
                     servicos.forEach(servico => {
                         const item = document.createElement('button');
                         item.type = 'button';
@@ -453,7 +458,6 @@
                         });
                         servicosList.appendChild(item);
                     });
-
                 })
                 .catch(error => {
                     console.error(error);
@@ -461,98 +465,168 @@
                 });
         }, 300);
     });
-    // FECHA A LISTA AO CLICAR FORA
-    // FUNÇÃO ACIONADA QUANDO O USUÁRIO CLICA EM QUALQUER PARTE DA PÁGINA(document)
-    document.addEventListener('click', (e) => {
 
-        //  VERIFICA SE O CLIQUE FOI FORA DOS DOIS ELEMENTOS ESPECÍFICOS
+    // Fecha a lista de serviços ao clicar fora
+    document.addEventListener('click', (e) => {
         if (!servicoInput.contains(e.target) && !servicosList.contains(e.target)) {
             servicosList.innerHTML = '';
         }
     });
+
+    // =========================
+    // BUSCA DE LOCAL
+    // =========================
+    localInput.addEventListener('input', () => {
+        clearTimeout(timeout);
+
+        timeout = setTimeout(() => {
+            const query = localInput.value.trim();
+
+            if (!query) {
+                localList.innerHTML = '';
+                return;
+            }
+
+            fetch(`/psicologia/pesquisar-local?search=${encodeURIComponent(query)}`)
+                .then(response => response.json())
+                .then(locais => {
+                    localList.innerHTML = '';
+
+                    if (locais.length === 0) {
+                        localList.innerHTML = `<button type="button" class="list-group-item list-group-item-action disabled">Nenhum local encontrado</button>`;
+                        return;
+                    }
+
+                    const localExato = locais.find(l => l.DESCRICAO.toLowerCase() === query.toLowerCase());
+
+                    if (localExato) {
+                        aoSelecionarLocal(localExato);
+                        localList.innerHTML = '';
+                        return;
+                    }
+
+                    locais.forEach(local => {
+                        const item = document.createElement('button');
+                        item.type = 'button';
+                        item.classList.add('list-group-item', 'list-group-item-action');
+                        item.textContent = local.DESCRICAO;
+                        item.addEventListener('click', () => {
+                            aoSelecionarLocal(local);
+                            localList.innerHTML = '';
+                        });
+                        localList.appendChild(item);
+                    });
+                })
+                .catch(error => {
+                    console.error(error);
+                    localList.innerHTML = `<button type="button" class="list-group-item list-group-item-action disabled text-danger">Erro ao buscar locais</button>`;
+                });
+        }, 300);
+    });
+
+    // Fecha a lista de locais ao clicar fora
+    document.addEventListener('click', (e) => {
+        if (!localInput.contains(e.target) && !localList.contains(e.target)) {
+            localList.innerHTML = '';
+        }
+    });
+
+    // =========================
+    // FUNÇÕES DE SELEÇÃO
+    // =========================
+    function aoSelecionarServico(servico) {
+        document.getElementById('servico').value = servico.SERVICO_CLINICA_DESC;
+        document.getElementById('id_servico').value = servico.ID_SERVICO;
+        document.getElementById('info-observacao').style.display = servico.OBSERVACAO ? 'inline-block' : 'none';
+        document.getElementById('info-observacao').title = servico.OBSERVACAO || '';
+    }
+
+    function aoSelecionarLocal(local) {
+        document.getElementById('local_agend').value = local.DESCRICAO;
+        document.getElementById('id_sala_clinica').value = local.ID_SALA_CLINICA;
+    }
 </script>
+
 
 <!-- CAMPOS DE RECORRÊNCIA -->
 <script>
-    // EXIBE OU OCULTA CAMPOS DE RECORRÊNCIA AO MARCAR O CHECKBOX
+    document.addEventListener('DOMContentLoaded', function() {
     const temRecorrenciaCheckbox = document.getElementById('temRecorrencia');
     const recorrenciaCampos = document.getElementById('recorrenciaCampos');
+    const msgRecorrencia = document.getElementById('msg-recorrencia');
+    const recorrenciaInput = document.getElementById('recorrencia');
+
+    const diasSemanaBtns = document.querySelectorAll('#diasSemanaBtns button');
+
+    // Container para inputs hidden dos dias selecionados
+    let container = document.getElementById('diasSemanaContainer');
+    if (!container) {
+        container = document.createElement('div');
+        container.id = 'diasSemanaContainer';
+        container.style.display = 'none';
+        document.getElementById('agendamento-form').appendChild(container);
+    }
+
+    // Função que atualiza dias selecionados no container hidden
+    function atualizarDiasSelecionados() {
+        container.innerHTML = '';
+        const diasSelecionados = Array.from(diasSemanaBtns)
+            .filter(btn => btn.classList.contains('active'))
+            .map(btn => btn.getAttribute('data-dia'));
+
+        diasSelecionados.forEach(dia => {
+            const input = document.createElement('input');
+            input.type = 'hidden';
+            input.name = 'dias_semana[]';
+            input.value = dia;
+            container.appendChild(input);
+        });
+    }
+
+    // Manipula os botões dos dias da semana
+    diasSemanaBtns.forEach(btn => {
+        btn.addEventListener('click', function() {
+            this.classList.toggle('active');
+            this.classList.toggle('btn-primary');
+            this.classList.toggle('btn-outline-primary');
+            atualizarDiasSelecionados();
+        });
+    });
+
+    // Evento único para checkbox "temRecorrencia"
     temRecorrenciaCheckbox.addEventListener('change', function() {
         if (this.checked) {
-            recorrenciaCampos.classList.add('show');
+            // Mostrar campos e mensagem
+            recorrenciaCampos.classList.remove('d-none');
+            msgRecorrencia.classList.remove('d-none');
+
+            // Gerar UUID
+            if (crypto.randomUUID) {
+                recorrenciaInput.value = crypto.randomUUID();
+            } else {
+                // Fallback se necessário
+                recorrenciaInput.value = 'uuid-fallback-' + Date.now();
+            }
         } else {
-            recorrenciaCampos.classList.remove('show');
-            document.getElementById('dias_semana').selectedIndex = -1;
+            // Esconder campos e mensagem
+            recorrenciaCampos.classList.add('d-none');
+            msgRecorrencia.classList.add('d-none');
+
+            // Limpar UUID e seleção dias semana
+            recorrenciaInput.value = '';
+
+            diasSemanaBtns.forEach(btn => {
+                btn.classList.remove('active', 'btn-primary');
+                btn.classList.add('btn-outline-primary');
+            });
+            container.innerHTML = '';
+
+            // Limpar campo data fim recorrencia
             document.getElementById('data_fim_recorrencia').value = '';
         }
     });
+});
 
-
-    document.addEventListener('DOMContentLoaded', function() {
-        // GERA HASH AO MARCAR RECORRÊNCIA
-        const temRecorrenciaCheckbox = document.getElementById('temRecorrencia');
-        const recorrenciaInput = document.getElementById('recorrencia');
-
-        temRecorrenciaCheckbox.addEventListener('change', function() {
-            if (this.checked) {
-                recorrenciaInput.value = crypto.randomUUID();
-            } else {
-                recorrenciaInput.value = '';
-            }
-        });
-    });
-
-    // SELEÇÃO DE DIAS DA SEMANA
-    document.addEventListener('DOMContentLoaded', function() {
-        const diasSemanaBtns = document.querySelectorAll('#diasSemanaBtns button');
-        const diasSemanaContainer = document.getElementById('diasSemanaContainer'); // Container para os inputs hidden
-
-        // Se não existir, vamos criar esse container escondido para os inputs hidden
-        if (!diasSemanaContainer) {
-            const container = document.createElement('div');
-            container.id = 'diasSemanaContainer';
-            container.style.display = 'none';
-            document.getElementById('agendamento-form').appendChild(container);
-        }
-
-        const container = document.getElementById('diasSemanaContainer');
-
-        diasSemanaBtns.forEach(btn => {
-            btn.addEventListener('click', function() {
-                this.classList.toggle('active');
-                this.classList.toggle('btn-primary');
-                this.classList.toggle('btn-outline-primary');
-
-                // Remove todos os inputs antigos
-                container.innerHTML = '';
-
-                // Pega os dias selecionados
-                const diasSelecionados = Array.from(diasSemanaBtns)
-                    .filter(b => b.classList.contains('active'))
-                    .map(b => b.getAttribute('data-dia'));
-
-                // Para cada dia selecionado, cria um input hidden com name dias_semana[]
-                diasSelecionados.forEach(dia => {
-                    const input = document.createElement('input');
-                    input.type = 'hidden';
-                    input.name = 'dias_semana[]';
-                    input.value = dia;
-                    container.appendChild(input);
-                });
-            });
-        });
-
-        // Limpa seleção e inputs ao desativar recorrência
-        document.getElementById('temRecorrencia').addEventListener('change', function() {
-            if (!this.checked) {
-                diasSemanaBtns.forEach(btn => {
-                    btn.classList.remove('active', 'btn-primary');
-                    btn.classList.add('btn-outline-primary');
-                });
-                container.innerHTML = '';
-            }
-        });
-    });
 </script>
 
 <!-- CONTROLE DE INSERÇÃO DE INFORMAÇÃO -->
@@ -777,6 +851,27 @@
         }
     });
     });
+</script>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const checkboxRecorrencia = document.getElementById('temRecorrencia');
+    const camposRecorrencia = document.getElementById('recorrenciaCampos');
+    const duracaoMesesContainer = document.getElementById('duracaoMesesContainer');
+    const msgRecorrencia = document.getElementById('msg-recorrencia');
+
+    checkboxRecorrencia.addEventListener('change', function() {
+        if (this.checked) {
+            camposRecorrencia.classList.remove('d-none');
+            duracaoMesesContainer.style.display = 'block';
+            msgRecorrencia.classList.remove('d-none');
+        } else {
+            camposRecorrencia.classList.add('d-none');
+            duracaoMesesContainer.style.display = 'none';
+            msgRecorrencia.classList.add('d-none');
+        }
+    });
+});
 </script>
 
 </body>

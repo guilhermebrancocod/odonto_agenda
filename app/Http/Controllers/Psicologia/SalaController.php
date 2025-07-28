@@ -30,10 +30,17 @@ class SalaController extends Controller
 }
 
 
-    public function getSala()
+    public function getSala(Request $request)
     {
+        $search = trim($request->query('search', ''));
 
+        $salas = FaesaClinicaSala::where('DESCRICAO', 'like', "%{$search}%")
+                    ->select('ID_SALA_CLINICA', 'DESCRICAO')
+                    ->get();
+
+        return response()->json($salas);
     }
+
 
     public function updateSala(Request $request, $id)
     {

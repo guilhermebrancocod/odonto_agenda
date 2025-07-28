@@ -174,6 +174,22 @@
                         </div>
                     </div>
 
+                    <!-- PESQUISA POR LOCAL -->
+                    <div class="col-md-2">
+                        <div class="input-group">
+                            <span class="input-group-text">
+                                <i class="bi bi-house"></i>
+                            </span>
+                            <input
+                                id="local-input"
+                                name="local"
+                                type="text"
+                                class="form-control"
+                                placeholder="Local"
+                            />
+                        </div>
+                    </div>
+
                     <div class="col-md-2">
                         <button type="submit" class="btn btn-primary w-100">Pesquisar</button>
                     </div>
@@ -191,6 +207,7 @@
                                 <th>Data</th>
                                 <th>Hora Início</th>
                                 <th>Hora Fim</th>
+                                <th>Local</th>
                                 <th>Status</th>
                                 <th>Ações</th>
                             </tr>
@@ -237,6 +254,7 @@
                 date: document.getElementById('date-input').value,
                 start_time: document.getElementById('start-time-input').value,
                 end_time: document.getElementById('end-time-input').value,
+                local: document.getElementById('local-input') ? document.getElementById('local-input').value.trim() : '',
                 status: document.getElementById('status-input').value,
                 service: document.getElementById('service-input').value.trim(),
                 limit: limitSelect.value,
@@ -267,6 +285,7 @@
                         const data = ag.DT_AGEND ? ag.DT_AGEND.substring(0, 10).split('-').reverse().join('/') : '-';
                         const horaIni = ag.HR_AGEND_INI ? ag.HR_AGEND_INI.substring(0, 5) : '-';
                         const horaFim = ag.HR_AGEND_FIN ? ag.HR_AGEND_FIN.substring(0, 5) : '-';
+                        const local = ag.LOCAL ?? '-';
                         const status = ag.STATUS_AGEND ?? '-';
 
                         const row = document.createElement('tr');
@@ -276,6 +295,7 @@
                             <td>${data}</td>
                             <td>${horaIni}</td>
                             <td>${horaFim}</td>
+                            <td>${local}</td>
                             <td>${status}</td>
                             <td>
                                 <a href="/psicologia/agendamento/${ag.ID_AGENDAMENTO}" class="btn btn-sm btn-primary">Visualizar</a>

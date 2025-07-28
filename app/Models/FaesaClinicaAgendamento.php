@@ -26,6 +26,7 @@ class FaesaClinicaAgendamento extends Model
         'RECORRENCIA',
         'VALOR_AGEND',
         'OBSERVACOES',
+        'LOCAL',
         'CREATED_AT',
         'UPDATED_AT',
     ];

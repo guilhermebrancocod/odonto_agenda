@@ -13,7 +13,6 @@ class FaesaClinicaSala extends Model
     public $timestamps = true;
 
     protected $fillable = [
-        'ID_CLINICA',
         'DESCRICAO',
         'ATIVO',
         'CREATED_AT',

@@ -357,6 +357,8 @@ Route::get('/psicologia/salas/listar', [SalaController::class, 'listSalas'])->na
 
 Route::put('/psicologia/salas/{id}', [SalaController::class, 'updateSala'])->name('atualizarSala-Psicologia');
 
+Route::get('/psicologia/pesquisar-local/', [SalaController::class, 'getSala'])->name('pesquisarLocal-Psicologia');
+
 
 
 
