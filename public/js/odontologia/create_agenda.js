@@ -1,5 +1,4 @@
 import { createNavBar } from './navbar.js';
-import { Modal } from 'https://cdnjs.cloudflare.com/ajax/libs/mdb-ui-kit/7.1.0/mdb.es.min.js';
 
 $('.datepicker').datepicker({
     format: 'dd/mm/yyyy',
@@ -56,10 +55,13 @@ $(document).ready(function () {
 });
 
 $(document).ready(function () {
-    const $select = $('#form-select');
+    $.fn.select2.defaults.set("language", "pt-BR");
+    let disciplinaSelecionada = null;
+    
+    const $servicoSelect = $('#form-select');
 
-    $select.select2({
-        placeholder: "Busque o serviços",
+    $servicoSelect.select2({
+        placeholder: "Busque o serviço",
         allowClear: true,
         minimumInputLength: 0,
         ajax: {
@@ -73,7 +75,8 @@ $(document).ready(function () {
                 return {
                     results: data.map(p => ({
                         id: p.ID_SERVICO_CLINICA,
-                        text: p.SERVICO_CLINICA_DESC +' '+'(' + p.DISCIPLINA + ')'
+                        text: p.SERVICO_CLINICA_DESC + ' (' + p.DISCIPLINA + ')',
+                        disciplina: p.DISCIPLINA
                     }))
                 };
             },
@@ -81,7 +84,40 @@ $(document).ready(function () {
         }
     });
 
-    $select.on('select2:open', function () {
+    $servicoSelect.on('select2:select', function () {
+        const selectedData = $(this).select2('data')[0];
+        disciplinaSelecionada = selectedData.disciplina;
+
+        $('#form-select-box').val(null).trigger('change');
+    });
+
+    // Inicializa o segundo select (boxes)
+    $('#form-select-box').select2({
+        placeholder: "Selecione o box",
+        allowClear: true,
+        ajax: {
+            url: function () {
+                return '/getBoxDisciplines/' + encodeURIComponent(disciplinaSelecionada || 'default');
+            },
+            dataType: 'json',
+            delay: 250,
+            data: function (params) {
+                return { query: params.term || '' };
+            },
+            processResults: function (data) {
+                return {
+                    results: data.map(p => ({
+                        id: p.ID_BOX_CLINICA,
+                        text: p.NOME_BOX || p.DESCRICAO
+                    }))
+                };
+            },
+            cache: true
+        }
+    });
+
+    // Foco automático na busca quando abrir
+    $servicoSelect.on('select2:open', function () {
         setTimeout(() => {
             document.querySelector('.select2-container--open .select2-search__field')?.focus();
         }, 0);

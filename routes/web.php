@@ -199,6 +199,8 @@ Route::get('/getBoxes', [OdontoConsultController::class, 'buscarBoxes']);
 
 Route::get('/getBoxDisciplines', [OdontoConsultController::class, 'buscarBoxeDisciplinas']);
 
+Route::get('/getBoxDisciplines/{discipline}', [OdontoConsultController::class, 'boxesDisciplina']);
+
 Route::get('/paciente/{pacienteId}', [OdontoConsultController::class, 'listaPacienteId']);
 
 Route::get('/servicos/{servicoId}', [OdontoConsultController::class, 'listaServicosId']);

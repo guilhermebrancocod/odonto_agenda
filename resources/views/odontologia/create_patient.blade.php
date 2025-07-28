@@ -15,9 +15,9 @@
 <body>
     <div id="navbar-container"></div>
     <div style="margin-left:220px; padding: 30px; border-radius: 10px; background-color: #fff; box-shadow: 0 4px 12px rgba(0,0,0,0.05);width: 100%;">
-        <div style="text-align: center; margin-bottom: 30px;">
-            <h3 style="margin: 0; font-size: 24px; color: #333;">Cadastro Paciente</h3>
-        </div>
+        <fieldset class="border p-3 rounded mb-3">
+            <legend class="w-auto px-2">Cadastro Paciente</legend>
+        </fieldset>
         <form id="form" class="row g-3 needs-validation"
             action="{{ isset($paciente) ? route('updatePatient', $paciente->ID_PACIENTE) : route('createPatient') }}"
             method="POST">
@@ -25,10 +25,14 @@
             @if(isset($paciente))
             @method('PUT')
             @endif
-            @csrf
             <div class="linha-com-titulo">
                 <h5>Dados Pessoais</h5>
                 <div class="linha-flex"></div>
+                <div class="form-check">
+                    <input class="form-check-input" type="checkbox" value="" id="pcd" />
+                    <label class="form-check-label" for="pcd"><strong>PCD</strong></label>
+                    <i class="fas fa-universal-access"></i>
+                </div>
             </div>
             <div class="row g-3" style="margin: 20px 0;">
                 <div style="flex: 0.2;">
@@ -36,7 +40,12 @@
                     <input type="text" id="cpf" name="cpf" class="form-control"
                         value="{{ old('cpf', $paciente->CPF_PACIENTE ?? '') }}" style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 6px; font-size: 14px;" maxlength="10" minlength="11">
                 </div>
-                <div style="flex: 1;">
+                <div style="flex: 0.2;">
+                    <label for="cod_sus" style="font-size: 14px; color: #666;">Cartão SUS</label>
+                    <input type="text" id="cod_sus" name="cod_sus" class="form-control"
+                        value="{{ old('nome', $paciente->COD_SUS ?? '') }}" style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 6px; font-size: 14px;" maxlength="25">
+                </div>
+                <div style="flex: 0.7;">
                     <label for="nome" style="font-size: 14px; color: #666;">Nome Completo</label>
                     <input type="text" id="nome" name="nome" class="form-control"
                         value="{{ old('nome', $paciente->NOME_COMPL_PACIENTE ?? '') }}" style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 6px; font-size: 14px;" maxlength="255">
@@ -56,7 +65,6 @@
                     </select>
                 </div>
             </div>
-
             <div class="linha-com-titulo">
                 <h5>Endereço</h5>
                 <div class="linha-flex"></div>
@@ -114,12 +122,37 @@
                     <input type="email" id="email" name="email" class="form-control"
                         value="{{ old('email', $paciente->E_MAIL_PACIENTE ?? '') }}" style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 6px; font-size: 14px;" maxlength="100">
                 </div>
+
                 <div style="flex: 1;">
                     <label for="celular" style="font-size: 14px; color: #666;">Celular</label>
                     <input type="text" id="celular" name="celular" class="form-control"
                         value="{{ old('celular', $paciente->FONE_PACIENTE ?? '') }}" style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 6px; font-size: 14px;" maxlength="20">
                 </div>
-                <div style="display: flex; justify-content: space-between; margin-top: 10px;">
+
+                <div class="linha-com-titulo">
+                    <h5>Informações complementares</h5>
+                    <div class="linha-flex"></div>
+                </div>
+
+                <div class="row g-3" style="margin: 20px 0;">
+                    <div style="flex: 1">
+                        <label for="nome_resposavel" style="font-size: 14px; color: #666;">Nome do resposável</label>
+                        <input type="text" id="nome_resposavel" name="nome_resposavel" class="form-control"
+                            value="{{ old('nome_resposavel', $paciente->NOME_RESPONSAVEL ?? '') }}" style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 6px; font-size: 14px;" maxlength="100">
+                    </div>
+                    <div style="flex: 1;">
+                        <label for="cpf_responsavel" style="font-size: 14px; color: #666;">CPF do responsável</label>
+                        <input type="text" id="cpf_responsavel" name="cpf_responsavel" class="form-control"
+                            value="{{ old('cpf_resposavel', $paciente->CPF_RESPONSAVEL ?? '') }}" style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 6px; font-size: 14px;" maxlength="20">
+                    </div>
+                </div>
+                <div style="flex: 1;">
+                    <label for="obs_laudo" style="font-size: 14px; color: #666;">Laudo</label>
+                    <input type="text" id="obs_laudo" name="obs_laudo" class="form-control"
+                        value="{{ old('obs_laudo', $paciente->OBSERVACAO ?? '') }}" style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 6px; font-size: 14px;" maxlength="20">
+                </div>
+
+                <div style="display: flex; justify-content: space-between; margin-top: 30px;margin-bottom:20px">
 
                     <div>
                         <button id="voltar" name="voltar" type="submit" style="background-color: #007bff; color: #fff; border: none; padding: 10px 20px; font-size: 14px; border-radius: 6px; cursor: pointer;">
