@@ -100,7 +100,7 @@
                         name="DT_NASC_PACIENTE"
                         type="text"
                         class="form-control"
-                        placeholder="Data"
+                        placeholder="Data de Nascimento"
                         />
                     </div>
                 </div>

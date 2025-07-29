@@ -94,7 +94,7 @@ class FaesaClinicaAgendamento extends Model
      * Self-referencing inverso (um agendamento pode ter N remarcações).
      *
      * @return \Illuminate\Database\Eloquent\Relations\HasMany
-     */
+    */
     public function remarcacoes(): HasMany
     {
         return $this->hasMany(FaesaClinicaAgendamento::class, 'ID_AGEND_REMARCADO', 'ID_AGENDAMENTO');

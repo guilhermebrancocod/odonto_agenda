@@ -403,8 +403,8 @@ class AgendamentoController extends Controller
             $horaFim = substr($agendamento->HR_AGEND_FIN, 0, 8);
             $status = $agendamento->STATUS_AGEND;
 
-            $start = Carbon::parse("{$dateOnly} {$horaInicio}")->toIso8601String();
-            $end = Carbon::parse("{$dateOnly} {$horaFim}")->toIso8601String();
+            $start = Carbon::parse("{$dateOnly} {$horaInicio}", 'America/Sao_Paulo')->toIso8601String();
+            $end = Carbon::parse("{$dateOnly} {$horaFim}", 'America/Sao_Paulo')->toIso8601String();
 
             $cor = match($status) {
                 'Agendado' => '#0d6efd',
@@ -521,6 +521,7 @@ class AgendamentoController extends Controller
                         ->with('success', 'Agendamento excluído com sucesso!');
     }
 
+    // VERIFICA CONFLITO DE AGENDAMENTO
     private function existeConflitoAgendamento($idClinica, $local, $dataAgend, $hrIni, $hrFim, $idPaciente, $idAgendamentoAtual = null)
     {
         $dataAgend = Carbon::parse($dataAgend)->format('Y-m-d');
@@ -530,16 +531,14 @@ class AgendamentoController extends Controller
         $query = FaesaClinicaAgendamento::where('ID_CLINICA', $idClinica)
             ->where('DT_AGEND', $dataAgend)
             ->where(function ($q) use ($hrIni, $hrFim) {
-                $q->whereBetween('HR_AGEND_INI', [$hrIni, $hrFim])
-                    ->orWhereBetween('HR_AGEND_FIN', [$hrIni, $hrFim])
-                    ->orWhere(function ($q2) use ($hrIni, $hrFim) {
-                        $q2->where('HR_AGEND_INI', '<=', $hrIni)
-                            ->where('HR_AGEND_FIN', '>=', $hrFim);
-                    });
+                $q->where(function ($q2) use ($hrIni, $hrFim) {
+                    $q2->where('HR_AGEND_INI', '<', $hrFim)
+                        ->where('HR_AGEND_FIN', '>', $hrIni);
+                });
             })
             ->where(function ($q) use ($local, $idPaciente) {
                 $q->where('LOCAL', $local)
-                ->orWhere('ID_PACIENTE', $idPaciente); // impede mesmo paciente em outro local
+                ->orWhere('ID_PACIENTE', $idPaciente);
             });
 
         if ($idAgendamentoAtual) {
@@ -549,19 +548,19 @@ class AgendamentoController extends Controller
         return $query->exists();
     }
 
-
+    // VERIFICA CONFLITO EXCLUSIVO DO PACIENTE
     private function existeConflitoPaciente($idClinica, $idPaciente, $dataAgend, $hrIni, $hrFim, $idAgendamentoAtual = null)
     {
+        $dataAgend = Carbon::parse($dataAgend)->format('Y-m-d');
+        $hrIni = Carbon::parse($hrIni)->format('H:i:s');
+        $hrFim = Carbon::parse($hrFim)->format('H:i:s');
+
         $query = FaesaClinicaAgendamento::where('ID_CLINICA', $idClinica)
             ->where('ID_PACIENTE', $idPaciente)
             ->where('DT_AGEND', $dataAgend)
             ->where(function($q) use ($hrIni, $hrFim) {
-                $q->whereBetween('HR_AGEND_INI', [$hrIni, $hrFim])
-                ->orWhereBetween('HR_AGEND_FIN', [$hrIni, $hrFim])
-                ->orWhere(function($q2) use ($hrIni, $hrFim) {
-                    $q2->where('HR_AGEND_INI', '<=', $hrIni)
-                        ->where('HR_AGEND_FIN', '>=', $hrFim);
-                });
+                $q->where('HR_AGEND_INI', '<', $hrFim)
+                ->where('HR_AGEND_FIN', '>', $hrIni);
             });
 
         if ($idAgendamentoAtual) {

@@ -73,6 +73,7 @@
 
         const calendar = new FullCalendar.Calendar(calendarEl, {
             initialView: "dayGridMonth",
+            timeZone: 'local',
             headerToolbar: {
                 left: "prev,next today",
                 center: "title",
