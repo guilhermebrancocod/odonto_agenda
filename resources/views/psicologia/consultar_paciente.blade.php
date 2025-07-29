@@ -154,6 +154,7 @@
                 <!-- BOTÃO DE PESQUISA -->
                 <div>
                     <button type="submit" class="btn btn-primary btn-sm px-3">Pesquisar</button>
+                    <button type="button" class="btn btn-outline-secondary btn-sm px-3" id="btnCleanFilters">Limpar Filtros</button>
                 </div>
 
             </form>
@@ -376,6 +377,41 @@
         </div>
     </div>
 
+    <!-- HISTÓRICO DE AGENDAMENTO POR PACIENTE  -->
+    <div class="modal fade" id="historicoPacienteModal" tabindex="-1" aria-labelledby="historicoPacienteModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-xl">
+            <div class="modal-content">
+
+                <div class="modal-header">
+                    <h5 class="modal-title" id="historicoPacienteModalLabel">Histórico de Agendamentos</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fechar"></button>
+                </div>
+
+                <div class="modal-body">
+                    <p><strong>Paciente:</strong> <span id="nomePacienteHistorico"></span></p>
+                    <div id="tabelaHistoricoPaciente" class="table-responsive">
+                        <table class="table table-bordered">
+                            <thead>
+                                <tr>
+                                    <th>Data</th>
+                                    <th>Hora Início</th>
+                                    <th>Hora Fim</th>
+                                    <th>Serviço</th>
+                                    <th>Status</th>
+                                </tr>
+                            </thead>
+                            <tbody id="historicoAgendamentosBody">
+                                <tr><td colspan="5" class="text-center">Nenhum agendamento encontrado.</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+
     <!-- FLATPICKR -->
     <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
     <script src="https://cdn.jsdelivr.net/npm/flatpickr/dist/l10n/pt.js"></script>
@@ -511,6 +547,12 @@
                                 data-email="${paciente.E_MAIL_PACIENTE ?? ''}"
                                 data-municipio="${paciente.MUNICIPIO ?? ''}">
                                 Editar
+                            </button>
+                            <button
+                                type="button" class="btn btn-sm btn-secondary historico-btn"
+                                data-id="${paciente.ID_PACIENTE}"
+                                data-nome="${paciente.NOME_COMPL_PACIENTE}">
+                                Histórico
                             </button>
                             <button type="button" class="btn btn-sm btn-danger excluir-btn"
                                 data-id="${paciente.ID_PACIENTE}"
@@ -704,6 +746,61 @@
             editPacienteModal.addEventListener('shown.bs.modal', initializeFlatpickr);
 
             initializeFlatpickr();
+        });
+    </script>
+
+    <!-- SCRIPT MOSTRAR AGENDAMENTOS POR PACIENTE -->
+     <script>
+        document.addEventListener('click', function (event) {
+            if (event.target.classList.contains('historico-btn')) {
+                const pacienteId = event.target.getAttribute('data-id');
+                const nomePaciente = event.target.getAttribute('data-nome');
+
+                document.getElementById('nomePacienteHistorico').textContent = nomePaciente;
+                const tbody = document.getElementById('historicoAgendamentosBody');
+                tbody.innerHTML = `<tr><td colspan="5" class="text-center">Carregando...</td></tr>`;
+
+                fetch(`/psicologia/agendamentos/paciente/${pacienteId}`)
+                    .then(res => res.json())
+                    .then(agendamentos => {
+                        if (agendamentos.length === 0) {
+                            tbody.innerHTML = `<tr><td colspan="5" class="text-center">Nenhum agendamento encontrado.</td></tr>`;
+                            return;
+                        }
+
+                        tbody.innerHTML = '';
+                        agendamentos.forEach(ag => {
+                            const row = document.createElement('tr');
+                            row.innerHTML = `
+                                <td>${formatarDataBR(ag.DT_AGEND)}</td>
+                                <td>${ag.HR_AGEND_INI ? ag.HR_AGEND_INI.substring(0, 8) : '-'}</td>
+                                <td>${ag.HR_AGEND_FIN ? ag.HR_AGEND_FIN.substring(0, 8) : '-'}</td>
+                                <td>${ag.servico?.SERVICO_CLINICA_DESC ?? '-'}</td>
+                                <td>${ag.STATUS_AGEND ?? '-'}</td>
+                            `;
+                            tbody.appendChild(row);
+                        });
+                    })
+                    .catch(error => {
+                        console.error(error);
+                        tbody.innerHTML = `<tr><td colspan="5" class="text-center text-danger">Erro ao carregar dados.</td></tr>`;
+                    });
+
+                const modal = new bootstrap.Modal(document.getElementById('historicoPacienteModal'));
+                modal.show();
+            }
+        });
+     </script>
+
+    <!-- LIMPAR FILTROS DE PESQUISA -->
+    <script>
+        document.getElementById('btnCleanFilters').addEventListener('click', () => {
+            searchInput.value = '';
+            dt_nasc_paciente_input.value = '';
+            statusInput.value = '';
+            sexoInput.value = '';
+            telefoneInput.value = '';
+            buscarPacientes();
         });
     </script>
 

@@ -90,6 +90,59 @@ class AgendamentoController extends Controller
         return response()->json($agendamentos);
     }
 
+    // RETORNA AGENDAMENTOS PARA O CALENDÁRIO
+    public function getAgendamentosForCalendar()
+    {
+        $agendamentos = FaesaClinicaAgendamento::with('paciente', 'servico')
+            ->where('ID_CLINICA', 1)
+            ->get();
+
+        $events = $agendamentos->map(function($agendamento) {
+            $dateOnly = substr($agendamento->DT_AGEND, 0, 10);
+            $horaInicio = substr($agendamento->HR_AGEND_INI, 0, 8);
+            $horaFim = substr($agendamento->HR_AGEND_FIN, 0, 8);
+            $status = $agendamento->STATUS_AGEND;
+
+            $start = Carbon::parse("{$dateOnly} {$horaInicio}", 'America/Sao_Paulo')->toIso8601String();
+            $end = Carbon::parse("{$dateOnly} {$horaFim}", 'America/Sao_Paulo')->toIso8601String();
+
+            $cor = match($status) {
+                'Agendado' => '#0d6efd',
+                'Presente' => '#28a745',
+                'Cancelado' => '#dc3545',
+                default => '#6c757d',
+            };
+
+            return [
+                'id' => $agendamento->ID_AGENDAMENTO,
+                'title' => $agendamento->paciente 
+                    ? $agendamento->paciente->NOME_COMPL_PACIENTE 
+                    : 'Agendamento',
+                'start' => $start,
+                'end' => $end,
+                'status' => $status,
+                'servico' => $agendamento->servico->SERVICO_CLINICA_DESC ?? 'Serviço não informado',
+                'description' => $agendamento->OBSERVACOES ?? '',
+                'color' => $cor,
+                'local' => $agendamento->LOCAL ?? 'Não informado',
+            ];
+        });
+
+        return response()->json($events);
+    }
+
+    // RETORNA AGENDAMENTOS POR PACIENTE
+    public function getAgendamentosByPaciente($idPaciente)
+    {
+        $agendamentos = FaesaClinicaAgendamento::with(['servico', 'clinica'])
+            ->where('ID_CLINICA', 1)
+            ->where('ID_PACIENTE', $idPaciente)
+            ->orderBy('DT_AGEND', 'desc')
+            ->get();
+
+        return response()->json($agendamentos);
+    }
+
     // CRIAR AGENDAMENTO
     public function criarAgendamento(Request $request)
     {
@@ -389,46 +442,6 @@ class AgendamentoController extends Controller
         }
 
         return view('psicologia.agendamento_show', compact('agendamento'));
-    }
-
-    public function getAgendamentosForCalendar()
-    {
-        $agendamentos = FaesaClinicaAgendamento::with('paciente', 'servico')
-            ->where('ID_CLINICA', 1)
-            ->get();
-
-        $events = $agendamentos->map(function($agendamento) {
-            $dateOnly = substr($agendamento->DT_AGEND, 0, 10);
-            $horaInicio = substr($agendamento->HR_AGEND_INI, 0, 8);
-            $horaFim = substr($agendamento->HR_AGEND_FIN, 0, 8);
-            $status = $agendamento->STATUS_AGEND;
-
-            $start = Carbon::parse("{$dateOnly} {$horaInicio}", 'America/Sao_Paulo')->toIso8601String();
-            $end = Carbon::parse("{$dateOnly} {$horaFim}", 'America/Sao_Paulo')->toIso8601String();
-
-            $cor = match($status) {
-                'Agendado' => '#0d6efd',
-                'Presente' => '#28a745',
-                'Cancelado' => '#dc3545',
-                default => '#6c757d',
-            };
-
-            return [
-                'id' => $agendamento->ID_AGENDAMENTO,
-                'title' => $agendamento->paciente 
-                    ? $agendamento->paciente->NOME_COMPL_PACIENTE 
-                    : 'Agendamento',
-                'start' => $start,
-                'end' => $end,
-                'status' => $status,
-                'servico' => $agendamento->servico->SERVICO_CLINICA_DESC ?? 'Serviço não informado',
-                'description' => $agendamento->OBSERVACOES ?? '',
-                'color' => $cor,
-                'local' => $agendamento->LOCAL ?? 'Não informado',
-            ];
-        });
-
-        return response()->json($events);
     }
 
     // RETORNA VIEW DE EDIÇÃO DE AGENDAMENTO
