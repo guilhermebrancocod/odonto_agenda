@@ -124,28 +124,24 @@
             <h2 class="fs-4 mb-0">Agendamento</h2>
         </div>
 
-        <!-- FORM DE BUSCA DE PACIENTE -->
-        <form id="search-form" class="d-flex mb-3" role="search">
-            <div class="input-group">
-                <input id="search-input" name="search" type="search" class="form-control" placeholder="Pesquisar paciente" value="{{ old('search') }}">
-                <button type="submit" class="btn btn-primary">Pesquisar</button>
-            </div>
-        </form>
-
-        <!-- LISTA DE PACIENTES ENCONTRADOS PARA AGENDAMENTO -->
-        <div id="pacientes-list" class="mb-3"></div>
-
-        <!-- PACIENTE SELECIONADO -->
-        <div id="paciente-selecionado" class="mb-3"></div>
 
         <!-- FORM DE AGENDAMENTO -->
         <form action="{{ route('criarAgendamento-Psicologia') }}" method="POST" id="agendamento-form" class="w-100">
             @csrf
 
-            <input type="hidden" name="paciente_id" id="paciente_id" />
+            <input type="hidden" name="paciente_id" id="paciente_id" value="{{ old('paciente_id') }}"/>
             <input type="hidden" name="id_servico" id="id_servico" />
             <input type="hidden" name="recorrencia" id="recorrencia" />
             <input type="hidden" name="status_agend" value="Em aberto" />
+
+            <div class="mb-3">
+                <div class="input-group">
+                    <input id="search-input" name="search" class="form-control" placeholder="Pesquisar paciente" value="{{ old('search') }}">
+                </div>
+
+                <!-- LISTA DE PACIENTES ENCONTRADOS PARA AGENDAMENTO -->
+                <div id="pacientes-list" class="list-group position-absolute w-100" style="z-index: 1000;"></div>
+            </div>
 
             <!-- SUBTÍTULO -->
             <div class="mb-2">
@@ -314,7 +310,7 @@
     // LISTA DE PACIENTES ENCONTRADOS PARA AGENDAMENTO
     const pacientesList = document.getElementById('pacientes-list');
     // PACIENTE SELECIONADO APÓS BUSCA
-    const pacienteSelecionadoDiv = document.getElementById('paciente-selecionado');
+    // const pacienteSelecionadoDiv = document.getElementById('paciente-selecionado');
     // ID PACIENTE SELECIONADO
     const pacienteIdInput = document.getElementById('paciente_id');
 </script>
@@ -322,8 +318,8 @@
 <!-- BUSCA DE PACIENTES -->
 <script>
     // PESQUISA PACIENTE - FUNCIONALIDADES
-    searchForm.addEventListener('submit', function(e) {
-        e.preventDefault(); // EVITA RECARREGAMENTO DA PÁGINA
+    searchInput.addEventListener('input', function(e) {
+        //e.preventDefault(); // EVITA RECARREGAMENTO DA PÁGINA
         // RESGATA O NOME DO PACIENTE | REMOVE OS ESPAÇOS EM BRANCO COM A FUNÇÃO TRIM()
         const nome = searchInput.value.trim();
         fetch(`/psicologia/consultar-paciente/buscar?search=${encodeURIComponent(nome)}`)
@@ -332,7 +328,6 @@
 
                     // AO BUSCAR, OS VALORES ABAIXO SÃO ZERADOS
                     pacientesList.innerHTML = '';
-                    pacienteSelecionadoDiv.innerHTML = '';
                     pacienteIdInput.value = '';
 
                     // CASO NENHUM PACIENTE SEJA ENCONTRADO - MOSTRA MENSAGEM
@@ -357,23 +352,23 @@
                         item.classList.add('list-group-item', 'list-group-item-action');
                         item.textContent = `${paciente.NOME_COMPL_PACIENTE} (${paciente.CPF_PACIENTE}) - Nasc: ${formatarDataBR(paciente.DT_NASC_PACIENTE)}`;
                         item.addEventListener('click', () => {
-                            pacienteSelecionadoDiv.innerHTML = 
+                            searchInput.value = `${paciente.NOME_COMPL_PACIENTE} (${paciente.CPF_PACIENTE})`;
+                            /*pacienteSelecionadoDiv.innerHTML = 
                             `<div class="alert alert-success d-flex justify-content-between align-items-center">
                                 <div>
                                     <strong>Paciente selecionado:</strong> ${paciente.NOME_COMPL_PACIENTE} (${paciente.CPF_PACIENTE})
                                 </div>
                                 <button type="button" id="cancelar-paciente" class="btn btn-sm btn-outline-danger ms-2">Cancelar</button>
                             </div>
-                            `;
+                            `;*/
                             
                             pacienteIdInput.value = paciente.ID_PACIENTE;
                             pacientesList.innerHTML = '';
 
                             // LISTENER DO BOTÃO DE CANCELAR
-                            document.getElementById('cancelar-paciente').addEventListener('click', () => {
-                                pacienteSelecionadoDiv.innerHTML = '';
-                                pacienteIdInput.value = '';
-                            })
+                            // document.getElementById('cancelar-paciente').addEventListener('click', () => {
+                            //     pacienteIdInput.value = '';
+                            // })
                         });
                         listGroup.appendChild(item);
                     });
