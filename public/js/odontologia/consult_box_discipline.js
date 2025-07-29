@@ -2,8 +2,8 @@ import { createNavBar } from './navbar.js';
 
 function maskTime(value) {
     return value
-        .replace(/\D/g, '')                
-        .replace(/^(\d{2})(\d)/, '$1:$2')  
+        .replace(/\D/g, '')
+        .replace(/^(\d{2})(\d)/, '$1:$2')
         .replace(/^(\d{2}):(\d{2}).*/, '$1:$2')
 }
 
@@ -98,12 +98,14 @@ $(document).ready(function () {
 // Evento ao selecionar um paciente no select2
 $('#selectBoxDiscipline').on('select2:select', function (e) {
     const idBoxDiscipline = e.params.data.id;
-
     // Busca os dados completos do paciente via AJAX
     $.ajax({
         url: `/editBoxDiscipline/${idBoxDiscipline}`,
-        type: 'GET',
         dataType: 'json',
+        delay: 250,
+        data: function (params) {
+            return { query: params.term || '' };
+        },
         success: function (disciplines) {
             const html = `
                     <tr>
