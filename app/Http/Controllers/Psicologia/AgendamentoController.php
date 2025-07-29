@@ -393,8 +393,8 @@ class AgendamentoController extends Controller
 
     public function getAgendamentosForCalendar()
     {
-        $agendamentos = FaesaClinicaAgendamento::with('paciente')
-            ->where('ID_CLINICA', 1) // Filtro por clínica
+        $agendamentos = FaesaClinicaAgendamento::with('paciente', 'servico')
+            ->where('ID_CLINICA', 1)
             ->get();
 
         $events = $agendamentos->map(function($agendamento) {
@@ -406,12 +406,11 @@ class AgendamentoController extends Controller
             $start = Carbon::parse("{$dateOnly} {$horaInicio}")->toIso8601String();
             $end = Carbon::parse("{$dateOnly} {$horaFim}")->toIso8601String();
 
-            // Define a cor conforme o status
             $cor = match($status) {
-                'Agendado' => '#0d6efd',    // azul
-                'Presente' => '#28a745',    // verde
-                'Cancelado' => '#dc3545',   // vermelho
-                default => '#6c757d',       // cinza
+                'Agendado' => '#0d6efd',
+                'Presente' => '#28a745',
+                'Cancelado' => '#dc3545',
+                default => '#6c757d',
             };
 
             return [
@@ -422,6 +421,7 @@ class AgendamentoController extends Controller
                 'start' => $start,
                 'end' => $end,
                 'status' => $status,
+                'servico' => $agendamento->servico->SERVICO_CLINICA_DESC ?? 'Serviço não informado',
                 'description' => $agendamento->OBSERVACOES ?? '',
                 'color' => $cor,
                 'local' => $agendamento->LOCAL ?? 'Não informado',

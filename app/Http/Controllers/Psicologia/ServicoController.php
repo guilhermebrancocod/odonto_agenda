@@ -89,6 +89,22 @@ class ServicoController extends Controller
         return response()->json($servicos);
     }
 
+    public function getServicoById($id)
+    {
+        $servico = FaesaClinicaServico::find($id);
+
+        if (!$servico) {
+            return response()->json(['message' => 'Serviço não encontrado'], 404);
+        }
+
+        // Substituir null ou 0 no código interno por texto customizado
+        if (is_null($servico->COD_INTERNO_SERVICO_CLINICA) || $servico->COD_INTERNO_SERVICO_CLINICA == 0) {
+            $servico->COD_INTERNO_SERVICO_CLINICA = '--';
+        }
+
+        return response()->json($servico->SERVICO_CLINICA_DESC);
+    }
+
     // ATUALIZAÇÃO DE SERVIÇO
     public function atualizarServico(Request $request, $id)
     {

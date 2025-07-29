@@ -41,8 +41,10 @@
         <div class="modal-body">
             <p><strong>Paciente:</strong> <span id="modalPaciente"></span></p>
             <p><strong>Data e Horário:</strong> <span id="modalDataHora"></span></p>
+            <p><strong>Serviço:</strong> <span id="modalServico"></span></p>
+            <p><strong>Status:</strong> <span id="modalStatus"></span></p>
+            <p><strong>Local:</strong> <span id="modalLocal"></span></p>
             <p><strong>Observações:</strong> <span id="modalObservacoes"></span></p>
-            <!-- Adicione mais campos se quiser -->
         </div>
         <div class="modal-footer">
             <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fechar</button>
@@ -88,20 +90,21 @@
             events: '/psicologia/agendamentos-calendar',
 
             eventClick: function(info) {
-                document.getElementById('modalPaciente').textContent = info.event.title;
-
-                // Formatar a data/hora para mostrar bonitinho:
-                const start = info.event.start;
-                const end = info.event.end;
-                const options = { day: '2-digit', month: '2-digit', year: 'numeric', hour:'2-digit', minute:'2-digit' };
+                const event = info.event;
+                const start = event.start;
+                const end = event.end;
+                const options = { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' };
                 const dataHoraStr = start.toLocaleString('pt-BR', options) + " - " + (end ? end.toLocaleString('pt-BR', options) : '');
 
+                document.getElementById('modalPaciente').textContent = event.title;
                 document.getElementById('modalDataHora').textContent = dataHoraStr;
-                document.getElementById('modalObservacoes').textContent = info.event.extendedProps.description || 'Nenhuma observação';
+                document.getElementById('modalObservacoes').textContent = event.extendedProps.description || 'Nenhuma observação';
+                document.getElementById('modalStatus').textContent = event.extendedProps.status || 'Sem status';
+                document.getElementById('modalLocal').textContent = event.extendedProps.local || 'Não informado';
+                document.getElementById('modalServico').textContent = event.extendedProps.servico || 'Não informado';
 
-                // Abre o modal com Bootstrap 5
-                const agendamentoModal = new bootstrap.Modal(document.getElementById('agendamentoModal'));
-                agendamentoModal.show();
+                const modal = new bootstrap.Modal(document.getElementById('agendamentoModal'));
+                modal.show();
             }
         });
 
