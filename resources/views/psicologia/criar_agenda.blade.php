@@ -193,7 +193,7 @@
                             <i class="fas fa-info-circle"></i>
                         </span>
                     </label>
-                    <input type="text" id="servico" name="servico" class="form-control" autocomplete="off">
+                    <input type="text" id="servico" name="servico" class="form-control" autocomplete="off" value="{{ old('servico') }}">
                     
                     <div id="servicos-list" class="list-group position-absolute w-100" style="z-index: 1000;"></div>
                 </div>
