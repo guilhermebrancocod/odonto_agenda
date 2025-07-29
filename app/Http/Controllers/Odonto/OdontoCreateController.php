@@ -263,7 +263,7 @@ class OdontoCreateController extends Controller
         return redirect()->back()->with('success', ' Disciplina e dia da semana vinculado a um ou mais boxes!');
     }
 
-    public function editBoxDiscipline($idBoxDiscipline)
+    public function editBoxDiscipline(Request $request, $idBoxDiscipline)
     {
         $BoxDiscipline = DB::table('FAESA_CLINICA_BOX_DISCIPLINA')->where('ID_BOX_DISCIPLINA', $idBoxDiscipline)->first();
 
