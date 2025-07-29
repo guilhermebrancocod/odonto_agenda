@@ -163,7 +163,7 @@
             </script>
         @endif
 
-        <!-- FORMULÁRIO DE CRIAÇÃO DE HORARI0 -->
+        <!-- FORMULÁRIO DE CRIAÇÃO DE HORARIO -->
         <form class="needs-validation" action="{{ route('criarHorario-Psicologia') }}" method="POST" novalidate>
 
             @csrf
@@ -204,13 +204,13 @@
             <!-- HORÁRIO INÍCIO -->
             <div class="mt-2">
                 <label for="HR_HORARIO_INICIAL" class="form-label">Horário Inicial</label>
-                <input type="time" id="HR_HORARIO_INICIAL" name="HR_HORARIO_INICIAL" class="form-control" value="{{ old('HR_HORARIO_INICIAL') }}">
+                <input type="text" id="HR_HORARIO_INICIAL" name="HR_HORARIO_INICIAL" class="form-control" value="{{ old('HR_HORARIO_INICIAL') }}">
             </div>
 
              <!-- HORÁRIO FINAL -->
             <div class="mt-2">
                 <label for="HR_HORARIO_FINAL" class="form-label">Horário Final</label>
-                <input type="time" id="HR_HORARIO_FINAL" name="HR_HORARIO_FINAL" class="form-control" value="{{ old('HR_HORARIO_FINAL') }}">
+                <input type="text" id="HR_HORARIO_FINAL" name="HR_HORARIO_FINAL" class="form-control" value="{{ old('HR_HORARIO_FINAL') }}">
             </div>
 
             <!-- DESCRICAO -->
@@ -262,10 +262,13 @@
             <div class="modal-dialog">
                 <div class="modal-content">
                     <div id="modal-alert-container"></div>
-                        <form id="form-editar-horario">
+                        <form id="form-editar-horario" novalidate>
 
                             <!-- HEADER DO MODAL -->
                             <div class="modal-header">
+
+                                <div id="form-errors" class="alert alert-danger d-none" role="alert"></div>
+
                                 <h5 class="modal-title">Editar Horário</h5>
                                 <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                             </div>
@@ -309,13 +312,13 @@
                                 <!-- EDIÇÃO DE HORÁRIO INICIAL -->
                                 <div class="mb-3">
                                     <label class="form-label">Horário Inicial</label>
-                                    <input type="time" id="edit-hr-horario-inicial" name="HR_HORARIO_INICIAL" class="form-control" required />
+                                    <input type="text" id="edit-hr-horario-inicial" name="HR_HORARIO_INICIAL" class="form-control" required />
                                 </div>
 
                                 <!-- EDIÇÃO DE HORÁRIO FINAL -->
                                 <div class="mb-3">
                                     <label class="form-label">Horário Final</label>
-                                    <input type="time" id="edit-hr-horario-final" name="HR_HORARIO_FINAL" class="form-control" required />
+                                    <input type="text" id="edit-hr-horario-final" name="HR_HORARIO_FINAL" class="form-control" required />
                                 </div>
 
                                 <!-- EDIÇÃO DE OBSERVAÇÃO -->
@@ -395,6 +398,7 @@
             fetch(`/psicologia/horarios/listar?search=${encodeURIComponent(search)}`)
                 .then(response => response.json())
                 .then(horarios => {
+                    console.log(horarios);
                     horariosTbody.innerHTML = '';
 
                     // CASO NÃO ACHE NENHUM RESULTADO
@@ -417,10 +421,10 @@
                                     data-id="${horario.ID_HORARIO}"
                                     data-desc="${horario.DESCRICAO_HORARIO}"
                                     data-tipo="${horario.BLOQUEADO}"
-                                    data-dataInicial="${horario.DATA_HORARIO_INICIAL ?? ''}"
-                                    data-dataFinal="${horario.DATA_HORARIO_FINAL ?? ''}"
-                                    data-horarioInicial="${horario.HR_HORARIO_INICIAL ?? ''}"
-                                    data-horarioFinal="${horario.HR_HORARIO_FINAL ?? ''}"
+                                    data-data-inicial="${horario.DATA_HORARIO_INICIAL ? horario.DATA_HORARIO_INICIAL.slice(0, 10) : ''}"
+                                    data-data-final="${horario.DATA_HORARIO_FINAL ? horario.DATA_HORARIO_FINAL.slice(0, 10) : ''}"
+                                    data-hora-inicial="${horario.HR_HORARIO_INICIAL ? horario.HR_HORARIO_INICIAL.slice(0, 5) : ''}"
+                                    data-hora-final="${horario.HR_HORARIO_FINAL ? horario.HR_HORARIO_FINAL.slice(0, 5) : ''}"
                                     data-observacao="${horario.OBSERVACAO ?? ''}">
                                     Editar
                                 </button>
@@ -431,14 +435,29 @@
 
                     document.querySelectorAll('.btn-editar').forEach(btn => {
                         btn.addEventListener('click', () => {
-                            document.getElementById('edit-horario-id').value = btn.dataset.id;
-                            document.getElementById('edit-horario-desc').value = btn.dataset.desc;
-                            document.getElementById('edit-tipo-horario').value = btn.dataset.tipo;
-                            document.getElementById('edit-data-horario-inicial').value = btn.dataset.dataInicial;
-                            document.getElementById('edit-data-horario-final').value = btn.dataset.dataFinal;
-                            document.getElementById('edit-hr-horario-inicial').value = btn.dataset.horarioInicial;
-                            document.getElementById('edit-hr-horario-final').value = btn.dataset.horarioFinal;
-                            document.getElementById('edit-observacao').value = btn.dataset.observacao ?? '';
+                            const id = btn.dataset.id;
+                            const desc = btn.dataset.desc;
+                            const tipo = btn.dataset.tipo;
+                            const observacao = btn.dataset.observacao ?? '';
+
+                            const dataInicial = btn.dataset.dataInicial || '';
+                            let dataFinal = btn.dataset.dataFinal || '';
+                            if (dataFinal.includes('T')) {
+                                dataFinal = dataFinal.split('T')[0];
+                            }
+
+                            const horarioInicial = btn.dataset.horaInicial ? btn.dataset.horaInicial.substring(0, 5) : '';
+                            const horarioFinal = btn.dataset.horaFinal ? btn.dataset.horaFinal.substring(0, 5) : '';
+
+                            document.getElementById('edit-horario-id').value = id;
+                            document.getElementById('edit-horario-desc').value = desc;
+                            document.getElementById('edit-tipo-horario').value = tipo;
+                            document.getElementById('edit-data-horario-inicial').value = dataInicial;
+                            document.getElementById('edit-data-horario-final').value = dataFinal;
+                            document.getElementById('edit-hr-horario-inicial').value = horarioInicial;
+                            document.getElementById('edit-hr-horario-final').value = horarioFinal;
+                            document.getElementById('edit-observacao').value = observacao;
+
                             editarHorarioModal.show();
                         });
                     });
@@ -468,15 +487,15 @@
                 document.getElementById('edit-data-horario-inicial').value = btn.dataset.dataInicial;
                 document.getElementById('edit-data-horario-final').value = btn.dataset.dataFinal;
                 document.getElementById('edit-hr-horario-inicial').value = btn.dataset.horarioInicial;
-                document.getElementById('edit-hr-horario-final').value = btn.dataset.horariFinal;
-                document.getElementById('edit-observacao').vaue = btn.dataset.observacao;
+                document.getElementById('edit-hr-horario-final').value = btn.dataset.horarioFinal;
+                document.getElementById('edit-observacao').value = btn.dataset.observacao;
                 // const dataInicial = document.getElementById('edit-data-horario-inicial');
                 // const dataFinal = document.getElementById('edit-data-horario-final');
                 // const hrInicial = document.getElementById('edit-hr-horario-inicial');
                 // const hrFinal = document.getElementById('edit-hr-horario-final');
                 // const observacao = document.getElementById('edit-observacao').value;
 
-                editarServicoModal.show();
+                editarHorarioModal.show();
             });
         });
 
@@ -531,6 +550,7 @@
                 method: 'PUT',
                 headers: {
                     'Content-Type': 'application/json',
+                    'Accept': 'application/json',
                     'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
                 },
                 body: JSON.stringify({
@@ -543,82 +563,85 @@
                     OBSERVACAO: observacao
                 })
             })
-                .then(res => {
-                    if (!res.ok) throw new Error('Erro ao salvar');
-                    return res.json();
-                })
-                .then(() => {
-                    showAlert('Horário atualizado com sucesso!', 'success');
-                    editarHorarioModal.hide();
-                    carregarHorarios(searchInput.value);
-                })
-                .catch(() => {
-                    showModalAlert('Erro ao atualizar horário. Verifique os campos ou tente novamente.', 'danger');
-                });
+            .then(res => {
+                if (!res.ok) throw new Error('Erro ao salvar');
+                return res.json();
+            })
+            .then(() => {
+                showAlert('Horário atualizado com sucesso!', 'success');
+                editarHorarioModal.hide();
+                carregarHorarios(searchInput.value);
+            })
+            .catch(async (err) => {
+                if (err instanceof Response) {
+                    const errorData = await err.json();
+
+                    if (errorData.errors) {
+                        const messages = Object.values(errorData.errors).flat();
+                        const html = messages.map(msg => `<div>${msg}</div>`).join('');
+                        showModalAlert(html, 'danger');
+                    } else {
+                        showModalAlert(errorData.message || 'Erro inesperado. Tente novamente.', 'danger');
+                    }
+                } else {
+                    showModalAlert('Erro inesperado. Verifique os campos e tente novamente.', 'danger');
+                }
+            });
         });
     });
 </script>
 
 <!-- FLATPICKR -->
 <script>
-        flatpickr("#DATA_HORARIO_INICIAL", {
-            dateFormat: "Y-m-d",   
-            altInput: true,
-            altFormat: "d-m-Y",
-            locale: "pt",
-            minDate: "today",
-            allowInput: true,
-        });
-        flatpickr("#DATA_HORARIO_FINAL", {
-            dateFormat: "Y-m-d",   
-            altInput: true,
-            altFormat: "d-m-Y",
-            locale: "pt",
-            minDate: "today",
-            allowInput: true,
-        });
-        flatpickr("#HR_HORARIO_INICIAL", {
-            enableTime: true,
-            noCalendar: true,
-            dateFormat: "H:i",
-            time_24hr: true,
-            allowInput: true,
-        });
-        flatpickr("#HR_HORARIO_FINAL", {
-            enableTime: true,
-            noCalendar: true,
-            dateFormat: "H:i",
-            time_24hr: true,
-            allowInput: true,
-        });    
-        flatpickr("edit-data-horario-inicial", {
-            enableTime: true,
-            noCalendar: true,
-            dateFormat: "H:i",
-            time_24hr: true,
-            allowInput: true,
-        });
-        flatpickr("edit-data-horario-final", {
-            enableTime: true,
-            noCalendar: true,
-            dateFormat: "H:i",
-            time_24hr: true,
-            allowInput: true,
-        });
-        flatpickr("#edit-hr-horario-inicial", {
-            enableTime: true,
-            noCalendar: true,
-            dateFormat: "H:i",
-            time_24hr: true,
-            allowInput: true,
-        }); 
-        flatpickr("#edit-hr-horario-final", {
-            enableTime: true,
-            noCalendar: true,
-            dateFormat: "H:i",
-            time_24hr: true,
-            allowInput: true,
-        }); 
+    flatpickr("#edit-data-horario-inicial", {
+        altFormat: "d-m-Y",
+        locale: "pt",
+        minDate: "today",
+        allowInput: true,
+    });
+
+    flatpickr("#edit-data-horario-final", {
+        dateFormat: "Y-m-d",
+        altFormat: "d-m-Y",
+        locale: "pt",
+        minDate: "today",
+        allowInput: true,
+    });
+
+    flatpickr("#edit-hr-horario-inicial", {
+        enableTime: true,
+        noCalendar: true,
+        dateFormat: "H:i",
+        time_24hr: true,
+        allowInput: true,
+    });
+
+    flatpickr("#edit-hr-horario-final", {
+        enableTime: true,
+        noCalendar: true,
+        dateFormat: "H:i",
+        time_24hr: true,
+        allowInput: true,
+    });
+
+    flatpickr("#DATA_HORARIO_INICIAL", {
+        dateFormat: "Y-m-d",
+        altInput: true,
+        altFormat: "d-m-Y",
+        locale: "pt",
+        minDate: "today",
+        allowInput: true,
+    });
+
+    flatpickr("#DATA_HORARIO_FINAL", {
+        dateFormat: "Y-m-d",
+        altInput: true,
+        altFormat: "d-m-Y",
+        locale: "pt",
+        minDate: "today",
+        allowInput: true,
+    });
+
 </script>
 
 </body>
