@@ -79,120 +79,104 @@
             <form id="search-form" class="w-100 mb-4">
                 <div class="row g-3">
 
-                    <!-- PESQUISA POR NOME DO PACIENTE OU CPF -->
+                    <!-- Linha 1 -->
                     <div class="col-md-4">
-                        <div class="input-group">
-                            <span class="input-group-text">
-                                <i class="bi bi-person"></i>
-                            </span>
-                            <input
-                                id="search-input"
-                                name="search"
-                                type="search"
-                                class="form-control"
-                                placeholder="Nome ou CPF do paciente"
-                            />
-                        </div>
+                    <div class="input-group">
+                        <span class="input-group-text"><i class="bi bi-person"></i></span>
+                        <input
+                        id="search-input"
+                        name="search"
+                        type="search"
+                        class="form-control"
+                        placeholder="Nome ou CPF do paciente"
+                        />
+                    </div>
                     </div>
 
-                    <!-- PESQUISA POR DATA -->
                     <div class="col-md-2">
-                        <div class="input-group">
-                            <span class="input-group-text">
-                                <i class="bi bi-calendar"></i>
-                            </span>
-                            <input
-                                id="date-input"
-                                name="date"
-                                type="date"
-                                class="form-control"
-                                placeholder="Data"
-                            />
-                        </div>
+                    <div class="input-group">
+                        <span class="input-group-text"><i class="bi bi-calendar"></i></span>
+                        <input
+                        id="date-input"
+                        name="date"
+                        type="date"
+                        class="form-control"
+                        placeholder="Data"
+                        />
+                    </div>
                     </div>
 
-                    <!-- PESQUISA POR HORA DE INÍCIO  -->
                     <div class="col-md-2">
-                        <div class="input-group">
-                            <span class="input-group-text">
-                                <i class="bi bi-clock"></i>
-                            </span>
-                            <input
-                                id="start-time-input"
-                                name="start_time"
-                                type="time"
-                                class="form-control"
-                                placeholder="Hora Início"
-                            />
-                        </div>
+                    <div class="input-group">
+                        <span class="input-group-text"><i class="bi bi-clock"></i></span>
+                        <input
+                        id="start-time-input"
+                        name="start_time"
+                        type="time"
+                        class="form-control"
+                        placeholder="Hora Início"
+                        />
+                    </div>
                     </div>
 
-                    <!-- PESQUISA POR HORA FINAL -->
                     <div class="col-md-2">
-                        <div class="input-group">
-                            <span class="input-group-text">
-                                <i class="bi bi-clock"></i>
-                            </span>
-                            <input
-                                id="end-time-input"
-                                name="end_time"
-                                type="time"
-                                class="form-control"
-                                placeholder="Hora Fim"
-                            />
-                        </div>
+                    <div class="input-group">
+                        <span class="input-group-text"><i class="bi bi-clock"></i></span>
+                        <input
+                        id="end-time-input"
+                        name="end_time"
+                        type="time"
+                        class="form-control"
+                        placeholder="Hora Fim"
+                        />
+                    </div>
                     </div>
 
-                    <!-- PESQUISA POR STATUS DO AGENDAMENTO -->
                     <div class="col-md-2">
-                        <div class="input-group">
-                            <span class="input-group-text">
-                                <i class="bi bi-list-check"></i>
-                            </span>
-                            <select id="status-input" name="status" class="form-select">
-                                <option value="">Status</option>
-                                <option value="Agendado">Agendado</option>
-                                <option value="Em atendimento">Em atendimento</option>
-                                <option value="Finalizado">Finalizado</option>
-                            </select>
-                        </div>
+                    <div class="input-group">
+                        <span class="input-group-text"><i class="bi bi-list-check"></i></span>
+                        <select id="status-input" name="status" class="form-select">
+                        <option value="">Status</option>
+                        <option value="Agendado">Agendado</option>
+                        <option value="Presente">Presente</option>
+                        <option value="Cancelado">Cancelado</option>
+                        <option value="Finalizado">Finalizado</option>
+                        </select>
+                    </div>
                     </div>
 
-                    <!-- PESQUISA POR SERVIÇO -->
+                    <!-- Linha 2 -->
                     <div class="col-md-3">
-                        <div class="input-group">
-                            <span class="input-group-text">
-                                <i class="bi bi-briefcase"></i>
-                            </span>
-                            <input
-                                id="service-input"
-                                name="service"
-                                type="text"
-                                class="form-control"
-                                placeholder="Serviço"
-                            />
-                        </div>
+                    <div class="input-group">
+                        <span class="input-group-text"><i class="bi bi-briefcase"></i></span>
+                        <input
+                        id="service-input"
+                        name="service"
+                        type="text"
+                        class="form-control"
+                        placeholder="Serviço"
+                        />
+                    </div>
                     </div>
 
-                    <!-- PESQUISA POR LOCAL -->
-                    <div class="col-md-2">
-                        <div class="input-group">
-                            <span class="input-group-text">
-                                <i class="bi bi-house"></i>
-                            </span>
-                            <input
-                                id="local-input"
-                                name="local"
-                                type="text"
-                                class="form-control"
-                                placeholder="Local"
-                            />
-                        </div>
+                    <div class="col-md-3">
+                    <div class="input-group">
+                        <span class="input-group-text"><i class="bi bi-house"></i></span>
+                        <input
+                        id="local-input"
+                        name="local"
+                        type="text"
+                        class="form-control"
+                        placeholder="Local"
+                        />
+                    </div>
                     </div>
 
-                    <div class="col-md-2">
-                        <button type="submit" class="btn btn-primary w-100">Pesquisar</button>
+                    <div class="col-md-3 d-flex gap-2">
+                    <button type="submit" class="btn btn-primary flex-grow-1">Pesquisar</button>
+                    <button type="button" class="btn btn-outline-secondary flex-grow-1" id="btnClearFilters">Limpar filtros</button>
                     </div>
+
                 </div>
             </form>
 
@@ -337,6 +321,22 @@
         });
     </script>
 
+    <script>
+        document.getElementById('btnClearFilters').addEventListener('click', () => {
+            const form = document.getElementById('search-form');
+
+            // Para cada input do form, limpar o valor
+            form.querySelectorAll('input').forEach(input => {
+                input.value = '';
+            });
+
+            // Para cada select do form, resetar para a opção vazia (ou a primeira)
+            form.querySelectorAll('select').forEach(select => {
+                select.selectedIndex = 0;
+            });
+        });
+    </script>
+
 
     <!-- FLATPICKR PARA MELHORAR VISUALIZAÇÃO DE DIAS E HORÁRIOS -->
     <script>
@@ -345,7 +345,7 @@
             altInput: true,
             altFormat: "d-m-Y",
             locale: "pt",
-            minDate: "today",
+            // minDate: "today",
             allowInput: true,
         });
 

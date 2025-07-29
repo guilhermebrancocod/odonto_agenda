@@ -488,6 +488,25 @@ class AgendamentoController extends Controller
             ->with('success', 'Agendamento atualizado com sucesso!');
     }
 
+    // ATUALIZA STATUS DO AGENDAMENTO
+    public function atualizarStatus(Request $request, $id)
+    {
+        $agendamento = FaesaClinicaAgendamento::find($id);
+
+        if (!$agendamento) {
+            return response()->json(['message' => 'Agendamento não encontrado'], 404);
+        }
+
+        $request->validate([
+            'status' => 'required|in:Agendado,Presente,Cancelado',
+        ]);
+
+        $agendamento->STATUS_AGEND = $request->status;
+        $agendamento->save();
+
+        return response()->json(['message' => 'Status atualizado com sucesso']);
+    }
+
     // FUNÇÃO DE EXCLUSÃO DE AGENDAMENTP
     public function deleteAgendamento(Request $request, $id)
     {

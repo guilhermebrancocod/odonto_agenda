@@ -128,6 +128,8 @@ Route::get('/psicologia/criar-agendamento', function () {
 
 Route::post('/psicologia/criar-agendamento/criar', [AgendamentoController::class, 'criarAgendamento'])->name('criarAgendamento-Psicologia');
 
+Route::put('/psicologia/agendamentos/{id}/status', [AgendamentoController::class, 'atualizarStatus']);
+
 Route::get('/consultar-agendamento', function () {
     return view('psicologia.consultar_agendamento');
 })->name('listagem-agendamentos');

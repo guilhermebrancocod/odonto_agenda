@@ -10,6 +10,8 @@
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700&display=swap" rel="stylesheet" />
     <link href="https://cdnjs.cloudflare.com/ajax/libs/mdb-ui-kit/7.1.0/mdb.min.css" rel="stylesheet" />
 
+    <meta name="csrf-token" content="{{ csrf_token() }}">
+
     {{-- Bootsrap Icons --}}
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
 
@@ -42,11 +44,20 @@
             <p><strong>Paciente:</strong> <span id="modalPaciente"></span></p>
             <p><strong>Data e Horário:</strong> <span id="modalDataHora"></span></p>
             <p><strong>Serviço:</strong> <span id="modalServico"></span></p>
-            <p><strong>Status:</strong> <span id="modalStatus"></span></p>
+            <div class="mb-3">
+            <label for="modalStatusSelect" class="form-label"><strong>Status:</strong></label>
+            <select class="form-select" id="modalStatusSelect">
+                <option value="Agendado">Agendado</option>
+                <option value="Presente">Presente</option>
+                <option value="Cancelado">Cancelado</option>
+                <option value="Finalizado">Finalizado</option>
+            </select>
+            </div>
             <p><strong>Local:</strong> <span id="modalLocal"></span></p>
             <p><strong>Observações:</strong> <span id="modalObservacoes"></span></p>
         </div>
         <div class="modal-footer">
+            <button type="button" class="btn btn-primary" id="btnSalvarStatus">Salvar Status</button>
             <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fechar</button>
         </div>
         </div>
@@ -87,6 +98,12 @@
             select: function (info) {
                 alert("Selecionado de " + info.startStr + " até " + info.endStr);
             },
+            eventDidMount: function(info) {
+                // Aplica a cor de fundo ao evento
+                info.el.style.backgroundColor = info.event.backgroundColor;
+                info.el.style.borderColor = info.event.backgroundColor;
+                info.el.style.color = 'white'; // ou outra cor que fique legível
+            },
             events: '/psicologia/agendamentos-calendar',
 
             eventClick: function(info) {
@@ -99,16 +116,46 @@
                 document.getElementById('modalPaciente').textContent = event.title;
                 document.getElementById('modalDataHora').textContent = dataHoraStr;
                 document.getElementById('modalObservacoes').textContent = event.extendedProps.description || 'Nenhuma observação';
-                document.getElementById('modalStatus').textContent = event.extendedProps.status || 'Sem status';
+                document.getElementById('modalStatusSelect').value = event.extendedProps.status || 'Agendado';
                 document.getElementById('modalLocal').textContent = event.extendedProps.local || 'Não informado';
                 document.getElementById('modalServico').textContent = event.extendedProps.servico || 'Não informado';
 
                 const modal = new bootstrap.Modal(document.getElementById('agendamentoModal'));
+                document.getElementById('btnSalvarStatus').setAttribute('data-event-id', event.id);
                 modal.show();
             }
         });
 
         calendar.render();
+
+        document.getElementById('btnSalvarStatus').addEventListener('click', function () {
+            const eventId = this.getAttribute('data-event-id');
+            const novoStatus = document.getElementById('modalStatusSelect').value;
+
+            fetch(`/psicologia/agendamentos/${eventId}/status`, {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+                },
+                body: JSON.stringify({ status: novoStatus })
+            })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Erro ao atualizar status.');
+                }
+                return response.json();
+            })
+            .then(data => {
+                // Atualiza o evento visualmente (força refetch)
+                calendar.refetchEvents();
+                bootstrap.Modal.getInstance(document.getElementById('agendamentoModal')).hide();
+            })
+            .catch(error => {
+                alert('Erro: ' + error.message);
+            });
+        });
+
     });
 </script>
 

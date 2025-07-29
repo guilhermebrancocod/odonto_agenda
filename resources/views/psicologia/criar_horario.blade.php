@@ -596,7 +596,7 @@
     flatpickr("#edit-data-horario-inicial", {
         altFormat: "d-m-Y",
         locale: "pt",
-        minDate: "today",
+        // minDate: "today",
         allowInput: true,
     });
 

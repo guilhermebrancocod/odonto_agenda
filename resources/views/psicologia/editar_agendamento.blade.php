@@ -115,6 +115,7 @@
                         <select id="status" name="status" class="form-select @error('status') is-invalid @enderror" required>
                             <option value="Agendado" {{ old('status', $agendamento->STATUS_AGEND) == 'Agendado' ? 'selected' : '' }}>Agendado</option>
                             <option value="Em atendimento" {{ old('status', $agendamento->STATUS_AGEND) == 'Em atendimento' ? 'selected' : '' }}>Em atendimento</option>
+                            <option value="Cancelado" {{ old('status', $agendamento->STATUS_AGEND) == 'Cancelado' ? 'selected' : '' }}>Cancelado</option>
                             <option value="Finalizado" {{ old('status', $agendamento->STATUS_AGEND) == 'Finalizado' ? 'selected' : '' }}>Finalizado</option>
                         </select>
                         @error('status')
