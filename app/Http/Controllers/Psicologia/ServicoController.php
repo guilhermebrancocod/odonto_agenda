@@ -89,6 +89,16 @@ class ServicoController extends Controller
         return response()->json($servicos);
     }
 
+    public function getServicoByName(string|null $request)
+    {
+        if ($request == null){
+            return '';
+        }
+
+        $servico = FaesaClinicaServico::where('SERVICO_CLINICA_DESC', $request)->first();
+        return $servico->ID_SERVICO_CLINICA;
+    }
+
     public function getServicoById($id)
     {
         $servico = FaesaClinicaServico::find($id);

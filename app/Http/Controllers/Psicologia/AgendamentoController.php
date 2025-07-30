@@ -145,7 +145,9 @@ class AgendamentoController extends Controller
 
     // CRIAR AGENDAMENTO
     public function criarAgendamento(Request $request)
-    {
+    {   
+
+
         $idClinica = 1;
 
         if ($request->has('valor_agend')) {
@@ -153,6 +155,17 @@ class AgendamentoController extends Controller
                 'valor_agend' => str_replace(',', '.', $request->valor_agend),
             ]);
         }
+
+        $servico = $request->servico;
+        $servicoController = new ServicoController;
+        if ($request->id_servico == null){
+            $servicoId = $servicoController->getServicoByName($servico);
+            $request->merge([
+                'id_servico' => $servicoId,
+            ]);
+        }
+
+
 
         $request->validate([
             'paciente_id' => 'required|integer',
