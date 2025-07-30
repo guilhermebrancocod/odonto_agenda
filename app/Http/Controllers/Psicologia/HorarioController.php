@@ -27,6 +27,7 @@ class HorarioController extends Controller
             'TIPO_HORARIO.required' => 'O tipo de horário é obrigatório.',
             'DATA_HORARIO_INICIAL.required' => 'A data inicial do horário é obrigatória.',
             'DATA_HORARIO_FINAL.required' => 'A data final do horário é obrigatória.',
+            'DATA_HORARIO_FINAL.date_format' => 'O Horário Final deve ser informado seguindo o formato Hora:min',
             'DATA_HORARIO_FINAL.after_or_equal' => 'A data final deve ser igual ou posterior à data inicial.',
             'HR_HORARIO_INICIAL.required' => 'A hora inicial do horário é obrigatória.',
             'HR_HORARIO_FINAL.required' => 'A hora final do horário é obrigatória.',

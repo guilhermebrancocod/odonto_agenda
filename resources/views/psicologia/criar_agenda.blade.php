@@ -16,18 +16,19 @@
     <style>
         html, body { height: 100%; margin: 0; }
         #content-wrapper {
-            height: calc(100vh - 56px);
-            overflow-y: auto;
-            padding: 16px;
+            width: 80vw;
+            height: 90vh;
+            margin: auto;
             display: flex;
-            justify-content: center;
-            align-items: flex-start;
+            gap: 24px;
+            overflow: hidden;
+            align-items: stretch;
         }
         #servicos-list button {
             cursor: pointer;
         }
 
-         #recorrenciaCampos.show {
+        #recorrenciaCampos.show {
             display: flex !important;
             animation: fadeInSlide 0.3s ease-in-out;
         }

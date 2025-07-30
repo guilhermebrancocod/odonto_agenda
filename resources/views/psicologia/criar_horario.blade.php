@@ -594,6 +594,7 @@
 <!-- FLATPICKR -->
 <script>
     flatpickr("#edit-data-horario-inicial", {
+        dateFormat: "Y-m-d",
         altFormat: "d-m-Y",
         locale: "pt",
         // minDate: "today",
@@ -641,6 +642,22 @@
         minDate: "today",
         allowInput: true,
     });
+
+    flatpickr("#HR_HORARIO_INICIAL", {
+        enableTime: true,
+        noCalendar: true,
+        dateFormat: "H:i",
+        time_24hr: true,
+        allowInput: true,
+    })
+
+    flatpickr("#HR_HORARIO_FINAL", {
+        enableTime: true,
+        noCalendar: true,
+        dateFormat: "H:i",
+        time_24hr: true,
+        allowInput: true,
+    })
 
 </script>
 
