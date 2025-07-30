@@ -1,7 +1,3 @@
-import { createNavBar } from './navbar.js';
-import { Modal } from 'https://cdnjs.cloudflare.com/ajax/libs/mdb-ui-kit/7.1.0/mdb.es.min.js';
-
-
 function carregarTodosBox() {
     const $select = $('#selectBoxes');
     const $tbody = $('#table-box tbody');
@@ -135,6 +131,3 @@ addPatient.addEventListener('click', function (event) {
     window.location.href = '/odontologia/criarbox';
 });
 
-const navbarContainer = document.getElementById('navbar-container');
-const navbar = createNavBar();
-navbarContainer.appendChild(navbar);

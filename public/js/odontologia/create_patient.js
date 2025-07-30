@@ -1,5 +1,3 @@
-import { createNavBar } from './navbar.js';
-
 $('.datepicker').datepicker({
     format: 'dd/mm/yyyy',
     language: 'pt-BR',
@@ -23,9 +21,7 @@ $(document).ready(function(){
     $('#dt_nasc').mask('00/00/0000');
 });
 
-const navbarContainer = document.getElementById('navbar-container');
-const navbar = createNavBar();
-navbarContainer.appendChild(navbar);
+
 
 document.getElementById('cep').addEventListener('blur', async function () {
     const cep = this.value.replace(/\D/g, '');

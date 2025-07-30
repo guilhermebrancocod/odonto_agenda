@@ -70,7 +70,7 @@
     font-size: 16px;
 }
 
-.logout-link {
+#logout {
     margin-top: auto;
     margin-bottom: 30px;
     padding: 12px 24px;
@@ -86,7 +86,7 @@
     transition: background 0.3s;
 }
 
-.logout-link:hover {
+#logout:hover {
     background-color: #c0392b;
 }
 

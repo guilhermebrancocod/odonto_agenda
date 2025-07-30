@@ -5,7 +5,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Consultar Disciplinas por Box</title>
-    <link rel="icon" type="img/png" href="faesa_favicon.png">
+    <link rel="icon" type="image/png" href="/img/faesa_favicon.png">
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700&display=swap" rel="stylesheet">
 
     <link href="https://cdnjs.cloudflare.com/ajax/libs/mdb-ui-kit/7.1.0/mdb.min.css" rel="stylesheet" />
@@ -14,7 +14,7 @@
 </head>
 
 <body>
-    <div id="navbar-container"></div>
+    @include('components.sidebar')
     <div style="margin-left:220px; padding: 30px; border-radius: 10px; background-color: #fff; box-shadow: 0 4px 12px rgba(0,0,0,0.05);width: 100%;">
         <fieldset class="border p-3 rounded mb-3">
             <legend class="w-auto px-2">Buscando disciplinas por box</legend>
