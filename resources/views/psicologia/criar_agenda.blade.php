@@ -158,7 +158,7 @@
                     </div>
 
                     <!-- LISTA DE PACIENTES ENCONTRADOS PARA AGENDAMENTO -->
-                    <div id="pacientes-list" class="list-group position-absolute w-100" style="z-index: 1000;"></div>
+                    <div id="pacientes-list" class="list-group position-absolute mw-100" style="z-index: 1000;"></div>
                 </div>
 
                 <!-- SUBTÍTULO -->
