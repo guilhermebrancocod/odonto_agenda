@@ -16,14 +16,13 @@
     <style>
         html, body { height: 100%; margin: 0; }
         #content-wrapper {
-            height: calc(100vh - 56px);
+            width: 85vw;
+            height: 97vh;
+            margin: auto;
+            display: column;
+            gap: 24px;
             overflow-y: auto;
-            padding: 16px;
-            display: flex;
-            flex-direction: column;
             align-items: stretch;
-            width: 100%;
-            background-color: #f8f9fa;
         }
         .modal-body { max-height: 60vh; overflow-y: auto; }
         /* Espaçamento para o container do limit select */
@@ -42,6 +41,15 @@
         }
         .flatpickr-calendar-arrow {
             display: none !important;
+        }
+        main {
+            background-color: #ffffff;
+            padding: 24px;
+            border-radius: 10px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+            flex-direction: column;
+            overflow-y: auto;
+            border: 1.8px solid #dee2e6;
         }
     </style>
 </head>
@@ -70,153 +78,160 @@
             </div>
         @endif
 
-        <div class="bg-white p-4 rounded shadow-sm w-100">
+            <main>
 
-            <!-- TITULO DA PÁGINA -->
-            <h2 class="mb-4 text-center">Consultar Agendamento</h2>
+                <div class="bg-white p-4 rounded shadow-sm w-100">
 
-            <!-- CAMPOS DE PESQUISA - FILTRO -->
-            <form id="search-form" class="w-100 mb-4">
-                <div class="row g-3">
-
-                    <!-- Linha 1 -->
-                    <div class="col-md-4">
-                    <div class="input-group">
-                        <span class="input-group-text"><i class="bi bi-person"></i></span>
-                        <input
-                        id="search-input"
-                        name="search"
-                        type="search"
-                        class="form-control"
-                        placeholder="Nome ou CPF do paciente"
-                        />
-                    </div>
+                    <!-- TÍTULO -->
+                    <div class="text-center mb-5">
+                        <h2 class="fs-4 mb-0">Agendamentos</h2>
                     </div>
 
-                    <div class="col-md-2">
-                    <div class="input-group">
-                        <span class="input-group-text"><i class="bi bi-calendar"></i></span>
-                        <input
-                        id="date-input"
-                        name="date"
-                        type="date"
-                        class="form-control"
-                        placeholder="Data"
-                        />
-                    </div>
-                    </div>
+                    <!-- CAMPOS DE PESQUISA - FILTRO -->
+                    <form id="search-form" class="w-100 mb-4">
+                        <div class="row g-3">
 
-                    <div class="col-md-2">
-                    <div class="input-group">
-                        <span class="input-group-text"><i class="bi bi-clock"></i></span>
-                        <input
-                        id="start-time-input"
-                        name="start_time"
-                        type="time"
-                        class="form-control"
-                        placeholder="Hora Início"
-                        />
-                    </div>
-                    </div>
+                            <!-- Linha 1 -->
+                            <div class="col-12 col-sm-6 col-md-4">
+                                <div class="input-group">
+                                    <span class="input-group-text"><i class="bi bi-person"></i></span>
+                                    <input
+                                        id="search-input"
+                                        name="search"
+                                        type="search"
+                                        class="form-control"
+                                        placeholder="Nome ou CPF do paciente"
+                                    />
+                                </div>
+                            </div>
 
-                    <div class="col-md-2">
-                    <div class="input-group">
-                        <span class="input-group-text"><i class="bi bi-clock"></i></span>
-                        <input
-                        id="end-time-input"
-                        name="end_time"
-                        type="time"
-                        class="form-control"
-                        placeholder="Hora Fim"
-                        />
-                    </div>
-                    </div>
+                            <div class="col-12 col-sm-6 col-md-4">
+                            <div class="input-group">
+                                <span class="input-group-text"><i class="bi bi-calendar"></i></span>
+                                <input
+                                id="date-input"
+                                name="date"
+                                type="date"
+                                class="form-control"
+                                placeholder="Data"
+                                />
+                            </div>
+                            </div>
 
-                    <div class="col-md-2">
-                    <div class="input-group">
-                        <span class="input-group-text"><i class="bi bi-list-check"></i></span>
-                        <select id="status-input" name="status" class="form-select">
-                        <option value="">Status</option>
-                        <option value="Agendado">Agendado</option>
-                        <option value="Presente">Presente</option>
-                        <option value="Cancelado">Cancelado</option>
-                        <option value="Finalizado">Finalizado</option>
-                        </select>
-                    </div>
-                    </div>
+                            <div class="col-12 col-sm-6 col-md-4">
+                            <div class="input-group">
+                                <span class="input-group-text"><i class="bi bi-clock"></i></span>
+                                <input
+                                id="start-time-input"
+                                name="start_time"
+                                type="time"
+                                class="form-control"
+                                placeholder="Hora Início"
+                                />
+                            </div>
+                            </div>
 
-                    <!-- Linha 2 -->
-                    <div class="col-md-3">
-                    <div class="input-group">
-                        <span class="input-group-text"><i class="bi bi-briefcase"></i></span>
-                        <input
-                        id="service-input"
-                        name="service"
-                        type="text"
-                        class="form-control"
-                        placeholder="Serviço"
-                        />
-                    </div>
-                    </div>
+                            <div class="col-12 col-sm-6 col-md-4">
+                            <div class="input-group">
+                                <span class="input-group-text"><i class="bi bi-clock"></i></span>
+                                <input
+                                id="end-time-input"
+                                name="end_time"
+                                type="time"
+                                class="form-control"
+                                placeholder="Hora Fim"
+                                />
+                            </div>
+                            </div>
 
-                    <div class="col-md-3">
-                    <div class="input-group">
-                        <span class="input-group-text"><i class="bi bi-house"></i></span>
-                        <input
-                        id="local-input"
-                        name="local"
-                        type="text"
-                        class="form-control"
-                        placeholder="Local"
-                        />
-                    </div>
-                    </div>
+                            <div class="col-12 col-sm-6 col-md-4">
+                            <div class="input-group">
+                                <span class="input-group-text"><i class="bi bi-list-check"></i></span>
+                                <select id="status-input" name="status" class="form-select">
+                                <option value="">Status</option>
+                                <option value="Agendado">Agendado</option>
+                                <option value="Presente">Presente</option>
+                                <option value="Cancelado">Cancelado</option>
+                                <option value="Finalizado">Finalizado</option>
+                                </select>
+                            </div>
+                            </div>
 
-                    <div class="col-md-3 d-flex gap-2">
-                    <button type="submit" class="btn btn-primary flex-grow-1">Pesquisar</button>
-                    <button type="button" class="btn btn-outline-secondary flex-grow-1" id="btnClearFilters">Limpar filtros</button>
-                    </div>
+                            <!-- Linha 2 -->
+                            <div class="col-12 col-sm-6 col-md-4">
+                            <div class="input-group">
+                                <span class="input-group-text"><i class="bi bi-briefcase"></i></span>
+                                <input
+                                id="service-input"
+                                name="service"
+                                type="text"
+                                class="form-control"
+                                placeholder="Serviço"
+                                />
+                            </div>
+                            </div>
 
+                            <div class="col-12 col-sm-6 col-md-4">
+                            <div class="input-group">
+                                <span class="input-group-text"><i class="bi bi-house"></i></span>
+                                <input
+                                id="local-input"
+                                name="local"
+                                type="text"
+                                class="form-control"
+                                placeholder="Local"
+                                />
+                            </div>
+                            </div>
+
+                            <div class="col-12 col-sm-6 col-md-4 d-flex gap-2">
+                                <button type="submit" class="btn btn-primary flex-grow-1">Pesquisar</button>
+                                <button type="button" class="btn btn-outline-secondary flex-grow-1" id="btnClearFilters">Limpar filtros</button>
+                                </div>
+
+                        </div>
+                    </form>
+
+                    <div class="w-100">
+                        <h5 class="mb-3">Resultados</h5>
+                        <div class="table-responsive" style="max-height: 500px; overflow-y: auto;">
+                            <table class="table table-hover table-bordered align-middle">
+                                <thead class="table-light" style="position: sticky; top: 0; background-color: white; z-index: 10;">
+                                    <tr>
+                                        <th>Paciente</th>
+                                        <th>Serviço</th>
+                                        <th>Data</th>
+                                        <th>Hora Início</th>
+                                        <th>Hora Fim</th>
+                                        <th>Local</th>
+                                        <th>Status</th>
+                                        <th>Ações</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="agendamentos-tbody">
+                                    <tr>
+                                        <td colspan="8" class="text-center">Nenhuma pesquisa realizada ainda.</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+
+                        <!-- Seletor de limite de registros abaixo da tabela -->
+                        <div id="limit-container">
+                            <label for="limit-select">Mostrar:</label>
+                            <select id="limit-select" class="form-select" style="width: auto;">
+                                <option value="5">5</option>
+                                <option value="10" selected>10</option>
+                                <option value="20">20</option>
+                                <option value="50">50</option>
+                                <option value="100">100</option>
+                            </select>
+                        </div>
+                    </div>
                 </div>
-            </form>
 
-            <div class="w-100">
-                <h5 class="mb-3">Resultados</h5>
-                <div class="table-responsive" style="max-height: 500px; overflow-y: auto;">
-                    <table class="table table-hover table-bordered align-middle">
-                        <thead class="table-light" style="position: sticky; top: 0; background-color: white; z-index: 10;">
-                            <tr>
-                                <th>Paciente</th>
-                                <th>Serviço</th>
-                                <th>Data</th>
-                                <th>Hora Início</th>
-                                <th>Hora Fim</th>
-                                <th>Local</th>
-                                <th>Status</th>
-                                <th>Ações</th>
-                            </tr>
-                        </thead>
-                        <tbody id="agendamentos-tbody">
-                            <tr>
-                                <td colspan="8" class="text-center">Nenhuma pesquisa realizada ainda.</td>
-                            </tr>
-                        </tbody>
-                    </table>
-                </div>
+            </main>
 
-                <!-- Seletor de limite de registros abaixo da tabela -->
-                <div id="limit-container">
-                    <label for="limit-select">Mostrar:</label>
-                    <select id="limit-select" class="form-select" style="width: auto;">
-                        <option value="5">5</option>
-                        <option value="10" selected>10</option>
-                        <option value="20">20</option>
-                        <option value="50">50</option>
-                        <option value="100">100</option>
-                    </select>
-                </div>
-            </div>
-        </div>
     </div>
 
     <!-- Scripts -->

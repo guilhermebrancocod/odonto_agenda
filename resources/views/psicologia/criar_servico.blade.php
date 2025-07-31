@@ -21,11 +21,15 @@
             width: 80vw;
             height: 90vh;
             margin: auto;
+            margin-top: 10px;
+            margin-bottom: 10px;
             display: flex;
-            gap: 24px;
+            gap: 12px;
             overflow: hidden;
             align-items: stretch;
+            flex-direction: row; /* mantém lado a lado em telas grandes */
         }
+
         main {
             background-color: #ffffff;
             padding: 24px;
@@ -36,6 +40,18 @@
             flex-direction: column;
             overflow: hidden;
             border: 1.8px solid #dee2e6;
+        }
+
+        /* Para telas menores que 992px */
+        @media (max-width: 991.98px) {
+            #content-wrapper {
+                flex-direction: column; /* empilha os main */
+            }
+
+            main {
+                width: 100%; /* ocupa toda a largura */
+                height: calc(50% - 12px); /* divide igualmente a altura considerando o gap */
+            }
         }
         form {
             flex-grow: 1;

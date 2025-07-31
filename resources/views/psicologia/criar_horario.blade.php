@@ -20,15 +20,20 @@
             font-family: "Montserrat", sans-serif;
             background-color: #f8f9fa;
         }
+        /* Estilo padrão (largura maior ou igual a 992px) */
         #content-wrapper {
             width: 80vw;
             height: 90vh;
             margin: auto;
+            margin-top: 10px;
+            margin-bottom: 10px;
             display: flex;
-            gap: 24px;
+            gap: 12px;
             overflow: hidden;
             align-items: stretch;
+            flex-direction: row; /* mantém lado a lado em telas grandes */
         }
+
         main {
             background-color: #ffffff;
             padding: 24px;
@@ -39,6 +44,18 @@
             flex-direction: column;
             overflow: hidden;
             border: 1.8px solid #dee2e6;
+        }
+
+        /* Para telas menores que 992px */
+        @media (max-width: 991.98px) {
+            #content-wrapper {
+                flex-direction: column; /* empilha os main */
+            }
+
+            main {
+                width: 100%; /* ocupa toda a largura */
+                height: calc(50% - 12px); /* divide igualmente a altura considerando o gap */
+            }
         }
         form {
             flex-grow: 1;
@@ -234,7 +251,7 @@
     </main>
 
     <!-- LISTAGEM DE HORÁRIOS  -->
-    <main style="overflow-y:auto; max-height: 90vh;">
+    <main style="">
 
         <!-- TITULO LISTAGEM DE HORARIOS -->
         <h2 class="text-center mb-4">Consulta e Edição de Horários</h2>
@@ -602,7 +619,7 @@
     });
 
     flatpickr("#edit-data-horario-final", {
-        dateFormat: "Y-m-d",
+        dateFormat: "d-m-Y",
         altFormat: "d-m-Y",
         locale: "pt",
         minDate: "today",

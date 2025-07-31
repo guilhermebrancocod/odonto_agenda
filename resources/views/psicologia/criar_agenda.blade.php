@@ -16,12 +16,12 @@
     <style>
         html, body { height: 100%; margin: 0; }
         #content-wrapper {
-            width: 80vw;
-            height: 90vh;
+            width: 85vw;
+            height: 97vh;
             margin: auto;
-            display: flex;
+            display: column;
             gap: 24px;
-            overflow: hidden;
+            overflow-y: auto;
             align-items: stretch;
         }
         #servicos-list button {
@@ -93,6 +93,21 @@
     #info-observacao:hover {
         color: #0a58ca;
     }
+    main {
+        background-color: #ffffff;
+        padding: 24px;
+        border-radius: 10px;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+        flex-direction: column;
+        overflow-y: auto;
+        border: 1.8px solid #dee2e6;
+    }
+
+    .list-local-option {
+        max-width: 350px;
+        max-height: 50px;
+        overflow-y: auto;
+    }
     </style>
 </head>
 <body>
@@ -118,181 +133,184 @@
 @endif
 
 <div id="content-wrapper" class="bg-light">
-    <div class="bg-white p-4 rounded shadow-sm w-80 w-md-75 w-lg-50">
+    <main>
+        <div class="bg-white p-4 rounded shadow-sm w-80 w-md-75 w-lg-50">
 
-        <!-- TÍTULO -->
-        <div class="text-center mb-3">
-            <h2 class="fs-4 mb-0">Agendamento</h2>
-        </div>
-
-
-        <!-- FORM DE AGENDAMENTO -->
-        <form action="{{ route('criarAgendamento-Psicologia') }}" method="POST" id="agendamento-form" class="w-100">
-            @csrf
-
-            <input type="hidden" name="paciente_id" id="paciente_id" value="{{ old('paciente_id') }}"/>
-            <input type="hidden" name="id_servico" id="id_servico" />
-            <input type="hidden" name="recorrencia" id="recorrencia" />
-            <input type="hidden" name="status_agend" value="Em aberto" />
-
-            <div class="mb-3">
-                <div class="input-group">
-                    <input id="search-input" name="search" class="form-control" placeholder="Pesquisar paciente" value="{{ old('search') }}">
-                </div>
-
-                <!-- LISTA DE PACIENTES ENCONTRADOS PARA AGENDAMENTO -->
-                <div id="pacientes-list" class="list-group position-absolute w-100" style="z-index: 1000;"></div>
+            <!-- TÍTULO -->
+            <div class="text-center mb-5">
+                <h2 class="fs-4 mb-0">Criação de Agendamento</h2>
             </div>
 
-            <!-- SUBTÍTULO -->
-            <div class="mb-2">
-                <h5 class="mb-0">Horário</h5>
-                <hr class="mt-1">
-            </div>
 
-            <div class="row g-2">
+            <!-- FORM DE AGENDAMENTO -->
+            <form action="{{ route('criarAgendamento-Psicologia') }}" method="POST" id="agendamento-form" class="w-100">
+                @csrf
 
-                <!-- CHECKBOX TEM RECORRÊNCIA E SELETOR DE DURAÇÃO -->
-                <div class="col-12 mb-2">
-                    <div class="form-check form-switch d-flex align-items-center gap-3">
-                        <input class="form-check-input" type="checkbox" value="1" id="temRecorrencia" name="tem_recorrencia">
-                        <label class="form-check-label fw-semibold mb-0" for="temRecorrencia">
-                            <i class="fas fa-redo-alt me-1 text-primary"></i> Ativar recorrência
-                            <span id="recorrenciaBadge" class="badge bg-success ms-2 d-none">Ativa</span>
-                        </label>
+                <!-- VALORES PASSADOS NO FORMATO HIDDEN | USUÁRIO NÃO SELECIONA DIRETAMENTE -->
+                <input type="hidden" name="paciente_id" id="paciente_id" value="{{ old('paciente_id') }}"/>
+                <input type="hidden" name="id_servico" id="id_servico" value="{{ old('id_servico') }}" />
+                <input type="hidden" name="recorrencia" id="recorrencia"/>
+                <input type="hidden" name="status_agend" value="Em aberto"/>
 
-                        <div id="duracaoMesesContainer" style="display:none; min-width: 150px;">
-                            <label for="duracao_meses_recorrencia" class="form-label mb-0">Duração (meses)</label>
-                            <select id="duracao_meses_recorrencia" name="duracao_meses_recorrencia" class="form-select form-select-sm" aria-label="Duração da recorrência em meses">
-                                <option value="" selected>Selecione</option>
-                                <option value="1">1 mês</option>
-                                <option value="2">2 meses</option>
-                                <option value="3">3 meses</option>
-                                <option value="4">4 meses</option>
-                                <option value="5">5 meses</option>
-                                <option value="6">6 meses</option>
-                                <option value="7">7 meses</option>
-                                <option value="8">8 meses</option>
-                                <option value="9">9 meses</option>
-                                <option value="10">10 meses</option>
-                                <option value="11">11 meses</option>
-                                <option value="12">12 meses</option>
-                            </select>
-                        </div>
+                <div class="mb-3">
+                    <div class="input-group">
+                        <input id="search-input" name="search" class="form-control" placeholder="Pesquisar paciente" value="{{ old('search') }}">
                     </div>
+
+                    <!-- LISTA DE PACIENTES ENCONTRADOS PARA AGENDAMENTO -->
+                    <div id="pacientes-list" class="list-group position-absolute w-100" style="z-index: 1000;"></div>
                 </div>
 
-                <!-- SERVIÇO -->
-                <div class="col-sm-6 col-md-3 position-relative" style="position: relative;">
-                    <label for="servico" class="form-label">
-                        Serviço
-                        <span id="info-observacao">
-                            <i class="fas fa-info-circle"></i>
-                        </span>
-                    </label>
-                    <input type="text" id="servico" name="servico" class="form-control" autocomplete="off" value="{{ old('servico') }}">
-                    
-                    <div id="servicos-list" class="list-group position-absolute w-100" style="z-index: 1000;"></div>
+                <!-- SUBTÍTULO -->
+                <div class="mb-2">
+                    <h5 class="mb-0">Horário</h5>
+                    <hr class="mt-1">
                 </div>
 
-                <!-- DIA -->
-                <div class="col-sm-6 col-md-3">
-                    <label for="data" class="form-label">Dia</label>
-                    <input type="date" id="data" name="dia_agend" class="form-control" value="{{ old('dia_agend') }}">
-                </div>
+                <div class="row g-2">
 
-                <!-- HORÁRIO INÍCIO -->
-                <div class="col-sm-6 col-md-3">
-                    <label for="hr_ini" class="form-label">Horário Início</label>
-                    <input type="time" id="hr_ini" name="hr_ini" class="form-control" value="{{ old('hr_ini') }}">
-                </div>
+                    <!-- CHECKBOX TEM RECORRÊNCIA E SELETOR DE DURAÇÃO -->
+                    <div class="col-12 mb-2">
+                        <div class="form-check form-switch d-flex align-items-center gap-3">
+                            <input class="form-check-input" type="checkbox" value="1" id="temRecorrencia" name="tem_recorrencia">
+                            <label class="form-check-label fw-semibold mb-0" for="temRecorrencia">
+                                <i class="fas fa-redo-alt me-1 text-primary"></i> Ativar recorrência
+                                <span id="recorrenciaBadge" class="badge bg-success ms-2 d-none">Ativa</span>
+                            </label>
 
-                <!-- HORÁRIO FIM -->
-                <div class="col-sm-6 col-md-3">
-                    <label for="hr_fim" class="form-label">Horário Fim</label>
-                    <input type="time" id="hr_fim" name="hr_fim" class="form-control" value="{{ old('hr_fim') }}">
-                </div>
-
-                <!-- CAMPOS DE RECORRÊNCIA -->
-                <div id="recorrenciaCampos" class="col-12 mt-2 d-none">
-                    <div class="card border-primary">
-                        <div class="card-body">
-
-                            <!-- TÍTULO DA CONFIGURAÇÃO DE RECORRÊNCIA -->
-                            <h6 class="card-title text-primary mb-3">
-                                <i class="fas fa-calendar-alt me-1"></i> Configuração de Recorrência
-                            </h6>
-
-
-                            <div class="row g-2">
-                                <!-- DIAS DA SEMANA (NOVA SELEÇÃO) -->
-                                <div class="col-md-8">
-                                    <label class="form-label">Dias da Semana</label>
-                                    <div id="diasSemanaBtns" class="d-flex flex-wrap gap-2">
-                                        <button type="button" class="btn btn-outline-primary btn-sm" data-dia="0">Dom</button>
-                                        <button type="button" class="btn btn-outline-primary btn-sm" data-dia="1">Seg</button>
-                                        <button type="button" class="btn btn-outline-primary btn-sm" data-dia="2">Ter</button>
-                                        <button type="button" class="btn btn-outline-primary btn-sm" data-dia="3">Qua</button>
-                                        <button type="button" class="btn btn-outline-primary btn-sm" data-dia="4">Qui</button>
-                                        <button type="button" class="btn btn-outline-primary btn-sm" data-dia="5">Sex</button>
-                                        <button type="button" class="btn btn-outline-primary btn-sm" data-dia="6">Sáb</button>
-                                    </div>
-                                    <small class="text-muted">Clique nos dias desejados para selecionar.</small>
-                                </div>
-
-                                
-                                <!-- DATA FIM DA RECORRÊNCIA -->
-                                <div class="col-md-4">
-                                    <label for="data_fim_recorrencia" class="form-label">Data Fim</label>
-                                    <input type="date" id="data_fim_recorrencia" name="data_fim_recorrencia" class="form-control">
-                                </div>
-
-
+                            <div id="duracaoMesesContainer" style="display:none; min-width: 150px;">
+                                <label for="duracao_meses_recorrencia" class="form-label mb-0">Duração (meses)</label>
+                                <select id="duracao_meses_recorrencia" name="duracao_meses_recorrencia" class="form-select form-select-sm" aria-label="Duração da recorrência em meses">
+                                    <option value="" selected>Selecione</option>
+                                    <option value="1">1 mês</option>
+                                    <option value="2">2 meses</option>
+                                    <option value="3">3 meses</option>
+                                    <option value="4">4 meses</option>
+                                    <option value="5">5 meses</option>
+                                    <option value="6">6 meses</option>
+                                    <option value="7">7 meses</option>
+                                    <option value="8">8 meses</option>
+                                    <option value="9">9 meses</option>
+                                    <option value="10">10 meses</option>
+                                    <option value="11">11 meses</option>
+                                    <option value="12">12 meses</option>
+                                </select>
                             </div>
                         </div>
                     </div>
-                </div>
 
-                <!-- Mensagem que aparece quando ativa recorrência -->
-                <div id="msg-recorrencia" class="alert alert-info mt-2 d-none">
-                    Caso não selecione dia da semana e/ou data fim, serão gerados agendamentos por 1 mês por padrão.
-                </div>
+                    <!-- SERVIÇO -->
+                    <div class="col-sm-6 col-md-3 position-relative" style="position: relative;">
+                        <label for="servico" class="form-label">
+                            Serviço
+                            <span id="info-observacao">
+                                <i class="fas fa-info-circle"></i>
+                            </span>
+                        </label>
+                        <input type="text" id="servico" name="servico" class="form-control" autocomplete="off" value="{{ old('servico') }}">
+                        
+                        <div id="servicos-list" class="list-group position-absolute w-100" style="z-index: 1000;"></div>
+                    </div>
+
+                    <!-- DIA -->
+                    <div class="col-sm-6 col-md-3">
+                        <label for="data" class="form-label">Dia</label>
+                        <input type="date" id="data" name="dia_agend" class="form-control" value="{{ old('dia_agend') }}">
+                    </div>
+
+                    <!-- HORÁRIO INÍCIO -->
+                    <div class="col-sm-6 col-md-3">
+                        <label for="hr_ini" class="form-label">Horário Início</label>
+                        <input type="time" id="hr_ini" name="hr_ini" class="form-control" value="{{ old('hr_ini') }}">
+                    </div>
+
+                    <!-- HORÁRIO FIM -->
+                    <div class="col-sm-6 col-md-3">
+                        <label for="hr_fim" class="form-label">Horário Fim</label>
+                        <input type="time" id="hr_fim" name="hr_fim" class="form-control" value="{{ old('hr_fim') }}">
+                    </div>
+
+                    <!-- CAMPOS DE RECORRÊNCIA -->
+                    <div id="recorrenciaCampos" class="col-12 mt-2 d-none">
+                        <div class="card border-primary">
+                            <div class="card-body">
+
+                                <!-- TÍTULO DA CONFIGURAÇÃO DE RECORRÊNCIA -->
+                                <h6 class="card-title text-primary mb-3">
+                                    <i class="fas fa-calendar-alt me-1"></i> Configuração de Recorrência
+                                </h6>
 
 
-                    <!-- VALOR -->
-                    <div class="col-sm-6 col-md-3 mt-2">
-                        <label for="valor_agend" class="form-label">Valor</label>
-                        <div class="input-group">
-                            <span class="input-group-text">R$</span>
-                            <input type="text" name="valor_agend" id="valor_agend" class="form-control" placeholder="0,00" value="{{ old('valor_agend') }}">
+                                <div class="row g-2">
+                                    <!-- DIAS DA SEMANA (NOVA SELEÇÃO) -->
+                                    <div class="col-md-8">
+                                        <label class="form-label">Dias da Semana</label>
+                                        <div id="diasSemanaBtns" class="d-flex flex-wrap gap-2">
+                                            <button type="button" class="btn btn-outline-primary btn-sm" data-dia="0">Dom</button>
+                                            <button type="button" class="btn btn-outline-primary btn-sm" data-dia="1">Seg</button>
+                                            <button type="button" class="btn btn-outline-primary btn-sm" data-dia="2">Ter</button>
+                                            <button type="button" class="btn btn-outline-primary btn-sm" data-dia="3">Qua</button>
+                                            <button type="button" class="btn btn-outline-primary btn-sm" data-dia="4">Qui</button>
+                                            <button type="button" class="btn btn-outline-primary btn-sm" data-dia="5">Sex</button>
+                                            <button type="button" class="btn btn-outline-primary btn-sm" data-dia="6">Sáb</button>
+                                        </div>
+                                        <small class="text-muted">Clique nos dias desejados para selecionar.</small>
+                                    </div>
+
+                                    
+                                    <!-- DATA FIM DA RECORRÊNCIA -->
+                                    <div class="col-md-4">
+                                        <label for="data_fim_recorrencia" class="form-label">Data Fim</label>
+                                        <input type="date" id="data_fim_recorrencia" name="data_fim_recorrencia" class="form-control">
+                                    </div>
+
+
+                                </div>
+                            </div>
                         </div>
                     </div>
 
-                    <!-- LOCAL -->
-                    <input type="hidden" name="id_sala_clinica" id="id_sala_clinica">
-                    <div class="col-sm-6 col-md-3 mt-2">
-                        <label for="local_agend" class="form-label">Local</label>
-                        <input type="text" name="local_agend" id="local_agend" class="form-control" placeholder="Local do atendimento" value="{{ old('local_agend') }}" autocomplete="off">
-
-                        <div id="local-list" class="list-group position-absolute w-100" style="z-index: 1000;"></div>
+                    <!-- Mensagem que aparece quando ativa recorrência -->
+                    <div id="msg-recorrencia" class="alert alert-info mt-2 d-none">
+                        Caso não selecione dia da semana e/ou data fim, serão gerados agendamentos por 1 mês por padrão.
                     </div>
-                    
-                <!-- OBSERVAÇÕES -->
-                <div class="col-12 mt-2">
-                    <label for="observacoes" class="form-label">Observações</label>
-                    <textarea name="observacoes" id="observacoes" class="form-control" placeholder="Observações..." rows="3">{{ old('observacoes') }}</textarea>
-                </div>
 
-                <!-- BOTÃO SUBMIT -->
-                <div class="col-12 text-end mt-3">
-                    <button type="submit" class="btn btn-success">
-                        <i class="fas fa-check-circle me-1"></i> Agendar
-                    </button>
-                </div>
 
-            </div>
-        </form>
-    </div>
+                        <!-- VALOR -->
+                        <div class="col-sm-6 col-md-3 mt-2">
+                            <label for="valor_agend" class="form-label">Valor</label>
+                            <div class="input-group">
+                                <span class="input-group-text">R$</span>
+                                <input type="text" name="valor_agend" id="valor_agend" class="form-control" placeholder="0,00" value="{{ old('valor_agend') }}">
+                            </div>
+                        </div>
+
+                        <!-- LOCAL -->
+                        <input type="hidden" name="id_sala_clinica" id="id_sala_clinica">
+                        <div class="col-sm-6 col-md-3 mt-2">
+                            <label for="local_agend" class="form-label">Local</label>
+                            <input type="text" name="local_agend" id="local_agend" class="form-control" placeholder="Local do atendimento" value="{{ old('local_agend') }}" autocomplete="off">
+
+                            <div id="local-list" class="list-group position-absolute w-100" style="z-index: 1000;"></div>
+                        </div>
+                        
+                    <!-- OBSERVAÇÕES -->
+                    <div class="col-12 mt-2">
+                        <label for="observacoes" class="form-label">Observações</label>
+                        <textarea name="observacoes" id="observacoes" class="form-control" placeholder="Observações..." rows="3">{{ old('observacoes') }}</textarea>
+                    </div>
+
+                    <!-- BOTÃO SUBMIT -->
+                    <div class="col-12 text-end mt-3">
+                        <button type="submit" class="btn btn-success">
+                            <i class="fas fa-check-circle me-1"></i> Agendar
+                        </button>
+                    </div>
+
+                </div>
+            </form>
+        </div>
+    </main>
 </div>
 
 <!-- Scripts -->
@@ -504,7 +522,7 @@
                     locais.forEach(local => {
                         const item = document.createElement('button');
                         item.type = 'button';
-                        item.classList.add('list-group-item', 'list-group-item-action');
+                        item.classList.add('list-group-item', 'list-local-option', 'list-group-item-action');
                         item.textContent = local.DESCRICAO;
                         item.addEventListener('click', () => {
                             aoSelecionarLocal(local);
@@ -727,39 +745,45 @@
 <!-- FLATPICKR PARA MELHORAR VISUALIZAÇÃO DE DIAS E HORÁRIOS -->
 <script>
     // Inicializa o flatpickr para o campo de data
-    flatpickr("#data", {
-        dateFormat: "d-m-Y", // <-- altera para D-M-Y visualmente
-        altInput: true,      // mostra formatado mas envia no formato do banco
-        altFormat: "d-m-Y",  // formato visível ao usuário
-        locale: "pt",
-        minDate: "today"
-    });
+    document.addEventListener('DOMContentLoaded', function() {
+        flatpickr("#data", {
+            dateFormat: "d-m-Y", // <-- altera para D-M-Y visualmente
+            altInput: true,      // mostra formatado mas envia no formato do banco
+            altFormat: "d-m-Y",  // formato visível ao usuário
+            locale: "pt",
+            minDate: "today",
+            allowInput: true,
+        });
 
-    // Inicializa o flatpickr para os campos de hora (início e fim)
-    flatpickr("#hr_ini", {
-        enableTime: true,
-        noCalendar: true,
-        dateFormat: "H:i",
-        time_24hr: true,
-        minuteIncrement: 15,
-    });
+        // Inicializa o flatpickr para os campos de hora (início e fim)
+        flatpickr("#hr_ini", {
+            enableTime: true,
+            noCalendar: true,
+            dateFormat: "H:i",
+            time_24hr: true,
+            minuteIncrement: 15,
+            allowInput: true,
+        });
 
-    // FLATPICKR CAMPO DE HORA FINAL
-    flatpickr("#hr_fim", {
-        enableTime: true,
-        noCalendar: true,
-        dateFormat: "H:i",
-        time_24hr: true,
-        minuteIncrement: 15,
-    });
+        // FLATPICKR CAMPO DE HORA FINAL
+        flatpickr("#hr_fim", {
+            enableTime: true,
+            noCalendar: true,
+            dateFormat: "H:i",
+            time_24hr: true,
+            minuteIncrement: 15,
+            allowInput: true,
+        });
 
-    flatpickr("#data_fim_recorrencia", {
-        dateFormat: "Y-m-d",
-        locale: "pt",
-        minDate: "today"
-    });
+        flatpickr("#data_fim_recorrencia", {
+            dateFormat: "Y-m-d",
+            locale: "pt",
+            minDate: "today",
+            allowInput: true,
+        });
 
-    flatpickr.localize(flatpickr.l10ns.pt);
+        flatpickr.localize(flatpickr.l10ns.pt);
+    });
 </script>
 
 <!-- PERMISSÃO DE ESCRITA EM INPUT DE VALOR -->
@@ -868,6 +892,48 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     });
 });
+</script>
+
+<!-- CASO O CAMPO DE SELEÇÃO DE MESES DE DURAÇÃO DA RECORRÊNCIA ESTEJA SELECIONADO, O CAMPO DE DATA FIM DA RECORRÊNCIA DESATIVA -->
+<script>
+    const selectDuracao = document.getElementById('duracao_meses_recorrencia');
+    const inputDataFim = document.getElementById('data_fim_recorrencia');
+
+    function atualizarEstadoInput() {
+        if (selectDuracao.value !== '') {
+            inputDataFim.disabled = true;
+            inputDataFim.value = '';
+        } else {
+            inputDataFim.disabled = false;
+        }
+        }
+
+    // Atualiza sempre que o select mudar
+    selectDuracao.addEventListener('change', atualizarEstadoInput);
+
+    // Atualiza na carga da página, caso tenha valor já selecionado
+    window.addEventListener('load', atualizarEstadoInput);
+</script>
+
+<!-- CASO O CAMPO DE SELEÇÃO DE FATA FINAL SEJA INFORMADO, SELEÇÃO DE DURAÇÃO EM MESES DA RECORRÊNCIA É DEASTIVADO -->
+<script>
+    const selectDuracao = document.getElementById('duracao_meses_recorrencia');
+    const inputDataFim = document.getElementById('data_fim_recorrencia');
+
+    function atualizarEstadoInput() {
+        if (inputDataFim.value !== '') {
+            selectDuracao.disabled = true;
+            selectDuracao.value = '';
+        } else {
+            selectDuracao.disabled = false;
+        }
+    }
+
+    // Atualiza sempre que o select mudar
+    inputDataFim.addEventListener('change', atualizarEstadoInput);
+
+    // Atualiza na carga da página, caso tenha valor já selecionado
+    window.addEventListener('load', atualizarEstadoInput);
 </script>
 
 </body>

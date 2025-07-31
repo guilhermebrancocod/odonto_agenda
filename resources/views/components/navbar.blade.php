@@ -86,7 +86,7 @@
 </style>
 
 
-<nav class="navbar navbar-dark bg-primary d-lg-none fixed-top shadow-sm px-3" style="height: 56px;">
+<nav class="navbar navbar-dark bg-primary d-lg-none fixed-top shadow-sm px-3" style="height: 56px">
     <button class="btn btn-primary" type="button" data-bs-toggle="offcanvas" data-bs-target="#offcanvasMenu">
         <i class="fas fa-bars"></i>
     </button>
@@ -218,7 +218,7 @@
             <!-- CONSULTAR AGENDAMENTO -->
             <li class="list-group-item p-0 overflow-hidden ">
                 <a href="/psicologia/consultar-agendamento" class="link-agendar d-flex align-items-center gap-2 p-2">
-                    <i class="fas fa-edit"></i> Consultar Agenda
+                    <i class="fas fa-edit"></i> Agendas
                 </a>
             </li>
             <!-- CADASTRAR PACIENTE -->
@@ -236,7 +236,7 @@
             <!-- CADASTRAR SERVIÇO -->
             <li class="list-group-item p-0 overflow-hidden ">
                 <a href="/psicologia/criar-servico" class="link-agendar d-flex align-items-center gap-2 p-2">
-                    <i class="bi bi-gear"></i> Cadastrar Serviço
+                    <i class="bi bi-gear"></i> Serviços
                 </a>
             </li>
             <!-- CADASTRAR SALA -->

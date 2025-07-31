@@ -17,26 +17,37 @@
     <meta name="csrf-token" content="{{ csrf_token() }}">
 
     <style>
-        html, body {
-            height: 100%;
-            margin: 0;
-        }
-         #content-wrapper {
-            height: calc(100vh - 56px);
+        html, body { height: 100%; margin: 0; }
+        #content-wrapper {
+            width: 85vw;
+            height: 97vh;
+            margin: auto;
+            display: column;
+            gap: 24px;
             overflow-y: auto;
-            padding: 16px;
-            display: flex;
-            flex-direction: column;
             align-items: stretch;
-            width: 100%;
-            background-color: #f8f9fa;
-        
+        }
         /* ADICIONA SCROLL CASO EXCEDA O MÁXIMO DE ALTURA DEFINIDO */
         .modal-body {
             max-height: 60vh;
             overflow-y: auto;
         }
-        
+        main {
+            background-color: #ffffff;
+            padding: 24px;
+            border-radius: 10px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+            flex-direction: column;
+            overflow-y: auto;
+            border: 1.8px solid #dee2e6;
+        }
+        .table-responsive {
+            overflow-x: auto;
+            overflow-y: auto;
+        }
+        tr {
+            max-height: 10px; /* ajuste conforme a altura das linhas da tabela original */
+        }
     </style>
 </head>
 
@@ -64,149 +75,157 @@
             </div>
         @endif
 
-        <div class="bg-white p-4 rounded shadow-sm w-100">  
+        <main>
 
-            <!-- TITULO DA PÁGINA -->
-            <h2 class="mb-4 text-center">Consultar Paciente</h2>
+            <div class="bg-white p-4 rounded shadow-sm w-100">  
 
-            <!-- FORMULÁIO DE PESQUISA -->
-            <form id="search-form" class="w-100 mb-4">
-                <div class="row g-3">
+                <!-- TÍTULO -->
+                <div class="text-center mb-5">
+                    <h2 class="fs-4 mb-0">Pacientes</h2>
+                </div>
 
-                    <!-- PESQUISA POR NOME DO PACIENTE OU CPF -->
-                    <div class="col-md-3">
+                <!-- FORMULÁIO DE PESQUISA -->
+                <form id="search-form" class="w-100 mb-4">
+                    <div class="row g-3">
+
+                        <!-- PESQUISA POR NOME DO PACIENTE OU CPF -->
+                        <div class="col-12 col-sm-6 col-md-4">
+                            <div class="input-group">
+                                <span class="input-group-text">
+                                    <i class="bi bi-person"></i>
+                                </span>
+                                <input
+                                    id="search-input"
+                                    name="search"
+                                    type="search"
+                                    class="form-control"
+                                    placeholder="Nome ou CPF do paciente"
+                                />
+                            </div>
+                        </div>
+
+                    <!-- DATA DE NASCIMENTO -->
+                    <div class="col-12 col-sm-6 col-md-4">
                         <div class="input-group">
                             <span class="input-group-text">
-                                <i class="bi bi-person"></i>
+                                <i class="bi bi-calendar-event"></i>
                             </span>
                             <input
-                                id="search-input"
-                                name="search"
-                                type="search"
-                                class="form-control"
-                                placeholder="Nome ou CPF do paciente"
+                            id="DT_NASC_PACIENTE-input"
+                            name="DT_NASC_PACIENTE"
+                            type="text"
+                            class="form-control"
+                            placeholder="Data de Nascimento"
                             />
                         </div>
                     </div>
 
-                <!-- DATA DE NASCIMENTO -->
-                <div class="col-md-2">
-                    <div class="input-group">
-                        <span class="input-group-text">
-                            <i class="bi bi-calendar-event"></i>
-                        </span>
-                        <input
-                        id="DT_NASC_PACIENTE-input"
-                        name="DT_NASC_PACIENTE"
-                        type="text"
-                        class="form-control"
-                        placeholder="Data de Nascimento"
-                        />
+                    <!-- SEXO -->
+                    <div class="col-12 col-sm-6 col-md-4">
+                        <div class="input-group">
+                            <span class="input-group-text">
+                                <i class="bi bi-arrow-down-circle"></i>
+                            </span>
+                            <select id="sexo" name="SEXO_PACIENTE" class="form-select form-select-sm">
+                                <option value="">Sexo</option>
+                                <option value="M">Masculino</option>
+                                <option value="F">Feminino</option>
+                                <option value="O">Outro</option>
+                            </select>
+                        </div>
                     </div>
-                </div>
 
-                <!-- SEXO -->
-                <div class="col-md-2">
-                    <div class="input-group">
-                        <span class="input-group-text">
-                            <i class="bi bi-arrow-down-circle"></i>
-                        </span>
-                        <select id="sexo" name="SEXO_PACIENTE" class="form-select form-select-sm">
-                            <option value="">Sexo</option>
-                            <option value="M">Masculino</option>
-                            <option value="F">Feminino</option>
-                            <option value="O">Outro</option>
+                    <!-- TELEFONE -->
+                    <div class="col-12 col-sm-6 col-md-4">
+                        <div class="input-group">
+                            <span class="input-group-text">
+                                <i class="bi bi-telephone"></i>
+                            </span>
+                            <input
+                                id="telefone-input"
+                                name="FONE_PACIENTE"
+                                type="text"
+                                class="form-control"
+                                placeholder="Telefone"
+                            />
+                        </div>
+                    </div>
+
+                    <!-- STATUS PACIENTE -->
+                    <div class="col-12 col-sm-6 col-md-4">
+                        <div class="input-group">
+                            <span class="input-group-text">
+                                <i class="bi bi-check2-circle"></i>
+                            </span>
+                            <select id="status-input" name="STATUS" class="form-select form-select-sm">
+                                <option value="">Status</option>
+                                <option value="Em espera">Em espera</option>
+                                <option value="Agendado">Agendado</option>
+                                <option value="CanceladoO">Cancelado</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <!-- BOTÃO DE PESQUISA -->
+                    <div class="col-12 col-sm-6 col-md-4">
+                        <button type="submit" class="btn btn-primary btn-sm px-3 mb-2">Pesquisar</button>
+                        <button type="button" class="btn btn-outline-secondary btn-sm px-3 mb-2" id="btnCleanFilters">Limpar Filtros</button>
+                    </div>
+
+                </form>
+
+                <hr>
+
+
+                <!-- RESULTADOS - TABELA -->
+                <div class="w-100">
+
+                    <h5 class="mb-3">Resultados</h5>
+
+                    <div class="table-responsive" style="max-height: 460px; overflow-x: auto;">
+                        <table class="table table-hover table-bordered align-middle mb-0">
+                            <thead class="table-light">
+                                <tr>
+                                    <th style="min-width: 150px;">Nome</th>
+                                    <th class="text-nowrap">CPF</th>
+                                    <th class="text-nowrap">Data de Nascimento</th>
+                                    <th class="text-nowrap">Sexo</th>
+                                    <th style="min-width: 120px;">Telefone</th>
+                                    <th style="min-width: 180px;">Email</th>
+                                    <th>Status</th>
+                                    <th style="">Ações</th>
+                                </tr>
+                            </thead>
+
+                            <!-- SEM PACIENTES -->
+                            <tbody id="pacientes-tbody">
+                                <tr>
+                                    <td colspan="8" class="text-center">Nenhuma pesquisa realizada ainda.</td>
+                                </tr>
+                            </tbody>
+
+                        </table>
+                    </div>
+
+                    <!-- SELEÇÃO DE TOTAL DE REGISTROS A SEREM MOSTRADOS -->
+                    <div class="d-flex justify-content-end align-items-center mt-2">
+                        <label for="limite-visualizacao" class="form-label me-2 mb-0">Mostrar:</label>
+                        <select id="limite-visualizacao" class="form-select form-select-sm w-auto">
+                            <option value="5">5</option>
+                            <option value="10">10</option>
+                            <option value="25">25</option>
+                            <option value="50">50</option>
+                            <option value="100">100</option>
                         </select>
                     </div>
+
                 </div>
 
-                <!-- TELEFONE -->
-                <div class="col-md-2">
-                    <div class="input-group">
-                        <span class="input-group-text">
-                            <i class="bi bi-telephone"></i>
-                        </span>
-                        <input
-                            id="telefone-input"
-                            name="FONE_PACIENTE"
-                            type="text"
-                            class="form-control"
-                            placeholder="Telefone"
-                        />
-                    </div>
-                </div>
-
-                <!-- STATUS PACIENTE -->
-                <div class="col-md-3">
-                    <div class="input-group">
-                        <span class="input-group-text">
-                            <i class="bi bi-check2-circle"></i>
-                        </span>
-                        <select id="status-input" name="STATUS" class="form-select form-select-sm">
-                            <option value="">Status</option>
-                            <option value="Em espera">Em espera</option>
-                            <option value="Agendado">Agendado</option>
-                            <option value="CanceladoO">Cancelado</option>
-                        </select>
-                    </div>
-                </div>
-
-                <!-- BOTÃO DE PESQUISA -->
-                <div>
-                    <button type="submit" class="btn btn-primary btn-sm px-3">Pesquisar</button>
-                    <button type="button" class="btn btn-outline-secondary btn-sm px-3" id="btnCleanFilters">Limpar Filtros</button>
-                </div>
-
-            </form>
-
-            <hr>
-
-
-            <!-- RESULTADOS - TABELA -->
-            <div class="w-100">
-
-                <h5 class="mb-3">Resultados</h5>
-
-                <div class="table-responsive overflow-auto" style="max-height: 460px;">
-                    <table class="table table-hover table-bordered align-middle mb-0">
-                        <thead class="table-light">
-                            <tr>
-                                <th>Nome</th>
-                                <th>CPF</th>
-                                <th>Data de Nascimento</th>
-                                <th>Sexo</th>
-                                <th>Telefone</th>
-                                <th>Email</th>
-                                <th>Status</th>
-                                <th>Ações</th>
-                            </tr>
-                        </thead>
-
-                        <!-- SEM PACIENTES -->
-                        <tbody id="pacientes-tbody">
-                            <tr>
-                                <td colspan="8" class="text-center">Nenhuma pesquisa realizada ainda.</td>
-                            </tr>
-                        </tbody>
-
-                    </table>
-                </div>
-
-                <!-- SELECAO DE TOTAL DE REGISTROS A SEREM MOSTRADOS -->
-                <div class="d-flex justify-content-end align-items-center mt-2">
-                    <label for="limite-visualizacao" class="form-label me-2 mb-0">Mostrar:</label>
-                    <select id="limite-visualizacao" class="form-select form-select-sm w-auto">
-                        <option value="5">5</option>
-                        <option value="10">10</option>
-                        <option value="25">25</option>
-                        <option value="50">50</option>
-                        <option value="100">100</option>
-                    </select>
-                </div>
 
             </div>
 
-        </div>
+        </main>
+
     </div>
 
     <!-- MODA DE CONFIRMAÇÃO DE EDIÇÃO DE PACIENTE -->
@@ -411,7 +430,6 @@
         </div>
     </div>
 
-
     <!-- FLATPICKR -->
     <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
     <script src="https://cdn.jsdelivr.net/npm/flatpickr/dist/l10n/pt.js"></script>
@@ -514,7 +532,7 @@
                 pacientesTbody.innerHTML = '';
                 if (pacientes.length === 0) {
                     pacientesTbody.innerHTML = `
-                        <tr><td colspan="7" class="text-center">Nenhum paciente encontrado.</td></tr>
+                        <tr><td colspan="8" class="text-center">Nenhum paciente encontrado.</td></tr>
                     `;
                     return;
                 }
@@ -530,35 +548,37 @@
                         <td>${paciente.E_MAIL_PACIENTE ?? '-'}</td>
                         <td>${paciente.STATUS ?? '-'}</td>
                         <td>
-                            <button
-                                type="button" class="btn btn-sm btn-warning editar-btn" 
-                                data-id="${paciente.ID_PACIENTE}" 
-                                data-nome="${paciente.NOME_COMPL_PACIENTE ?? 'Paciente'}"
-                                data-cpf="${paciente.CPF_PACIENTE ?? ''}"
-                                data-dt_nasc="${paciente.DT_NASC_PACIENTE ?? ''}"
-                                data-sexo="${paciente.SEXO_PACIENTE ?? ''}"
-                                data-endereco="${paciente.ENDERECO ?? ''}"
-                                data-num="${paciente.END_NUM ?? ''}"
-                                data-complemento="${paciente.COMPLEMENTO ?? ''}"
-                                data-bairro="${paciente.BAIRRO ?? ''}"
-                                data-uf="${paciente.UF ?? ''}"
-                                data-cep="${paciente.CEP ?? ''}"
-                                data-celular="${paciente.FONE_PACIENTE ?? ''}"
-                                data-email="${paciente.E_MAIL_PACIENTE ?? ''}"
-                                data-municipio="${paciente.MUNICIPIO ?? ''}">
-                                Editar
-                            </button>
-                            <button
-                                type="button" class="btn btn-sm btn-secondary historico-btn"
-                                data-id="${paciente.ID_PACIENTE}"
-                                data-nome="${paciente.NOME_COMPL_PACIENTE}">
-                                Histórico
-                            </button>
-                            <button type="button" class="btn btn-sm btn-danger excluir-btn"
-                                data-id="${paciente.ID_PACIENTE}"
-                                data-nome="${paciente.NOME_COMPL_PACIENTE ?? 'Paciente'}">
-                                Excluir
-                            </button>
+                            <div class="d-flex flex-nowrap gap-1">
+                                <button type="button" class="btn btn-sm btn-warning editar-btn"
+                                    data-id="${paciente.ID_PACIENTE}" 
+                                    data-nome="${paciente.NOME_COMPL_PACIENTE ?? 'Paciente'}"
+                                    data-cpf="${paciente.CPF_PACIENTE ?? ''}"
+                                    data-dt_nasc="${paciente.DT_NASC_PACIENTE ?? ''}"
+                                    data-sexo="${paciente.SEXO_PACIENTE ?? ''}"
+                                    data-endereco="${paciente.ENDERECO ?? ''}"
+                                    data-num="${paciente.END_NUM ?? ''}"
+                                    data-complemento="${paciente.COMPLEMENTO ?? ''}"
+                                    data-bairro="${paciente.BAIRRO ?? ''}"
+                                    data-uf="${paciente.UF ?? ''}"
+                                    data-cep="${paciente.CEP ?? ''}"
+                                    data-celular="${paciente.FONE_PACIENTE ?? ''}"
+                                    data-email="${paciente.E_MAIL_PACIENTE ?? ''}"
+                                    data-municipio="${paciente.MUNICIPIO ?? ''}">
+                                    <i class="bi bi-pencil"></i> <span class="d-none d-sm-inline">Editar</span>
+                                </button>
+
+                                <button type="button" class="btn btn-sm btn-secondary historico-btn"
+                                    data-id="${paciente.ID_PACIENTE}"
+                                    data-nome="${paciente.NOME_COMPL_PACIENTE}">
+                                    <i class="bi bi-clock-history"></i> <span class="d-none d-sm-inline">Histórico</span>
+                                </button>
+
+                                <button type="button" class="btn btn-sm btn-danger excluir-btn"
+                                    data-id="${paciente.ID_PACIENTE}"
+                                    data-nome="${paciente.NOME_COMPL_PACIENTE ?? 'Paciente'}">
+                                    <i class="bi bi-trash"></i> <span class="d-none d-sm-inline">Excluir</span>
+                                </button>
+                            </div>
                         </td>
                     `;
                     pacientesTbody.appendChild(row);
@@ -750,7 +770,7 @@
     </script>
 
     <!-- SCRIPT MOSTRAR AGENDAMENTOS POR PACIENTE -->
-     <script>
+    <script>
         document.addEventListener('click', function (event) {
             if (event.target.classList.contains('historico-btn')) {
                 const pacienteId = event.target.getAttribute('data-id');
@@ -790,7 +810,7 @@
                 modal.show();
             }
         });
-     </script>
+    </script>
 
     <!-- LIMPAR FILTROS DE PESQUISA -->
     <script>

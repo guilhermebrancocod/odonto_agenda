@@ -13,22 +13,24 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css" />
 
     <style>
-        body, html {
-            height: 100%;
-            margin: 0;
-        }
-        #content-container {
-            height: calc(100vh - 56px);
+        html, body { height: 100%; margin: 0; }
+        #content-wrapper {
+            width: 85vw;
+            height: 97vh;
+            margin: auto;
+            display: column;
+            gap: 24px;
             overflow-y: auto;
-            padding: 20px;
-            display: flex;
-            flex-direction: column;
             align-items: stretch;
-            width: 100%;
         }
         main {
-            max-width: 1600px;
-            margin: 0 auto;
+            background-color: #ffffff;
+            padding: 24px;
+            border-radius: 10px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+            flex-direction: row;
+            overflow-y: auto;
+            border: 1.8px solid #dee2e6;
         }
     </style>
 </head>
@@ -37,8 +39,8 @@
     <!-- COMPONENT NAVBAR -->
     @include('components.navbar')
 
-    <div id="content-container" class="bg-light">
-        <main class="bg-white p-4 rounded shadow-sm w-100" style="">
+    <div id="content-wrapper">
+        <main>
             <div class="text-center mb-4">
                 <h2 class="fs-4 mb-0" style="color: #333;">Cadastro de Paciente</h2>
             </div>
