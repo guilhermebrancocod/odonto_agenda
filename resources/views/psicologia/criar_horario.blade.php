@@ -614,12 +614,12 @@
         dateFormat: "Y-m-d",
         altFormat: "d-m-Y",
         locale: "pt",
-        // minDate: "today",
+        minDate: "today",
         allowInput: true,
     });
 
     flatpickr("#edit-data-horario-final", {
-        dateFormat: "d-m-Y",
+        dateFormat: "Y-m-d",
         altFormat: "d-m-Y",
         locale: "pt",
         minDate: "today",
