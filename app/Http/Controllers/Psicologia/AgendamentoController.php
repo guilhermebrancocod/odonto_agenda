@@ -563,8 +563,9 @@ class AgendamentoController extends Controller
         // Busca o agendamento pelo ID ou falha (404)
         $agendamento = FaesaClinicaAgendamento::findOrFail($id);
 
-        // Exclui o agendamento
-        $agendamento->delete();
+        // Altera o status para Excluido
+        $agendamento->STATUS_AGEND = "Excluido";
+        $agendamento->save();
 
         // Redireciona para a lista ou outra rota com mensagem de sucesso
         return redirect()->route('listagem-agendamentos')
