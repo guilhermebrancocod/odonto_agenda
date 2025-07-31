@@ -772,9 +772,10 @@
     <!-- SCRIPT MOSTRAR AGENDAMENTOS POR PACIENTE -->
     <script>
         document.addEventListener('click', function (event) {
-            if (event.target.classList.contains('historico-btn')) {
-                const pacienteId = event.target.getAttribute('data-id');
-                const nomePaciente = event.target.getAttribute('data-nome');
+        const btn = event.target.closest('.historico-btn');
+        if (btn) {
+            const pacienteId = btn.getAttribute('data-id');
+            const nomePaciente = btn.getAttribute('data-nome');
 
                 document.getElementById('nomePacienteHistorico').textContent = nomePaciente;
                 const tbody = document.getElementById('historicoAgendamentosBody');
