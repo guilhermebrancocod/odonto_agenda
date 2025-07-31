@@ -1,5 +1,3 @@
-import { createNavBar } from './navbar.js';
-
 function maskTime(value) {
     return value
         .replace(/\D/g, '')                // Remove tudo que não é dígito
@@ -33,9 +31,9 @@ function carregarTodosAgendamentos() {
             data.forEach(agendamento => {
                 const html = `
                     <tr>
-                        <td>${agendamento.NOME_COMPL_PACIENTE  ?? ''}</td>
-                        <td>${formatDateStr(agendamento.DT_AGEND  ?? '')}</td>
-                        <td>${maskTime(agendamento.HR_AGEND_INI  ?? '')} - ${maskTime(agendamento.HR_AGEND_FIN  ?? '')}</td>
+                        <td>${agendamento.NOME_COMPL_PACIENTE ?? ''}</td>
+                        <td>${formatDateStr(agendamento.DT_AGEND ?? '')}</td>
+                        <td>${maskTime(agendamento.HR_AGEND_INI ?? '')} - ${maskTime(agendamento.HR_AGEND_FIN ?? '')}</td>
                         <td>${agendamento.SERVICO_CLINICA_DESC ? agendamento.SERVICO_CLINICA_DESC : ''}</td>
                         <td>${agendamento.E_MAIL_PACIENTE ? agendamento.E_MAIL_PACIENTE : ''}</td>
                         <td>${agendamento.FONE_PACIENTE ? maskPhone(agendamento.FONE_PACIENTE) : ''}</td>
@@ -162,7 +160,3 @@ $(document).on('click', '.edit-agenda', function (event) {
     const agendaId = $(this).data('id');
     window.location.href = `/odontologia/criaragenda/${agendaId}`;
 });
-
-const navbarContainer = document.getElementById('navbar-container');
-const navbar = createNavBar();
-navbarContainer.appendChild(navbar);

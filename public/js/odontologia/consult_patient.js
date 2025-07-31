@@ -1,6 +1,3 @@
-import { createNavBar } from './navbar.js';
-import { Modal } from 'https://cdnjs.cloudflare.com/ajax/libs/mdb-ui-kit/7.1.0/mdb.es.min.js';
-
 function maskPhone(value) {
     if (!value) return '';
     return value
@@ -155,6 +152,3 @@ addPatient.addEventListener('click', function (event) {
     window.location.href = '/odontologia/criarpaciente';
 });
 
-const navbarContainer = document.getElementById('navbar-container');
-const navbar = createNavBar();
-navbarContainer.appendChild(navbar);

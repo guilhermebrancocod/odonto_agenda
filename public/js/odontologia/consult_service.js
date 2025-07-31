@@ -1,5 +1,3 @@
-import { createNavBar } from './navbar.js';
-
 function carregarTodosServicos() {
     const $select = $('#selectService');
     const $tbody = $('#table-service tbody');
@@ -139,6 +137,3 @@ addPatient.addEventListener('click', function (event) {
     window.location.href = 'criarservico';
 });
 
-const navbarContainer = document.getElementById('navbar-container');
-const navbar = createNavBar();
-navbarContainer.appendChild(navbar);

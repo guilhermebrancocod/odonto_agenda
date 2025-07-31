@@ -1,5 +1,3 @@
-import { createNavBar } from './navbar.js';
-
 $('.datepicker').datepicker({
     format: 'dd/mm/yyyy',
     language: 'pt-BR',
@@ -57,7 +55,7 @@ $(document).ready(function () {
 $(document).ready(function () {
     $.fn.select2.defaults.set("language", "pt-BR");
     let disciplinaSelecionada = null;
-    
+
     const $servicoSelect = $('#form-select');
 
     $servicoSelect.select2({
@@ -172,9 +170,7 @@ $(document).ready(function () {
     });
 });
 
-const navbarContainer = document.getElementById('navbar-container');
-const navbar = createNavBar();
-navbarContainer.appendChild(navbar);
+
 
 const pagto = document.getElementById('pagto');
 const valor = document.getElementById('valor');

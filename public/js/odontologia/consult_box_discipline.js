@@ -1,5 +1,3 @@
-import { createNavBar } from './navbar.js';
-
 function maskTime(value) {
     return value
         .replace(/\D/g, '')
@@ -148,6 +146,3 @@ addPatient.addEventListener('click', function (event) {
     window.location.href = '/odontologia/criarboxdisciplina';
 });
 
-const navbarContainer = document.getElementById('navbar-container');
-const navbar = createNavBar();
-navbarContainer.appendChild(navbar);

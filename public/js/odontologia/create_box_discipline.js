@@ -1,9 +1,5 @@
-import { createNavBar } from './navbar.js';
-
 const add = document.getElementById('add');
-const navbarContainer = document.getElementById('navbar-container');
-const navbar = createNavBar();
-navbarContainer.appendChild(navbar);
+
 
 
 
