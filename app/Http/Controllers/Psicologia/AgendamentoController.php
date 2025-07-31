@@ -96,9 +96,11 @@ class AgendamentoController extends Controller
     {
         $agendamentos = FaesaClinicaAgendamento::with('paciente', 'servico')
             ->where('ID_CLINICA', 1)
+            ->where('STATUS_AGEND', '<>', 'Excluido')
             ->get();
 
-        $events = $agendamentos->map(function($agendamento) {
+        $events = $agendamentos
+        ->map(function($agendamento) {
             $dateOnly = substr($agendamento->DT_AGEND, 0, 10);
             $horaInicio = substr($agendamento->HR_AGEND_INI, 0, 8);
             $horaFim = substr($agendamento->HR_AGEND_FIN, 0, 8);
@@ -138,6 +140,7 @@ class AgendamentoController extends Controller
         $agendamentos = FaesaClinicaAgendamento::with(['servico', 'clinica'])
             ->where('ID_CLINICA', 1)
             ->where('ID_PACIENTE', $idPaciente)
+            ->where('STATUS_AGEND', '<>', 'Excluido')
             ->orderBy('DT_AGEND', 'desc')
             ->get();
 
@@ -588,7 +591,8 @@ class AgendamentoController extends Controller
             ->where(function ($q) use ($local, $idPaciente) {
                 $q->where('LOCAL', $local)
                 ->orWhere('ID_PACIENTE', $idPaciente);
-            });
+            })
+            ->where('STATUS_AGEND', '<>', 'Excluido');
 
         if ($idAgendamentoAtual) {
             $query->where('ID_AGENDAMENTO', '<>', $idAgendamentoAtual);
@@ -613,7 +617,8 @@ class AgendamentoController extends Controller
             ->where(function($q) use ($hrIni, $hrFim) {
                 $q->where('HR_AGEND_INI', '<', $hrFim)
                 ->where('HR_AGEND_FIN', '>', $hrIni);
-            });
+            })
+            ->where('STATUS_AGEND', '<>', 'Excluido');
 
         // EVITA QUE ACUSE DE ERRO COM O PRÓPRIO AGENDAMENTO
         if ($idAgendamentoAtual) {
