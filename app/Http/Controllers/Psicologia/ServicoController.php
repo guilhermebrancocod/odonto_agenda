@@ -89,6 +89,7 @@ class ServicoController extends Controller
         return response()->json($servicos);
     }
 
+    // RETORNA SERVIÇO PELO NOME
     public function getServicoByName(string|null $request)
     {
         if ($request == null){
