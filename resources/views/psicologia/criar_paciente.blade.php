@@ -63,7 +63,7 @@
                 </div>
             @endif
 
-            <form action="{{ route('criarPaciente-Psicologia') }}" method="POST" class="needs-validation">
+            <form action="{{ route('criarPaciente-Psicologia') }}" method="POST" class="needs-validation" id="pacienteForm">
                 @csrf
 
                 <!-- DADOS PESSOAIS -->
@@ -76,7 +76,7 @@
                         <label for="nome" class="form-label">Nome Completo</label>
                         <input type="text" id="nome" name="NOME_COMPL_PACIENTE" class="form-control" value="{{ old('NOME_COMPL_PACIENTE') }}"/>
                     </div>
-
+                    
                     <!-- DATA NASCIMENTO -->
                     <div class="col-md-2">
                         <label for="dt_nasc" class="form-label">Dt Nascimento</label>
@@ -99,7 +99,34 @@
                             <option value="O" {{ old('SEXO_PACIENTE') == 'O' ? 'selected' : '' }}>Outro</option>
                         </select>
                     </div>
+
+                    {{-- CÓDIGO SUS --}}
+                    <div class='col-md-2' id='div-check-sus'>
+                        <input type="checkbox" name="cod_sus_check" id="cod_sus_check">
+                        <label for="cod_sus_check">Possui cartão do SUS</label>
+                    </div>
+
+                    {{-- CAMPO DE PREENCHIMENTO --}}
+                    <div class="col-md-4" id='cod-sus-div'></div>
+
                 </div>
+
+                <!-- DADOS DO RESPONSAVEL -->
+                <h5>Dados do Responsável</h5>
+                <hr />
+                <div class="row g-3 mb-4">
+
+                    <!-- NOME COMPLETO -->
+                    <div class="col-md-6">
+                        <label for="nome_responsavel" class="form-label">Nome Completo</label>
+                        <input type="text" id="nome_responsavel" name="NOME_RESPONSAVEL" class="form-control" value="{{ old('NOME_RESPONSAVEL') }}"/>
+                    </div>
+                    
+                    <!-- CPF -->
+                    <div class="col-md-2">
+                        <label for="cpf_responsavel" class="form-label">CPF</label>
+                        <input type="text" id="cpf_responsavel" name="CPF_RESPONSAVEL" class="form-control" value="{{ old('CPF_RESPONSAVEL') }}"/>
+                    </div>
 
                 <!-- ENDEREÇO -->
                 <h5>Endereço</h5>
@@ -216,6 +243,24 @@
     <!-- FLATPICKR -->
     <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
     <script src="https://cdn.jsdelivr.net/npm/flatpickr/dist/l10n/pt.js"></script>
+
+    <script>
+        const inputCheckSus = document.getElementById('cod_sus_check');
+        const codSusDiv = document.getElementById('cod-sus-div');
+
+        inputCheckSus.addEventListener('input',  function () {
+            if (inputCheckSus.checked) {
+                codSusDiv.innerHTML += `
+                    <div class="input-group mb-3">
+                        <span class="input-group-text">Cod. SUS</span>
+                        <input type="text" class="form-control" name="COD_SUS">
+                    </div>
+                    `
+            } else {
+                codSusDiv.innerHTML = ''
+            }
+        })
+    </script>
 
     <!-- API DOS CORREIOS PARA PREENCHER AUTOMATICAMENTE DADOS DE ENDEREÇO AO INFORMAR O CEP -->
     <script>

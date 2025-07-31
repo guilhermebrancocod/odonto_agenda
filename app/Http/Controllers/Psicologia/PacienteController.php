@@ -29,14 +29,17 @@ class PacienteController extends Controller
             'E_MAIL_PACIENTE' => 'nullable|email|max:255',
             'FONE_PACIENTE' => 'required|string|max:20|regex:/^\(?\d{2}\)?\s?\d{4,5}-?\d{4}$/',
             'OBSERVACAO' => 'nullable|string',
-            'STATUS' => 'required|string|max:50|in:Em espera'
+            'STATUS' => 'required|string|max:50|in:Em espera',
+            'NOME_RESPONSAVEL' => 'nullable|string|max:255',
+            'CPF_RESPONSAVEL' => 'nullable|string|max:14|regex:/^\d{3}\.?\d{3}\.?\d{3}-?\d{2}$/',
+            'COD_SUS' => 'nullable|string|max:15',
         ], [
             'NOME_COMPL_PACIENTE.required' => 'Informe o nome do paciente antes de continuar.',
             'CPF_PACIENTE.required' => 'Informe o CPF do paciente antes de continuar.',
             'CPF_PACIENTE.unique' => 'Este CPF já está cadastrado no sistema. Por favor, verifique',
-            'CPF_PACIENTE.regex' => 'Informe um CPF válido, usando apenas números ou no formato 000.000.000-00.',
+            'CPF_PACIENTE.regex' => 'Informe um CPF válido para o Paciente, usando apenas números ou no formato 000.000.000-00.',
             'SEXO_PACIENTE.required' => 'Informe o sexo do paciente antes de continuar.',
-            'CEP.required' => 'Informe o CPF do endereço do paciente antes de continuar.',
+            'CEP.required' => 'Informe o CEP do endereço do paciente antes de continuar.',
             'ENDERECO.required' => 'Informe o endereço do paciente antes de continuar',
             'END_NUM.required' => 'Informe o número do endereço do paciente antes de continuar.',
             'BAIRRO.required' => 'Informe o bairro do paciente antes de continuar.',
@@ -44,8 +47,10 @@ class PacienteController extends Controller
             'UF.required' => 'Informe o estado (UF) do endereço do paciente antes de continuar.',
             'FONE_PACIENTE.required' => 'Informe o telefone do paciente antes de continuar.',
             'FONE_PACIENTE.regex' => 'Informe um telefone válido, usando apenas números ou no formato correto.',
+            'CPF_RESPONSAVEL.regex' => 'Informe um CPF válido para o Responsável, usando apenas números ou no formato 000.000.000-00.',
+            'COD_SUS.string' => 'Isso aqui é uma string'
         ]);
-        
+
         $paciente = new FaesaClinicaPaciente();
         $paciente->NOME_COMPL_PACIENTE=$validatedData['NOME_COMPL_PACIENTE'];
         $paciente->CPF_PACIENTE=$validatedData['CPF_PACIENTE'];
@@ -61,6 +66,9 @@ class PacienteController extends Controller
         $paciente->E_MAIL_PACIENTE=$validatedData['E_MAIL_PACIENTE'] ?? null;
         $paciente->MUNICIPIO=$validatedData['municipio'];
         $paciente->STATUS=$validatedData['STATUS'];
+        $paciente->NOME_RESPONSAVEL=$validatedData['NOME_RESPONSAVEL'];
+        $paciente->CPF_RESPONSAVEL=$validatedData['CPF_RESPONSAVEL'];
+        $paciente->COD_SUS=$validatedData['COD_SUS'];
 
         $paciente->save();
 
