@@ -4,6 +4,7 @@ namespace App\Services\Psicologia;
 
 use App\Models\FaesaClinicaAgendamento;
 use Illuminate\Http\Request;
+use Carbon\Carbon;
 
 class AgendamentoService
 {

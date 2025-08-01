@@ -63,6 +63,20 @@
         </div>
     </div>
     </div>
+
+    <div class="modal fade" id="motivoCancelamentoModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5>Motivo do Cancelamento</h5>
+                </div>
+                <div class="modal-body"></div>
+                    <input type="text" name="nariz" id="grande">
+                <div class="modal-footer"></div>
+            </div>
+        </div>
+    </div>
+    
 </body >
 
 <!-- FULLCALENDAR SCRIPT -->
@@ -148,8 +162,12 @@
                 return response.json();
             })
             .then(data => {
-                // Atualiza o evento visualmente (força refetch)
                 calendar.refetchEvents();
+
+                // Adiciona Modal para preencher Mensagem de cancelamento
+                const modal = new bootstrap.Modal((document.getElementById('motivoCancelamentoModal')));
+                modal.show();
+
                 bootstrap.Modal.getInstance(document.getElementById('agendamentoModal')).hide();
             })
             .catch(error => {

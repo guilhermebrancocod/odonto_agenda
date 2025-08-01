@@ -9,6 +9,7 @@ use App\Models\FaesaClinicaServico;
 use App\Models\FaesaClinicaHorario;
 use App\Http\Controllers\Psicologia\PacienteController;
 use App\Services\Psicologia\PacienteService;
+use App\Services\Psicologia\AgendamentoService;
 use Carbon\Carbon;
 
 class AgendamentoController extends Controller
@@ -18,13 +19,9 @@ class AgendamentoController extends Controller
     private PacienteService $pacienteService;
     private AgendamentoService $agendamentoService;
 
-    public function __construct(PacienteService $pacienteService)
+    public function __construct(PacienteService $pacienteService, AgendamentoService $agendamentoService) 
     {
         $this->pacienteService = $pacienteService;
-    }
-
-    public function __construct(AgendamentoService $agendamentoService)
-    {
         $this->agendamentoService = $agendamentoService;
     }
 
