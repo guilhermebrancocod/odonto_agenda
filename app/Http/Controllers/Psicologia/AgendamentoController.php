@@ -7,10 +7,21 @@ use Illuminate\Http\Request;
 use App\Models\FaesaClinicaAgendamento;
 use App\Models\FaesaClinicaServico;
 use App\Models\FaesaClinicaHorario;
+use App\Http\Controllers\Psicologia\PacienteController;
+use App\Services\Psicologia\PacienteService;
 use Carbon\Carbon;
 
 class AgendamentoController extends Controller
 {
+
+    //  INJEÇÃO DE DEPENDÊNCIA
+    private PacienteService $pacienteService;
+
+    public function __construct(PacienteService $pacienteService)
+    {
+        $this->pacienteService = $pacienteService;
+    }
+
     // GET AGENDAMENTO
     public function getAgendamento(Request $request)
     {
@@ -425,7 +436,7 @@ class AgendamentoController extends Controller
                 ->with('success', 'Atendimentos semanais gerados conforme recorrência padrão do serviço.');
         }
 
-        // Agendamento simples - verificar conflito antes de criar
+        // AAGENDAMENTOS SIMPLES
         if ($this->existeConflitoAgendamento(
             $idClinica,
             $request->local_agend,
@@ -462,6 +473,15 @@ class AgendamentoController extends Controller
         }
 
         FaesaClinicaAgendamento::create($dados);
+ 
+        try {
+            $paciente = $this->pacienteService->setEmAtendimento($request->paciente_id);
+            // Continua depois, sem return aqui
+        } catch (\Illuminate\Database\Eloquent\ModelNotFoundException $e) {
+            return redirect()->back()->with('error', 'Paciente não encontrado.');
+        } catch (\Exception $e) {
+            return redirect()->back()->with('error', 'Erro ao atualizar o status do paciente.');
+        }
 
         return redirect('/psicologia/criar-agendamento/')
             ->with('success', 'Agendamento criado com sucesso!');
@@ -551,7 +571,7 @@ class AgendamentoController extends Controller
         }
 
         $request->validate([
-            'status' => 'required|in:Agendado,Presente,Cancelado',
+            'status' => 'required|in:Agendado,Presente,Finalizado,Cancelado',
         ]);
 
         $agendamento->STATUS_AGEND = $request->status;

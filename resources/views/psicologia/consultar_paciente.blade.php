@@ -743,9 +743,8 @@
                 const inputEdit = document.querySelector("#editPacienteDTNASC");
                 if (inputEdit._flatpickr) inputEdit._flatpickr.destroy();
                 flatpickr(inputEdit, {
-                    altInput: true,
                     altFormat: "d-m-Y",
-                    allowInput: true,
+                    // allowInput: true,
                     dateFormat: "Y-m-d",
                     maxDate: "today",
                     locale: "pt",
@@ -753,9 +752,8 @@
                 const inputSearch = document.querySelector("#DT_NASC_PACIENTE-input");
                 if (inputSearch._flatpickr) inputSearch._flatpickr.destroy();
                 flatpickr(inputSearch, {
-                    altInput: true,
                     altFormat: "d-m-Y",
-                    allowInput: true,
+                    // allowInput: true,
                     dateFormat: "Y-m-d",
                     maxDate: "today",
                     locale: "pt",

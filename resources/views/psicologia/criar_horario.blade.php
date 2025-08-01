@@ -180,12 +180,15 @@
             </script>
         @endif
 
-                <div class="alert alert-danger">
-                    <ul>
-                        <li>Ao criar um bloqueio, os horários que já foram cadastrados no período travado não serão alterados!</li>
-                        <li>Lembre-se de reagendar ou remarcar todos os agendamentos nesse período</li>
-                    </ul> 
-                </div>   
+        <div class="alert alert-warning alert-dismissible fade show" role="alert">
+            <strong>
+                <i class="bi bi-exclamation-diamond-fill"></i>
+                Atenção!
+            </strong>
+            <br>
+            Ao criar um bloqueio, os horários que já foram cadastrados no período travado não serão alterados! embre-se de reagendar ou remarcar todos os agendamentos nesse período
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>   
                 
         <!-- FORMULÁRIO DE CRIAÇÃO DE HORARIO -->
         <form class="needs-validation" action="{{ route('criarHorario-Psicologia') }}" method="POST" novalidate>

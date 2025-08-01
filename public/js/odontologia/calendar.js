@@ -110,7 +110,7 @@ document.addEventListener('DOMContentLoaded', function () {
                             body: JSON.stringify({ status: novoStatus, mensagem })
                         }).then(res => {
                             if (!res.ok) throw new Error("Erro ao atualizar status");
-                            return { novoStatus, mensagem }; // retorna para result.value
+                            return { novoStatus, mensagem };
                         });
                     }
                 });

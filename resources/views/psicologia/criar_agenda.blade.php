@@ -143,7 +143,7 @@
 
 
             <!-- FORM DE AGENDAMENTO -->
-            <form action="{{ route('criarAgendamento-Psicologia') }}" method="POST" id="agendamento-form" class="w-100">
+            <form action="{{ route('criarAgendamento-Psicologia') }}" method="POST" id="agendamento-form" class="w-100" validate>
                 @csrf
 
                 <!-- VALORES PASSADOS NO FORMATO HIDDEN | USUÁRIO NÃO SELECIONA DIRETAMENTE -->
@@ -319,6 +319,20 @@
 <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
 <!-- Flatpckr pt-br -->
 <script src="https://cdn.jsdelivr.net/npm/flatpickr/dist/l10n/pt.js"></script>
+
+<!-- EVITA ENVIO DE FORMULÁRIO AO CLICAR NO ENTER -->
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const form = document.getElementById('agendamento-form');
+
+        form.addEventListener('keydown', function (event) {
+            if (event.key === 'Enter' && event.target.tagName.toLowerCase() !== 'textarea') {
+                event.preventDefault();
+            }
+        });
+    });
+</script>
+
 
 <!-- OBJETOS DA APLICAÇÃO -->
 <script>
@@ -747,9 +761,9 @@
     // Inicializa o flatpickr para o campo de data
     document.addEventListener('DOMContentLoaded', function() {
         flatpickr("#data", {
-            dateFormat: "d-m-Y", // <-- altera para D-M-Y visualmente
-            altInput: true,      // mostra formatado mas envia no formato do banco
-            altFormat: "d-m-Y",  // formato visível ao usuário
+            dateFormat: "d-m-Y", 
+            altInput: true,
+            altFormat: "d-m-Y",
             locale: "pt",
             minDate: "today",
             allowInput: true,
@@ -809,7 +823,7 @@
         if (alert) {
             setTimeout(() => {
                 alert.remove();
-            }, 4000); // após 4s remove
+            }, 4000);
         }
     });
 
@@ -894,33 +908,18 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 </script>
 
-<!-- CASO O CAMPO DE SELEÇÃO DE MESES DE DURAÇÃO DA RECORRÊNCIA ESTEJA SELECIONADO, O CAMPO DE DATA FIM DA RECORRÊNCIA DESATIVA -->
 <script>
     const selectDuracao = document.getElementById('duracao_meses_recorrencia');
     const inputDataFim = document.getElementById('data_fim_recorrencia');
 
-    function atualizarEstadoInput() {
+    function atualizarCamposRecorrencia() {
         if (selectDuracao.value !== '') {
             inputDataFim.disabled = true;
             inputDataFim.value = '';
         } else {
             inputDataFim.disabled = false;
         }
-        }
 
-    // Atualiza sempre que o select mudar
-    selectDuracao.addEventListener('change', atualizarEstadoInput);
-
-    // Atualiza na carga da página, caso tenha valor já selecionado
-    window.addEventListener('load', atualizarEstadoInput);
-</script>
-
-<!-- CASO O CAMPO DE SELEÇÃO DE FATA FINAL SEJA INFORMADO, SELEÇÃO DE DURAÇÃO EM MESES DA RECORRÊNCIA É DEASTIVADO -->
-<script>
-    const selectDuracao = document.getElementById('duracao_meses_recorrencia');
-    const inputDataFim = document.getElementById('data_fim_recorrencia');
-
-    function atualizarEstadoInput() {
         if (inputDataFim.value !== '') {
             selectDuracao.disabled = true;
             selectDuracao.value = '';
@@ -929,11 +928,12 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     }
 
-    // Atualiza sempre que o select mudar
-    inputDataFim.addEventListener('change', atualizarEstadoInput);
+    // Atualiza sempre que um dos campos mudar
+    selectDuracao.addEventListener('change', atualizarCamposRecorrencia);
+    inputDataFim.addEventListener('change', atualizarCamposRecorrencia);
 
-    // Atualiza na carga da página, caso tenha valor já selecionado
-    window.addEventListener('load', atualizarEstadoInput);
+    // Atualiza na carga da página
+    window.addEventListener('load', atualizarCamposRecorrencia);
 </script>
 
 </body>
