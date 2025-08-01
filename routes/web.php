@@ -20,10 +20,10 @@ use App\Http\Middleware\CheckClinicaMiddleware;
 // -------------------- ODONTOLOGIA --------------------
 
 // MENU
-Route::get('/odontologia/menu_agenda_odontologia', function () {
+Route::get('/odontologia/menu_agenda', function () {
     $usuario = session('usuario');
-    return view('odontologia/menu_agenda_odontologia', compact('usuario'));
-})->name('menu_agenda_odontologia');
+    return view('odontologia/menu_agenda', compact('usuario'));
+})->name('menu_agenda');
 
 // MIDDLEWARE DE ROTAS ODONTOLOGIA
 Route::middleware([AuthMiddleware::class, CheckClinicaMiddleware::class])->prefix('odontologia')->group(function () {
