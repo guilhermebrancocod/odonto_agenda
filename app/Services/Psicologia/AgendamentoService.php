@@ -111,6 +111,7 @@ class AgendamentoService
     public function addMensagemCancelamento($id, String $msg)
     {
         $agendamento = FaesaClinicaAgendamento::findOrFail($id);
+        $agendamento->STATUS_AGEND = "Cancelado";
         $agendamento->MENSAGEM = $msg;
         $agendamento->save();
 

@@ -69,13 +69,16 @@
         <div class="modal-dialog">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h5>Motivo do Cancelamento</h5>
+                    <h5 class="modal-title">Motivo do Cancelamento</h5>
                 </div>
-                <div class="modal-body"></div>
-                    <label for="text-cancelamento" class="form-label">Motivo do Cancelamento</label>
-                    <input type="text" class="form-control" id="text-cancelamento">
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label for="text-cancelamento" class="form-label">Motivo:</label>
+                        <input type="text" class="form-control" id="text-cancelamento">
+                    </div>
+                </div>
                 <div class="modal-footer">
-                    <button class="btn btn-secondary" id="btnMensagemCancelamento">Salvar</button>
+                    <button class="btn btn-primary" id="btnMensagemCancelamento">Salvar</button>
                 </div>
             </div>
         </div>
@@ -86,7 +89,6 @@
 <!-- FULLCALENDAR SCRIPT -->
 <script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.11/index.global.min.js"></script>
 <script>
-    document.addEventListener("DOMContentLoaded", function () {
         const calendarEl = document.getElementById("calendar");
 
         const calendar = new FullCalendar.Calendar(calendarEl, {
@@ -152,47 +154,52 @@
             const eventId = this.getAttribute('data-event-id');
             const novoStatus = document.getElementById('modalStatusSelect').value;
 
-            fetch(`/psicologia/agendamentos/${eventId}/status`, {
-                method: 'PUT',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
-                },
-                body: JSON.stringify({ status: novoStatus })
-            })
-            .then(response => {
-                if (!response.ok) {
-                    throw new Error('Erro ao atualizar status.');
-                }
-                return response.json();
-            })
-            .then(data => {
-                calendar.refetchEvents();
-
+            if (document.getElementById('modalStatusSelect').value == "Cancelado"){
+                bootstrap.Modal.getInstance(document.getElementById('agendamentoModal')).hide();
                 // Adiciona Modal para preencher Mensagem de cancelamento
                 const modal = new bootstrap.Modal((document.getElementById('motivoCancelamentoModal')));
                 modal.show();
+            } else {
+                fetch(`/psicologia/agendamentos/${eventId}/status`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+                    },
+                    body: JSON.stringify({ status: novoStatus })
+                })
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Erro ao atualizar status.');
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    calendar.refetchEvents();
 
-                bootstrap.Modal.getInstance(document.getElementById('agendamentoModal')).hide();
-            })
-            .catch(error => {
-                alert('Erro: ' + error.message);
-            });
+                    bootstrap.Modal.getInstance(document.getElementById('agendamentoModal')).hide();
+                })
+                .catch(error => {
+                    alert('Erro: ' + error.message);
+                });
+            }
+
         });
 
-    });
 </script>
 
 <!-- ENVIO DE MODAL DE MOTIVO DE CANCELAMENTO -->
 <script>
-    document.addEventListener("DOMContentLoaded", function() {
-        document.getElementById("btnMensagemCancelamento").addEventListener('click', function() {
+    document.getElementById("btnMensagemCancelamento").addEventListener('click', function() {
 
-            const content = document.getElementById('text-cancelamento').value;
-            const eventId = this.getAttribute('data-event-id');
+        const content = document.getElementById('text-cancelamento').value;
+        const eventId = this.getAttribute('data-event-id');
 
+        if (!content) {
+            alert("Insira um motivo para poder continuar")
+        } else {
             fetch(`/psicologia/agendamentos/${eventId}/mensagem-cancelamento`, {
-                method: 'POST',
+                method: 'PUT',
                 headers: {
                     'Content-Type': 'application/json',
                     'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
@@ -200,15 +207,22 @@
                 body: JSON.stringify({ mensagem : content, id : eventId })
             })
             .then(response => {
-                 if (!response.ok) {
+                if (!response.ok) {
                     throw new Error('Erro ao atualizar agendamento.');
                 }
                 return response.json();
             })
+            .then(data => {
+                document.getElementById('text-cancelamento').value = '';
+                calendar.refetchEvents();
+                bootstrap.Modal.getInstance(document.getElementById('motivoCancelamentoModal')).hide();
+            })
             .catch(error => {
                 alert('Erro: ' + error.message);
             });
-        })
+        }
+
+
     })
 </script>
 
