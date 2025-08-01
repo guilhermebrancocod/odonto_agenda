@@ -180,6 +180,13 @@
             </script>
         @endif
 
+                <div class="alert alert-danger">
+                    <ul>
+                        <li>Ao criar um bloqueio, os horários que já foram cadastrados no período travado não serão alterados!</li>
+                        <li>Lembre-se de reagendar ou remarcar todos os agendamentos nesse período</li>
+                    </ul> 
+                </div>   
+                
         <!-- FORMULÁRIO DE CRIAÇÃO DE HORARIO -->
         <form class="needs-validation" action="{{ route('criarHorario-Psicologia') }}" method="POST" novalidate>
 
@@ -240,7 +247,7 @@
                 <div class=" mt-2">
                     <label for="OBSERVACAO" class="form-label">Observações</label>
                     <textarea name="OBSERVACAO" id="OBSERVACAO" class="form-control" placeholder="Observações..." rows="3">{{ old('OBSERVACAO') }}</textarea>
-                </div> 
+                </div>
 
             <!-- BOTÃO DE SALVAR | SUBMIT -->
             <div class="text-end mt-4">

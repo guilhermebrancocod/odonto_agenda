@@ -26,6 +26,9 @@ class FaesaClinicaPaciente extends Model
         'FONE_PACIENTE',
         'E_MAIL_PACIENTE',
         'MUNICIPIO',
+        'NOME_RESPONSAVEL',
+        'CPF_RESPONSAVEL',
+        'COD_SUS',
     ];
 
     /**
