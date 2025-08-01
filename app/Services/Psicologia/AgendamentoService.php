@@ -106,4 +106,14 @@ class AgendamentoService
     {
         
     }
+
+    // ADICIONA MENSAGEM DE MOTIVO DE CANCELAMENTO AO AGENDAMENTO
+    public function addMensagemCancelamento($id, String $msg)
+    {
+        $agendamento = FaesaClinicaAgendamento::findOrFail($id);
+        $agendamento->MENSAGEM = $msg;
+        $agendamento->save();
+
+        return $agendamento;
+    }
 }

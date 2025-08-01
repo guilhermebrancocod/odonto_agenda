@@ -64,6 +64,7 @@
     </div>
     </div>
 
+    <!-- MODAL DE MOTIVO DE CANCELAMENTO -->
     <div class="modal fade" id="motivoCancelamentoModal" tabindex="-1">
         <div class="modal-dialog">
             <div class="modal-content">
@@ -71,8 +72,11 @@
                     <h5>Motivo do Cancelamento</h5>
                 </div>
                 <div class="modal-body"></div>
-                    <input type="text" name="nariz" id="grande">
-                <div class="modal-footer"></div>
+                    <label for="text-cancelamento" class="form-label">Motivo do Cancelamento</label>
+                    <input type="text" class="form-control" id="text-cancelamento">
+                <div class="modal-footer">
+                    <button class="btn btn-secondary" id="btnMensagemCancelamento">Salvar</button>
+                </div>
             </div>
         </div>
     </div>
@@ -137,6 +141,7 @@
 
                 const modal = new bootstrap.Modal(document.getElementById('agendamentoModal'));
                 document.getElementById('btnSalvarStatus').setAttribute('data-event-id', event.id);
+                document.getElementById('btnMensagemCancelamento').setAttribute('data-event-id', event.id);
                 modal.show();
             }
         });
@@ -176,6 +181,35 @@
         });
 
     });
+</script>
+
+<!-- ENVIO DE MODAL DE MOTIVO DE CANCELAMENTO -->
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+        document.getElementById("btnMensagemCancelamento").addEventListener('click', function() {
+
+            const content = document.getElementById('text-cancelamento').value;
+            const eventId = this.getAttribute('data-event-id');
+
+            fetch(`/psicologia/agendamentos/${eventId}/mensagem-cancelamento`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+                },
+                body: JSON.stringify({ mensagem : content, id : eventId })
+            })
+            .then(response => {
+                 if (!response.ok) {
+                    throw new Error('Erro ao atualizar agendamento.');
+                }
+                return response.json();
+            })
+            .catch(error => {
+                alert('Erro: ' + error.message);
+            });
+        })
+    })
 </script>
 
 </html>

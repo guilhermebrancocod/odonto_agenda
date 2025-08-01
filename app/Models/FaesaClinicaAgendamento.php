@@ -27,6 +27,7 @@ class FaesaClinicaAgendamento extends Model
         'VALOR_AGEND',
         'OBSERVACOES',
         'LOCAL',
+        'MENSAGEM',
         'CREATED_AT',
         'UPDATED_AT',
     ];

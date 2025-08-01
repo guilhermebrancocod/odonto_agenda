@@ -615,4 +615,11 @@ class AgendamentoController extends Controller
 
         return false; // Nenhum horário permitido contemplou esse intervalo
     }
+
+    // ADICIONA MENSAGEM DE MOTIVO DE CANCELAMENTO AO AGENDAMENTO
+    public function addMensagemCancelamento(Request $request)
+    {
+        $this->agendamentoService->addMensagemCancelamento($request->id, $request->mensagem);
+        return redirect('/psicologia')->with('success', 'Mensagem de Cancelamento adicionada com sucesso!');
+    }
 }
