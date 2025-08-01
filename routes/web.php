@@ -299,7 +299,7 @@ Route::get('/psicologia/consultar-paciente/', function () {
 Route::get('/psicologia/consultar-paciente/buscar/', [PacienteController::class, 'getPaciente'])->name('getPaciente');
 
 //DELETE DE PACIENTE - PSICOLOGIA
-Route::delete('psicologia/excluir-paciente/{id}', [PacienteController::class, 'deletePaciente'])->name('deletePaciente-Psicologia');
+Route::delete('/psicologia/excluir-paciente/{id}', [PacienteController::class, 'deletePaciente'])->name('deletePaciente-Psicologia');
 
 // CONSULTA DE AGENDAMENTO
 Route::get('/psicologia/consultar-agendamento', function () {
