@@ -479,10 +479,13 @@ class AgendamentoController extends Controller
         $observacoes = $validatedData['observacoes'];
         $mensagem = $validatedData['mensagem'];
 
-        $agendamento->STATUS_AGEND = "Remarcado";
-        $agendamento->save();
-        $agendamento = new FaesaClinicaAgendamento();
-        $agendamento->ID_AGEND_REMARCADO = $idAgendamento;
+        if ($data != $agendamento->DT_AGEND->format('Y-m-d'))
+        {
+            $agendamento->STATUS_AGEND = "Remarcado";
+            $agendamento->save();
+            $agendamento = new FaesaClinicaAgendamento();
+            $agendamento->ID_AGEND_REMARCADO = $idAgendamento;
+        }
         $agendamento->ID_SERVICO = $idServico;
         $agendamento->ID_CLINICA = $idClinica;
         $agendamento->ID_PACIENTE = $idPaciente;
