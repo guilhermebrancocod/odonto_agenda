@@ -287,7 +287,7 @@
                         const local = ag.LOCAL ?? '-';
                         const status = ag.STATUS_AGEND ?? '-';
 
-                        if (status != "Excluido"){
+                        if (status != "Excluido" && status != "Remarcado"){
                             const row = document.createElement('tr');
                             row.innerHTML = `
                                 <td>${paciente}</td>

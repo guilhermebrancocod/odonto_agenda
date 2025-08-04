@@ -373,9 +373,7 @@
         });
 
         function aoSelecionarLocal(local) {
-            console.log(local.ID_SALA_CLINICA)
             document.getElementById('local').value = local.DESCRICAO;
-            document.getElementById('id_clinica').value = local.ID_SALA_CLINICA;
         }
     </script>
 

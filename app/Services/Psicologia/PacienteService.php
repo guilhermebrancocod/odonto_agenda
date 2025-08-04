@@ -49,6 +49,7 @@ class PacienteService
         return DB::table('FAESA_CLINICA_AGENDAMENTO')
             ->where('ID_PACIENTE', $id)
             ->where('STATUS_AGEND', '<>', 'Excluido')
+            ->where('STATUS_AGEND', '<>', 'Remarcado')
             ->exists();
     }
 
