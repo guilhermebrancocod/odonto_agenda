@@ -38,6 +38,7 @@ class AgendamentoController extends Controller
         $agendamentos = FaesaClinicaAgendamento::with('paciente', 'servico')
             ->where('ID_CLINICA', 1)
             ->where('STATUS_AGEND', '<>', 'Excluido')
+            ->where('STATUS_AGEND', '<>', 'Remarcado')
             ->get();
 
         $events = $agendamentos
@@ -82,6 +83,7 @@ class AgendamentoController extends Controller
             ->where('ID_CLINICA', 1)
             ->where('ID_PACIENTE', $idPaciente)
             ->where('STATUS_AGEND', '<>', 'Excluido')
+            ->where('STATUS_AGEND', '<>', 'Remarcado')
             ->orderBy('DT_AGEND', 'desc')
             ->get();
 
@@ -451,6 +453,7 @@ class AgendamentoController extends Controller
             'id_servico' => 'required|integer',
             'id_clinica' => 'required|integer',
             'id_paciente' => 'required|integer',
+            'id_agend_remarcado' => 'nullable|integer',
             'local' => 'nullable|string',
             'date' => 'required|date',
             'start_time' => 'required',
@@ -476,14 +479,25 @@ class AgendamentoController extends Controller
         $observacoes = $validatedData['observacoes'];
         $mensagem = $validatedData['mensagem'];
 
+        if ($data != $agendamento->DT_AGEND->format('Y-m-d'))
+        {
+            $agendamento->STATUS_AGEND = "Remarcado";
+            $agendamento->save();
+            $agendamento = new FaesaClinicaAgendamento();
+            $agendamento->ID_AGEND_REMARCADO = $idAgendamento;
+        }
         $agendamento->ID_SERVICO = $idServico;
+        $agendamento->ID_CLINICA = $idClinica;
+        $agendamento->ID_PACIENTE = $idPaciente;
         $agendamento->DT_AGEND = $data;
         $agendamento->HR_AGEND_INI = $horaIni;
         $agendamento->HR_AGEND_FIN = $horaFim;
-        $agendamento->STATUS_AGEND = $status;
         $agendamento->VALOR_AGEND = $valor_agend;
         $agendamento->OBSERVACOES = $observacoes;
+        $agendamento->STATUS_AGEND = $status;
         $agendamento->MENSAGEM = $mensagem;
+        $agendamento->LOCAL = $local;
+
 
         // Valida conflito de agendamento
         if ($this->existeConflitoAgendamento($idClinica, $local, $data, $horaIni, $horaFim, $idPaciente, $idAgendamento)) {
@@ -560,7 +574,8 @@ class AgendamentoController extends Controller
                 $q->where('LOCAL', $local)
                 ->orWhere('ID_PACIENTE', $idPaciente);
             })
-            ->where('STATUS_AGEND', '<>', 'Excluido');
+            ->where('STATUS_AGEND', '<>', 'Excluido')
+            ->where('STATUS_AGEND', '<>', 'Remarcado');
 
         if ($idAgendamentoAtual) {
             $query->where('ID_AGENDAMENTO', '<>', $idAgendamentoAtual);
@@ -586,7 +601,8 @@ class AgendamentoController extends Controller
                 $q->where('HR_AGEND_INI', '<', $hrFim)
                 ->where('HR_AGEND_FIN', '>', $hrIni);
             })
-            ->where('STATUS_AGEND', '<>', 'Excluido');
+            ->where('STATUS_AGEND', '<>', 'Excluido')
+            ->where('STATUS_AGEND', '<>', 'Remarcado');
 
         // EVITA QUE ACUSE DE ERRO COM O PRÓPRIO AGENDAMENTO
         if ($idAgendamentoAtual) {

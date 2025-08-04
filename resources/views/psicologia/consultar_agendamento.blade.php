@@ -286,29 +286,27 @@
                         const horaFim = ag.HR_AGEND_FIN ? ag.HR_AGEND_FIN.substring(0, 5) : '-';
                         const local = ag.LOCAL ?? '-';
                         const status = ag.STATUS_AGEND ?? '-';
-
-                        if (status != "Excluido"){
-                            const row = document.createElement('tr');
-                            row.innerHTML = `
-                                <td>${paciente}</td>
-                                <td>${servico}</td>
-                                <td>${data}</td>
-                                <td>${horaIni}</td>
-                                <td>${horaFim}</td>
-                                <td>${local}</td>
-                                <td>${status}</td>
-                                <td>
-                                    <a href="/psicologia/agendamento/${ag.ID_AGENDAMENTO}" class="btn btn-sm btn-primary">Visualizar</a>
-                                    <a href="/psicologia/agendamento/${ag.ID_AGENDAMENTO}/editar" class="btn btn-sm btn-warning">Editar</a>
-                                    <form action="/psicologia/agendamento/${ag.ID_AGENDAMENTO}" method="POST" style="display:inline;" onsubmit="return confirm('Confirma a exclusão deste agendamento?');">
-                                        <input type="hidden" name="_method" value="DELETE" />
-                                        <input type="hidden" name="_token" value="${document.querySelector('meta[name=csrf-token]').content}" />
-                                        <button type="submit" class="btn btn-sm btn-danger">Excluir</button>
-                                    </form>
-                                </td>
-                            `;
-                            agendamentosTbody.appendChild(row);
-                        }
+                        const row = document.createElement('tr');
+                        row.innerHTML = `
+                            <td>${paciente}</td>
+                            <td>${servico}</td>
+                            <td>${data}</td>
+                            <td>${horaIni}</td>
+                            <td>${horaFim}</td>
+                            <td>${local}</td>
+                            <td>${status}</td>
+                            <td>
+                                <a href="/psicologia/agendamento/${ag.ID_AGENDAMENTO}" class="btn btn-sm btn-primary">Visualizar</a>
+                                <a href="/psicologia/agendamento/${ag.ID_AGENDAMENTO}/editar" class="btn btn-sm btn-warning">Editar</a>
+                                <form action="/psicologia/agendamento/${ag.ID_AGENDAMENTO}" method="POST" style="display:inline;" onsubmit="return confirm('Confirma a exclusão deste agendamento?');">
+                                    <input type="hidden" name="_method" value="DELETE" />
+                                    <input type="hidden" name="_token" value="${document.querySelector('meta[name=csrf-token]').content}" />
+                                    <button type="submit" class="btn btn-sm btn-danger">Excluir</button>
+                                </form>
+                            </td>
+                        `;
+                        agendamentosTbody.appendChild(row);
+                        
                     });
                 })
                 .catch(error => {

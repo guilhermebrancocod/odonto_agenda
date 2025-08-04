@@ -17,7 +17,9 @@ class AgendamentoService
             'agendamentoOriginal',
             'remarcacoes'
         ])
-        ->where('ID_CLINICA', 1);
+        ->where('ID_CLINICA', 1)
+        ->where('STATUS_AGEND', '<>', 'Excluido')
+        ->where('STATUS_AGEND', '<>', 'Remarcado');
 
         // Filtro por nome ou CPF do paciente
         if ($request->filled('search')) {
