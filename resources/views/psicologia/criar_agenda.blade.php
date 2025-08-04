@@ -275,24 +275,23 @@
                         Caso não selecione dia da semana e/ou data fim, serão gerados agendamentos por 1 mês por padrão.
                     </div>
 
-
-                        <!-- VALOR -->
-                        <div class="col-sm-6 col-md-3 mt-2">
-                            <label for="valor_agend" class="form-label">Valor</label>
-                            <div class="input-group">
-                                <span class="input-group-text">R$</span>
-                                <input type="text" name="valor_agend" id="valor_agend" class="form-control" placeholder="0,00" value="{{ old('valor_agend') }}">
-                            </div>
+                    <!-- VALOR -->
+                    <div class="col-sm-6 col-md-3 mt-2">
+                        <label for="valor_agend" class="form-label">Valor</label>
+                        <div class="input-group">
+                            <span class="input-group-text">R$</span>
+                            <input type="text" name="valor_agend" id="valor_agend" class="form-control" placeholder="0,00" value="{{ old('valor_agend') }}">
                         </div>
+                    </div>
 
-                        <!-- LOCAL -->
-                        <input type="hidden" name="id_sala_clinica" id="id_sala_clinica">
-                        <div class="col-sm-6 col-md-3 mt-2">
-                            <label for="local_agend" class="form-label">Local</label>
-                            <input type="text" name="local_agend" id="local_agend" class="form-control" placeholder="Local do atendimento" value="{{ old('local_agend') }}" autocomplete="off">
+                    <!-- LOCAL -->
+                    <input type="hidden" name="id_sala_clinica" id="id_sala_clinica">
+                    <div class="col-sm-6 col-md-3 mt-2">
+                        <label for="local_agend" class="form-label">Local</label>
+                        <input type="text" name="local_agend" id="local_agend" class="form-control" placeholder="Local do atendimento" value="{{ old('local_agend') }}" autocomplete="off">
 
-                            <div id="local-list" class="list-group position-absolute w-100" style="z-index: 1000;"></div>
-                        </div>
+                        <div id="local-list" class="list-group position-absolute w-100" style="z-index: 1000;"></div>
+                    </div>
                         
                     <!-- OBSERVAÇÕES -->
                     <div class="col-12 mt-2">

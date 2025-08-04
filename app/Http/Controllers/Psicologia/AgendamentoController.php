@@ -443,48 +443,62 @@ class AgendamentoController extends Controller
     }
 
     // CONTROLLER DE EDIÇÃO DE PACIENTE - Utiliza Injeção de Dependência
-    public function updateAgendamento(Request $request, FaesaClinicaModel $agendamentoModel)
+    public function updateAgendamento(Request $request)
     {
-        $request->validate([
+        // VALODATED DATA É UM ARRAY
+        $validatedData = $request->validate([
+            'id_agendamento' => 'required|integer',
+            'id_servico' => 'required|integer',
+            'id_clinica' => 'required|integer',
+            'id_paciente' => 'required|integer',
+            'local' => 'nullable|string',
             'date' => 'required|date',
             'start_time' => 'required',
             'end_time' => 'required',
             'status' => 'required|string',
+            'valor_agend' => 'nullable|numeric',
+            'observacoes' => 'nullable|string',
+            'mensagem' => 'nullable|string',
         ]);
 
-        $agendamento = agendamentoModel->findOrFail($id);
+        $agendamento = FaesaClinicaAgendamento::findOrFail($request->input('id_agendamento'));
 
-        $clinica = $agendamento->clinica;
-        $data = $request->input('date');
-        $horaIni = $request->input('start_time');
-        $horaFim = $request->input('end_time');
-        $local = $request->input('local', $agendamento->LOCAL);
-        $idSalaClinica = $request->input('id_sala_clinica', $agendamento->ID_SALA_CLINICA);
-        $status = $request->input('status');
-        $idClinica = $agendamento->ID_CLINICA;
-        $local = $agendamento->LOCAL;
-        $idPaciente = $agendamento->ID_PACIENTE;
+        $idClinica = $validatedData['id_clinica'];
+        $idPaciente = $validatedData['id_paciente'];
+        $idServico = $validatedData['id_servico'];
+        $idAgendamento = $validatedData['id_agendamento'];
+        $local = $validatedData['local'];
+        $data = $validatedData['date'];
+        $horaIni = $validatedData['start_time'];
+        $horaFim = $validatedData['end_time'];
+        $status = $validatedData['status'];
+        $valor_agend = $validatedData['valor_agend'];
+        $observacoes = $validatedData['observacoes'];
+        $mensagem = $validatedData['mensagem'];
+
+        $agendamento->ID_SERVICO = $idServico;
+        $agendamento->DT_AGEND = $data;
+        $agendamento->HR_AGEND_INI = $horaIni;
+        $agendamento->HR_AGEND_FIN = $horaFim;
+        $agendamento->STATUS_AGEND = $status;
+        $agendamento->VALOR_AGEND = $valor_agend;
+        $agendamento->OBSERVACOES = $observacoes;
+        $agendamento->MENSAGEM = $mensagem;
 
         // Valida conflito de agendamento
-        if ($this->existeConflitoAgendamento($idClinica, $local, $data, $horaIni, $horaFim, $idPaciente, $id)) {
+        if ($this->existeConflitoAgendamento($idClinica, $local, $data, $horaIni, $horaFim, $idPaciente, $idAgendamento)) {
             return redirect()->back()
                 ->withInput()
                 ->withErrors(['Conflito detectado: outro agendamento no mesmo horário/local ou para o mesmo paciente.']);
         }
 
         // Valida conflito exclusivo do paciente
-        if ($this->existeConflitoPaciente($idClinica, $idPaciente, $data, $horaIni, $horaFim, $id)) {
+        if ($this->existeConflitoPaciente($idClinica, $idPaciente, $data, $horaIni, $horaFim, $idAgendamento)) {
             return redirect()->back()
                 ->withInput()
                 ->withErrors(['Conflito detectado: o paciente já possui agendamento neste horário.']);
         }
 
-        // Atualiza se não houver conflitos
-        $agendamento->DT_AGEND = $data;
-        $agendamento->HR_AGEND_INI = $horaIni;
-        $agendamento->HR_AGEND_FIN = $horaFim;
-        $agendamento->STATUS_AGEND = $status;
-        $agendamento->LOCAL = $local;
         $agendamento->save();
 
         return redirect()->route('listagem-agendamentos', $agendamento->ID_AGENDAMENTO)
@@ -496,6 +510,7 @@ class AgendamentoController extends Controller
     {
         $agendamento = FaesaClinicaAgendamento::find($id);
 
+        // CASO NÃO ENCONTRE AGENDAMENTO
         if (!$agendamento) {
             return response()->json(['message' => 'Agendamento não encontrado'], 404);
         }
@@ -555,14 +570,14 @@ class AgendamentoController extends Controller
     }
 
     // VERIFICA CONFLITO EXCLUSIVO DO PACIENTE
-    private function existeConflitoPaciente($idClinica, $idPaciente, $dataAgend, $hrIni, $hrFim, $idAgendamentoAtual = null, FaesaClinicaAgendamento $agendamentoModel)
+    private function existeConflitoPaciente($idClinica, $idPaciente, $dataAgend, $hrIni, $hrFim, $idAgendamentoAtual = null)
     {
         // FORMATA VALORES
         $dataAgend = Carbon::parse($dataAgend)->format('Y-m-d');
         $hrIni = Carbon::parse($hrIni)->format('H:i:s');
         $hrFim = Carbon::parse($hrFim)->format('H:i:s');
 
-        $query = $agendamentoModel->where('ID_CLINICA', $idClinica)
+        $query = FaesaClinicaAgendamento::where('ID_CLINICA', $idClinica)
             ->where('ID_PACIENTE', $idPaciente)
             ->where('DT_AGEND', $dataAgend)
 

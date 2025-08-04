@@ -59,7 +59,6 @@ class ServicoController extends Controller
             }
         }
 
-        // ✅ Criação do serviço
         FaesaClinicaServico::create($validated);
 
         return redirect()->back()->with('success', 'Serviço criado com sucesso.');
@@ -68,9 +67,10 @@ class ServicoController extends Controller
     // PESQUISA OS SERVIÇOS DISPONÍVEIS
     public function getServicos(Request $request)
     {
+        // TIRA OS ESPAÇOS EM BRANCO
         $search = trim($request->query('search', ''));
 
-        $query = FaesaClinicaServico::where('ID_CLINICA', 1); // FILTRO FIXO PARA CLÍNICA DE PSICOLOGIA
+        $query = FaesaClinicaServico::where('ID_CLINICA', 1);
 
         if ($search) {
             $query->where('SERVICO_CLINICA_DESC', 'LIKE', "%{$search}%");

@@ -231,7 +231,6 @@ Route::get('psicologia//editar-paciente', function () {
 
 Route::post('/psicologia/editar-paciente/{id}', [PacienteController::class, 'editarPaciente'])->name('editarPaciente-Psicologia');
 
-
 Route::get('/psicologia/criar-agendamento', function () {
     return view('psicologia/criar_agenda');
 })->name('criaragenda_psicologia');
