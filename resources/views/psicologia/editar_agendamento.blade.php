@@ -59,6 +59,7 @@
 
                     <input type="hidden" name="id_paciente" value="{{ old('id_paciente', $agendamento->ID_PACIENTE) }}">
 
+
                     <!-- PACIENTE -->
                     <div class="mb-3">
                         <label for="paciente" class="form-label">Paciente</label>
@@ -68,10 +69,10 @@
                     <!-- SERVIÇO -->
                     <div class="mb-3">
                         <label for="servico" class="form-label">Serviço</label>
-                        <input type="text" id="servico" class="form-control" value="{{ $agendamento->servico->SERVICO_CLINICA_DESC ?? '-' }}">
+                        <input type="text" id="servico" class="form-control" value="{{ old('servico', $agendamento->servico->SERVICO_CLINICA_DESC ?? '-') }}">
 
                         <!-- LISTAGEM DE SERVIÇOS PÓS PESQUISA PARA SELEÇÃO -->
-                        <input type="hidden" name="id_servico" id="id_servico" value="{{ old('id_servico', $agendamento->ID_SERVICO_CLINICA) }}">
+                        <input type="hidden" name="id_servico" id="id_servico" value="{{ old('id_servico', $agendamento->ID_SERVICO) }}">
                         <div id="servicos-list" class="list-group position-absolute w-75" style="z-index: 100"></div>
                     </div>
 
