@@ -236,7 +236,7 @@ Route::get('/psicologia/criar-agendamento', function () {
     return view('psicologia/criar_agenda');
 })->name('criaragenda_psicologia');
 
-Route::post('/psicologia/agendamentos/{id}/mensagem-cancelamento', [AgendamentoController::class, 'addMensagemCancelamento']);
+Route::put('/psicologia/agendamentos/{id}/mensagem-cancelamento', [AgendamentoController::class, 'addMensagemCancelamento']);
 
 Route::post('/psicologia/criar-agendamento/criar', [AgendamentoController::class, 'criarAgendamento'])->name('criarAgendamento-Psicologia');
 
@@ -299,7 +299,7 @@ Route::get('/psicologia/consultar-paciente/', function () {
 Route::get('/psicologia/consultar-paciente/buscar/', [PacienteController::class, 'getPaciente'])->name('getPaciente');
 
 //DELETE DE PACIENTE - PSICOLOGIA
-Route::delete('psicologia/excluir-paciente/{id}', [PacienteController::class, 'deletePaciente'])->name('deletePaciente-Psicologia');
+Route::delete('/psicologia/excluir-paciente/{id}', [PacienteController::class, 'deletePaciente'])->name('deletePaciente-Psicologia');
 
 // CONSULTA DE AGENDAMENTO
 Route::get('/psicologia/consultar-agendamento', function () {

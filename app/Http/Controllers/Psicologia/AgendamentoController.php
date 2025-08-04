@@ -505,6 +505,9 @@ class AgendamentoController extends Controller
         ]);
 
         $agendamento->STATUS_AGEND = $request->status;
+        if ($request->status != "Cancelado") {
+            $agendamento->MENSAGEM = null;
+        }
         $agendamento->save();
 
         return response()->json(['message' => 'Status atualizado com sucesso']);
@@ -620,6 +623,9 @@ class AgendamentoController extends Controller
     public function addMensagemCancelamento(Request $request)
     {
         $this->agendamentoService->addMensagemCancelamento($request->id, $request->mensagem);
-        return redirect('/psicologia')->with('success', 'Mensagem de Cancelamento adicionada com sucesso!');
+        return response()->json([
+            'success' => true,
+            'message' => 'Mensagem de Cancelamento adicionada com sucesso!'
+        ]);
     }
 }
