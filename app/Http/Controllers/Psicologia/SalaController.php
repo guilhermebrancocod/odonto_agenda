@@ -35,6 +35,7 @@ class SalaController extends Controller
         $search = trim($request->query('search', ''));
 
         $salas = FaesaClinicaSala::where('DESCRICAO', 'like', "%{$search}%")
+                    ->where('ATIVO', '<>', 'N')
                     ->select('ID_SALA_CLINICA', 'DESCRICAO')
                     ->get();
 

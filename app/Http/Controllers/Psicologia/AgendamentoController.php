@@ -8,6 +8,7 @@ use App\Models\FaesaClinicaAgendamento;
 use App\Models\FaesaClinicaServico;
 use App\Models\FaesaClinicaHorario;
 use App\Http\Controllers\Psicologia\PacienteController;
+use App\Models\FaesaClinicaSala;
 use App\Services\Psicologia\PacienteService;
 use App\Services\Psicologia\AgendamentoService;
 use Carbon\Carbon;
@@ -408,6 +409,14 @@ class AgendamentoController extends Controller
             'LOCAL' => $request->local_agend ?? null,
         ];
 
+        //Verifica se a sala está ativa
+        if (!$this->salaEstaAtiva($request->local_agend))
+        {
+            return redirect()->back()
+                ->withInput()
+                ->withErrors(['sala_indisponivel' => 'Sala não está disponível.']);
+        }
+
         // VERIFICA HORÁRIOS DISPONÍVEIS
         if (!$this->horarioEstaDisponivel($idClinica, $request->dia_agend, $request->hr_ini, $request->hr_fim)) {
             return redirect()->back()
@@ -500,6 +509,14 @@ class AgendamentoController extends Controller
         $valor_agend = $validatedData['valor_agend'];
         $observacoes = $validatedData['observacoes'];
         $mensagem = $validatedData['mensagem'];
+
+        //Verifica se a sala está ativa
+        if (!$this->salaEstaAtiva($request->local)) 
+        {
+            return redirect()->back()
+                ->withInput()
+                ->withErrors(['sala_indisponivel' => 'Sala não está disponível.']);
+        }
 
         // Valida conflito de agendamento
         if ($this->existeConflitoAgendamento($idClinica, $local, $data, $horaIni, $horaFim, $idPaciente, $idAgendamento)) {
@@ -637,6 +654,29 @@ class AgendamentoController extends Controller
         }        
         return $query->exists();
     }
+
+    private function salaEstaAtiva($salaAgendamento)
+    {
+
+
+        if ($salaAgendamento == null) {
+            return true; //Se nenhuma sala for selecionada, não retorna erro
+        }
+
+        // Busca todas as salas INATIVAS da clínica
+        $salasInativas = FaesaClinicaSala::where('ATIVO', 'N')->get();
+
+
+        // Verifica se alguma dessas salas tem a descrição igual à sala do agendamento
+        foreach ($salasInativas as $sala) {
+            if ($sala->DESCRICAO === $salaAgendamento) {
+                return false; // A sala está disponível (está inativa e é a sala desejada)
+            }
+        }
+
+        return true; // Nenhuma sala inativa bate com a descrição
+    }
+
 
     private function horarioEstaDisponivel($idClinica, $dataAgendamento, $horaInicio, $horaFim)
     {
