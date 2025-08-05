@@ -28,7 +28,7 @@
             align-items: stretch;
         }
         .modal-body { max-height: 60vh; overflow-y: auto; }
-        /* Espaçamento para o container do limit select */
+
         #limit-container {
             margin-top: 12px;
             display: flex;
@@ -54,6 +54,32 @@
             overflow-y: auto;
             border: 1.8px solid #dee2e6;
         }
+
+
+        /* CSS DA MENSAGEM DE SUCESSO */
+        @keyframes slideDownFadeOut {
+        0% {
+            opacity: 0;
+            transform: translateY(-100%);
+        }
+        10% {
+            opacity: 1;
+            transform: translateY(0);
+        }
+        90% {
+            opacity: 1;
+            transform: translateY(0);
+        }
+        100% {
+            opacity: 0;
+            transform: translateY(-100%);
+        }
+    }
+
+    .animate-slide-down {
+        animation: slideDownFadeOut 5s ease forwards;
+        z-index: 9999;
+    }
     </style>
 </head>
 
@@ -76,7 +102,7 @@
 
         <!-- MOSTRA MENSAGEM DE SUCESSO AO USUARIO APÓS UMA AÇÃO BEM SUCEDIDA -->
         @if(session('success'))
-            <div class="alert alert-success">
+            <div id="success-alert" class="alert alert-success fixed-top text-center mx-auto w-50 shadow animate-slide-down">
                 {{ session('success') }}
             </div>
         @endif
@@ -390,5 +416,15 @@
         flatpickr.localize(flatpickr.l10ns.pt);
     </script>
 
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            const alert = document.getElementById("success-alert");
+            if (alert) {
+                setTimeout(() => {
+                    alert.remove();
+                }, 5000); // remove após a animação de 5 segundos
+            }
+        });
+    </script>
 </body>
 </html>

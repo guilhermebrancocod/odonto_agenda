@@ -81,7 +81,7 @@ class AgendamentoService
 
         $query->orderBy('DT_AGEND', 'desc');
 
-        // Limita o número de registros retornados
+        // Limita o número de registros retornados - Limite de 100
         $limit = min((int) $request->input('limit', 10), 100);
 
         $agendamentos = $query->limit($limit)->get();

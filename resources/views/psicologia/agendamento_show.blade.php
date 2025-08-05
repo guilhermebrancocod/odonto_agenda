@@ -3,7 +3,10 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <link rel="icon" type="image/png" href="{{ asset('faesa_favicon.png') }}" />
+
+    <!-- FAVICON - IMAGEM DA GUIA -->
+    <link rel="icon" type="image/png" href="/favicon_faesa.png">
+
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700&display=swap" rel="stylesheet" />
     <link href="https://cdnjs.cloudflare.com/ajax/libs/mdb-ui-kit/7.1.0/mdb.min.css" rel="stylesheet" />
     <meta name="csrf-token" content="{{ csrf_token() }}" />
@@ -55,6 +58,18 @@
                 <tr>
                     <th>Status</th>
                     <td>{{ $agendamento->STATUS_AGEND }}</td>
+                </tr>
+                <tr>
+                    <th>É um reagendamento?</th>
+                    <td>
+                        {{ $agendamento->ID_AGEND_REMARCADO !== null ? 'Sim' : 'Não' }}
+                        @if($agendamento->ID_AGEND_REMARCADO)
+                            |
+                            <a href="{{ url('/psicologia/agendamento/' . $agendamento->ID_AGEND_REMARCADO) }}" class="btn">
+                                <i class="bi bi-arrow-right-square"></i>
+                            </a>
+                        @endif
+                    </td>
                 </tr>
                 <tr>
                     <th>Observações</th>

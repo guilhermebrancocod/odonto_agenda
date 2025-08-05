@@ -4,6 +4,10 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>Editar Agendamento</title>
+
+    <!-- FAVICON - IMAGEM DA GUIA -->
+    <link rel="icon" type="image/png" href="/favicon_faesa.png">
+
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700&display=swap" rel="stylesheet" />
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" />
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css" />
@@ -58,8 +62,7 @@
                     <input type="hidden" id="id_clinica" name="id_clinica" value="{{ old('id_clinica', $agendamento->ID_CLINICA) }}">
 
                     <input type="hidden" name="id_paciente" value="{{ old('id_paciente', $agendamento->ID_PACIENTE) }}">
-
-
+                    
                     <!-- PACIENTE -->
                     <div class="mb-3">
                         <label for="paciente" class="form-label">Paciente</label>
@@ -164,7 +167,11 @@
                         <button type="submit" class="btn btn-success flex-grow-1 fw-bold" id="btnSalvarAlteracoes">
                             <i class="bi bi-save me-2"></i> Salvar Alterações
                         </button>
-                        <button type="button" class="btn btn-outline-secondary flex-grow-1 fw-bold" onclick="history.back()">
+                        <button 
+                            type="button" 
+                            class="btn btn-outline-secondary flex-grow-1 fw-bold" 
+                            onclick="window.history.back();"
+                        >
                             <i class="bi bi-x-circle me-2"></i> Cancelar
                         </button>
                     </div>
@@ -216,6 +223,7 @@
             altInput: true,
             altFormat: "d/m/Y",
             locale: "pt",
+            minDate: "today",
         });
 
         flatpickr("#start_time", {
