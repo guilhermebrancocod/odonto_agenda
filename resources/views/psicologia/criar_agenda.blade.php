@@ -4,7 +4,10 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>Agendamento</title>
-    <link rel="icon" type="image/png" href="{{ asset('favicon_faesa.png') }}" />
+
+    <!-- FAVICON - IMAGEM DA GUIA -->
+    <link rel="icon" type="image/png" href="/favicon_faesa.png">
+    
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700&display=swap" rel="stylesheet" />
     <link href="https://cdnjs.cloudflare.com/ajax/libs/mdb-ui-kit/7.1.0/mdb.min.css" rel="stylesheet" />
 
@@ -131,6 +134,13 @@
         {{ session('success') }}
     </div>
 @endif
+
+@if(session('error'))
+    <div id="alert-error" class="alert alert-danger text-center shadow position-fixed top-0 start-50 translate-middle-x mt-3" style="z-index: 1050; max-width: 90%;">
+        {{ session('error') }}
+    </div>
+@endif
+
 
 <div id="content-wrapper" class="bg-light">
     <main>

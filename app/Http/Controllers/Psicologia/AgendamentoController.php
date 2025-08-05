@@ -475,16 +475,16 @@ class AgendamentoController extends Controller
             'local' => 'nullable|string',
             'date' => 'required|date',
             'start_time' => 'required',
-            'end_time' => 'required',
+            'end_time' => 'required|after:start_time',
             'status' => 'required|string',
             'valor_agend' => 'nullable|numeric',
             'observacoes' => 'nullable|string',
             'mensagem' => 'nullable|string',
         ],[
             'id_servico.required' => 'Informe o Serviço do Agendamento antes de prosseguir',
+            'end_time.after' => 'O horário final deve ser igual ou posterior ao horário inicial',
         ]
         );
-        
 
         $agendamento = FaesaClinicaAgendamento::findOrFail($request->input('id_agendamento'));
 
@@ -500,26 +500,6 @@ class AgendamentoController extends Controller
         $valor_agend = $validatedData['valor_agend'];
         $observacoes = $validatedData['observacoes'];
         $mensagem = $validatedData['mensagem'];
-
-        if ($data != $agendamento->DT_AGEND->format('Y-m-d'))
-        {
-            $agendamento->STATUS_AGEND = "Remarcado";
-            $agendamento->save();
-            $agendamento = new FaesaClinicaAgendamento();
-            $agendamento->ID_AGEND_REMARCADO = $idAgendamento;
-        }
-        $agendamento->ID_SERVICO = $idServico;
-        $agendamento->ID_CLINICA = $idClinica;
-        $agendamento->ID_PACIENTE = $idPaciente;
-        $agendamento->DT_AGEND = $data;
-        $agendamento->HR_AGEND_INI = $horaIni;
-        $agendamento->HR_AGEND_FIN = $horaFim;
-        $agendamento->VALOR_AGEND = $valor_agend;
-        $agendamento->OBSERVACOES = $observacoes;
-        $agendamento->STATUS_AGEND = $status;
-        $agendamento->MENSAGEM = $mensagem;
-        $agendamento->LOCAL = $local;
-
 
         // Valida conflito de agendamento
         if ($this->existeConflitoAgendamento($idClinica, $local, $data, $horaIni, $horaFim, $idPaciente, $idAgendamento)) {
@@ -540,6 +520,25 @@ class AgendamentoController extends Controller
                 ->withInput()
                 ->withErrors(['horario_indisponivel' => 'O horário solicitado não está disponível.']);
         }
+
+        if ($data != $agendamento->DT_AGEND->format('Y-m-d'))
+        {
+            $agendamento->STATUS_AGEND = "Remarcado";
+            $agendamento->save();
+            $agendamento = new FaesaClinicaAgendamento();
+            $agendamento->ID_AGEND_REMARCADO = $idAgendamento;
+        }
+        $agendamento->ID_SERVICO = $idServico;
+        $agendamento->ID_CLINICA = $idClinica;
+        $agendamento->ID_PACIENTE = $idPaciente;
+        $agendamento->DT_AGEND = $data;
+        $agendamento->HR_AGEND_INI = $horaIni;
+        $agendamento->HR_AGEND_FIN = $horaFim;
+        $agendamento->VALOR_AGEND = $valor_agend;
+        $agendamento->OBSERVACOES = $observacoes;
+        $agendamento->STATUS_AGEND = $status;
+        $agendamento->MENSAGEM = $mensagem;
+        $agendamento->LOCAL = $local;
 
         $agendamento->save();
 
