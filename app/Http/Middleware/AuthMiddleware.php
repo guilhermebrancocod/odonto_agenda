@@ -67,7 +67,7 @@ class AuthMiddleware
             $response = Http::withHeaders([
                 'Accept' => "application/json",
                 'Authorization' => $apiKey
-            ])->timeout(5)->post($apiUrl, $credentials);
+            ])->withoutVerifying()->timeout(5)->post($apiUrl, $credentials);
 
             if($response->successful()) {
                 return [
