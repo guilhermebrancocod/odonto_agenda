@@ -126,6 +126,7 @@ class AgendamentoController extends Controller
             'paciente_id.required' => 'A seleção de paciente é obrigatória.',
             'id_servico.required' => 'A seleção de serviço obrigatória.',
             'dia_agend.required' => 'A data do agendamento é obrigatória.',
+            'data_fim_recorrencia.after' => 'A data final da recorrência deve ser igual ou posterior à data inicial.',
             'hr_ini.required' => 'A hora de início é obrigatória.',
             'hr_fim.required' => 'A hora de término é obrigatória.',
             'hr_fim.after' => 'A hora de término deve ser posterior à hora de início.',
@@ -239,19 +240,25 @@ class AgendamentoController extends Controller
 
             // SE ELE ACHA DIAS COM CONFLITO, GERA PARA TODOS OS DIAS SEM CONFLITO MENOS PARA O QUE TEM CONFLITO
             if (!empty($diasComConflito)) {
-                if($dataFormatada == $diasComConflito[0]) {
+                // Se nenhum agendamento foi criado (todos os dias deram conflito)
+                if (empty($agendamentosCriados)) {
                     return redirect('/psicologia/criar-agendamento/')
-                    ->with('error', 'Agendamento não pode ser criado pois há conflito: ' . $dataFormatada);
+                        ->with('error', 'Nenhum agendamento foi criado devido a conflitos em todos os dias selecionados.');
                 }
 
-                // Formata todos os dias com conflito para 'd-m-Y'
+                // Caso só alguns dias tenham dado conflito
                 $diasFormatados = array_map(function ($dia) {
                     return \Carbon\Carbon::parse($dia)->format('d-m-Y');
                 }, $diasComConflito);
 
+                $this->pacienteService->setEmAtendimento($request->paciente_id);
+
                 return redirect('/psicologia/criar-agendamento/')
                     ->with('success', 'Agendamentos criados, exceto para os dias com conflito: ' . implode(', ', $diasFormatados));
             }
+
+            // COLOCA PACIENTE "Em Atendimento"
+            $this->pacienteService->setEmAtendimento($request->paciente_id);
             return redirect('/psicologia/criar-agendamento/')
                 ->with('success', 'Agendamentos recorrentes criados conforme os dias e duração definidos!');
         }
@@ -336,6 +343,7 @@ class AgendamentoController extends Controller
             $dataInicio = Carbon::parse($request->dia_agend);
             $ret = $handleAgendamentoComConflito($dataInicio, $dataInicio->copy()->addWeeks(2));
             if ($ret) return $ret;
+            $this->pacienteService->setEmAtendimento($request->paciente_id);
             return redirect('/psicologia/criar-agendamento/')
                 ->with('success', 'Gerados 3 agendamentos, 1 por semana!');
         }
@@ -345,6 +353,7 @@ class AgendamentoController extends Controller
             $dataFim = $dataInicio->copy()->addMonths(6);
             $ret = $handleAgendamentoComConflito($dataInicio, $dataFim);
             if ($ret) return $ret;
+            $this->pacienteService->setEmAtendimento($request->paciente_id);
             return redirect('/psicologia/criar-agendamento/')
                 ->with('success', 'Atendimentos semanais gerados por 6 meses.');
         }
@@ -354,6 +363,7 @@ class AgendamentoController extends Controller
             $dataFim = $dataInicio->copy()->addYear();
             $ret = $handleAgendamentoComConflito($dataInicio, $dataFim);
             if ($ret) return $ret;
+            $this->pacienteService->setEmAtendimento($request->paciente_id);
             return redirect('/psicologia/criar-agendamento/')
                 ->with('success', 'Atendimentos semanais gerados para 1 ano.');
         }
@@ -364,11 +374,12 @@ class AgendamentoController extends Controller
             $dataFim = $dataInicio->copy()->addMonths($meses);
             $ret = $handleAgendamentoComConflito($dataInicio, $dataFim);
             if ($ret) return $ret;
+            $this->pacienteService->setEmAtendimento($request->paciente_id);
             return redirect('/psicologia/criar-agendamento/')
                 ->with('success', 'Atendimentos semanais gerados conforme recorrência padrão do serviço.');
         }
 
-        // AAGENDAMENTOS SIMPLES
+        // AGENDAMENTOS SIMPLES
         if ($this->existeConflitoAgendamento(
             $idClinica,
             $request->local_agend,
@@ -447,6 +458,13 @@ class AgendamentoController extends Controller
     // CONTROLLER DE EDIÇÃO DE PACIENTE - Utiliza Injeção de Dependência
     public function updateAgendamento(Request $request)
     {
+        // CASO TENHA VALOR INFORMADO, ADICIONA | SOBRESCREVE VALOR NA REQUEST
+        if ($request->has('valor_agend')) {
+            $request->merge([
+                'valor_agend' => str_replace(',', '.', $request->valor_agend),
+            ]);
+        }
+        
         // VALODATED DATA É UM ARRAY
         $validatedData = $request->validate([
             'id_agendamento' => 'required|integer',
@@ -462,7 +480,11 @@ class AgendamentoController extends Controller
             'valor_agend' => 'nullable|numeric',
             'observacoes' => 'nullable|string',
             'mensagem' => 'nullable|string',
-        ]);
+        ],[
+            'id_servico.required' => 'Informe o Serviço do Agendamento antes de prosseguir',
+        ]
+        );
+        
 
         $agendamento = FaesaClinicaAgendamento::findOrFail($request->input('id_agendamento'));
 
@@ -511,6 +533,12 @@ class AgendamentoController extends Controller
             return redirect()->back()
                 ->withInput()
                 ->withErrors(['Conflito detectado: o paciente já possui agendamento neste horário.']);
+        }
+
+        if (!$this->horarioEstaDisponivel($idClinica, $data, $horaIni, $horaFim)) {
+            return redirect()->back()
+                ->withInput()
+                ->withErrors(['horario_indisponivel' => 'O horário solicitado não está disponível.']);
         }
 
         $agendamento->save();
