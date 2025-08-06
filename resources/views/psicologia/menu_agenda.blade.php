@@ -160,6 +160,14 @@
                 document.getElementById('btnSalvarStatus').setAttribute('data-event-id', event.id);
                 document.getElementById('btnMensagemCancelamento').setAttribute('data-event-id', event.id);
                 modal.show();
+            },
+            eventContent: function(arg) {
+                if (screenWidth <= 700) {
+                    return { domNodes: [document.createTextNode(arg.event.title)] };
+                } else {
+                    const timeText = arg.timeText + ' ';
+                    return { domNodes: [document.createTextNode(timeText + arg.event.title)] };
+                }
             }
         };
     }
