@@ -414,7 +414,7 @@ class AgendamentoController extends Controller
         {
             return redirect()->back()
                 ->withInput()
-                ->withErrors(['sala_indisponivel' => 'Sala não está disponível.']);
+                ->withErrors(['sala_indisponivel' => 'Sala não está ativa.']);
         }
 
         // VERIFICA HORÁRIOS DISPONÍVEIS
