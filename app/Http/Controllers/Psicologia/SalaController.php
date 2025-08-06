@@ -27,14 +27,16 @@ class SalaController extends Controller
         $sala->save();
 
         return redirect()->route('salas_psicologia')->with('success', 'Sala criada com sucesso!');
-}
+    }
 
 
     public function getSala(Request $request)
     {
         $search = trim($request->query('search', ''));
 
+        // RETORNA APENAS SALAS QUE ESTÃO ATIVAS PARA CRIAR AGENDAMENTO
         $salas = FaesaClinicaSala::where('DESCRICAO', 'like', "%{$search}%")
+                    ->where('ATIVO', '<>', 'N')
                     ->select('ID_SALA_CLINICA', 'DESCRICAO')
                     ->get();
 
