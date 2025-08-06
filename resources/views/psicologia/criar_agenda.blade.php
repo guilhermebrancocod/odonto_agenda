@@ -294,13 +294,15 @@
                         </div>
                     </div>
 
+                    <!-- LOCAL -->
+                    <input type="hidden" name="id_sala_clinica" id="id_sala_clinica">
                     <div class="col-sm-6 col-md-3 mt-2 position-relative">
                         <label for="local_agend" class="form-label">Local</label>
                         <input type="text" name="local_agend" id="local_agend" class="form-control" placeholder="Local do atendimento" value="{{ old('local_agend') }}" autocomplete="off">
 
-                        <div id="local-list" class="list-group position-absolute w-100" style="z-index: 1000;"></div>
+                        <div id="local-list" class="list-group position-absolute w-100" style="z-index: 1000; top: 100%"></div>
                     </div>
-
+                        
                     <!-- OBSERVAÇÕES -->
                     <div class="col-12 mt-2">
                         <label for="observacoes" class="form-label">Observações</label>
