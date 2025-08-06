@@ -162,13 +162,11 @@
                 <input type="hidden" name="recorrencia" id="recorrencia"/>
                 <input type="hidden" name="status_agend" value="Em aberto"/>
 
-                <div class="mb-3">
-                    <div class="input-group">
-                        <input id="search-input" name="search" class="form-control" placeholder="Pesquisar paciente" value="{{ old('search') }}">
-                    </div>
+                <div class="mb-3 position-relative">
+                    <input id="search-input" name="search" class="form-control" placeholder="Pesquisar paciente" value="{{ old('search') }}">
 
                     <!-- LISTA DE PACIENTES ENCONTRADOS PARA AGENDAMENTO -->
-                    <div id="pacientes-list" class="list-group position-absolute mw-100" style="z-index: 1000;"></div>
+                    <div id="pacientes-list" class="list-group position-absolute w-100" style="z-index: 1000; top: 100%"></div>
                 </div>
 
                 <!-- SUBTÍTULO -->
@@ -392,7 +390,7 @@
                         const item = document.createElement('button');
                         item.type = 'button';
                         item.classList.add('list-group-item', 'list-group-item-action');
-                        item.textContent = `${paciente.NOME_COMPL_PACIENTE} (${paciente.CPF_PACIENTE}) - Nasc: ${formatarDataBR(paciente.DT_NASC_PACIENTE)}`;
+                        item.textContent = `${paciente.NOME_COMPL_PACIENTE} (${paciente.CPF_PACIENTE})`;
                         item.addEventListener('click', () => {
                             searchInput.value = `${paciente.NOME_COMPL_PACIENTE} (${paciente.CPF_PACIENTE})`;
                             /*pacienteSelecionadoDiv.innerHTML = 
@@ -799,7 +797,8 @@
         });
 
         flatpickr("#data_fim_recorrencia", {
-            dateFormat: "Y-m-d",
+            dateFormat: "d-m-Y",
+            altFormat: "Y-m-d",
             locale: "pt",
             minDate: "today",
             allowInput: true,
