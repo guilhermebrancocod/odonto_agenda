@@ -35,36 +35,43 @@
     <!-- CALENDÁRIO -->
     <div id="calendar" class="flex-grow-1 p-3 overflow-auto"></div>
 
-    <!-- Modal para detalhes do agendamento -->
+    <!-- MODAL PARA DETALHES DO AGENDAMENTO -->
     <div class="modal fade" id="agendamentoModal" tabindex="-1" aria-labelledby="agendamentoModalLabel" aria-hidden="true">
-    <div class="modal-dialog">
-        <div class="modal-content">
-        <div class="modal-header">
-            <h5 class="modal-title" id="agendamentoModalLabel">Detalhes do Agendamento</h5>
-            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fechar"></button>
-        </div>
-        <div class="modal-body">
-            <p><strong>Paciente:</strong> <span id="modalPaciente"></span></p>
-            <p><strong>Data e Horário:</strong> <span id="modalDataHora"></span></p>
-            <p><strong>Serviço:</strong> <span id="modalServico"></span></p>
-            <div class="mb-3">
-            <label for="modalStatusSelect" class="form-label"><strong>Status:</strong></label>
-            <select class="form-select" id="modalStatusSelect">
-                <option value="Agendado">Agendado</option>
-                <option value="Presente">Presente</option>
-                <option value="Cancelado">Cancelado</option>
-                <option value="Finalizado">Finalizado</option>
-            </select>
+        <div class="modal-dialog">
+            <div class="modal-content">
+                
+            <!-- CABEÇALHO MODAL -->
+                <div class="modal-header">
+                    <h5 class="modal-title" id="agendamentoModalLabel">Detalhes do Agendamento</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fechar"></button>
+                </div>
+
+                <!-- CORPO MODAL -->
+                <div class="modal-body">
+                    <p><strong>Paciente:</strong> <span id="modalPaciente"></span></p>
+                    <p><strong>Data e Horário:</strong> <span id="modalDataHora"></span></p>
+                    <p><strong>Serviço:</strong> <span id="modalServico"></span></p>
+                    <div class="mb-3">
+                    <label for="modalStatusSelect" class="form-label"><strong>Status:</strong></label>
+                    <select class="form-select" id="modalStatusSelect">
+                        <option value="Agendado">Agendado</option>
+                        <option value="Presente">Presente</option>
+                        <option value="Cancelado">Cancelado</option>
+                        <option value="Finalizado">Finalizado</option>
+                    </select>
+                    </div>
+                    <p><strong>Local:</strong> <span id="modalLocal"></span></p>
+                    <p><strong>Observações:</strong> <span id="modalObservacoes"></span></p>
+                </div>
+                
+                <!-- RODAPÉ MODAL -->
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-primary" id="btnSalvarStatus">Salvar Status</button>
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fechar</button>
+                </div>
+
             </div>
-            <p><strong>Local:</strong> <span id="modalLocal"></span></p>
-            <p><strong>Observações:</strong> <span id="modalObservacoes"></span></p>
         </div>
-        <div class="modal-footer">
-            <button type="button" class="btn btn-primary" id="btnSalvarStatus">Salvar Status</button>
-            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fechar</button>
-        </div>
-        </div>
-    </div>
     </div>
 
     <!-- MODAL DE MOTIVO DE CANCELAMENTO -->
@@ -92,22 +99,29 @@
 <!-- FULLCALENDAR SCRIPT -->
 <script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.11/index.global.min.js"></script>
 <script>
-        const calendarEl = document.getElementById("calendar");
+    let calendar; // variável global para poder destruir e recriar
 
-        const calendar = new FullCalendar.Calendar(calendarEl, {
-            initialView: "dayGridMonth",
+    function getCalendarOptions(screenWidth) {
+        return {
+            initialView: screenWidth <= 600 ? "dayGridDay" : "dayGridMonth",
             timeZone: 'local',
-            headerToolbar: {
-                left: "prev,next today",
-                center: "title",
-                right: "dayGridDay,timeGridWeek,dayGridMonth",
-            },
+            headerToolbar: screenWidth <= 600
+                ? {
+                    left: 'prev,next',
+                    center: '',
+                    right: 'dayGridDay,timeGridWeek,dayGridMonth',
+                }
+                : {
+                    left: 'prev,next today',
+                    center: 'title',
+                    right: 'dayGridDay,timeGridWeek,dayGridMonth',
+                },
             slotMinTime: "08:00:00",
             slotMaxTime: "20:30:00",
             businessHours: {
                 daysOfWeek: [1, 2, 3, 4, 5, 6],
                 startTime: "08:00",
-                endTime: "20:30",
+                endTime: "23:00",
             },
             buttonText: {
                 today: "Hoje",
@@ -123,13 +137,11 @@
                 alert("Selecionado de " + info.startStr + " até " + info.endStr);
             },
             eventDidMount: function(info) {
-                // Aplica a cor de fundo ao evento
                 info.el.style.backgroundColor = info.event.backgroundColor;
                 info.el.style.borderColor = info.event.backgroundColor;
-                info.el.style.color = 'white'; // ou outra cor que fique legível
+                info.el.style.color = 'white';
             },
             events: '/psicologia/agendamentos-calendar',
-
             eventClick: function(info) {
                 const event = info.event;
                 const start = event.start;
@@ -149,49 +161,74 @@
                 document.getElementById('btnMensagemCancelamento').setAttribute('data-event-id', event.id);
                 modal.show();
             }
-        });
+        };
+    }
 
+    function renderCalendar() {
+        const calendarEl = document.getElementById("calendar");
+
+        // Destroi o calendário anterior, se já existir
+        if (calendar) {
+            calendar.destroy();
+        }
+
+        // Cria nova instância com base na largura atual
+        const screenWidth = window.innerWidth;
+        const options = getCalendarOptions(screenWidth);
+
+        calendar = new FullCalendar.Calendar(calendarEl, options);
         calendar.render();
+    }
 
-        document.getElementById('btnSalvarStatus').addEventListener('click', function () {
-            const eventId = this.getAttribute('data-event-id');
-            const novoStatus = document.getElementById('modalStatusSelect').value;
+    // Renderiza na primeira vez
+    document.addEventListener('DOMContentLoaded', function () {
+        renderCalendar();
+    });
 
-            if (document.getElementById('modalStatusSelect').value == "Cancelado"){
+    // Recria o calendário ao redimensionar (com debounce)
+    let resizeTimeout;
+    window.addEventListener('resize', () => {
+        clearTimeout(resizeTimeout);
+        resizeTimeout = setTimeout(() => {
+            renderCalendar();
+        }, 300); // espera 300ms após parar de redimensionar
+    });
+
+    // SCRIPT PARA MUDANÇA DE STATUS DE AGENDAMENTO
+    document.getElementById('btnSalvarStatus').addEventListener('click', function () {
+        const eventId = this.getAttribute('data-event-id');
+        const novoStatus = document.getElementById('modalStatusSelect').value;
+
+        if (novoStatus === "Cancelado") {
+            bootstrap.Modal.getInstance(document.getElementById('agendamentoModal')).hide();
+            const modal = new bootstrap.Modal((document.getElementById('motivoCancelamentoModal')));
+            modal.show();
+        } else {
+            fetch(`/psicologia/agendamentos/${eventId}/status`, {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+                },
+                body: JSON.stringify({ status: novoStatus })
+            })
+            .then(response => {
+                if (!response.ok) throw new Error('Erro ao atualizar status.');
+                return response.json();
+            })
+            .then(data => {
+                calendar.refetchEvents();
                 bootstrap.Modal.getInstance(document.getElementById('agendamentoModal')).hide();
-                // Adiciona Modal para preencher Mensagem de cancelamento
-                const modal = new bootstrap.Modal((document.getElementById('motivoCancelamentoModal')));
-                modal.show();
-            } else {
-                fetch(`/psicologia/agendamentos/${eventId}/status`, {
-                    method: 'PUT',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
-                    },
-                    body: JSON.stringify({ status: novoStatus })
-                })
-                .then(response => {
-                    if (!response.ok) {
-                        throw new Error('Erro ao atualizar status.');
-                    }
-                    return response.json();
-                })
-                .then(data => {
-                    calendar.refetchEvents();
-
-                    bootstrap.Modal.getInstance(document.getElementById('agendamentoModal')).hide();
-                })
-                .catch(error => {
-                    alert('Erro: ' + error.message);
-                });
-            }
-
-        });
+            })
+            .catch(error => {
+                alert('Erro: ' + error.message);
+            });
+        }
+    });
 
 </script>
 
-<!-- ENVIO DE MODAL DE MOTIVO DE CANCELAMENTO -->
+<!-- MODAL DE CANCELAMENTO -->
 <script>
     document.getElementById("btnMensagemCancelamento").addEventListener('click', function() {
 
