@@ -368,15 +368,13 @@
 
     <!-- NÃO PERMITE ENVIO DE FORMULÁRIO DE PACIENTE AO CLICAR EM ENTER -->
     <script>
-        document.addEventListener('DOMContentLoaded', function () {
-            const form = document.getElementById('pacienteForm');
+        const form = document.getElementById('pacienteForm');
 
-            form.addEventListener('keydown', function (event) {
-                if (event.key === 'Enter' && event.target.tagName.toLowerCase() !== 'textarea') {
-                    event.preventDefault();
-                }
-            });
-        }); 
+        form.addEventListener('keydown', function (event) {
+            if (event.key === 'Enter' && event.target.tagName.toLowerCase() !== 'textarea') {
+                event.preventDefault();
+            }
+        });
     </script>
 
 </body>
