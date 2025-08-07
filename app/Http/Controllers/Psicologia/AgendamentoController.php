@@ -48,6 +48,8 @@ class AgendamentoController extends Controller
             $horaInicio = substr($agendamento->HR_AGEND_INI, 0, 8);
             $horaFim = substr($agendamento->HR_AGEND_FIN, 0, 8);
             $status = $agendamento->STATUS_AGEND;
+            $checkPagamento = $agendamento->STATUS_PAG;
+            $valorPagamento = $agendamento->VALOR_PAG;
 
             $start = Carbon::parse("{$dateOnly} {$horaInicio}", 'America/Sao_Paulo')->toIso8601String();
             $end = Carbon::parse("{$dateOnly} {$horaFim}", 'America/Sao_Paulo')->toIso8601String();
@@ -67,6 +69,8 @@ class AgendamentoController extends Controller
                 'start' => $start,
                 'end' => $end,
                 'status' => $status,
+                'checkPagamento' => $checkPagamento,
+                'valorPagamento' => $valorPagamento,
                 'servico' => $agendamento->servico->SERVICO_CLINICA_DESC ?? 'Serviço não informado',
                 'description' => $agendamento->OBSERVACOES ?? '',
                 'color' => $cor,
@@ -573,13 +577,30 @@ class AgendamentoController extends Controller
             return response()->json(['message' => 'Agendamento não encontrado'], 404);
         }
 
+        // ZERA O VALOR CASO O CHECK SEJA MARCADO COMO NÃO PAGO
+        if($request->checkPagamento == 'N') {
+            $request->merge(['valorPagamento' => 0.00]);
+        }
+
         $request->validate([
             'status' => 'required|in:Agendado,Presente,Finalizado,Cancelado',
             'checkPagamento' => 'in:S,N',
+            'valorPagamento' => 'required_if:checkPagamento,S|numeric',
+        ], [
+            'valorPagamento.required_if' => 'O campo valor do pagamento é obrigatório quando o pagamento está marcado como realizado.',
+            'valorPagamento.numeric' => 'O campo valor do pagamento deve ser um número válido.',
         ]);
+
+        // FORMATA VALOR DO PAGAMENTO CASO O TENHA
+        if($request->has('valorPagamento')) {
+            $request->merge([
+                'valorPagamento' => str_replace(',', '.', $request->valorPagamento),
+            ]);
+        }
 
         $agendamento->STATUS_AGEND = $request->status;
         $agendamento->STATUS_PAG = $request->checkPagamento;
+        $agendamento->VALOR_PAG = $request->valorPagamento;
 
         if ($request->status != "Cancelado") {
             $agendamento->MENSAGEM = null;

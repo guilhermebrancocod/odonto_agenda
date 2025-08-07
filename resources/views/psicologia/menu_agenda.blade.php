@@ -26,6 +26,7 @@
         integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz"
         crossorigin="anonymous">
     </script>
+
 </head >
     
 <body>
@@ -52,6 +53,7 @@
                     <p><strong>Data e Horário:</strong> <span id="modalDataHora"></span></p>
                     <p><strong>Serviço:</strong> <span id="modalServico"></span></p>
 
+                    <!-- STATUS AGENDAMENTO -->
                     <div class="mb-3">
                         <label for="modalStatusSelect" class="form-label"><strong>Status:</strong></label>
                         <select class="form-select" id="modalStatusSelect">
@@ -63,12 +65,21 @@
                     </div>
 
                     <!-- CHECK PAGAMENTO -->
-                    <div class="form-check mb-3">
+                    <div class="form-check mb-3" id="checkPagamentoAgendamento">
                         <input type="checkbox" class="form-check-input" id="modalCheckPagamento" name="STATUS_PAG" value="S">
                         <label for="modalCheckPagamento" class="form-check-label">Pago?</label>
                     </div>
 
+                    <!-- VALOR PAGO -->
+                    <div class="input-group mb-3 d-none" id="valorPagoAgendamento">
+                        <span class="input-group-text" for="modalValorPagamento">$</span>
+                        <input type="number" class="form-control" id="modalValorPagamento">
+                    </div>
+
+                    <!-- LOCAL -->
                     <p><strong>Local:</strong> <span id="modalLocal"></span></p>
+
+                    <!-- OBSERVAÇÕES -->
                     <p><strong>Observações:</strong> <span id="modalObservacoes"></span></p>
                 </div>
                 
@@ -103,7 +114,6 @@
     </div>
     
 </body >
-
 <!-- FULLCALENDAR SCRIPT -->
 <script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.11/index.global.min.js"></script>
 <script>
@@ -166,7 +176,21 @@
                 document.getElementById('modalStatusSelect').value = event.extendedProps.status || 'Agendado';
                 document.getElementById('modalLocal').textContent = event.extendedProps.local || 'Não informado';
                 document.getElementById('modalServico').textContent = event.extendedProps.servico || 'Não informado';
-                document.getElementById('modalCheckPagamento').value = event.extendedProps.checkPagamento || 'Não informado';
+
+                const checkPagamento = event.extendedProps.checkPagamento || 'N';
+                const checkPagamentoEl = document.getElementById('modalCheckPagamento');
+                checkPagamentoEl.checked = checkPagamento === 'S';
+                checkPagamentoEl.value = checkPagamento;
+
+                // Exibe campo de valor se estiver pago
+                const valorPagamentoSection = document.getElementById('valorPagoAgendamento');
+                if (checkPagamento === 'S') {
+                    valorPagamentoSection.classList.remove('d-none');
+                } else {
+                    valorPagamentoSection.classList.add('d-none');
+                }
+
+                document.getElementById('modalValorPagamento').value = event.extendedProps.valorPagamento || '';
 
                 const modal = new bootstrap.Modal(document.getElementById('agendamentoModal'));
                 document.getElementById('btnSalvarStatus').setAttribute('data-event-id', event.id);
@@ -221,8 +245,10 @@
         const eventId = this.getAttribute('data-event-id');
         // PEGA VALOR DO STATUS ATUALIZADO
         const novoStatus = document.getElementById('modalStatusSelect').value;
-        // PEGA VALOR DO PAGAMENTO ATUALIZADO
+        // PEGA STATUS DO PAGAMENTO ATUALIZADO
         const checkPagamento = document.getElementById('modalCheckPagamento').checked ? 'S' : 'N' ;
+        // PEGA VALOR DO PAGAMENTO ATUALIZADO
+        const valorPagamento = document.getElementById('modalValorPagamento').value;
 
         if (novoStatus === "Cancelado") {
             bootstrap.Modal.getInstance(document.getElementById('agendamentoModal')).hide();
@@ -235,7 +261,7 @@
                     'Content-Type': 'application/json',
                     'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
                 },
-                body: JSON.stringify({ status: novoStatus, checkPagamento: checkPagamento })
+                body: JSON.stringify({ status: novoStatus, checkPagamento: checkPagamento, valorPagamento: valorPagamento })
             })
             .then(response => {
                 if (!response.ok) throw new Error('Erro ao atualizar status.');
@@ -260,6 +286,7 @@
         const content = document.getElementById('text-cancelamento').value;
         const eventId = this.getAttribute('data-event-id');
         const checkPagamento = document.getElementById('modalCheckPagamento');
+        const valorPagamento = document.getElementById('modalValorPagamento');
 
         // CAOS NÃO INSIRA MOTIVO
         if (!content) {
@@ -271,7 +298,7 @@
                     'Content-Type': 'application/json',
                     'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
                 },
-                body: JSON.stringify({ mensagem : content, id : eventId, checkPagamento : checkPagamento })
+                body: JSON.stringify({ mensagem : content, id : eventId, checkPagamento : checkPagamento, valorPagamento: valorPagamento })
             })
             .then(response => {
                 if (!response.ok) {
@@ -288,9 +315,20 @@
                 alert('Erro: ' + error.message);
             });
         }
-
-
     })
 </script>
 
+<!-- SCRIPT PARA INPUT DE VALOR PAGO EM AGENDAMENTO | MODAL AGENDAMENTO -->
+<script>
+    const valorPagamentoSection = document.getElementById('valorPagoAgendamento');
+    const checkPagamentoSection = document.getElementById('modalCheckPagamento');
+
+    checkPagamentoSection.addEventListener('change', function() {
+        if(this.checked) {
+            valorPagamentoSection.classList.remove('d-none');
+        } else {
+            valorPagamentoSection.classList.add('d-none');
+        }
+    })
+</script>
 </html>
