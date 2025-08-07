@@ -575,15 +575,19 @@ class AgendamentoController extends Controller
 
         $request->validate([
             'status' => 'required|in:Agendado,Presente,Finalizado,Cancelado',
+            'checkPagamento' => 'in:S,N',
         ]);
 
         $agendamento->STATUS_AGEND = $request->status;
+        $agendamento->STATUS_PAG = $request->checkPagamento;
+
         if ($request->status != "Cancelado") {
             $agendamento->MENSAGEM = null;
         }
+
         $agendamento->save();
 
-        return response()->json(['message' => 'Status atualizado com sucesso']);
+        return response()->json(['message' => 'Agendamento atualizado com sucesso']);
     }
 
     // FUNÇÃO DE EXCLUSÃO DE AGENDAMENTP

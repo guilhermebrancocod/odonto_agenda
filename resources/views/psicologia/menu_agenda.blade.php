@@ -51,22 +51,30 @@
                     <p><strong>Paciente:</strong> <span id="modalPaciente"></span></p>
                     <p><strong>Data e Horário:</strong> <span id="modalDataHora"></span></p>
                     <p><strong>Serviço:</strong> <span id="modalServico"></span></p>
+
                     <div class="mb-3">
-                    <label for="modalStatusSelect" class="form-label"><strong>Status:</strong></label>
-                    <select class="form-select" id="modalStatusSelect">
-                        <option value="Agendado">Agendado</option>
-                        <option value="Presente">Presente</option>
-                        <option value="Cancelado">Cancelado</option>
-                        <option value="Finalizado">Finalizado</option>
-                    </select>
+                        <label for="modalStatusSelect" class="form-label"><strong>Status:</strong></label>
+                        <select class="form-select" id="modalStatusSelect">
+                            <option value="Agendado">Agendado</option>
+                            <option value="Presente">Presente</option>
+                            <option value="Cancelado">Cancelado</option>
+                            <option value="Finalizado">Finalizado</option>
+                        </select>
                     </div>
+
+                    <!-- CHECK PAGAMENTO -->
+                    <div class="form-check mb-3">
+                        <input type="checkbox" class="form-check-input" id="modalCheckPagamento" name="STATUS_PAG" value="S">
+                        <label for="modalCheckPagamento" class="form-check-label">Pago?</label>
+                    </div>
+
                     <p><strong>Local:</strong> <span id="modalLocal"></span></p>
                     <p><strong>Observações:</strong> <span id="modalObservacoes"></span></p>
                 </div>
                 
                 <!-- RODAPÉ MODAL -->
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-primary" id="btnSalvarStatus">Salvar Status</button>
+                    <button type="button" class="btn btn-primary" id="btnSalvarStatus">Salvar Alterações</button>
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fechar</button>
                 </div>
 
@@ -143,6 +151,8 @@
                 info.el.style.color = 'white';
             },
             events: '/psicologia/agendamentos-calendar',
+
+            // EXECUTADO QUANDO O USUÁRIO CLICA EM UM EVENTO DO CALENDÁRIO
             eventClick: function(info) {
                 const event = info.event;
                 const start = event.start;
@@ -156,12 +166,15 @@
                 document.getElementById('modalStatusSelect').value = event.extendedProps.status || 'Agendado';
                 document.getElementById('modalLocal').textContent = event.extendedProps.local || 'Não informado';
                 document.getElementById('modalServico').textContent = event.extendedProps.servico || 'Não informado';
+                document.getElementById('modalCheckPagamento').value = event.extendedProps.checkPagamento || 'Não informado';
 
                 const modal = new bootstrap.Modal(document.getElementById('agendamentoModal'));
                 document.getElementById('btnSalvarStatus').setAttribute('data-event-id', event.id);
                 document.getElementById('btnMensagemCancelamento').setAttribute('data-event-id', event.id);
                 modal.show();
             },
+
+            //  CUSTOMIZA O DISPLAY DE UM EVENTO NO CALENDÁRIO
             eventContent: function(arg) {
                 if (screenWidth <= 700) {
                     return { domNodes: [document.createTextNode(arg.event.title)] };
@@ -189,12 +202,12 @@
         calendar.render();
     }
 
-    // Renderiza na primeira vez
+    // RENDERIZA NA PRIMEIRA VEZ
     document.addEventListener('DOMContentLoaded', function () {
         renderCalendar();
     });
 
-    // Recria o calendário ao redimensionar (com debounce)
+    // RECRIA O CALENDÁRIO AO REDIMENSIONAR (com debounce)
     let resizeTimeout;
     window.addEventListener('resize', () => {
         clearTimeout(resizeTimeout);
@@ -206,7 +219,10 @@
     // SCRIPT PARA MUDANÇA DE STATUS DE AGENDAMENTO
     document.getElementById('btnSalvarStatus').addEventListener('click', function () {
         const eventId = this.getAttribute('data-event-id');
+        // PEGA VALOR DO STATUS ATUALIZADO
         const novoStatus = document.getElementById('modalStatusSelect').value;
+        // PEGA VALOR DO PAGAMENTO ATUALIZADO
+        const checkPagamento = document.getElementById('modalCheckPagamento').checked ? 'S' : 'N' ;
 
         if (novoStatus === "Cancelado") {
             bootstrap.Modal.getInstance(document.getElementById('agendamentoModal')).hide();
@@ -219,7 +235,7 @@
                     'Content-Type': 'application/json',
                     'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
                 },
-                body: JSON.stringify({ status: novoStatus })
+                body: JSON.stringify({ status: novoStatus, checkPagamento: checkPagamento })
             })
             .then(response => {
                 if (!response.ok) throw new Error('Erro ao atualizar status.');
@@ -243,7 +259,9 @@
 
         const content = document.getElementById('text-cancelamento').value;
         const eventId = this.getAttribute('data-event-id');
+        const checkPagamento = document.getElementById('modalCheckPagamento');
 
+        // CAOS NÃO INSIRA MOTIVO
         if (!content) {
             alert("Insira um motivo para poder continuar")
         } else {
@@ -253,7 +271,7 @@
                     'Content-Type': 'application/json',
                     'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
                 },
-                body: JSON.stringify({ mensagem : content, id : eventId })
+                body: JSON.stringify({ mensagem : content, id : eventId, checkPagamento : checkPagamento })
             })
             .then(response => {
                 if (!response.ok) {

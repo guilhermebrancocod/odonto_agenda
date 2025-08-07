@@ -30,6 +30,7 @@ class FaesaClinicaAgendamento extends Model
         'MENSAGEM',
         'CREATED_AT',
         'UPDATED_AT',
+        'STATUS_PAG',
     ];
 
     protected $casts = [
