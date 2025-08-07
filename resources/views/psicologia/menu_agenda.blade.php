@@ -134,7 +134,8 @@
             selectable: true,
             editable: false,
             select: function (info) {
-                alert("Selecionado de " + info.startStr + " até " + info.endStr);
+                
+              return;
             },
             eventDidMount: function(info) {
                 info.el.style.backgroundColor = info.event.backgroundColor;

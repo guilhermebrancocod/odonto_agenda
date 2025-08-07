@@ -51,6 +51,12 @@
         tr {
             max-height: 10px; /* ajuste conforme a altura das linhas da tabela original */
         }
+        .modal-xxl {
+          min-width: 95vw;
+          max-width: 95vw;
+          min-height: 95vh;
+          max-height: 95vh;
+        }
     </style>
 </head>
 
@@ -401,7 +407,7 @@
 
     <!-- HISTÓRICO DE AGENDAMENTO POR PACIENTE  -->
     <div class="modal fade" id="historicoPacienteModal" tabindex="-1" aria-labelledby="historicoPacienteModalLabel" aria-hidden="true">
-        <div class="modal-dialog modal-xl">
+        <div class="modal-dialog modal-xxl">
             <div class="modal-content">
 
                 <div class="modal-header">
