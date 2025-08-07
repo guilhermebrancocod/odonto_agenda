@@ -179,30 +179,13 @@
 
                     <!-- CHECKBOX TEM RECORRÊNCIA E SELETOR DE DURAÇÃO -->
                     <div class="col-12 mb-2">
-                        <div class="form-check form-switch d-flex align-items-center gap-3">
-                            <input class="form-check-input" type="checkbox" value="1" id="temRecorrencia" name="tem_recorrencia">
-                            <label class="form-check-label fw-semibold mb-0" for="temRecorrencia">
-                                <i class="fas fa-redo-alt me-1 text-primary"></i> Ativar recorrência
-                                <span id="recorrenciaBadge" class="badge bg-success ms-2 d-none">Ativa</span>
-                            </label>
-
-                            <div id="duracaoMesesContainer" style="display:none; min-width: 150px;">
-                                <label for="duracao_meses_recorrencia" class="form-label mb-0">Duração (meses)</label>
-                                <select id="duracao_meses_recorrencia" name="duracao_meses_recorrencia" class="form-select form-select-sm" aria-label="Duração da recorrência em meses">
-                                    <option value="" selected>Selecione</option>
-                                    <option value="1">1 mês</option>
-                                    <option value="2">2 meses</option>
-                                    <option value="3">3 meses</option>
-                                    <option value="4">4 meses</option>
-                                    <option value="5">5 meses</option>
-                                    <option value="6">6 meses</option>
-                                    <option value="7">7 meses</option>
-                                    <option value="8">8 meses</option>
-                                    <option value="9">9 meses</option>
-                                    <option value="10">10 meses</option>
-                                    <option value="11">11 meses</option>
-                                    <option value="12">12 meses</option>
-                                </select>
+                        <div class="form-check form-switch d-flex flex-column align-items-start gap-3">
+                            <div class="flex flex-row align-items-center">
+                                <input class="form-check-input" type="checkbox" value="1" id="temRecorrencia" name="tem_recorrencia">
+                                <label class="form-check-label fw-semibold mb-0" for="temRecorrencia">
+                                    <i class="fas fa-redo-alt me-1 text-primary"></i> Ativar recorrência
+                                    <span id="recorrenciaBadge" class="badge bg-success ms-2 d-none">Ativa</span>
+                                </label>
                             </div>
                         </div>
                     </div>
@@ -248,10 +231,9 @@
                                     <i class="fas fa-calendar-alt me-1"></i> Configuração de Recorrência
                                 </h6>
 
-
-                                <div class="row g-2">
+                                <div class="d-flex flex-wrap gap-3 align-items-center justify-content-around">
                                     <!-- DIAS DA SEMANA (NOVA SELEÇÃO) -->
-                                    <div class="col-md-8">
+                                    <div class="flex-grow-1">
                                         <label class="form-label">Dias da Semana</label>
                                         <div id="diasSemanaBtns" class="d-flex flex-wrap gap-2">
                                             <button type="button" class="btn btn-outline-primary btn-sm" data-dia="0">Dom</button>
@@ -265,14 +247,31 @@
                                         <small class="text-muted">Clique nos dias desejados para selecionar.</small>
                                     </div>
 
-                                    
+                                    <!-- DURAÇÃO DA RECORRÊNCIA EM MESES -->
+                                    <div id="duracaoMesesContainer" class="" style="min-width: 200px;">
+                                        <label for="duracao_meses_recorrencia" class="form-label">Duração (meses)</label>
+                                        <select id="duracao_meses_recorrencia" name="duracao_meses_recorrencia" class="form-select form-select-sm" aria-label="Duração da recorrência em meses">
+                                            <option value="" selected>Selecione</option>
+                                            <option value="1">1 mês</option>
+                                            <option value="2">2 meses</option>
+                                            <option value="3">3 meses</option>
+                                            <option value="4">4 meses</option>
+                                            <option value="5">5 meses</option>
+                                            <option value="6">6 meses</option>
+                                            <option value="7">7 meses</option>
+                                            <option value="8">8 meses</option>
+                                            <option value="9">9 meses</option>
+                                            <option value="10">10 meses</option>
+                                            <option value="11">11 meses</option>
+                                            <option value="12">12 meses</option>
+                                        </select>
+                                    </div>
+
                                     <!-- DATA FIM DA RECORRÊNCIA -->
-                                    <div class="col-md-4">
+                                    <div style="min-width: 200px;">
                                         <label for="data_fim_recorrencia" class="form-label">Data Fim</label>
                                         <input type="date" id="data_fim_recorrencia" name="data_fim_recorrencia" class="form-control">
                                     </div>
-
-
                                 </div>
                             </div>
                         </div>
@@ -389,7 +388,7 @@
                     pacientes.forEach(paciente => {
                         const item = document.createElement('button');
                         item.type = 'button';
-                        item.classList.add('list-group-item', 'list-group-item-action');
+                        item.classList.add('list-group-item', 'list-group-item-action', 'border', 'border-black');
                         item.textContent = `${paciente.NOME_COMPL_PACIENTE} (${paciente.CPF_PACIENTE})`;
                         item.addEventListener('click', () => {
                             searchInput.value = `${paciente.NOME_COMPL_PACIENTE} (${paciente.CPF_PACIENTE})`;
@@ -798,7 +797,7 @@
 
         flatpickr("#data_fim_recorrencia", {
             dateFormat: "d-m-Y",
-            altFormat: "Y-m-d",
+            altFormat: "d-m-Y",
             locale: "pt",
             minDate: "today",
             allowInput: true,
