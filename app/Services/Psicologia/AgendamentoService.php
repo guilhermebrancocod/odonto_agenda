@@ -18,8 +18,8 @@ class AgendamentoService
             'remarcacoes'
         ])
         ->where('ID_CLINICA', 1)
-        ->where('STATUS_AGEND', '<>', 'Excluido')
-        ->where('STATUS_AGEND', '<>', 'Remarcado');
+        ->where('STATUS_AGEND', '<>', 'Excluido');
+        // ->where('STATUS_AGEND', '<>', 'Remarcado');
 
         // Filtro por nome ou CPF do paciente
         if ($request->filled('search')) {
@@ -30,17 +30,17 @@ class AgendamentoService
             });
         }
 
-        // Filtro por data
+        // FILTRO POR DATA
         if ($request->filled('date')) {
             try {
                 $date = Carbon::parse($request->input('date'))->format('Y-m-d');
                 $query->where('DT_AGEND', $date);
             } catch (\Exception $e) {
-                // Data inválida - ignora filtro
+                // DATA INVÁLIDA - IGNORA FILTRO
             }
         }
 
-        // Filtro por hora de início
+        // FILTRO POR HORA DE INÍCIO
         if ($request->filled('start_time')) {
             try {
                 $startTime = Carbon::createFromFormat('H:i', $request->input('start_time'))->format('H:i:s');
@@ -50,7 +50,7 @@ class AgendamentoService
             }
         }
 
-        // Filtro por hora de fim
+        // FILTRO POR HORA DE FIM
         if ($request->filled('end_time')) {
             try {
                 $endTime = Carbon::createFromFormat('H:i', $request->input('end_time'))->format('H:i:s');
@@ -60,12 +60,12 @@ class AgendamentoService
             }
         }
 
-        // Filtro por status
+        // FILTRO POR STATUS
         if ($request->filled('status')) {
             $query->where('STATUS_AGEND', $request->input('status'));
         }
 
-        // Filtro por serviço
+        // FILTRO POR SERVIÇO
         if ($request->filled('service')) {
             $service = $request->input('service');
             $query->whereHas('servico', function($q) use ($service) {
@@ -73,7 +73,13 @@ class AgendamentoService
             });
         }
 
-        // **FILTRO POR LOCAL**
+        // FILTRO POR VALOR
+        if ($request->filled('valor')) {
+            $valorFormatado = str_replace(',', '.', $request->input('valor'));
+            $query->where('VALOR_AGEND', '=', $valorFormatado);
+        }
+
+        // FILTRO POR LOCAL
         if ($request->filled('local')) {
             $local = $request->input('local');
             $query->where('LOCAL', 'like', "%{$local}%");
