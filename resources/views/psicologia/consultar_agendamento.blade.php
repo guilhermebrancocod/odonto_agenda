@@ -134,6 +134,7 @@
                                 </div>
                             </div>
 
+                            <!-- FILTRO POR DATA -->
                             <div class="col-12 col-sm-6 col-md-4">
                             <div class="input-group">
                                 <span class="input-group-text"><i class="bi bi-calendar"></i></span>
@@ -147,6 +148,7 @@
                             </div>
                             </div>
 
+                            <!-- FILTRO POR HORÁRIO DE INICIAL -->
                             <div class="col-12 col-sm-6 col-md-4">
                             <div class="input-group">
                                 <span class="input-group-text"><i class="bi bi-clock"></i></span>
@@ -160,6 +162,7 @@
                             </div>
                             </div>
 
+                            <!-- FILTRO POR HORÁRIO FINAL -->
                             <div class="col-12 col-sm-6 col-md-4">
                             <div class="input-group">
                                 <span class="input-group-text"><i class="bi bi-clock"></i></span>
@@ -173,6 +176,7 @@
                             </div>
                             </div>
 
+                            <!-- FILTRO POR STATUS -->
                             <div class="col-12 col-sm-6 col-md-4">
                             <div class="input-group">
                                 <span class="input-group-text"><i class="bi bi-list-check"></i></span>
@@ -180,13 +184,14 @@
                                 <option value="">Status</option>
                                 <option value="Agendado">Agendado</option>
                                 <option value="Presente">Presente</option>
+                                <option value="Remarcado">Reagendado</option>
                                 <option value="Cancelado">Cancelado</option>
                                 <option value="Finalizado">Finalizado</option>
                                 </select>
                             </div>
                             </div>
 
-                            <!-- Linha 2 -->
+                            <!-- FILTRO POR SERVIÇO -->
                             <div class="col-12 col-sm-6 col-md-4">
                             <div class="input-group">
                                 <span class="input-group-text"><i class="bi bi-briefcase"></i></span>
@@ -200,6 +205,7 @@
                             </div>
                             </div>
 
+                            <!-- FILTRO POR LOCAL -->
                             <div class="col-12 col-sm-6 col-md-4">
                             <div class="input-group">
                                 <span class="input-group-text"><i class="bi bi-house"></i></span>
@@ -210,6 +216,20 @@
                                 class="form-control"
                                 placeholder="Local"
                                 />
+                            </div>
+                            </div>
+
+                            <!-- FILTRO POR VALOR -->
+                            <div class="col-12 col-sm-6 col-md-4">
+                            <div class="input-group">
+                                <span class="input-group-text"><i class="bi bi-currency-dollar"></i></i></span>
+                                <input
+                                id="valor-input"
+                                name="valor"
+                                type="text"
+                                class="form-control"
+                                placeholder="Valor"
+                                novalidate/>
                             </div>
                             </div>
 
@@ -234,6 +254,10 @@
                                         <th>Hora Fim</th>
                                         <th>Local</th>
                                         <th>Status</th>
+                                        <th>É Reagendamento?</th>
+                                        <th>Valor</th>
+                                        <th>Pago?</th>
+                                        <th>Valor Pago</th>
                                         <th>Ações</th>
                                     </tr>
                                 </thead>
@@ -285,6 +309,7 @@
                 local: document.getElementById('local-input') ? document.getElementById('local-input').value.trim() : '',
                 status: document.getElementById('status-input').value,
                 service: document.getElementById('service-input').value.trim(),
+                valor: document.getElementById('valor-input').value,
                 limit: limitSelect.value,
             };
         }
@@ -308,6 +333,9 @@
                     }
 
                     agendamentos.forEach(ag => {
+
+                        console.log(ag.ID_AGENDAMENTO_REMARCADO);
+
                         const paciente = ag.paciente ? ag.paciente.NOME_COMPL_PACIENTE : '-';
                         const servico = ag.servico ? ag.servico.SERVICO_CLINICA_DESC : '-';
                         const data = ag.DT_AGEND ? ag.DT_AGEND.substring(0, 10).split('-').reverse().join('/') : '-';
@@ -315,6 +343,12 @@
                         const horaFim = ag.HR_AGEND_FIN ? ag.HR_AGEND_FIN.substring(0, 5) : '-';
                         const local = ag.LOCAL ?? '-';
                         const status = ag.STATUS_AGEND ?? '-';
+                        const valor = ag.VALOR_AGEND ?? '-';
+                        const checkPagamento = ag.STATUS_PAG === 'S' ? 'Sim' :
+                                               ag.STATUS_PAG === 'N' ? 'Não' :
+                                               'Não informado';
+                        const valorPagamento = ag.VALOR_PAG ?? '-';
+                        const reagendamento = ag.ID_AGEND_REMARCADO != null ? 'Sim' : 'Não';
                         const row = document.createElement('tr');
                         row.innerHTML = `
                             <td>${paciente}</td>
@@ -324,6 +358,10 @@
                             <td>${horaFim}</td>
                             <td>${local}</td>
                             <td>${status}</td>
+                            <td>${reagendamento}</td>
+                            <td>${valor}</td>
+                            <td>${checkPagamento}</td>
+                            <td>${valorPagamento}</td>
                             <td>
                                 <a href="/psicologia/agendamento/${ag.ID_AGENDAMENTO}" class="btn btn-sm btn-primary">Visualizar</a>
                                 <a href="/psicologia/agendamento/${ag.ID_AGENDAMENTO}/editar" class="btn btn-sm btn-warning">Editar</a>
@@ -422,7 +460,7 @@
             if (alert) {
                 setTimeout(() => {
                     alert.remove();
-                }, 5000); // remove após a animação de 5 segundos
+                }, 5000);
             }
         });
     </script>
