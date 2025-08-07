@@ -41,8 +41,54 @@ class PacienteController extends Controller
             'CPF_RESPONSAVEL' => 'nullable|string|max:14|regex:/^\d{3}\.?\d{3}\.?\d{3}-?\d{2}$/',
             'COD_SUS' => 'nullable|string|max:15',
         ], [
-            'CPF_PACIENTE.regex' => 'O CPF informado não está em um formato válido.'
+            'NOME_COMPL_PACIENTE.required' => 'O nome completo do paciente é obrigatório.',
+            'NOME_COMPL_PACIENTE.max' => 'O nome completo não pode passar de 255 caracteres.',
+
+            'DT_NASC_PACIENTE.date' => 'A data de nascimento deve ser uma data válida.',
+
+            'CPF_PACIENTE.required' => 'O CPF do paciente é obrigatório.',
+            'CPF_PACIENTE.unique' => 'Este CPF já está cadastrado.',
+            'CPF_PACIENTE.regex' => 'O CPF informado não está em um formato válido.',
+
+            'SEXO_PACIENTE.required' => 'O sexo do paciente é obrigatório.',
+            'SEXO_PACIENTE.in' => 'O sexo informado é inválido. Use M, F ou O.',
+
+            'CEP.required' => 'O CEP é obrigatório.',
+            'CEP.max' => 'O CEP não pode ter mais que 20 caracteres.',
+
+            'ENDERECO.required' => 'O endereço é obrigatório.',
+            'ENDERECO.max' => 'O endereço não pode ter mais que 255 caracteres.',
+
+            'END_NUM.required' => 'O número do endereço é obrigatório.',
+
+            'COMPLEMENTO.max' => 'O complemento não pode ter mais que 255 caracteres.',
+
+            'BAIRRO.required' => 'O bairro é obrigatório.',
+
+            'municipio.required' => 'O município é obrigatório.',
+            'municipio.max' => 'O município não pode ter mais que 255 caracteres.',
+
+            'UF.required' => 'O estado (UF) é obrigatório.',
+            'UF.max' => 'A UF deve conter 2 caracteres.',
+
+            'E_MAIL_PACIENTE.email' => 'O e-mail informado não é válido.',
+            'E_MAIL_PACIENTE.max' => 'O e-mail não pode ter mais que 255 caracteres.',
+
+            'FONE_PACIENTE.required' => 'O telefone do paciente é obrigatório.',
+            'FONE_PACIENTE.regex' => 'O telefone deve estar no formato (99) 99999-9999.',
+
+            'OBSERVACAO.string' => 'A observação deve ser um texto.',
+
+            'STATUS.required' => 'O status é obrigatório.',
+            'STATUS.in' => 'O status deve ser "Em espera".',
+
+            'NOME_RESPONSAVEL.max' => 'O nome do responsável não pode ter mais que 255 caracteres.',
+
+            'CPF_RESPONSAVEL.regex' => 'O CPF do responsável não está em um formato válido.',
+
+            'COD_SUS.max' => 'O código SUS não pode ter mais que 15 caracteres.',
         ]);
+
 
         $this->pacienteService->createPaciente($validatedData);
 
