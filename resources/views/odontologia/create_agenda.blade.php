@@ -118,9 +118,9 @@
                         @endphp
 
                         @foreach (['segunda', 'terca', 'quarta', 'quinta', 'sexta', 'sabado'] as $dia)
-                            <option value="{{ $dia }}" {{ in_array($dia, $diasSelecionados) ? 'selected' : '' }}>
-                                {{ ucfirst($dia) }}-feira
-                            </option>
+                        <option value="{{ $dia }}" {{ in_array($dia, $diasSelecionados) ? 'selected' : '' }}>
+                            {{ ucfirst($dia) }}-feira
+                        </option>
                         @endforeach
                     </select>
                 </div>
@@ -144,7 +144,13 @@
                 <!-- Serviço e Valor -->
                 <div class="col-md-3">
                     <label class="form-label">Serviço</label>
-                    <select id="form-select" class="form-select" name="servico"></select>
+                    <select id="form-select" name="ID_SERVICO" class="form-select">
+                        <option
+                            value="{{ old('ID_SERVICO', isset($agenda->ID_SERVICO) ? $agenda->ID_SERVICO : '') }}"
+                            selected>
+                            {{ isset($agenda->SERVICO_CLINICA_DESC) ? $agenda->SERVICO_CLINICA_DESC : 'Selecione um serviço' }}
+                        </option>
+                    </select>
                 </div>
 
                 @php
@@ -188,7 +194,13 @@
                 </div>
                 <div class="col-md-3">
                     <label class="form-label">Box de atendimento</label>
-                    <select id="form-select-box" class="form-select" name="boxes"></select>
+                    <select id="form-select-box" name="ID_BOX" class="form-select">
+                        <option
+                            value="{{ old('ID_BOX', $agenda->ID_BOX ?? '') }}"
+                            selected>
+                            {{ $agenda->DESCRICAO ?? 'Selecione um box' }}
+                        </option>
+                    </select>
                 </div>
             </div>
             <div style="text-align: right;flex:1">

@@ -117,15 +117,17 @@ $(document).ready(function () {
 // Evento ao selecionar um paciente no select2
 $('#selectPatient').on('select2:select', function (e) {
     const pacienteId = e.params.data.id;
-
+    let html;
     // Busca os dados completos do paciente via AJAX
     $.ajax({
         url: `/agenda/${pacienteId}`,
         type: 'GET',
         dataType: 'json',
         success: function (paciente) {
+            let html =''
             // Monta o HTML da linha da tabela
-            const html = `
+            paciente.forEach(function(paciente){
+                html += `
                 <tr>
                     <td>${paciente.NOME_COMPL_PACIENTE}</td>
                     <td>${formatDateStr(paciente.DT_AGEND)}</td>
@@ -144,6 +146,7 @@ $('#selectPatient').on('select2:select', function (e) {
                     </td>
                 </tr>
             `;
+            })
 
             // Atualiza o corpo da tabela
             $('#table-agenda tbody').html(html);
@@ -159,4 +162,9 @@ $(document).on('click', '.edit-agenda', function (event) {
     event.preventDefault();
     const agendaId = $(this).data('id');
     window.location.href = `/odontologia/criaragenda/${agendaId}`;
+});
+
+$(document).on('click', '#add', function (event) {
+    event.preventDefault();
+    window.location.href = `/odontologia/criaragenda`;
 });
