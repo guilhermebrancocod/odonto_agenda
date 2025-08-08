@@ -89,6 +89,7 @@ class PacienteController extends Controller
             'COD_SUS.max' => 'O código SUS não pode ter mais que 15 caracteres.',
         ]);
 
+        $validatedData['CPF_PACIENTE'] = str_replace(['-', '.'], '', $validatedData['CPF_PACIENTE']);
 
         $this->pacienteService->createPaciente($validatedData);
 

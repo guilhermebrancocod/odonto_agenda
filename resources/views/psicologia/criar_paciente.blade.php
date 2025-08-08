@@ -377,5 +377,51 @@
         });
     </script>
 
+    <!-- FORMATADOR DO CAMPO DE CPF -->
+    <script>
+        document.getElementById('cpf_paciente').addEventListener('input', function (e) {
+            let value = e.target.value;
+
+            // Remove tudo que não é número
+            value = value.replace(/\D/g, '');
+
+            // Limita a 11 dígitos
+            value = value.slice(0, 11);
+
+            // Aplica a máscara de CPF
+            if (value.length <= 11) {
+                value = value.replace(/(\d{3})(\d)/, '$1.$2');
+                value = value.replace(/(\d{3})(\d)/, '$1.$2');
+                value = value.replace(/(\d{3})(\d{1,2})$/, '$1-$2');
+            }
+
+            e.target.value = value;
+        });
+    </script>
+    
+    <!-- FORMATADOR DO CAMPO DE CELULAR -->
+    <script>
+    document.getElementById('telefone').addEventListener('input', function(e) {
+        let value = e.target.value;
+
+        // Remove tudo que não for número
+        value = value.replace(/\D/g, '');
+
+        // Limita a 11 dígitos (DDD + número)
+        value = value.slice(0, 11);
+
+        // Aplica a máscara (99) 99999-9999
+        if(value.length > 0){
+            value = value.replace(/^(\d{2})(\d)/g, '($1) $2');  // (99) ...
+            if(value.length <= 10){
+                value = value.replace(/(\d{4})(\d)/, '$1-$2');    // até 9999-9999
+            } else {
+                value = value.replace(/(\d{5})(\d)/, '$1-$2');    // 99999-9999
+            }
+        }
+
+        e.target.value = value;
+    });
+    </script>
 </body>
 </html>
