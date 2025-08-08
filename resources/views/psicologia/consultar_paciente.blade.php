@@ -170,7 +170,7 @@
                                 <option value="">Status</option>
                                 <option value="Em espera">Em espera</option>
                                 <option value="Agendado">Agendado</option>
-                                <option value="CanceladoO">Cancelado</option>
+                                <option value="Cancelado">Cancelado</option>
                             </select>
                         </div>
                     </div>
@@ -554,52 +554,96 @@
                         pacientesTbody.innerHTML = `<tr><td colspan="8" class="text-center">Nenhum paciente encontrado.</td></tr>`;
                         return;
                     }
+                    
 
                     pacientes.forEach(paciente => {
                         const row = document.createElement('tr');
-                        row.innerHTML = `
-                            <td>${paciente.NOME_COMPL_PACIENTE}</td>
-                            <td>${paciente.CPF_PACIENTE}</td>
-                            <td>${paciente.DT_NASC_PACIENTE ? formatarDataBR(paciente.DT_NASC_PACIENTE) : '-'}</td>
-                            <td>${paciente.SEXO_PACIENTE ?? '-'}</td>
-                            <td>${paciente.FONE_PACIENTE ?? '-'}</td>
-                            <td>${paciente.E_MAIL_PACIENTE ?? '-'}</td>
-                            <td>${paciente.STATUS ?? '-'}</td>
-                            <td>
-                                <div class="d-flex flex-nowrap gap-1">
-                                    <button type="button" class="btn btn-sm btn-warning editar-btn"
-                                        data-id="${paciente.ID_PACIENTE}" 
-                                        data-status="${paciente.STATUS}"
-                                        data-nome="${paciente.NOME_COMPL_PACIENTE ?? 'Paciente'}"
-                                        data-cpf="${paciente.CPF_PACIENTE ?? ''}"
-                                        data-dt_nasc="${paciente.DT_NASC_PACIENTE ?? ''}"
-                                        data-sexo="${paciente.SEXO_PACIENTE ?? ''}"
-                                        data-endereco="${paciente.ENDERECO ?? ''}"
-                                        data-num="${paciente.END_NUM ?? ''}"
-                                        data-complemento="${paciente.COMPLEMENTO ?? ''}"
-                                        data-bairro="${paciente.BAIRRO ?? ''}"
-                                        data-uf="${paciente.UF ?? ''}"
-                                        data-cep="${paciente.CEP ?? ''}"
-                                        data-celular="${paciente.FONE_PACIENTE ?? ''}"
-                                        data-email="${paciente.E_MAIL_PACIENTE ?? ''}"
-                                        data-municipio="${paciente.MUNICIPIO ?? ''}">
-                                        <i class="bi bi-pencil"></i> <span class="d-none d-sm-inline">Editar</span>
-                                    </button>
+                        if (paciente.STATUS === 'Inativo') {
+                            
+                            row.innerHTML = `
+                                <td>${paciente.NOME_COMPL_PACIENTE}</td>
+                                <td>${paciente.CPF_PACIENTE}</td>
+                                <td>${paciente.DT_NASC_PACIENTE ? formatarDataBR(paciente.DT_NASC_PACIENTE) : '-'}</td>
+                                <td>${paciente.SEXO_PACIENTE ?? '-'}</td>
+                                <td>${paciente.FONE_PACIENTE ?? '-'}</td>
+                                <td>${paciente.E_MAIL_PACIENTE ?? '-'}</td>
+                                <td>${paciente.STATUS ?? '-'}</td>
+                                <td>
+                                    <div class="d-flex flex-nowrap gap-1">
+                                        <button type="button" class="btn btn-sm btn-warning editar-btn"
+                                            data-id="${paciente.ID_PACIENTE}" 
+                                            data-status="${paciente.STATUS}"
+                                            data-nome="${paciente.NOME_COMPL_PACIENTE ?? 'Paciente'}"
+                                            data-cpf="${paciente.CPF_PACIENTE ?? ''}"
+                                            data-dt_nasc="${paciente.DT_NASC_PACIENTE ?? ''}"
+                                            data-sexo="${paciente.SEXO_PACIENTE ?? ''}"
+                                            data-endereco="${paciente.ENDERECO ?? ''}"
+                                            data-num="${paciente.END_NUM ?? ''}"
+                                            data-complemento="${paciente.COMPLEMENTO ?? ''}"
+                                            data-bairro="${paciente.BAIRRO ?? ''}"
+                                            data-uf="${paciente.UF ?? ''}"
+                                            data-cep="${paciente.CEP ?? ''}"
+                                            data-celular="${paciente.FONE_PACIENTE ?? ''}"
+                                            data-email="${paciente.E_MAIL_PACIENTE ?? ''}"
+                                            data-municipio="${paciente.MUNICIPIO ?? ''}">
+                                            <i class="bi bi-pencil"></i> <span class="d-none d-sm-inline">Editar</span>
+                                        </button>
 
-                                    <button type="button" class="btn btn-sm btn-secondary historico-btn"
-                                        data-id="${paciente.ID_PACIENTE}"
-                                        data-nome="${paciente.NOME_COMPL_PACIENTE}">
-                                        <i class="bi bi-clock-history"></i> <span class="d-none d-sm-inline">Histórico</span>
-                                    </button>
+                                        <button type="button" class="btn btn-sm btn-secondary historico-btn"
+                                            data-id="${paciente.ID_PACIENTE}"
+                                            data-nome="${paciente.NOME_COMPL_PACIENTE}">
+                                            <i class="bi bi-clock-history"></i> <span class="d-none d-sm-inline">Histórico</span>
+                                        </button>
+                                    </div>
+                                </td>
+                            `;
+                        } else {
+                            row.innerHTML = `
+                                <td>${paciente.NOME_COMPL_PACIENTE}</td>
+                                <td>${paciente.CPF_PACIENTE}</td>
+                                <td>${paciente.DT_NASC_PACIENTE ? formatarDataBR(paciente.DT_NASC_PACIENTE) : '-'}</td>
+                                <td>${paciente.SEXO_PACIENTE ?? '-'}</td>
+                                <td>${paciente.FONE_PACIENTE ?? '-'}</td>
+                                <td>${paciente.E_MAIL_PACIENTE ?? '-'}</td>
+                                <td>${paciente.STATUS ?? '-'}</td>
+                                <td>
+                                    <div class="d-flex flex-nowrap gap-1">
+                                        <button type="button" class="btn btn-sm btn-warning editar-btn"
+                                            data-id="${paciente.ID_PACIENTE}" 
+                                            data-status="${paciente.STATUS}"
+                                            data-nome="${paciente.NOME_COMPL_PACIENTE ?? 'Paciente'}"
+                                            data-cpf="${paciente.CPF_PACIENTE ?? ''}"
+                                            data-dt_nasc="${paciente.DT_NASC_PACIENTE ?? ''}"
+                                            data-sexo="${paciente.SEXO_PACIENTE ?? ''}"
+                                            data-endereco="${paciente.ENDERECO ?? ''}"
+                                            data-num="${paciente.END_NUM ?? ''}"
+                                            data-complemento="${paciente.COMPLEMENTO ?? ''}"
+                                            data-bairro="${paciente.BAIRRO ?? ''}"
+                                            data-uf="${paciente.UF ?? ''}"
+                                            data-cep="${paciente.CEP ?? ''}"
+                                            data-celular="${paciente.FONE_PACIENTE ?? ''}"
+                                            data-email="${paciente.E_MAIL_PACIENTE ?? ''}"
+                                            data-municipio="${paciente.MUNICIPIO ?? ''}">
+                                            <i class="bi bi-pencil"></i> <span class="d-none d-sm-inline">Editar</span>
+                                        </button>
 
-                                    <button type="button" class="btn btn-sm btn-danger excluir-btn"
-                                        data-id="${paciente.ID_PACIENTE}"
-                                        data-nome="${paciente.NOME_COMPL_PACIENTE ?? 'Paciente'}">
-                                        <i class="bi bi-trash"></i> <span class="d-none d-sm-inline">Inativar</span>
-                                    </button>
-                                </div>
-                            </td>
-                        `;
+                                        <button type="button" class="btn btn-sm btn-secondary historico-btn"
+                                            data-id="${paciente.ID_PACIENTE}"
+                                            data-nome="${paciente.NOME_COMPL_PACIENTE}">
+                                            <i class="bi bi-clock-history"></i> <span class="d-none d-sm-inline">Histórico</span>
+                                        </button>
+
+                                        <button type="button" class="btn btn-sm btn-danger excluir-btn"
+                                            data-id="${paciente.ID_PACIENTE}"
+                                            data-nome="${paciente.NOME_COMPL_PACIENTE ?? 'Paciente'}">
+                                            <i class="bi bi-trash"></i> <span class="d-none d-sm-inline">Inativar</span>
+                                        </button>
+                                    </div>
+                                </td>
+                            `;
+                        }
+
+
                         pacientesTbody.appendChild(row);
                     });
 
@@ -616,12 +660,11 @@
             function abrirModalEdicao() {
                 if (!selectedPaciente) return;
                 document.getElementById('editPacienteNome').value = selectedPaciente.nome || '';
-                document.getElementById('editPacienteStatus').value = selectedPaciente.status || '';
+                let status = document.getElementById('editPacienteStatus').value = selectedPaciente.status || '';
 
                 const cpfInput = document.getElementById('editPacienteCPF');
                 if (cpfInput) {
                     cpfInput.value = selectedPaciente.cpf || '';
-                    const status = document.getElementById('editPacienteStatus').value;
                     cpfInput.readOnly = (status !== 'Inativo');
                 }
 
@@ -833,6 +876,28 @@
             sexoInput.value = '';
             telefoneInput.value = '';
             buscarPacientes();
+        });
+    </script>
+
+        <!-- FORMATADOR DO CAMPO DE CPF -->
+    <script>
+        document.getElementById('editPacienteCPF').addEventListener('input', function (e) {
+            let value = e.target.value;
+
+            // Remove tudo que não é número
+            value = value.replace(/\D/g, '');
+
+            // Limita a 11 dígitos
+            value = value.slice(0, 11);
+
+            // Aplica a máscara de CPF
+            if (value.length <= 11) {
+                value = value.replace(/(\d{3})(\d)/, '$1.$2');
+                value = value.replace(/(\d{3})(\d)/, '$1.$2');
+                value = value.replace(/(\d{3})(\d{1,2})$/, '$1-$2');
+            }
+
+            e.target.value = value;
         });
     </script>
 

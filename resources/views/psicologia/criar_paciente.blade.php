@@ -91,6 +91,13 @@
                 </div>
             @endif
 
+            @if (session('error'))
+                <div class="alert alert-danger fixed-top text-center mx-auto w-50 shadow animate-slide-down">
+                    {{ session('error') }}
+                </div>
+                
+            @endif
+
             <form action="{{ route('criarPaciente-Psicologia') }}" method="POST" class="needs-validation" id="pacienteForm">
                 @csrf
 
