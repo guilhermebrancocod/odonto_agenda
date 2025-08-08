@@ -66,7 +66,7 @@ Route::put('/updatePatient/{id}', [OdontoUpdateController::class, 'updatePatient
 
 // SERVIÇOS
 Route::get('/odontologia/criarservico', function () {
-    return view('odontologia/create_servico');
+    return view('odontologia/create_service');
 })->name('criarservico');
 Route::post('/odontologia/criarservico', [OdontoCreateController::class, 'createService'])->name('createService');
 Route::get('/criarservico/{idService}', [OdontoCreateController::class, 'editService'])->name('editService');
