@@ -95,7 +95,9 @@ class OdontoUpdateController extends Controller
 
         $valor = $request->input('valor') ? str_replace(',', '.', $request->input('valor')) : null;
 
-        DB::table('FAESA_CLINICA_AGENDAMENTO')
+        DB::table('FAESA_CLINICA_AGENDAMENTO as a')
+            ->join('FAESA_CLINICA_LOCAL_AGENDAMENTO as la','la.ID_AGENDAMENTO','=','A.ID_AGENDAMENTO')
+            ->join('FAESA_CLINICA_BOXES as cb','cb.ID_BOX_CLINICA','=','la.ID_BOX')
             ->where('ID_AGENDAMENTO', $id)
             ->update([
                 'ID_CLINICA' => 2,

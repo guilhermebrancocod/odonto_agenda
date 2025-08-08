@@ -174,6 +174,8 @@ class OdontoCreateController extends Controller
     {
 
         $agenda = DB::table('FAESA_CLINICA_AGENDAMENTO as a')
+            ->join('FAESA_CLINICA_LOCAL_AGENDAMENTO as la','la.ID_AGENDAMENTO','=','A.ID_AGENDAMENTO')
+            ->join('FAESA_CLINICA_BOXES as cb','cb.ID_BOX_CLINICA','=','la.ID_BOX')
             ->join('FAESA_CLINICA_PACIENTE as p', 'p.ID_PACIENTE', '=', 'a.ID_PACIENTE')
             ->join('FAESA_CLINICA_SERVICO as s', 's.ID_SERVICO_CLINICA', '=', 'a.ID_SERVICO')
             ->where('a.ID_AGENDAMENTO', $agendaId)->first();
