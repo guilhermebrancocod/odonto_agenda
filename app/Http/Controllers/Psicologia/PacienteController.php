@@ -21,6 +21,7 @@ class PacienteController extends Controller
     // CRIA PACIENTE
     public function createPaciente(Request $request)
     {
+
         $validatedData = $request->validate([
             'NOME_COMPL_PACIENTE' => 'required|string|max:255',
             'DT_NASC_PACIENTE' => 'nullable|date',
@@ -90,12 +91,20 @@ class PacienteController extends Controller
 
         $validatedData['CPF_PACIENTE'] = str_replace(['-', '.'], '', $validatedData['CPF_PACIENTE']);
 
-        $paciente = $this->pacienteService->createPaciente($validatedData);
+        $created = $this->pacienteService->createPaciente($validatedData);
 
-        if($paciente) {
+        if(!$created) {
             return redirect('/psicologia/criar-paciente')->with('success', 'Paciente criado com sucesso!');
         } else {
-            return redirect('/psicologia/criar-paciente')->with('error', 'Paciente com CPF cadastrado');
+            $paciente = $this->pacienteService->getByCPF($validatedData['CPF_PACIENTE']);
+            if ($paciente->STATUS == "Inativo") {
+                return redirect('/psicologia/criar-paciente')
+                ->with('error', 'Paciente com CPF já cadastrado e inativo, por favor reative o paciente')
+                ->withInput();
+            }
+            return redirect('/psicologia/criar-paciente')
+            ->with('error', 'Paciente com CPF já cadastrado, por favor verifique os dados.')
+            ->withInput();
         }
     }
 
@@ -133,8 +142,13 @@ class PacienteController extends Controller
 
         try {
             $paciente = FaesaClinicaPaciente::findOrFail($id);
+
+            if ($paciente->CPF_PACIENTE !== $validatedData['cpf']) {
+                $paciente->STATUS = 'Em espera';
+            }
+
             $paciente->NOME_COMPL_PACIENTE = $validatedData['nome'];
-            $paciente->CPF_PACIENTE = $validatedData['cpf'];
+            $paciente->CPF_PACIENTE = str_replace(['-', '.'], '', $validatedData['cpf']);
             $paciente->DT_NASC_PACIENTE = $validatedData['dt_nasc'] ?? $paciente->DT_NASC_PACIENTE;
             $paciente->SEXO_PACIENTE = $validatedData['sexo'] ?? $paciente->SEXO_PACIENTE;
             $paciente->ENDERECO = $validatedData['endereco'] ?? $paciente->ENDERECO;
