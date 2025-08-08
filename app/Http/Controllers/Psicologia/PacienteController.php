@@ -24,7 +24,7 @@ class PacienteController extends Controller
         $validatedData = $request->validate([
             'NOME_COMPL_PACIENTE' => 'required|string|max:255',
             'DT_NASC_PACIENTE' => 'nullable|date',
-            'CPF_PACIENTE' => 'required|string|max:14|unique:FAESA_CLINICA_PACIENTE,CPF_PACIENTE|regex:/^\d{3}\.?\d{3}\.?\d{3}-?\d{2}$/',
+            'CPF_PACIENTE' => 'required|string|max:14|regex:/^\d{3}\.?\d{3}\.?\d{3}-?\d{2}$/',
             'SEXO_PACIENTE' => 'required|string|in:M,F,O',
             'CEP' => 'required|string|max:20',
             'ENDERECO' => 'required|string|max:255',
@@ -47,7 +47,6 @@ class PacienteController extends Controller
             'DT_NASC_PACIENTE.date' => 'A data de nascimento deve ser uma data válida.',
 
             'CPF_PACIENTE.required' => 'O CPF do paciente é obrigatório.',
-            'CPF_PACIENTE.unique' => 'Este CPF já está cadastrado.',
             'CPF_PACIENTE.regex' => 'O CPF informado não está em um formato válido.',
 
             'SEXO_PACIENTE.required' => 'O sexo do paciente é obrigatório.',
@@ -91,9 +90,13 @@ class PacienteController extends Controller
 
         $validatedData['CPF_PACIENTE'] = str_replace(['-', '.'], '', $validatedData['CPF_PACIENTE']);
 
-        $this->pacienteService->createPaciente($validatedData);
+        $paciente = $this->pacienteService->createPaciente($validatedData);
 
-        return redirect('/psicologia/criar-paciente')->with('success', 'Paciente criado com sucesso!');
+        if($paciente) {
+            return redirect('/psicologia/criar-paciente')->with('success', 'Paciente criado com sucesso!');
+        } else {
+            return redirect('/psicologia/criar-paciente')->with('error', 'Paciente com CPF cadastrado');
+        }
     }
 
     // BUSCA PACIENTE
@@ -159,17 +162,11 @@ class PacienteController extends Controller
     // DELETA PACIENTE
     public function deletePaciente($id)
     {
-        try {
-            $this->pacienteService->deletarPaciente($id);
-
+        $statusDelete = $this->pacienteService->deletarPaciente($id);
+        if($statusDelete) {
             return response()->json(['message' => 'Registro de paciente excluído com sucesso.'], 200);
-        } catch (ModelNotFoundException $e) {
-            return response()->json(['message' => 'Paciente não encontrado.'], 404);
-        } catch (\Exception $e) {
-            return response()->json([
-                'message' => 'Erro ao excluir o paciente.',
-                'error' => $e->getMessage()
-            ], 400);
+        } else {
+            return response()->json(['message' => 'Erro ao excluir paciente'], 400);    
         }
     }
 

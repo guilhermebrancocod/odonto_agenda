@@ -37,7 +37,6 @@ class PacienteService
         $paciente = FaesaClinicaPaciente::findOrFail($id);
         $paciente->STATUS = $status;
         $paciente->save();
-
         return $paciente;
     }
 
@@ -48,21 +47,29 @@ class PacienteService
     {
         return DB::table('FAESA_CLINICA_AGENDAMENTO')
             ->where('ID_PACIENTE', $id)
-            ->where('STATUS_AGEND', '<>', 'Excluido')
+            ->where('STATUS_AGEND', '<>', 'Inativo')
             ->where('STATUS_AGEND', '<>', 'Remarcado')
             ->exists();
+
     }
 
     /**
      *  CRIA NOVO PACIENTE
      */
-    public function createPaciente(array $dados)
+    public function createPaciente(array $dados): bool
     {
-        $paciente = new FaesaClinicaPaciente($dados);
-        $paciente->STATUS = "Em espera";
-        $paciente->save();
+        $exists = \DB::table('FAESA_CLINICA_PACIENTE')
+                ->where('CPF_PACIENTE', $dados['CPF_PACIENTE'])
+                ->where('STATUS', '<>', 'Excluido')
+                ->exists();
 
-        return $paciente;
+        if(!$exists) {
+            $paciente = new FaesaClinicaPaciente($dados);
+            $paciente->STATUS = "Em espera";
+            $paciente->save();
+        }
+
+        return $exists;
     }
 
     /**
@@ -72,11 +79,17 @@ class PacienteService
     {
         $paciente = FaesaClinicaPaciente::findOrFail($id);
 
-        if ($this->temAgendamentosAssociados($id)) {
+        if ($this->temAgendamentosAssociados($id)) {            
             throw new \Exception('Paciente possui agendamentos associados.');
+        } else {
+            // return $paciente->delete();
+            $pacienteExcluido = $this->atualizarStatus($id, 'Inativo');
+            if(empty($paciente)) {
+                return False;
+            } else {
+                return True;
+            }
         }
-
-        return $paciente->delete();
     }
 
     /**
@@ -86,25 +99,33 @@ class PacienteService
     {
         $query = FaesaClinicaPaciente::query();
 
+        // Sempre ignora pacientes com STATUS 'Inativo'
+        // $query->where('STATUS', '<>', 'Inativo');
+
+        // Filtro por nome ou CPF
         if (!empty($filtros['search'])) {
             $query->where(function ($q) use ($filtros) {
                 $q->where('NOME_COMPL_PACIENTE', 'LIKE', '%' . $filtros['search'] . '%')
-                  ->orWhere('CPF_PACIENTE', 'LIKE', '%' . $filtros['search'] . '%');
+                ->orWhere('CPF_PACIENTE', 'LIKE', '%' . $filtros['search'] . '%');
             });
         }
 
+        // Filtro por data de nascimento
         if (!empty($filtros['DT_NASC_PACIENTE'])) {
             $query->whereDate('DT_NASC_PACIENTE', $filtros['DT_NASC_PACIENTE']);
         }
 
-        if (!empty($filtros['STATUS'])) {
+        // Filtro por status (desde que não seja 'Inativo')
+        if (!empty($filtros['STATUS']) && $filtros['STATUS'] !== 'Inativo') {
             $query->where('STATUS', $filtros['STATUS']);
         }
 
+        // Filtro por sexo
         if (!empty($filtros['SEXO_PACIENTE'])) {
             $query->where('SEXO_PACIENTE', $filtros['SEXO_PACIENTE']);
         }
 
+        // Filtro por telefone
         if (!empty($filtros['FONE_PACIENTE'])) {
             $query->where('FONE_PACIENTE', 'LIKE', '%' . $filtros['FONE_PACIENTE'] . '%');
         }

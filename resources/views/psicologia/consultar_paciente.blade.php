@@ -261,16 +261,16 @@
         <div class="modal-dialog">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h5 class="modal-title" id="confirmDeleteModalLabel">Excluir Paciente</h5>
+                    <h5 class="modal-title" id="confirmDeleteModalLabel">Inativar Paciente</h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fechar"></button>
                 </div>
                 <div class="modal-body">
-                    <p id="modal-delete-nome">Deseja excluir este paciente?</p>
+                    <p id="modal-delete-nome">Deseja inativar este paciente?</p>
                     <p class="text-danger">Essa ação não pode ser desfeita.</p>
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-                    <button type="button" class="btn btn-danger" id="confirm-delete-btn">Excluir</button>
+                    <button type="button" class="btn btn-danger" id="confirm-delete-btn">Inativar</button>
                 </div>
             </div>
         </div>
@@ -300,6 +300,12 @@
                             <div class="col-md-6 form-floating">
                                 <input type="text" class="form-control" id="editPacienteNome" name="nome" placeholder="Nome">
                                 <label for="editPacienteNome">Nome</label>
+                            </div>
+
+                            <!-- STATUS -->
+                            <div class="col-md-6 form-floating">
+                                <input type="text" class="form-control" id="editPacienteStatus" name="status" readonly>
+                                <label for="editPacienteStatus">Status</label>
                             </div>
 
                             <!-- CPF -->
@@ -448,299 +454,297 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/mdb-ui-kit/7.1.0/mdb.min.js"></script>
 
     <script>
-        // === CONSTANTES E VARIÁVEIS GLOBAIS ===
-        const searchForm = document.getElementById('search-form');
-        const searchInput = document.getElementById('search-input');
-        const dt_nasc_paciente_input = document.getElementById('DT_NASC_PACIENTE-input');
-        const statusInput = document.getElementById('status-input');
-        const sexoInput = document.getElementById('sexo');
-        const telefoneInput = document.getElementById('telefone-input');
-        const pacientesTbody = document.getElementById('pacientes-tbody');
-        const limiteSelect = document.getElementById('limite-visualizacao');
+        window.addEventListener('DOMContentLoaded', () => {
+            // === CONSTANTES E VARIÁVEIS GLOBAIS (pegas após DOM pronto) ===
+            const searchForm = document.getElementById('search-form');
+            const searchInput = document.getElementById('search-input');
+            const dt_nasc_paciente_input = document.getElementById('DT_NASC_PACIENTE-input');
+            const statusInput = document.getElementById('status-input');
+            const sexoInput = document.getElementById('sexo');
+            const telefoneInput = document.getElementById('telefone-input');
+            const pacientesTbody = document.getElementById('pacientes-tbody');
+            const limiteSelect = document.getElementById('limite-visualizacao');
 
-        let selectedPaciente = null;
-        let limiteRegistros = parseInt(limiteSelect.value) || 10;
+            let selectedPaciente = null;
+            let limiteRegistros = limiteSelect ? (parseInt(limiteSelect.value) || 10) : 10;
 
-        // === FUNÇÕES ===
-        function formatarDataBR(dateStr) {
-            if (!dateStr) return '-';
-            const cleanedDate = dateStr.split('T')[0];
-            const [year, month, day] = cleanedDate.split('-');
-            return `${day}/${month}/${year}`;
-        }
+            // === FUNÇÕES ===
+            function formatarDataBR(dateStr) {
+                if (!dateStr) return '-';
+                const cleanedDate = dateStr.split('T')[0];
+                const [year, month, day] = cleanedDate.split('-');
+                return `${day}/${month}/${year}`;
+            }
 
-        // ATIVA EVENTOS DE EDIÇÃO DOS PACIENTES
-        function ativarEventosEditar() {
-            document.querySelectorAll('.editar-btn').forEach(button => {
-                button.addEventListener('click', () => {
-                    selectedPaciente = {
-                        id: button.getAttribute('data-id'),
-                        nome: button.getAttribute('data-nome'),
-                        cpf: button.getAttribute('data-cpf'),
-                        dt_nasc: button.getAttribute('data-dt_nasc'),
-                        sexo: button.getAttribute('data-sexo'),
-                        endereco: button.getAttribute('data-endereco'),
-                        num: button.getAttribute('data-num'),
-                        complemento: button.getAttribute('data-complemento'),
-                        bairro: button.getAttribute('data-bairro'),
-                        uf: button.getAttribute('data-uf'),
-                        cep: button.getAttribute('data-cep'),
-                        celular: button.getAttribute('data-celular'),
-                        email: button.getAttribute('data-email'),
-                        municipio: button.getAttribute('data-municipio'),
-                    };
-                    document.getElementById('modal-paciente-nome').textContent = `Deseja editar o paciente: ${selectedPaciente.nome}?`;
-                    new bootstrap.Modal(document.getElementById('confirmEditModal')).show();
+            function ativarEventosEditar() {
+                document.querySelectorAll('.editar-btn').forEach(button => {
+                    button.addEventListener('click', () => {
+                        selectedPaciente = {
+                            id: button.getAttribute('data-id'),
+                            status: button.getAttribute('data-status'),
+                            nome: button.getAttribute('data-nome'),
+                            cpf: button.getAttribute('data-cpf'),
+                            dt_nasc: button.getAttribute('data-dt_nasc'),
+                            sexo: button.getAttribute('data-sexo'),
+                            endereco: button.getAttribute('data-endereco'),
+                            num: button.getAttribute('data-num'),
+                            complemento: button.getAttribute('data-complemento'),
+                            bairro: button.getAttribute('data-bairro'),
+                            uf: button.getAttribute('data-uf'),
+                            cep: button.getAttribute('data-cep'),
+                            celular: button.getAttribute('data-celular'),
+                            email: button.getAttribute('data-email'),
+                            municipio: button.getAttribute('data-municipio'),
+                        };
+                        document.getElementById('modal-paciente-nome').textContent = `Deseja editar o paciente: ${selectedPaciente.nome}?`;
+                        new bootstrap.Modal(document.getElementById('confirmEditModal')).show();
+                    });
                 });
-            });
-        }
+            }
 
-        // ATIVA EVENTOS DE EXCLUSÃO DOS PACIENTES
-        function ativarEventosDeletar() {
-            document.querySelectorAll('.excluir-btn').forEach(button => {
-                button.addEventListener('click', () => {
-                    selectedPaciente = {
-                        id: button.getAttribute('data-id'),
-                        nome: button.getAttribute('data-nome'),
-                    };
-                    document.getElementById('modal-delete-nome').textContent = `Deseja excluir o paciente: ${selectedPaciente.nome}?`;
-                    new bootstrap.Modal(document.getElementById('confirmDeleteModal')).show();
+            function ativarEventosDeletar() {
+                document.querySelectorAll('.excluir-btn').forEach(button => {
+                    button.addEventListener('click', () => {
+                        selectedPaciente = {
+                            id: button.getAttribute('data-id'),
+                            nome: button.getAttribute('data-nome'),
+                        };
+                        document.getElementById('modal-delete-nome').textContent = `Deseja inativar o paciente: ${selectedPaciente.nome}?`;
+                        new bootstrap.Modal(document.getElementById('confirmDeleteModal')).show();
+                    });
                 });
-            });
-        }
+            }
 
-        // ATUALIZA LIMITE DE VISUALIZAÇÃO
-        function atualizarVisualizacaoLimite() {
-            const linhas = pacientesTbody.querySelectorAll('tr');
-            linhas.forEach((linha, idx) => {
-                linha.style.display = idx < limiteRegistros ? '' : 'none';
-            });
-        }
+            function atualizarVisualizacaoLimite() {
+                if (!pacientesTbody) return;
+                const linhas = pacientesTbody.querySelectorAll('tr');
+                linhas.forEach((linha, idx) => {
+                    linha.style.display = idx < limiteRegistros ? '' : 'none';
+                });
+            }
 
-        function montarQueryParams(params) {
-            return Object.entries(params)
-                .filter(([_, v]) => v !== null && v !== '')
-                .map(([k, v]) => `${encodeURIComponent(k)}=${encodeURIComponent(v)}`)
-                .join('&');
-        }
+            function montarQueryParams(params) {
+                return Object.entries(params)
+                    .filter(([_, v]) => v !== null && String(v).trim() !== '')
+                    .map(([k, v]) => `${encodeURIComponent(k)}=${encodeURIComponent(v)}`)
+                    .join('&');
+            }
 
-        function buscarPacientes() {
-            const filtros = {
-                search: searchInput.value.trim(), // NOME OU CPF
-                DT_NASC_PACIENTE: dt_nasc_paciente_input.value,
-                STATUS: statusInput.value,
-                SEXO_PACIENTE: sexoInput.value,
-                FONE_PACIENTE: telefoneInput.value,
-            };
+            function buscarPacientes() {
+                if (!pacientesTbody) return;
+                const filtros = {
+                    search: searchInput ? searchInput.value.trim() : '',
+                    DT_NASC_PACIENTE: dt_nasc_paciente_input ? dt_nasc_paciente_input.value : '',
+                    STATUS: statusInput ? statusInput.value : '',
+                    SEXO_PACIENTE: sexoInput ? sexoInput.value : '',
+                    FONE_PACIENTE: telefoneInput ? telefoneInput.value : '',
+                };
 
-            const queryString = montarQueryParams(filtros);
+                const queryString = montarQueryParams(filtros);
+                console.log('Buscando pacientes com query:', queryString);
 
-            fetch(`/psicologia/consultar-paciente/buscar?${queryString}`)
-            .then(res => res.json())
-            .then(pacientes => {
-                pacientesTbody.innerHTML = '';
-                if (pacientes.length === 0) {
-                    pacientesTbody.innerHTML = `
-                        <tr><td colspan="8" class="text-center">Nenhum paciente encontrado.</td></tr>
-                    `;
+                fetch(`/psicologia/consultar-paciente/buscar?${queryString}`)
+                .then(res => {
+                    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+                    return res.json();
+                })
+                .then(pacientes => {
+                    pacientesTbody.innerHTML = '';
+                    if (!pacientes || pacientes.length === 0) {
+                        pacientesTbody.innerHTML = `<tr><td colspan="8" class="text-center">Nenhum paciente encontrado.</td></tr>`;
+                        return;
+                    }
+
+                    pacientes.forEach(paciente => {
+                        const row = document.createElement('tr');
+                        row.innerHTML = `
+                            <td>${paciente.NOME_COMPL_PACIENTE}</td>
+                            <td>${paciente.CPF_PACIENTE}</td>
+                            <td>${paciente.DT_NASC_PACIENTE ? formatarDataBR(paciente.DT_NASC_PACIENTE) : '-'}</td>
+                            <td>${paciente.SEXO_PACIENTE ?? '-'}</td>
+                            <td>${paciente.FONE_PACIENTE ?? '-'}</td>
+                            <td>${paciente.E_MAIL_PACIENTE ?? '-'}</td>
+                            <td>${paciente.STATUS ?? '-'}</td>
+                            <td>
+                                <div class="d-flex flex-nowrap gap-1">
+                                    <button type="button" class="btn btn-sm btn-warning editar-btn"
+                                        data-id="${paciente.ID_PACIENTE}" 
+                                        data-status="${paciente.STATUS}"
+                                        data-nome="${paciente.NOME_COMPL_PACIENTE ?? 'Paciente'}"
+                                        data-cpf="${paciente.CPF_PACIENTE ?? ''}"
+                                        data-dt_nasc="${paciente.DT_NASC_PACIENTE ?? ''}"
+                                        data-sexo="${paciente.SEXO_PACIENTE ?? ''}"
+                                        data-endereco="${paciente.ENDERECO ?? ''}"
+                                        data-num="${paciente.END_NUM ?? ''}"
+                                        data-complemento="${paciente.COMPLEMENTO ?? ''}"
+                                        data-bairro="${paciente.BAIRRO ?? ''}"
+                                        data-uf="${paciente.UF ?? ''}"
+                                        data-cep="${paciente.CEP ?? ''}"
+                                        data-celular="${paciente.FONE_PACIENTE ?? ''}"
+                                        data-email="${paciente.E_MAIL_PACIENTE ?? ''}"
+                                        data-municipio="${paciente.MUNICIPIO ?? ''}">
+                                        <i class="bi bi-pencil"></i> <span class="d-none d-sm-inline">Editar</span>
+                                    </button>
+
+                                    <button type="button" class="btn btn-sm btn-secondary historico-btn"
+                                        data-id="${paciente.ID_PACIENTE}"
+                                        data-nome="${paciente.NOME_COMPL_PACIENTE}">
+                                        <i class="bi bi-clock-history"></i> <span class="d-none d-sm-inline">Histórico</span>
+                                    </button>
+
+                                    <button type="button" class="btn btn-sm btn-danger excluir-btn"
+                                        data-id="${paciente.ID_PACIENTE}"
+                                        data-nome="${paciente.NOME_COMPL_PACIENTE ?? 'Paciente'}">
+                                        <i class="bi bi-trash"></i> <span class="d-none d-sm-inline">Inativar</span>
+                                    </button>
+                                </div>
+                            </td>
+                        `;
+                        pacientesTbody.appendChild(row);
+                    });
+
+                    ativarEventosEditar();
+                    ativarEventosDeletar();
+                    atualizarVisualizacaoLimite();
+                })
+                .catch(err => {
+                    console.error(err);
+                    pacientesTbody.innerHTML = `<tr><td colspan="7" class="text-center text-danger">Erro ao buscar pacientes.</td></tr>`;
+                });
+            }
+
+            function abrirModalEdicao() {
+                if (!selectedPaciente) return;
+                document.getElementById('editPacienteNome').value = selectedPaciente.nome || '';
+                document.getElementById('editPacienteStatus').value = selectedPaciente.status || '';
+
+                const cpfInput = document.getElementById('editPacienteCPF');
+                if (cpfInput) {
+                    cpfInput.value = selectedPaciente.cpf || '';
+                    const status = document.getElementById('editPacienteStatus').value;
+                    cpfInput.readOnly = (status !== 'Inativo');
+                }
+
+                document.getElementById('editPacienteDTNASC').value = selectedPaciente.dt_nasc ? selectedPaciente.dt_nasc.split('T')[0] : '';
+                document.getElementById('editPacienteSEXO').value = selectedPaciente.sexo || '';
+                document.getElementById('editPacienteENDERECO').value = selectedPaciente.endereco || '';
+                document.getElementById('editPacienteNUM').value = selectedPaciente.num || '';
+                document.getElementById('editPacienteCOMPLEMENTO').value = selectedPaciente.complemento || '';
+                document.getElementById('editPacienteBAIRRO').value = selectedPaciente.bairro || '';
+                document.getElementById('editPacienteUF').value = selectedPaciente.uf || '';
+                document.getElementById('editPacienteCEP').value = selectedPaciente.cep || '';
+                document.getElementById('editPacienteCELULAR').value = selectedPaciente.celular || '';
+                document.getElementById('editPacienteEMAIL').value = selectedPaciente.email || '';
+                document.getElementById('editPacienteMUNICIPIO').value = selectedPaciente.municipio || '';
+
+                bootstrap.Modal.getInstance(document.getElementById('confirmEditModal'))?.hide();
+                new bootstrap.Modal(document.getElementById('editPacienteModal')).show();
+            }
+
+            function enviarEdicao(e) {
+                e.preventDefault();
+                if (!selectedPaciente || !selectedPaciente.id) {
+                    alert('Paciente não selecionado.');
                     return;
                 }
 
-                pacientes.forEach(paciente => {
-                    const row = document.createElement('tr');
-                    row.innerHTML = `
-                        <td>${paciente.NOME_COMPL_PACIENTE}</td>
-                        <td>${paciente.CPF_PACIENTE}</td>
-                        <td>${paciente.DT_NASC_PACIENTE ? formatarDataBR(paciente.DT_NASC_PACIENTE) : '-'}</td>
-                        <td>${paciente.SEXO_PACIENTE ?? '-'}</td>
-                        <td>${paciente.FONE_PACIENTE ?? '-'}</td>
-                        <td>${paciente.E_MAIL_PACIENTE ?? '-'}</td>
-                        <td>${paciente.STATUS ?? '-'}</td>
-                        <td>
-                            <div class="d-flex flex-nowrap gap-1">
-                                <button type="button" class="btn btn-sm btn-warning editar-btn"
-                                    data-id="${paciente.ID_PACIENTE}" 
-                                    data-nome="${paciente.NOME_COMPL_PACIENTE ?? 'Paciente'}"
-                                    data-cpf="${paciente.CPF_PACIENTE ?? ''}"
-                                    data-dt_nasc="${paciente.DT_NASC_PACIENTE ?? ''}"
-                                    data-sexo="${paciente.SEXO_PACIENTE ?? ''}"
-                                    data-endereco="${paciente.ENDERECO ?? ''}"
-                                    data-num="${paciente.END_NUM ?? ''}"
-                                    data-complemento="${paciente.COMPLEMENTO ?? ''}"
-                                    data-bairro="${paciente.BAIRRO ?? ''}"
-                                    data-uf="${paciente.UF ?? ''}"
-                                    data-cep="${paciente.CEP ?? ''}"
-                                    data-celular="${paciente.FONE_PACIENTE ?? ''}"
-                                    data-email="${paciente.E_MAIL_PACIENTE ?? ''}"
-                                    data-municipio="${paciente.MUNICIPIO ?? ''}">
-                                    <i class="bi bi-pencil"></i> <span class="d-none d-sm-inline">Editar</span>
-                                </button>
+                const dados = {
+                    nome: document.getElementById('editPacienteNome').value,
+                    cpf: document.getElementById('editPacienteCPF').value,
+                    status: document.getElementById('editPacienteStatus').value, // <--- vírgula corrigida
+                    dt_nasc: document.getElementById('editPacienteDTNASC').value,
+                    sexo: document.getElementById('editPacienteSEXO').value,
+                    endereco: document.getElementById('editPacienteENDERECO').value,
+                    num: document.getElementById('editPacienteNUM').value,
+                    complemento: document.getElementById('editPacienteCOMPLEMENTO').value,
+                    bairro: document.getElementById('editPacienteBAIRRO').value,
+                    uf: document.getElementById('editPacienteUF').value,
+                    cep: document.getElementById('editPacienteCEP').value,
+                    celular: document.getElementById('editPacienteCELULAR').value,
+                    email: document.getElementById('editPacienteEMAIL').value,
+                    municipio: document.getElementById('editPacienteMUNICIPIO').value,
+                };
 
-                                <button type="button" class="btn btn-sm btn-secondary historico-btn"
-                                    data-id="${paciente.ID_PACIENTE}"
-                                    data-nome="${paciente.NOME_COMPL_PACIENTE}">
-                                    <i class="bi bi-clock-history"></i> <span class="d-none d-sm-inline">Histórico</span>
-                                </button>
-
-                                <button type="button" class="btn btn-sm btn-danger excluir-btn"
-                                    data-id="${paciente.ID_PACIENTE}"
-                                    data-nome="${paciente.NOME_COMPL_PACIENTE ?? 'Paciente'}">
-                                    <i class="bi bi-trash"></i> <span class="d-none d-sm-inline">Excluir</span>
-                                </button>
-                            </div>
-                        </td>
-                    `;
-                    pacientesTbody.appendChild(row);
-                });
-
-                ativarEventosEditar();
-                ativarEventosDeletar();
-                atualizarVisualizacaoLimite();
-            })
-            .catch(err => {
-                console.error(err);
-                pacientesTbody.innerHTML = `
-                    <tr><td colspan="7" class="text-center text-danger">Erro ao buscar pacientes.</td></tr>
-                `;
-            });
-        }
-
-        // PREENCHE FORMULÁRIO DE EDIÇÃO COM DADOS DO PACIENTE SELECIONADO
-        function abrirModalEdicao() {
-            
-
-            document.getElementById('editPacienteNome').value = selectedPaciente.nome;
-            const cpfInput = document.getElementById('editPacienteCPF');
-            cpfInput.value = selectedPaciente.cpf;
-            cpfInput.readOnly = true;
-            document.getElementById('editPacienteDTNASC').value = selectedPaciente.dt_nasc ? selectedPaciente.dt_nasc.split('T')[0] : '';
-            document.getElementById('editPacienteSEXO').value = selectedPaciente.sexo || '';
-            document.getElementById('editPacienteENDERECO').value = selectedPaciente.endereco || '';
-            document.getElementById('editPacienteNUM').value = selectedPaciente.num || '';
-            document.getElementById('editPacienteCOMPLEMENTO').value = selectedPaciente.complemento || '';
-            document.getElementById('editPacienteBAIRRO').value = selectedPaciente.bairro || '';
-            document.getElementById('editPacienteUF').value = selectedPaciente.uf || '';
-            document.getElementById('editPacienteCEP').value = selectedPaciente.cep || '';
-            document.getElementById('editPacienteCELULAR').value = selectedPaciente.celular || '';
-            document.getElementById('editPacienteEMAIL').value = selectedPaciente.email || '';
-            document.getElementById('editPacienteMUNICIPIO').value = selectedPaciente.municipio || '';
-
-            bootstrap.Modal.getInstance(document.getElementById('confirmEditModal')).hide();
-            new bootstrap.Modal(document.getElementById('editPacienteModal')).show();
-        }
-
-        function abrirModalExclusao() {
-            if (!selectedPaciente) return;
-            bootstrap.Modal.getInstance(document.getElementById('confirmDeleteModal')).hide();
-            new bootstrap.Modal(document.getElementById('confirmDeleteModal')).show();
-        }
-
-        // Envia formulário de edição via fetch
-        function enviarEdicao(e) {
-            e.preventDefault();
-
-            if (!selectedPaciente || !selectedPaciente.id) {
-                alert('Paciente não selecionado.');
-                return;
-            }
-
-            const dados = {
-                nome: document.getElementById('editPacienteNome').value,
-                cpf: document.getElementById('editPacienteCPF').value,
-                dt_nasc: document.getElementById('editPacienteDTNASC').value,
-                sexo: document.getElementById('editPacienteSEXO').value,
-                endereco: document.getElementById('editPacienteENDERECO').value,
-                num: document.getElementById('editPacienteNUM').value,
-                complemento: document.getElementById('editPacienteCOMPLEMENTO').value,
-                bairro: document.getElementById('editPacienteBAIRRO').value,
-                uf: document.getElementById('editPacienteUF').value,
-                cep: document.getElementById('editPacienteCEP').value,
-                celular: document.getElementById('editPacienteCELULAR').value,
-                email: document.getElementById('editPacienteEMAIL').value,
-                municipio: document.getElementById('editPacienteMUNICIPIO').value,
-            };
-
-            fetch(`editar-paciente/${selectedPaciente.id}`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
-                },
-                body: JSON.stringify(dados),
-            })
+                fetch(`editar-paciente/${selectedPaciente.id}`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
+                    },
+                    body: JSON.stringify(dados),
+                })
                 .then(response => {
                     if (!response.ok) throw new Error('Erro ao salvar dados');
                     return response.json();
                 })
                 .then(data => {
                     alert('Paciente atualizado com sucesso!');
-                    bootstrap.Modal.getInstance(document.getElementById('editPacienteModal')).hide();
+                    bootstrap.Modal.getInstance(document.getElementById('editPacienteModal'))?.hide();
                     location.reload();
                 })
                 .catch(error => {
                     console.error(error);
                     alert('Erro ao atualizar paciente.');
                 });
-        }
-
-        function enviarExclusao(e) {
-            e.preventDefault();
-            
-            if (!selectedPaciente || !selectedPaciente.id) {
-                alert('Paciente não selecionado.');
-                return;
             }
 
-            if (!confirm(`Tem certeza que deseja excluir o paciente: ${selectedPaciente.nome}?`)) {
-                return;
+            function enviarExclusao(e) {
+                e.preventDefault();
+                if (!selectedPaciente || !selectedPaciente.id) {
+                    alert('Paciente não selecionado.');
+                    return;
+                }
+
+                if (!confirm(`Tem certeza que deseja excluir o paciente: ${selectedPaciente.nome}?`)) {
+                    return;
+                }
+
+                fetch(`/psicologia/excluir-paciente/${selectedPaciente.id}`, {
+                    method: 'DELETE',
+                    headers: {
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
+                    },
+                })
+                .then(response => {
+                    if (!response.ok) throw new Error('Erro ao inativar paciente - Paciente com agendamento vinculado');
+                    return response.json();
+                })
+                .then(data => {
+                    alert('Paciente inativado com sucesso.');
+                    bootstrap.Modal.getInstance(document.getElementById('confirmDeleteModal'))?.hide();
+                    buscarPacientes();
+                })
+                .catch(error => {
+                    console.error(error);
+                    alert('Erro ao inativar paciente - Paciente com agendamento vinculado');
+                });
             }
 
-            fetch(`/psicologia/excluir-paciente/${selectedPaciente.id}`, {
-                method: 'DELETE',
-                headers: {
-                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
-                },
-            })
-            .then(response => {
-                if (!response.ok) throw new Error('Erro ao excluir paciente - Paciente com agendamento vinculado');
-                return response.json();
-            })
-            .then(data => {
-                alert('Paciente excluído com sucesso.');
-                bootstrap.Modal.getInstance(document.getElementById('confirmDeleteModal')).hide();
-                buscarPacientes(); // Recarrega tabela sem refresh
-            })
-            .catch(error => {
-                console.error(error);
-                alert('Erro ao excluir paciente - Paciente com agendamento vinculado');
-            });
-        }
+            // === EVENTOS ===
+            if (searchForm) {
+                searchForm.addEventListener('submit', e => {
+                    e.preventDefault();
+                    buscarPacientes();
+                });
+            }
 
-        // === EVENTOS ===
+            if (limiteSelect) {
+                limiteSelect.addEventListener('change', () => {
+                    limiteRegistros = parseInt(limiteSelect.value) || limiteRegistros;
+                    atualizarVisualizacaoLimite();
+                });
+            }
 
-        // Submissão do formulário de busca
-        searchForm.addEventListener('submit', e => {
-            e.preventDefault();
-            buscarPacientes();
-        });
+            const confirmEditBtn = document.getElementById('confirm-edit-btn');
+            if (confirmEditBtn) confirmEditBtn.addEventListener('click', abrirModalEdicao);
 
-        // Mudança no select de limite
-        limiteSelect.addEventListener('change', () => {
-            limiteRegistros = parseInt(limiteSelect.value);
-            atualizarVisualizacaoLimite();
-        });
+            const editForm = document.getElementById('editPacienteForm');
+            if (editForm) editForm.addEventListener('submit', enviarEdicao);
 
-        // Clique no botão confirmar edição (modal)
-        document.getElementById('confirm-edit-btn').addEventListener('click', abrirModalEdicao);
+            const confirmDeleteBtn = document.getElementById('confirm-delete-btn');
+            if (confirmDeleteBtn) confirmDeleteBtn.addEventListener('click', enviarExclusao);
 
-        // Submissão do formulário de edição
-        document.getElementById('editPacienteForm').addEventListener('submit', enviarEdicao);
-
-        // Submissão formulário de exclusão
-        document.getElementById('confirm-delete-btn').addEventListener('click', enviarExclusao);
-
-        // Busca inicial ao carregar página
-        window.addEventListener('DOMContentLoaded', () => {
+            // Busca inicial
             buscarPacientes();
         });
     </script>
