@@ -143,10 +143,6 @@ class PacienteController extends Controller
         try {
             $paciente = FaesaClinicaPaciente::findOrFail($id);
 
-            if ($paciente->CPF_PACIENTE !== $validatedData['cpf']) {
-                $paciente->STATUS = 'Em espera';
-            }
-
             $paciente->NOME_COMPL_PACIENTE = $validatedData['nome'];
             $paciente->CPF_PACIENTE = str_replace(['-', '.'], '', $validatedData['cpf']);
             $paciente->DT_NASC_PACIENTE = $validatedData['dt_nasc'] ?? $paciente->DT_NASC_PACIENTE;
@@ -190,6 +186,16 @@ class PacienteController extends Controller
         try {
             $paciente = $this->pacienteService->setEmAtendimento($id);
             return response()->json(['message' => 'Paciente em atendimento.', 'paciente' => $paciente]);
+        } catch (ModelNotFoundException $e) {
+            return response()->json(['message' => 'Paciente não encontrado.'], 404);
+        }
+    }
+
+    public function setAtivo($id)
+    {
+        try {
+            $paciente = $this->pacienteService->setAtivo($id);
+            return response()->json(['message' => 'Paciente reativado com sucesso.', 'paciente' => $paciente]);
         } catch (ModelNotFoundException $e) {
             return response()->json(['message' => 'Paciente não encontrado.'], 404);
         }

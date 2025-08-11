@@ -276,6 +276,27 @@
         </div>
     </div>
 
+    <!-- MODAL DE CONFIRMAÇÃO DE EXCLUSÃO DE PACIENTE -->
+    <div class="modal fade" id="confirmAtivarModal" tabindex="-1" aria-labelledby="confirmAtivarModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="confirmAtivarModalLabel">Reativar Paciente</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fechar"></button>
+                </div>
+                <div class="modal-body">
+                    <p id="modal-ativar-nome">Deseja reativar este paciente?</p>
+                    <p class="text-danger">Essa ação não pode ser desfeita.</p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="button" class="btn btn-success" id="confirm-ativar-btn">Reativar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
     <!-- MODAL DE EDIÇÃO DO PACIENTE -->
     <div class="modal fade" id="editPacienteModal" tabindex="-1" aria-labelledby="editPacienteModalLabel" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered modal-lg">
@@ -516,6 +537,19 @@
                 });
             }
 
+            function ativarEventosAtivar() {
+                document.querySelectorAll('.ativar-btn').forEach(button => {
+                    button.addEventListener('click', () => {
+                        selectedPaciente = {
+                            id: button.getAttribute('data-id'),
+                            nome: button.getAttribute('data-nome'),
+                        };
+                        document.getElementById('modal-ativar-nome').textContent = `Deseja ativar o paciente: ${selectedPaciente.nome}?`;
+                        new bootstrap.Modal(document.getElementById('confirmAtivarModal')).show();
+                    });
+                });
+            }
+
             function atualizarVisualizacaoLimite() {
                 if (!pacientesTbody) return;
                 const linhas = pacientesTbody.querySelectorAll('tr');
@@ -595,6 +629,13 @@
                                             data-nome="${paciente.NOME_COMPL_PACIENTE}">
                                             <i class="bi bi-clock-history"></i> <span class="d-none d-sm-inline">Histórico</span>
                                         </button>
+
+                                        <button type="button" class="btn btn-sm btn-success ativar-btn"
+                                            data-id="${paciente.ID_PACIENTE}"
+                                            data-nome="${paciente.NOME_COMPL_PACIENTE ?? 'Paciente'}">
+                                            <i class="bi bi-check2"></i> <span class="d-none d-sm-inline">Reativar</span>
+                                        </button>
+
                                     </div>
                                 </td>
                             `;
@@ -651,6 +692,7 @@
                     ativarEventosEditar();
                     ativarEventosDeletar();
                     atualizarVisualizacaoLimite();
+                    ativarEventosAtivar();
                 })
                 .catch(err => {
                     console.error(err);
@@ -688,7 +730,7 @@
             function enviarEdicao(e) {
                 e.preventDefault();
                 if (!selectedPaciente || !selectedPaciente.id) {
-                    alert('Paciente não selecionado.');
+                    //alert('Paciente não selecionado.');
                     return;
                 }
 
@@ -722,24 +764,17 @@
                     return response.json();
                 })
                 .then(data => {
-                    alert('Paciente atualizado com sucesso!');
                     bootstrap.Modal.getInstance(document.getElementById('editPacienteModal'))?.hide();
                     location.reload();
                 })
                 .catch(error => {
                     console.error(error);
-                    alert('Erro ao atualizar paciente.');
                 });
             }
 
             function enviarExclusao(e) {
                 e.preventDefault();
                 if (!selectedPaciente || !selectedPaciente.id) {
-                    alert('Paciente não selecionado.');
-                    return;
-                }
-
-                if (!confirm(`Tem certeza que deseja excluir o paciente: ${selectedPaciente.nome}?`)) {
                     return;
                 }
 
@@ -754,13 +789,37 @@
                     return response.json();
                 })
                 .then(data => {
-                    alert('Paciente inativado com sucesso.');
                     bootstrap.Modal.getInstance(document.getElementById('confirmDeleteModal'))?.hide();
                     buscarPacientes();
                 })
                 .catch(error => {
                     console.error(error);
-                    alert('Erro ao inativar paciente - Paciente com agendamento vinculado');
+                    alert(error.message);
+                });
+            }
+
+            function enviarAtivacao(e) {
+                e.preventDefault();
+                if (!selectedPaciente || !selectedPaciente.id) {
+                    return;
+                }
+
+                fetch(`/psicologia/paciente/${selectedPaciente.id}/ativar`, {
+                    method: 'GET',
+                    headers: {
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
+                    },
+                })
+                .then(response => {
+                    if (!response.ok) throw new Error('Erro ao ativar paciente');
+                    return response.json();
+                })
+                .then(data => {
+                    bootstrap.Modal.getInstance(document.getElementById('editPacienteModal'))?.hide();
+                    location.reload();
+                })
+                .catch(error => {
+                    console.error(error);
                 });
             }
 
@@ -787,6 +846,9 @@
 
             const confirmDeleteBtn = document.getElementById('confirm-delete-btn');
             if (confirmDeleteBtn) confirmDeleteBtn.addEventListener('click', enviarExclusao);
+
+            const confirmAtivarBtn = document.getElementById('confirm-ativar-btn');
+            if (confirmAtivarBtn) confirmAtivarBtn.addEventListener('click', enviarAtivacao);
 
             // Busca inicial
             buscarPacientes();
