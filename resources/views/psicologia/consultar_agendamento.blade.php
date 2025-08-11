@@ -102,7 +102,7 @@
 
         <!-- MOSTRA MENSAGEM DE SUCESSO AO USUARIO APÓS UMA AÇÃO BEM SUCEDIDA -->
         @if(session('success'))
-            <div id="success-alert" class="alert alert-success fixed-top text-center mx-auto w-50 shadow animate-slide-down">
+            <div id="success-alert" class="alert alert-success fixed-top text-center mx-auto w-50 shadow animate-slide-down mt-4">
                 {{ session('success') }}
             </div>
         @endif
@@ -334,8 +334,6 @@
 
                     agendamentos.forEach(ag => {
 
-                        console.log(ag.ID_AGENDAMENTO_REMARCADO);
-
                         const paciente = ag.paciente ? ag.paciente.NOME_COMPL_PACIENTE : '-';
                         const servico = ag.servico ? ag.servico.SERVICO_CLINICA_DESC : '-';
                         const data = ag.DT_AGEND ? ag.DT_AGEND.substring(0, 10).split('-').reverse().join('/') : '-';
@@ -350,6 +348,28 @@
                         const valorPagamento = ag.VALOR_PAG ?? '-';
                         const reagendamento = ag.ID_AGEND_REMARCADO != null ? 'Sim' : 'Não';
                         const row = document.createElement('tr');
+
+                       let statusColor = '';
+                        switch (status) {
+                            case 'Agendado':
+                                statusColor = '#4CAF50'; // verde médio (sem muito amarelo) – "ativo" e positivo
+                                break;
+                            case 'Cancelado':
+                                statusColor = '#F44336'; // vermelho vivo - alerta / erro
+                                break;
+                            case 'Concluído':
+                                statusColor = '#2E7D32'; // verde escuro - completado, sucesso definitivo
+                                break;
+                            case 'Reagendado':
+                                statusColor = '#FF9800'; // laranja vibrante - ação pendente / alteração
+                                break;
+                            case 'Presente':
+                                statusColor = '#2196F3'; // azul padrão, indica presença ou informação
+                                break;
+                            default:
+                                statusColor = '#616161'; // cinza para status não reconhecido
+                        }
+
                         row.innerHTML = `
                             <td>${paciente}</td>
                             <td>${servico}</td>
@@ -357,7 +377,7 @@
                             <td>${horaIni}</td>
                             <td>${horaFim}</td>
                             <td>${local}</td>
-                            <td>${status}</td>
+                            <td style="color: ${statusColor}; font-weight: bold;">${status}</td>
                             <td>${reagendamento}</td>
                             <td>${valor}</td>
                             <td>${checkPagamento}</td>
