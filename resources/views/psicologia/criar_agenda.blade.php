@@ -388,7 +388,7 @@
                     pacientes.forEach(paciente => {
                         const item = document.createElement('button');
                         item.type = 'button';
-                        item.classList.add('list-group-item', 'list-group-item-action', 'border', 'border-black');
+                        item.classList.add('list-group-item', 'list-group-item-action', 'border', 'rounded');
                         item.textContent = `${paciente.NOME_COMPL_PACIENTE} (${paciente.CPF_PACIENTE})`;
                         item.addEventListener('click', () => {
                             searchInput.value = `${paciente.NOME_COMPL_PACIENTE} (${paciente.CPF_PACIENTE})`;
