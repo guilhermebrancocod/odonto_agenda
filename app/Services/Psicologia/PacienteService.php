@@ -131,4 +131,12 @@ class PacienteService
 
         return $query->orderBy('ID_PACIENTE', 'desc')->get();
     }
+
+    public function setAtivo($id)
+    {
+        $paciente = FaesaClinicaPaciente::findOrFail($id);
+        $paciente->STATUS = 'Em espera';
+        $paciente->save();
+        return $paciente;
+    }
 }
