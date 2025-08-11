@@ -277,6 +277,11 @@ class AgendamentoController extends Controller
                 return redirect('/psicologia/criar-agendamento/')
                     ->with('error', 'Nenhum agendamento foi criado devido a conflitos em todos os dias.');
             }
+
+            if (!empty($agendamentosCriados)) {
+                $this->pacienteService->setEmAtendimento($request->paciente_id);
+            }
+
             if (!empty($diasComConflito)) {
                 $diasFormatados = array_map(fn($dia) => Carbon::parse($dia)->format('d-m-Y'), $diasComConflito);
                 return redirect('/psicologia/criar-agendamento/')
