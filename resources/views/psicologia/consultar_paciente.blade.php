@@ -454,6 +454,15 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/mdb-ui-kit/7.1.0/mdb.min.js"></script>
 
     <script>
+
+        // === FUNÇÕES ===
+            function formatarDataBR(dateStr) {
+                if (!dateStr) return '-';
+                const cleanedDate = dateStr.split('T')[0];
+                const [year, month, day] = cleanedDate.split('-');
+                return `${day}/${month}/${year}`;
+            }
+
         window.addEventListener('DOMContentLoaded', () => {
             // === CONSTANTES E VARIÁVEIS GLOBAIS (pegas após DOM pronto) ===
             const searchForm = document.getElementById('search-form');
@@ -466,15 +475,7 @@
             const limiteSelect = document.getElementById('limite-visualizacao');
 
             let selectedPaciente = null;
-            let limiteRegistros = limiteSelect ? (parseInt(limiteSelect.value) || 10) : 10;
-
-            // === FUNÇÕES ===
-            function formatarDataBR(dateStr) {
-                if (!dateStr) return '-';
-                const cleanedDate = dateStr.split('T')[0];
-                const [year, month, day] = cleanedDate.split('-');
-                return `${day}/${month}/${year}`;
-            }
+            let limiteRegistros = limiteSelect ? (parseInt(limiteSelect.value) || 10) : 10; 
 
             function ativarEventosEditar() {
                 document.querySelectorAll('.editar-btn').forEach(button => {
