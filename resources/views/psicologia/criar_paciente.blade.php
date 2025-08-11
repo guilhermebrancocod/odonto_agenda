@@ -86,7 +86,7 @@
 
             <!-- MOSTRA MENSAGEM DE SUCESSO AO USUARIO APÓS UMA AÇÃO BEM SUCEDIDA -->
             @if(session('success'))
-                <div id="success-alert" class="alert alert-success fixed-top text-center mx-auto w-50 shadow animate-slide-down">
+                <div id="success-alert" class="alert alert-success fixed-top text-center mx-auto w-50 shadow animate-slide-down mt-4">
                     {{ session('success') }}
                 </div>
             @endif
