@@ -34,11 +34,27 @@
                     <i class="fas fa-universal-access"></i>
                 </div>
             </div>
+            @php
+            $isEdit = isset($paciente);
+            @endphp
             <div class="row g-3" style="margin: 20px 0;">
                 <div style="flex: 0.2;">
                     <label for="cpf" style="font-size: 14px; color: #666;">CPF</label>
+
+                    @if($isEdit)
+                    {{-- Edição: bloqueado (disabled) e com hidden para enviar no POST --}}
+                    <input type="text" id="cpf" class="form-control is-readonly"
+                        value="{{ old('cpf', $paciente->CPF_PACIENTE ?? '') }}"
+                        style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 6px; font-size: 14px;"
+                        maxlength="11" minlength="11" disabled autocomplete="off">
+                    <input type="hidden" name="cpf" value="{{ old('cpf', $paciente->CPF_PACIENTE ?? '') }}">
+                    @else
+                    {{-- Criação: campo liberado --}}
                     <input type="text" id="cpf" name="cpf" class="form-control"
-                        value="{{ old('cpf', $paciente->CPF_PACIENTE ?? '') }}" style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 6px; font-size: 14px;" maxlength="10" minlength="11">
+                        value="{{ old('cpf') }}"
+                        style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 6px; font-size: 14px;"
+                        maxlength="11" minlength="11" autocomplete="off">
+                    @endif
                 </div>
                 <div style="flex: 0.2;">
                     <label for="cod_sus" style="font-size: 14px; color: #666;">Cartão SUS</label>
@@ -160,7 +176,7 @@
                         </button>
                     </div>
                     <div>
-                        <button id="salvar" name="salvar" type="submit" onclick="saveGroupData()" style="background-color: #007bff; color: #fff; border: none; padding: 10px 20px; font-size: 14px; border-radius: 6px; cursor: pointer;">
+                        <button id="salvar" name="salvar" type="submit" style="background-color: #007bff; color: #fff; border: none; padding: 10px 20px; font-size: 14px; border-radius: 6px; cursor: pointer;">
                             Salvar
                         </button>
                     </div>

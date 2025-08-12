@@ -101,25 +101,24 @@
                         @php
                         use Carbon\Carbon;
 
-                        $diasMap = [
-                        0 => 'domingo', 1 => 'segunda', 2 => 'terca', 3 => 'quarta',
-                        4 => 'quinta', 5 => 'sexta', 6 => 'sabado',
-                        ];
+                        // alinhado com Carbon::dayOfWeek
+                        $diasMap = [0=>'domingo',1=>'segunda',2=>'terca',3=>'quarta',4=>'quinta',5=>'sexta',6=>'sabado'];
 
                         $recorrenciaAtual = old('recorrencia', trim($agenda->RECORRENCIA ?? ''));
-                        $diasSelecionados = [];
-
                         if ($recorrenciaAtual === 'pontual' && isset($agenda->DT_AGEND)) {
                         $data = Carbon::parse($agenda->DT_AGEND);
-                        $diasSelecionados = [$diasMap[$data->dayOfWeek]];
+                        $diasSelecionados = [$diasMap[$data->dayOfWeek] ?? null];
                         } else {
                         $diasSelecionados = old('dia_semana', isset($agenda) ? explode(',', $agenda->DIA_SEMANA ?? '') : []);
                         }
+
+                        // lista que será renderizada
+                        $opcoesDias = ['domingo','segunda','terca','quarta','quinta','sexta','sabado'];
                         @endphp
 
-                        @foreach (['segunda', 'terca', 'quarta', 'quinta', 'sexta', 'sabado'] as $dia)
-                        <option value="{{ $dia }}" {{ in_array($dia, $diasSelecionados) ? 'selected' : '' }}>
-                            {{ ucfirst($dia) }}-feira
+                        @foreach ($opcoesDias as $dia)
+                        <option value="{{ $dia }}" {{ in_array($dia, $diasSelecionados ?? [], true) ? 'selected' : '' }}>
+                            {{ $dia === 'domingo' ? 'Domingo' : ucfirst($dia).'-feira' }}
                         </option>
                         @endforeach
                     </select>
@@ -157,8 +156,8 @@
                 $valorDisabled = $pagto === 'N' ? 'disabled' : '';
                 @endphp
                 <div class="col-md-3">
-                    <label for="valor" class="form-label">Valor</label>
-                    <input type="text" id="valor" name="valor" class="form-control"
+                    <label for="VALOR_AGEND" class="form-label">Valor</label>
+                    <input type="text" id="VALOR_AGEND" name="VALOR_AGEND" class="form-control"
                         value="{{ old('valor', $agenda->VALOR_AGEND ?? '') }}"
                         {{ $valorDisabled }}>
                 </div>

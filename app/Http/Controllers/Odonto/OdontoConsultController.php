@@ -223,6 +223,7 @@ class OdontoConsultController extends Controller
                 'FAESA_CLINICA_SERVICO.SERVICO_CLINICA_DESC'
             )
             ->where('FAESA_CLINICA_PACIENTE.ID_PACIENTE', $pacienteId)
+            ->where('FAESA_CLINICA_AGENDAMENTO.ID_CLINICA','=',2)
             ->get();
 
         if (!$agenda) {
