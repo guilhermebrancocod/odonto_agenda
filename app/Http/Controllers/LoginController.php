@@ -24,7 +24,7 @@ class LoginController extends Controller
 
         // CASO USUARIO POSSA ACESSAR SOMENTE PSICOLOGIA
         } else if (in_array(1, $clinicas)) {
-           return redirect()->route('menu_agenda_psicologia');
+           return redirect('/psicologia');
 
         // CASO USUARIO POSSA ACESSAR SOMENTE ODONTOLOGIA
         } else if (in_array(2, $clinicas)) {
@@ -45,5 +45,11 @@ class LoginController extends Controller
 
         // REDIRECIONA PARA TELA DE LOGIN NOVAMENTE
         return view('login');
+    }
+
+    // LOGIN DE PSICÓLOGOS
+    public function loginPsicologo(Request $request)
+    {
+        return redirect()->route('menu_agenda_psicologia_psicologos');
     }
 }
