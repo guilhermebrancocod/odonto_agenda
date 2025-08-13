@@ -5,13 +5,61 @@ $('.datepicker').datepicker({
     todayHighlight: true
 });
 
+function validarDataAnoAtual(campo) {
+    const valor = campo.value.replace(/[^0-9\/]/g, '').slice(0, 10);
+    campo.value = valor;
+
+    if (valor.length === 10) {
+        const [dia, mes, ano] = valor.split('/').map(Number);
+        const anoAtual = new Date().getFullYear();
+
+        if (ano !== anoAtual) {
+            alert(`O ano deve ser ${anoAtual}`);
+            campo.value = '';
+            return;
+        }
+
+        if (dia < 1 || dia > 30) {
+            alert('O dia deve estar entre 1 e 30');
+            campo.value = '';
+            return;
+        }
+
+        if (mes < 1 || mes > 12) {
+            alert('O mês deve estar entre 1 e 12');
+            campo.value = '';
+            return;
+        }
+    }
+}
+
+$(document).ready(function () {
+  $('#valor').on('blur', function () {
+    let valor = parseFloat($(this).val().replace(',', '.'));
+
+    if (!isNaN(valor) && valor > 100) {
+      if (!confirm("O valor informado é superior a R$ 100,00. Deseja continuar?")) {
+        $(this).val('');
+        $(this).focus();
+      }
+    }
+  });
+});
+
+
 $(document).ready(function () {
     // Inicializa os dois timepickers
-    $('#hr_ini, #hr_fim').timepicker({
-        showMeridian: false,
-        defaultTime: false,
-        minuteStep: 1
-    });
+    $('#hr_ini, #hr_fim')
+        .attr('maxlength', 4) // Limita para 5 caracteres
+        .on('input', function () {
+            // Remove caracteres inválidos
+            this.value = this.value.replace(/[^0-9:]/g, '').slice(0, 5);
+        })
+        .timepicker({
+            showMeridian: false,
+            defaultTime: false,
+            minuteStep: 1
+        });
 
     $('#hr_ini').on('focus', function () {
         const agora = new Date();
@@ -49,7 +97,11 @@ $(document).ready(function () {
 });
 
 $(document).ready(function () {
-    $('#date').mask('00/00/0000');
+    $('#date, #date_end')
+        .mask('00/00/0000')
+        .on('input', function () {
+            validarDataAnoAtual(this);
+        });
 });
 
 $(document).ready(function () {
@@ -82,10 +134,12 @@ $(document).ready(function () {
         }
     });
 
+    console.log($servicoSelect);
+
     $servicoSelect.on('select2:select', function () {
         const selectedData = $(this).select2('data')[0];
         disciplinaSelecionada = selectedData.disciplina;
-
+        console.log(disciplinaSelecionada);
         $('#form-select-box').val(null).trigger('change');
     });
 

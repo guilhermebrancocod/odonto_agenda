@@ -70,6 +70,7 @@ class OdontoUpdateController extends Controller
 
     public function updateBox(Request $request, $idBox)
     {
+
         $box = DB::table('FAESA_CLINICA_BOXES')->where('ID_BOX_CLINICA', $idBox)->first();
 
         DB::table('FAESA_CLINICA_BOXES')
@@ -85,24 +86,42 @@ class OdontoUpdateController extends Controller
 
     public function updateAgenda(Request $request, $id)
     {
-        
+
         $agenda = DB::table('FAESA_CLINICA_AGENDAMENTO')->where('ID_AGENDAMENTO', $id)->first();
-        $idBox = $request->input('boxes');
+        if (!$agenda) {
+            return back()->withErrors('Agendamento não encontrado.');
+        }
+
+        $idClinica = 2;
+        $idBox     = $request->input('ID_BOX');
+        $diaStr    = \Carbon\Carbon::createFromFormat('d/m/Y', $request->input('date'))->format('Y-m-d');
+        $hrIni     = \Carbon\Carbon::createFromFormat('H:i', $request->input('hr_ini'))->format('H:i:s');
+        $hrFin     = \Carbon\Carbon::createFromFormat('H:i', $request->input('hr_fim'))->format('H:i:s');
+
+        $valor_convert = $request->input('VALOR_AGEND');
+        if ($valor_convert === null || $valor_convert === '') {
+            $valor_convert = null;
+        } else {
+            $tmp = str_replace(['R$', ' ', '.'], '', $valor_convert);
+            $valor_convert = (float) str_replace(',', '.', $tmp);
+        }
 
         $descricaoLocal = DB::table('FAESA_CLINICA_BOXES')
             ->where('ID_BOX_CLINICA', $idBox)
-            ->value('DESCRICAO');
+            ->value('DESCRICAO') ?? null;
 
-        $valor = $request->input('valor') ? str_replace(',', '.', $request->input('valor')) : null;
+        $disciplina = DB::table('FAESA_CLINICA_SERVICO_DISCIPLINA')
+            ->where('ID_SERVICO_CLINICA', (int) $request->input('ID_SERVICO'))
+            ->value('DISCIPLINA');
 
-        DB::table('FAESA_CLINICA_AGENDAMENTO as a')
-            ->join('FAESA_CLINICA_LOCAL_AGENDAMENTO as la','la.ID_AGENDAMENTO','=','A.ID_AGENDAMENTO')
-            ->join('FAESA_CLINICA_BOXES as cb','cb.ID_BOX_CLINICA','=','la.ID_BOX')
-            ->where('ID_AGENDAMENTO', $id)
+        $idAgendamento = DB::table('FAESA_CLINICA_AGENDAMENTO as a')
+            ->join('FAESA_CLINICA_LOCAL_AGENDAMENTO as la', 'la.ID_AGENDAMENTO', '=', 'A.ID_AGENDAMENTO')
+            ->join('FAESA_CLINICA_BOXES as cb', 'cb.ID_BOX_CLINICA', '=', 'la.ID_BOX')
+            ->where('la.ID_AGENDAMENTO', $id)
             ->update([
                 'ID_CLINICA' => 2,
                 'ID_PACIENTE' => $request->input('ID_PACIENTE'),
-                'ID_SERVICO' => $request->input('servico'),
+                'ID_SERVICO' => $request->input('ID_SERVICO'),
                 'DT_AGEND' => \Carbon\Carbon::createFromFormat('d/m/Y', $request->input('date'))->format('Y-m-d'),
                 'DT_AGEND' => \Carbon\Carbon::createFromFormat('d/m/Y', $request->input('date_end'))->format('Y-m-d'),
                 'HR_AGEND_INI' => $request->input('hr_ini'),
@@ -110,16 +129,16 @@ class OdontoUpdateController extends Controller
                 'STATUS_AGEND' => $request->input('status'),
                 'ID_AGEND_REMARCADO' => $request->input('ID_AGEND_REMARCADO') ?: null,
                 'RECORRENCIA' => $request->input('recorrencia'),
-                'VALOR_AGEND' => $valor,
+                'VALOR_AGEND' => $valor_convert,
                 'OBSERVACOES' => $request->input('obs'),
                 'LOCAL' => $descricaoLocal
             ]);
 
-        DB::table('FAESA_CLINICA_LOCAL_AGENDAMENTO')
-            ->where('ID_AGENDAMENTO', $id)
-            ->update([
-                'ID_BOX' => $idBox
-            ]);
+        DB::table('FAESA_CLINICA_LOCAL_AGENDAMENTO')->insert([
+            'ID_AGENDAMENTO' => $idAgendamento,
+            'ID_BOX'         => $idBox,
+            'DISCIPLINA'     => $disciplina,
+        ]);
 
         return redirect()->back()->with('success', 'Agendamento atualizado com sucesso!');
     }

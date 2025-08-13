@@ -21,8 +21,6 @@ $(document).ready(function(){
     $('#dt_nasc').mask('00/00/0000');
 });
 
-
-
 document.getElementById('cep').addEventListener('blur', async function () {
     const cep = this.value.replace(/\D/g, '');
     if (cep.length === 8) {

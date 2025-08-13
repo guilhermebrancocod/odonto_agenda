@@ -1,8 +1,5 @@
 const add = document.getElementById('add');
 
-
-
-
 document.addEventListener('DOMContentLoaded', function () {
     fetch('/odontologia/disciplinas')
         .then(response => response.json())
@@ -31,7 +28,6 @@ document.addEventListener('DOMContentLoaded', function () {
         .then(data => {
             const container = document.getElementById('boxes-container');
             container.innerHTML = ''; // Limpa o conteúdo anterior
-
             data.forEach(item => {
                 const div = document.createElement('div');
 
@@ -54,6 +50,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 div.appendChild(label);
                 container.appendChild(div);
             });
+            console.log(boxesSelecionados)
         })
         .catch(error => {
             console.error('Erro ao carregar boxes:', error);
