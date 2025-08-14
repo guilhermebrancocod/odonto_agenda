@@ -98,9 +98,6 @@ class PacienteService
     {
         $query = FaesaClinicaPaciente::query();
 
-        // Sempre ignora pacientes com STATUS 'Inativo'
-        // $query->where('STATUS', '<>', 'Inativo');
-
         // Filtro por nome ou CPF
         if (!empty($filtros['search'])) {
             $query->where(function ($q) use ($filtros) {
@@ -114,8 +111,8 @@ class PacienteService
             $query->whereDate('DT_NASC_PACIENTE', $filtros['DT_NASC_PACIENTE']);
         }
 
-        // Filtro por status (desde que não seja 'Inativo')
-        if (!empty($filtros['STATUS']) && $filtros['STATUS'] !== 'Inativo') {
+        // Filtro por status
+        if (!empty($filtros['STATUS']) && $filtros['STATUS']) {
             $query->where('STATUS', $filtros['STATUS']);
         }
 
