@@ -4,6 +4,7 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Odonto\OdontoCreateController;
 use App\Http\Controllers\Odonto\OdontoConsultController;
 use App\Http\Controllers\Odonto\OdontoUpdateController;
+use App\Http\Controllers\Odonto\OdontoDeleteController;
 use App\Http\Controllers\Psicologia\PacienteController;
 use App\Http\Controllers\Psicologia\AgendamentoController;
 use App\Http\Controllers\Psicologia\ServicoController;
@@ -85,6 +86,7 @@ Route::put('/criarbox/{boxId}', [OdontoUpdateController::class, 'updateBox'])->n
 // BOX-DISCIPLINAS
 Route::post('/odontologia/criarboxdisciplina', [OdontoCreateController::class, 'createBoxDiscipline'])->name('createBoxDiscipline');
 Route::get('/odontologia/criarboxdisciplina/{idBoxDiscipline}', [OdontoCreateController::class, 'editBoxDiscipline'])->name('editBoxDiscipline');
+Route::get('/odontologia/deleteboxdisciplina/{idBoxDiscipline}', [OdontoDeleteController::class, 'deleteBoxDiscipline'])->name('deleteBoxDiscipline');
 Route::put('/criarboxdisciplina/{idBoxDiscipline}', [OdontoUpdateController::class, 'updateBoxDiscipline'])->name('updateBoxDiscipline');
 
 // AGENDA

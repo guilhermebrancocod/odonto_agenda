@@ -65,6 +65,8 @@
             icon: 'success',
             title: 'Sucesso!',
             text: "{{ session('success') }}",
+        }).then(() => {
+            window.location.href = "{{ url('odontologia/consultarbox') }}";
         });
     </script>
     @endif

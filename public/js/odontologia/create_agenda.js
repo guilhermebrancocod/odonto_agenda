@@ -124,7 +124,7 @@ $(document).ready(function () {
             processResults: function (data) {
                 return {
                     results: data.map(p => ({
-                        id: p.ID_SERVICO_CLINICA,
+                        id: p.ID,
                         text: p.SERVICO_CLINICA_DESC + ' (' + p.DISCIPLINA + ')',
                         disciplina: p.DISCIPLINA
                     }))

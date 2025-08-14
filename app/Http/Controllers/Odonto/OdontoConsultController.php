@@ -137,7 +137,6 @@ class OdontoConsultController extends Controller
 
     public function boxesDisciplina($discipline)
     {
-
         $boxes = DB::table('FAESA_CLINICA_BOX_DISCIPLINA')
             ->join('FAESA_CLINICA_BOXES', 'FAESA_CLINICA_BOXES.ID_BOX_CLINICA', '=', 'FAESA_CLINICA_BOX_DISCIPLINA.ID_BOX')
             ->select('FAESA_CLINICA_BOXES.ID_BOX_CLINICA', 'FAESA_CLINICA_BOXES.DESCRICAO', 'FAESA_CLINICA_BOX_DISCIPLINA.ID_BOX')
@@ -145,6 +144,7 @@ class OdontoConsultController extends Controller
             ->where('FAESA_CLINICA_BOX_DISCIPLINA.DISCIPLINA', trim($discipline))
             ->get();
 
+    
         return response()->json($boxes);
     }
 
@@ -192,7 +192,8 @@ class OdontoConsultController extends Controller
     {
         $query = DB::table('FAESA_CLINICA_SERVICO as s')
             ->join('FAESA_CLINICA_SERVICO_DISCIPLINA as sd', 'sd.ID_SERVICO_CLINICA', '=', 's.ID_SERVICO_CLINICA')
-            ->select('s.ID_SERVICO_CLINICA', 's.SERVICO_CLINICA_DESC', 'sd.DISCIPLINA');
+            ->select('sd.ID','s.SERVICO_CLINICA_DESC', 'sd.DISCIPLINA')
+            ->where('s.ID_CLINICA','=',2);
 
         if ($request->has('query')) {
             $search = $request->query('query');

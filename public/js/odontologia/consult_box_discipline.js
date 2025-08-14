@@ -44,6 +44,15 @@ function carregarTodosBoxDiscipline() {
                                 <i class="fa fa-pencil-alt"></i>
                             </button>
                         </td>
+                        <td>
+                            <button 
+                                type="button" 
+                                class=".delete-boxdisciplines btn btn-link p-0 m-0 border-0" 
+                                style="color: inherit;" 
+                                data-id="${disciplines.ID_BOX_DISCIPLINA}">
+                                <i class="fas fa-trash-alt"></i>
+                            </button>
+                        </td>
                     </tr>
                 `;
                 $tbody.append(html);
@@ -120,6 +129,15 @@ $('#selectBoxDiscipline').on('select2:select', function (e) {
                                 data-id="${disciplines.ID_BOX_DISCIPLINA}">
                                 <i class="fa fa-pencil-alt"></i>
                             </button>
+                        <td>
+                            <button 
+                                type="button" 
+                                class=".delete-boxdisciplines btn btn-link p-0 m-0 border-0" 
+                                style="color: inherit;" 
+                                data-id="${disciplines.ID_BOX_DISCIPLINA}">
+                                <i class="fas fa-trash-alt"></i>
+                            </button>
+                        </td>
                         </td>
                     </tr>
                 `;
@@ -137,6 +155,12 @@ $(document).on('click', '.edit-boxdisciplines', function (event) {
     event.preventDefault();
     const idBoxDiscipline = $(this).data('id');
     window.location.href = `/odontologia/criarboxdisciplina/${idBoxDiscipline}`;
+});
+
+$(document).on('click', '.delete-boxdisciplines', function (event) {
+    event.preventDefault();
+    const idBoxDiscipline = $(this).data('id');
+    window.location.href = `/odontologia/deleteboxdisciplina/${idBoxDiscipline}`;
 });
 
 const addPatient = document.getElementById('add');

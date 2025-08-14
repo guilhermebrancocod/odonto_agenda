@@ -92,6 +92,8 @@
             icon: 'success',
             title: 'Sucesso!',
             text: "{{ session('success') }}",
+        }).then(() => {
+            window.location.href = "{{ url('odontologia/consultardisciplinabox') }}";
         });
     </script>
     @endif
