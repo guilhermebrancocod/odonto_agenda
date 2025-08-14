@@ -270,15 +270,23 @@
                         </div>
 
                         <!-- Seletor de limite de registros abaixo da tabela -->
-                        <div id="limit-container">
-                            <label for="limit-select">Mostrar:</label>
-                            <select id="limit-select" class="form-select" style="width: auto;">
-                                <option value="5">5</option>
-                                <option value="10" selected>10</option>
-                                <option value="20">20</option>
-                                <option value="50">50</option>
-                                <option value="100">100</option>
-                            </select>
+                        <div id="limit-container" class="d-flex justify-content-between">
+
+                            <div id="contador-registros">
+                                <span>total de registros</span>
+                            </div>
+
+                            <div id="limitador-registros">
+                                <label for="limit-select">Mostrar:</label>
+                                <select id="limit-select" class="form-select" style="width: auto;">
+                                    <option value="5">5</option>
+                                    <option value="10" selected>10</option>
+                                    <option value="20">20</option>
+                                    <option value="50">50</option>
+                                    <option value="100">100</option>
+                                </select>
+                            </div>
+                            
                         </div>
                     </div>
                 </div>
@@ -314,7 +322,6 @@
             };
         }
 
-        // Função que carrega agendamentos conforme filtros
         function carregarAgendamentos(params = {}) {
             const urlParams = new URLSearchParams(params).toString();
             const url = `/psicologia/get-agendamento` + (urlParams ? `?${urlParams}` : '');
@@ -323,17 +330,22 @@
                 .then(response => response.json())
                 .then(agendamentos => {
                     agendamentosTbody.innerHTML = '';
+
+                    // Atualiza contador aqui, antes do loop
+                    document.getElementById('contador-registros').innerHTML = `
+                        <span>Total: ${agendamentos.length}</span>
+                    `;
+
                     if (agendamentos.length === 0) {
                         agendamentosTbody.innerHTML = `
                             <tr>
-                                <td colspan="8" class="text-center">Nenhum agendamento encontrado.</td>
+                                <td colspan="12" class="text-center">Nenhum agendamento encontrado.</td>
                             </tr>
                         `;
                         return;
                     }
 
                     agendamentos.forEach(ag => {
-
                         const paciente = ag.paciente ? ag.paciente.NOME_COMPL_PACIENTE : '-';
                         const servico = ag.servico ? ag.servico.SERVICO_CLINICA_DESC : '-';
                         const data = ag.DT_AGEND ? ag.DT_AGEND.substring(0, 10).split('-').reverse().join('/') : '-';
@@ -343,31 +355,20 @@
                         const status = ag.STATUS_AGEND ?? '-';
                         const valor = ag.VALOR_AGEND ?? '-';
                         const checkPagamento = ag.STATUS_PAG === 'S' ? 'Sim' :
-                                               ag.STATUS_PAG === 'N' ? 'Não' :
-                                               'Não informado';
+                                            ag.STATUS_PAG === 'N' ? 'Não' :
+                                            'Não informado';
                         const valorPagamento = ag.VALOR_PAG ?? '-';
                         const reagendamento = ag.ID_AGEND_REMARCADO != null ? 'Sim' : 'Não';
                         const row = document.createElement('tr');
 
-                       let statusColor = '';
+                        let statusColor = '';
                         switch (status) {
-                            case 'Agendado':
-                                statusColor = '#4CAF50'; // verde médio (sem muito amarelo) – "ativo" e positivo
-                                break;
-                            case 'Cancelado':
-                                statusColor = '#F44336'; // vermelho vivo - alerta / erro
-                                break;
-                            case 'Concluído':
-                                statusColor = '#2E7D32'; // verde escuro - completado, sucesso definitivo
-                                break;
-                            case 'Reagendado':
-                                statusColor = '#FF9800'; // laranja vibrante - ação pendente / alteração
-                                break;
-                            case 'Presente':
-                                statusColor = '#2196F3'; // azul padrão, indica presença ou informação
-                                break;
-                            default:
-                                statusColor = '#616161'; // cinza para status não reconhecido
+                            case 'Agendado':    statusColor = '#4CAF50'; break;
+                            case 'Cancelado':   statusColor = '#F44336'; break;
+                            case 'Concluído':   statusColor = '#2E7D32'; break;
+                            case 'Reagendado':  statusColor = '#FF9800'; break;
+                            case 'Presente':    statusColor = '#2196F3'; break;
+                            default:            statusColor = '#616161';
                         }
 
                         row.innerHTML = `
@@ -392,15 +393,15 @@
                                 </form>
                             </td>
                         `;
+
                         agendamentosTbody.appendChild(row);
-                        
                     });
                 })
                 .catch(error => {
                     console.error(error);
                     agendamentosTbody.innerHTML = `
                         <tr>
-                            <td colspan="8" class="text-center text-danger">Erro ao buscar agendamentos.</td>
+                            <td colspan="12" class="text-center text-danger">Erro ao buscar agendamentos.</td>
                         </tr>
                     `;
                 });
