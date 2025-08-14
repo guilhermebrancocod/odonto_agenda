@@ -11,6 +11,7 @@ use App\Http\Controllers\LoginController;
 use App\Http\Controllers\Psicologia\ClinicaController;
 use App\Http\Controllers\Psicologia\SalaController;
 use App\Http\Controllers\Psicologia\HorarioController;
+use App\Http\Controllers\Psicologia\DisciplinaController;
 use App\Models\FaesaClinicaServico;
 use App\Models\FaesaClinicaPaciente;
 use App\Http\Middleware\AuthMiddleware;
@@ -298,6 +299,9 @@ Route::middleware([AuthMiddleware::class, CheckClinicaMiddleware::class])
     Route::get('/horarios/listar', [HorarioController::class, 'listHorarios'])->name('listarHorarios-Psicologia');
     Route::put('/horarios/atualizar/{id}', [HorarioController::class, 'updateHorario'])->name('updateHorario-Psicologia');
     Route::delete('/horarios/deletar/{id}', [HorarioController::class, 'deleteHorario'])->name('deleteHorario-Psicologia');
+
+    // BUSCA DE DISCIPLINAS PARA VINCULAR AO SERVIÇO
+    Route::get('/disciplinas-psicologia', [DisciplinaController::class, 'getDisciplina']);
 });
 
 

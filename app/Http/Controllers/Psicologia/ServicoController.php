@@ -11,7 +11,7 @@ class ServicoController extends Controller
     // CRIAÇÃO DE SERVIÇO
     public function criarServico(Request $request)
     {
-        // ✅ Ajuste de valor do serviço
+        // Ajuste de valor do serviço
         $valorInput = $request->input('VALOR_SERVICO');
         if ($valorInput) {
             $valor = str_replace(['.', ','], ['', '.'], $valorInput);
@@ -20,22 +20,23 @@ class ServicoController extends Controller
             $request->merge(['VALOR_SERVICO' => null]);
         }
 
-        // ✅ Ajuste do código interno (null se vazio ou 0)
+        // Ajuste do código interno (null se vazio ou 0)
         if (!$request->filled('COD_INTERNO_SERVICO_CLINICA') || $request->input('COD_INTERNO_SERVICO_CLINICA') == 0) {
             $request->merge(['COD_INTERNO_SERVICO_CLINICA' => null]);
         }
 
-        // ✅ Validação
+        // Validação
         $validated = $request->validate([
             'ID_CLINICA' => 'required|integer|min:1',
             'SERVICO_CLINICA_DESC' => 'required|string|min:1|max:255',
+            'DISCIPLINA' => 'nullable|string|max:50',
             'COD_INTERNO_SERVICO_CLINICA' => 'nullable|integer|min:0',
             'VALOR_SERVICO' => 'nullable|numeric',
             'OBSERVACAO' => 'nullable|string|max:500',
             'TEMPO_RECORRENCIA_MESES' => 'nullable|integer|min:0',
         ]);
 
-        // ✅ Verificação de duplicidade por nome
+        // Verificação de duplicidade por nome
         $existeNome = FaesaClinicaServico::where('SERVICO_CLINICA_DESC', $validated['SERVICO_CLINICA_DESC'])
             ->where('ID_CLINICA', $validated['ID_CLINICA'])
             ->exists();
@@ -46,7 +47,7 @@ class ServicoController extends Controller
                 ->withInput();
         }
 
-        // ✅ Verificação de duplicidade por código interno se informado
+        // Verificação de duplicidade por código interno se informado
         if (!is_null($validated['COD_INTERNO_SERVICO_CLINICA'])) {
             $existeCodigo = FaesaClinicaServico::where('COD_INTERNO_SERVICO_CLINICA', $validated['COD_INTERNO_SERVICO_CLINICA'])
                 ->where('ID_CLINICA', $validated['ID_CLINICA'])

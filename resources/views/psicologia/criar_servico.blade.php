@@ -211,6 +211,15 @@
                        value="{{ old('COD_INTERNO_SERVICO_CLINICA') }}">
             </div>
 
+            <!-- DISCIPLINA PARA VINCULAR AO SERVIÇO -->
+            <div class="mb-3">
+                <label for="disciplina-servico" class="form-label" style="font-size: 14px;">Disciplina</label>
+                <select name="DISCIPLINA" id="disciplina-servico" class="form-select form-select-sm">
+                    <option value=""></option>
+                    <!-- Outras opções serão inseridas dinamicamente -->
+                </select>
+            </div>
+
             <!-- VALOR DO SERVIÇO -->
             <div class="mb-3">
                 <label for="valor-servico" class="form-label">Valor do Serviço</label>
@@ -286,6 +295,12 @@
                                 <label class="form-label">Código Interno</label>
                                 <input type="text" id="edit-servico-cod" name="COD_INTERNO_SERVICO_CLINICA" class="form-control"/>
                             </div>
+
+                            <div class="mb-3">
+                                <label class="form-label">Código Interno</label>
+                                <input type="text" id="edit-servico-cod" name="COD_INTERNO_SERVICO_CLINICA" class="form-control"/>
+                            </div>
+                            
                             <div class="mb-3">
                                 <label class="form-label">Valor Serviço</label>
                                 <input type="text" id="edit-valor-servico" name="VALOR_SERVICO" class="form-control">
@@ -493,6 +508,35 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 });
 </script>
+
+<!-- BUSCA DE DISCIPLINAS PARA VINCULAR AO SERVICO -->
+<script>
+document.getElementById('disciplina-servico').addEventListener('focus', function () {
+    fetch('/psicologia/disciplinas-psicologia')
+        .then(response => {
+            if (!response.ok) throw new Error('Erro ao buscar disciplinas');
+            return response.json(); // <-- converte para JSON
+        })
+        .then(disciplinas => {
+            console.log(disciplinas);
+            const select = document.getElementById('disciplina-servico');
+            select.innerHTML = '<option value="">Selecione uma disciplina</option>';
+            disciplinas.forEach(d => {
+                const option = document.createElement('option');
+                option.value = d.DISCIPLINA;
+                option.textContent = d.DISCIPLINA + " - " + d.NOME;
+                select.appendChild(option);
+            });
+        })
+        .catch(err => {
+            console.error(err);
+            const select = document.getElementById('disciplina-servico');
+            select.innerHTML = '<option value="">Erro ao carregar disciplinas</option>';
+        });
+});
+
+</script>
+
 
 </body>
 </html>
