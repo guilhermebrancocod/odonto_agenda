@@ -321,35 +321,36 @@ Route::middleware([AuthMiddleware::class, CheckClinicaMiddleware::class])
 // ROTAS DE LOGIN DOS PSICÓLOGOS (SEM MIDDLEWARE)
 Route::get('psicologo/login', function() {
     return view('psicologia.login_psicologo');
-})->middleware(AuthPsicologoMiddleware::class)->name('loginPsicologoGET');
+})->middleware(AuthMiddleware::class)->name('loginPsicologoGET');
 
-// POST de login passando pelo middleware para validar credenciais
-Route::post('psicologo/login', function() {
-    // Aqui o middleware vai processar a autenticação
-    return redirect()->route('psicologo.dashboard');
-})->middleware(AuthPsicologoMiddleware::class)->name('loginPsicologoPOST');
+
 
 // ROTAS PROTEGIDAS DOS PSICÓLOGOS (COM MIDDLEWARE)
-Route::middleware([AuthPsicologoMiddleware::class])
-    ->prefix('psicologo')
+Route::middleware([AuthMiddleware::class])
     ->group(function () {
 
-    Route::get('/', function() {
+    Route::get('/psicologo', function() {
         $psicologo = session('psicologo');
-        return view('psicologia.menu_agenda', compact('psicologo'));
+        $tipoUsuario = 'psicologo';
+        return view('psicologia.menu_agenda', compact('psicologo', 'tipoUsuario'));
     })->name('psicologo.dashboard');
 
-    Route::get('/agenda', function() {
+    // POST de login passando pelo middleware para validar credenciais
+    Route::post('psicologo/login', function() {
+        return redirect()->route('psicologo.dashboard');
+    })->name('loginPsicologoPOST');
+    
+    Route::get('psicologo/agenda', function() {
         $psicologo = session('psicologo');
         return view('psicologia.agenda', compact('psicologo'));
     })->name('psicologo.agenda');
 
-    Route::get('/pacientes', function() {
+    Route::get('psicologo/pacientes', function() {
         $psicologo = session('psicologo');
         return view('psicologia.pacientes', compact('psicologo'));
     })->name('psicologo.pacientes');
 
-    // Outras rotas específicas dos psicólogos...
+    Route::get('/psicologo/agendamentos-calendar', [AgendamentoController::class, 'getAgendamentosForCalendarPsicologo']);
 });
 
 // ROTA DE LOGOUT (COMPARTILHADA)

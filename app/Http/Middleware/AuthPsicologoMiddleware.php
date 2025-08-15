@@ -5,8 +5,8 @@ namespace App\Http\Middleware;
 use Closure;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Http;
-use App\Models\FaesaClinicaUsuario;
-use App\Models\FaesaClinicaPsicologo;
+use App\Models\FaesaClinicaUsuarioGeral;
+use Termwind\Components\Dd;
 
 class AuthPsicologoMiddleware
 {
@@ -14,15 +14,18 @@ class AuthPsicologoMiddleware
     {
         $routeName = $request->route()->getName();
 
-        // Rotas liberadas sem autenticação
         $rotasLiberadas = ['loginPsicologoGET', 'loginPsicologoPOST', 'logout-psicologo'];
 
-        // 1️⃣ Se já estiver logado e tentar acessar o login GET ou POST, redireciona direto
+        // if (in_array('admin', session()->get('usuario')->pluck('TIPO')->toArray())) {
+        //     return $next($request);
+        // }
+
+         // 2️⃣ Redireciona psicólogos autenticados longe da página de login
+
         if (session()->has('psicologo') && in_array($routeName, ['loginPsicologoGET', 'loginPsicologoPOST'])) {
             return redirect()->route('psicologo.dashboard');
         }
 
-        // 2️⃣ Se for POST de login, processa autenticação
         if ($routeName === 'loginPsicologoPOST' && $request->isMethod('post')) {
             $credentials = [
                 'username' => $request->input('login'),
@@ -43,7 +46,7 @@ class AuthPsicologoMiddleware
                 $psicologo->ID_CLINICA = 1;
                 session(['psicologo' => $psicologo]);
 
-                return redirect()->route('psicologo.dashboard');
+                return $next($request);
             }
 
             session()->flush();
@@ -53,7 +56,7 @@ class AuthPsicologoMiddleware
         // 3️⃣ Para rotas protegidas, verifica se há sessão
         if (!in_array($routeName, $rotasLiberadas)) {
             if (!session()->has('psicologo')) {
-                return redirect()->route('loginPsicologoGET')->with('error', 'Acesso não autorizado');
+                return redirect()->route('loginPsicologoGET');
             }
         }
 
@@ -95,8 +98,8 @@ class AuthPsicologoMiddleware
     public function validarUsuarioPsicologo(array $credentials)
     {
         $username = $credentials['username'];
-        $usuario = FaesaClinicaPsicologo::where('ID_PSICOLOGO_CLINICA', $username)
-            ->where('SIT_PSICOLOGO', '=', 'Ativo')
+        $usuario = FaesaClinicaUsuarioGeral::where('USUARIO', $username)
+            ->where('STATUS', '=', 'Ativo')
             ->get();
         return $usuario;
     }

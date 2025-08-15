@@ -10,9 +10,11 @@ class LoginController extends Controller
     {
         // ARMAZENA LOGIN DE USUARIO E ID DA CLINICA
         $usuario = session('usuario');
+
         if ($usuario) {
             $clinicas = collect($usuario)->pluck('ID_CLINICA')->toArray();
         } else {
+            
             return redirect()->route('loginGET');
         } 
 
@@ -45,11 +47,5 @@ class LoginController extends Controller
 
         // REDIRECIONA PARA TELA DE LOGIN NOVAMENTE
         return view('login');
-    }
-
-    // LOGIN DE PSICÓLOGOS
-    public function loginPsicologo(Request $request)
-    {
-        return redirect()->route('menu_agenda_psicologia_psicologos');
     }
 }

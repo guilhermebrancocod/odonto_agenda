@@ -37,11 +37,60 @@ class AgendamentoController extends Controller
     public function getAgendamentosForCalendar()
     {
         $agendamentos = FaesaClinicaAgendamento::with('paciente', 'servico')
-            ->where('ID_CLINICA', 1)
-            ->where('STATUS_AGEND', '<>', 'Excluido')
-            ->where('STATUS_AGEND', '<>', 'Remarcado')
-            ->get();
+        ->where('ID_CLINICA', 1)
+        ->where('STATUS_AGEND', '<>', 'Excluido')
+        ->where('STATUS_AGEND', '<>', 'Remarcado')
+        ->get();
+        
+        $events = $agendamentos
+        ->map(function($agendamento) {
+            $dateOnly = substr($agendamento->DT_AGEND, 0, 10);
+            $horaInicio = substr($agendamento->HR_AGEND_INI, 0, 8);
+            $horaFim = substr($agendamento->HR_AGEND_FIN, 0, 8);
+            $status = $agendamento->STATUS_AGEND;
+            $checkPagamento = $agendamento->STATUS_PAG;
+            $valorPagamento = $agendamento->VALOR_PAG;
 
+            $start = Carbon::parse("{$dateOnly} {$horaInicio}", 'America/Sao_Paulo')->toIso8601String();
+            $end = Carbon::parse("{$dateOnly} {$horaFim}", 'America/Sao_Paulo')->toIso8601String();
+
+            $cor = match($status) {
+                'Agendado' => '#0d6efd',
+                'Presente' => '#28a745',
+                'Cancelado' => '#dc3545',
+                default => '#6c757d',
+            };
+
+            return [
+                'id' => $agendamento->ID_AGENDAMENTO,
+                'title' => $agendamento->paciente 
+                    ? $agendamento->paciente->NOME_COMPL_PACIENTE 
+                    : 'Agendamento',
+                'start' => $start,
+                'end' => $end,
+                'status' => $status,
+                'checkPagamento' => $checkPagamento,
+                'valorPagamento' => $valorPagamento,
+                'servico' => $agendamento->servico->SERVICO_CLINICA_DESC ?? 'Serviço não informado',
+                'description' => $agendamento->OBSERVACOES ?? '',
+                'color' => $cor,
+                'local' => $agendamento->LOCAL ?? 'Não informado',
+            ];
+        });
+
+        return response()->json($events);
+    }
+
+    public function getAgendamentosForCalendarPsicologo()
+    {
+        $psicologo = session('psicologo');
+        $agendamentos = FaesaClinicaAgendamento::with('paciente', 'servico')
+        ->where('ID_CLINICA', 1)
+        ->where('STATUS_AGEND', '<>', 'Excluido')
+        ->where('STATUS_AGEND', '<>', 'Remarcado')
+        ->where('ID_PSICOLOGO', $psicologo->ID ?? $psicologo['ID'])
+        ->get();
+        
         $events = $agendamentos
         ->map(function($agendamento) {
             $dateOnly = substr($agendamento->DT_AGEND, 0, 10);
