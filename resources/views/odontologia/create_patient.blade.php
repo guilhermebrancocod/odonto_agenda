@@ -53,7 +53,7 @@
                     <input type="text" id="cpf" name="cpf" class="form-control"
                         value="{{ old('cpf') }}"
                         style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 6px; font-size: 14px;"
-                        maxlength="11" minlength="11" autocomplete="off">
+                        maxlength="12" minlength="11" autocomplete="off">
                     @endif
                 </div>
                 <div style="flex: 0.2;">

@@ -23,7 +23,7 @@ class OdontoUpdateController extends Controller
         $request->merge($input);
 
         $rules = [
-            'nome'            => ['required', 'string', 'max:255'],
+            'nome'            => ['required', 'string', 'max:255','regex:/^[A-Za-zÀ-ÿ0-9\s]+$/'],
             'cpf'             => ['required', 'regex:/^\d{11}$/'],   // 11 dígitos
             'dt_nasc'         => ['required', 'date_format:d/m/Y', 'before:today'],
             'sexo'            => ['required', 'in:M,F'],
@@ -37,13 +37,14 @@ class OdontoUpdateController extends Controller
             'email'           => ['nullable', 'email:rfc', 'max:100'],
             'celular'         => ['nullable', 'regex:/^\d{10,11}$/'], // 10 ou 11 dígitos
             'cod_sus'         => ['nullable', 'regex:/^\d{15}$/'],   // SUS geralmente 15 dígitos
-            'nome_resposavel' => ['nullable', 'string', 'max:100'],
+            'nome_resposavel' => ['nullable', 'string', 'max:255','regex:/^[A-Za-zÀ-ÿ0-9\s]+$/'],
             'cpf_responsavel' => ['nullable', 'regex:/^\d{11}$/'],
             'obs_laudo'       => ['nullable', 'string', 'max:255'],
         ];
 
         $messages = [
             'nome.required'          => 'O nome é obrigatório.',
+            'nome.regex'             => 'O nome não pode conter caracteres especiais.',
             'cpf.required'           => 'O CPF é obrigatório.',
             'cpf.regex'              => 'Informe um CPF com 11 dígitos (apenas números).',
             'dt_nasc.required'       => 'A data de nascimento é obrigatória.',
@@ -57,6 +58,7 @@ class OdontoUpdateController extends Controller
             'email.email'            => 'E-mail inválido.',
             'celular.regex'          => 'Celular deve ter 10 ou 11 dígitos (apenas números).',
             'cod_sus.regex'          => 'Cartão SUS deve ter 15 dígitos.',
+            'nome_resposavel.regex' => 'O nome do responsável inválido.',
             'cpf_responsavel.regex'  => 'CPF do responsável deve ter 11 dígitos.',
             'obs_laudo.max'          => 'Laudo deve ter no máximo 255 caracteres.',
         ];
@@ -76,26 +78,34 @@ class OdontoUpdateController extends Controller
             return back()->withInput()->with('alert', 'Data de nascimento inválida.');
         }
 
-        $paciente = DB::table('FAESA_CLINICA_PACIENTE')->where('ID_PACIENTE', $id)->first();
+        $paciente = DB::table('FAESA_CLINICA_PACIENTE')
+            ->where('ID_PACIENTE', $id)
+            ->first();
 
-        DB::table('FAESA_CLINICA_PACIENTE')->update([
-            'NOME_COMPL_PACIENTE' => $request->input('nome'),
-            'COD_SUS'             => $request->input('cod_sus'),
-            'DT_NASC_PACIENTE'    => $dtNasc,
-            'SEXO_PACIENTE'       => $request->input('sexo'),
-            'CEP'                 => $request->input('cep'),
-            'ENDERECO'            => $request->input('rua'),
-            'END_NUM'             => $request->input('numero'),
-            'COMPLEMENTO'         => $request->input('complemento'),
-            'BAIRRO'              => $request->input('bairro'),
-            'MUNICIPIO'           => $request->input('cidade'),
-            'UF'                  => $request->input('estado'),
-            'E_MAIL_PACIENTE'     => $request->input('email'),
-            'FONE_PACIENTE'       => $request->input('celular'),
-            'NOME_RESPONSAVEL'    => $request->input('nome_resposavel'),
-            'CPF_RESPONSAVEL'     => $request->input('cpf_responsavel'),
-            'OBSERVACAO'          => $request->input('obs_laudo'),
-        ]);
+        if (!$paciente) {
+            return redirect()->back()->with('error', 'Paciente não encontrado.');
+        }
+
+        DB::table('FAESA_CLINICA_PACIENTE')
+            ->where('ID_PACIENTE', $id)
+            ->update([
+                'NOME_COMPL_PACIENTE' => $request->input('nome'),
+                'COD_SUS'             => $request->input('cod_sus'),
+                'DT_NASC_PACIENTE'    => $dtNasc,
+                'SEXO_PACIENTE'       => $request->input('sexo'),
+                'CEP'                 => $request->input('cep'),
+                'ENDERECO'            => $request->input('rua'),
+                'END_NUM'             => $request->input('numero'),
+                'COMPLEMENTO'         => $request->input('complemento'),
+                'BAIRRO'              => $request->input('bairro'),
+                'MUNICIPIO'           => $request->input('cidade'),
+                'UF'                  => $request->input('estado'),
+                'E_MAIL_PACIENTE'     => $request->input('email'),
+                'FONE_PACIENTE'       => $request->input('celular'),
+                'NOME_RESPONSAVEL'    => $request->input('nome_resposavel'),
+                'CPF_RESPONSAVEL'     => $request->input('cpf_responsavel'),
+                'OBSERVACAO'          => $request->input('obs_laudo'),
+            ]);
 
         return redirect()->back()->with('success', 'Paciente atualizado com sucesso!');
     }

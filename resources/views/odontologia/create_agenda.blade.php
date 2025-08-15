@@ -143,7 +143,7 @@
                 <!-- Serviço e Valor -->
                 <div class="col-md-3">
                     <label class="form-label">Serviço</label>
-                    <select id="form-select" name="ID_SERVICO" class="form-select">
+                    <select id="form-select" name="servico" class="form-select">
                         <option
                             value="{{ old('ID_SERVICO', isset($agenda->ID_SERVICO) ? $agenda->ID_SERVICO : '') }}"
                             selected>
@@ -209,12 +209,7 @@
             </div>
         </form>
     </div>
-    <script>
-        window.agendaData = {
-            pacienteId: "{{ $agenda->ID_PACIENTE ?? '' }}",
-            nomePaciente: "{{ $agenda->NOME_COMPL_PACIENTE ?? '' }}"
-        };
-    </script>
+    </div>
     @if (session('success'))
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script>
@@ -222,6 +217,18 @@
             icon: 'success',
             title: 'Sucesso!',
             text: "{{ session('success') }}",
+        }).then(() => {
+            window.location.href = "{{ url('odontologia/consultarpaciente') }}";
+        });
+    </script>
+    @endif
+    @if ($errors->any())
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script>
+        Swal.fire({
+            icon: 'error',
+            title: 'Erro ao validar informações',
+            html: `<ul style="text-align:left;">@foreach($errors->all() as $e)<li>{{ $e }}</li>@endforeach</ul>`,
         });
     </script>
     @endif
