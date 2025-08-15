@@ -84,17 +84,25 @@
             icon: 'success',
             title: 'Sucesso!',
             text: "{{ session('success') }}",
+        }).then(() => {
+            window.location.href = "{{ url('odontologia/consultarservico') }}";
         });
     </script>
     @endif
 
-    @if (session('alert'))
+    @if ($errors->any())
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script>
         Swal.fire({
-            icon: 'warning',
-            title: 'Atenção!',
-            text: "{{ session('alert') }}",
+            icon: 'error',
+            title: 'Erro ao validar dados',
+            html: `
+            <ul style="text-align:left;">
+                @foreach ($errors->all() as $error)
+                    <li>{{ $error }}</li>
+                @endforeach
+            </ul>
+        `,
         });
     </script>
     @endif

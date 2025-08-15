@@ -67,7 +67,7 @@
                 <div class="col-md-3">
                     <label for="date_end" class="form-label">Dia Fim</label>
                     <input type="text" id="date_end" name="date_end" class="form-control datepicker"
-                        value="{{ old('date_end', isset($agenda->DT_AGEND) ? \Carbon\Carbon::parse($agenda->DT_AGEND)->format('d/m/Y') : '') }}">
+                        value="{{ old('date_end', isset($agenda->DT_AGEND_FINAL) ? \Carbon\Carbon::parse($agenda->DT_AGEND)->format('d/m/Y') : '') }}">
                 </div>
 
                 <div class="col-md-3">
@@ -156,8 +156,8 @@
                 $valorDisabled = $pagto === 'N' ? 'disabled' : '';
                 @endphp
                 <div class="col-md-3">
-                    <label for="VALOR_AGEND" class="form-label">Valor</label>
-                    <input type="text" id="VALOR_AGEND" name="VALOR_AGEND" class="form-control"
+                    <label for="valor" class="form-label">Valor</label>
+                    <input type="text" id="valor" name="valor" class="form-control"
                         value="{{ old('valor', $agenda->VALOR_AGEND ?? '') }}"
                         {{ $valorDisabled }}>
                 </div>

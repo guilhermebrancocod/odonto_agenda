@@ -57,6 +57,7 @@
                             <th>Hora inicio</th>
                             <th>Hora Fim</th>
                             <th>Editar</th>
+                            <th>Delete</th>
                         </tr>
                     </thead>
                     <tbody>
