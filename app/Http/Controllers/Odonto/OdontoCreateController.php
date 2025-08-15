@@ -210,6 +210,7 @@ class OdontoCreateController extends Controller
             'ID_PACIENTE'        => (int) $request->input('ID_PACIENTE'),
             'ID_SERVICO'         => $idServicoPai,      // <<< FK correta
             'DT_AGEND'           => $dataInicio->format('Y-m-d'),
+            'DT_AGEND_FINAL'     => $dataFim ->format('Y-m-d'),
             'HR_AGEND_INI'       => $hrIni,
             'HR_AGEND_FIN'       => $hrFim,
             'STATUS_AGEND'       => $request->input('status'),
