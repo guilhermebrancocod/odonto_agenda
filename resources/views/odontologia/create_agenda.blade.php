@@ -218,7 +218,7 @@
             title: 'Sucesso!',
             text: "{{ session('success') }}",
         }).then(() => {
-            window.location.href = "{{ url('odontologia/consultarpaciente') }}";
+            window.location.href = "{{ url('odontologia/consultaragenda') }}";
         });
     </script>
     @endif
