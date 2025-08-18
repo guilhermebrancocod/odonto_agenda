@@ -22,7 +22,7 @@ function carregarTodosBoxDiscipline() {
                 const newOption = new Option(
                     disciplines.DISCIPLINA,
                     disciplines.ID_BOX_DISCIPLINA,
-                    false,
+                    disciplines.NOME,
                     false
                 );
                 $select.append(newOption);
@@ -84,8 +84,7 @@ $(document).ready(function () {
                 return {
                     results: data.map(p => ({
                         id: p.ID_BOX_DISCIPLINA,
-                        text: p.DISCIPLINA
-
+                        text: `${p.DISCIPLINA} - ${p.NOME} - ${p.DESCRICAO}`
                     }))
                 };
             },
@@ -107,7 +106,7 @@ $('#selectBoxDiscipline').on('select2:select', function (e) {
     const idBoxDiscipline = e.params.data.id;
     // Busca os dados completos do paciente via AJAX
     $.ajax({
-        url: `/editBoxDiscipline/${idBoxDiscipline}`,
+        url: `/consultaboxdisciplina/${idBoxDiscipline}`,
         dataType: 'json',
         delay: 250,
         data: function (params) {
@@ -119,8 +118,8 @@ $('#selectBoxDiscipline').on('select2:select', function (e) {
                         <td>${disciplines.DISCIPLINA}</td>
                         <td>${disciplines.DESCRICAO}</td>
                         <td>${disciplines.DIA_SEMANA}</td>
-                        <td>${disciplines.HR_INICIO}</td>
-                        <td>${disciplines.HR_FIM}</td>
+                        <td>${maskTime(disciplines.HR_INICIO)}</td>
+                        <td>${maskTime(disciplines.HR_FIM)}</td>
                         <td>
                             <button 
                                 type="button" 
@@ -142,10 +141,10 @@ $('#selectBoxDiscipline').on('select2:select', function (e) {
                     </tr>
                 `;
             // Atualiza o corpo da tabela com apenas o paciente selecionado
-            $('#table-patient tbody').html(html);
+            $('#box-discipline tbody').html(html);
         },
         error: function () {
-            alert("Erro ao buscar os dados do paciente.");
+            alert("Erro ao buscar os dados box/disciplina.");
         }
     });
 });

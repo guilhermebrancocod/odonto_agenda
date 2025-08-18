@@ -93,32 +93,32 @@ $('#selectService').on('select2:select', function (e) {
 
     // Busca os dados completos do paciente via AJAX
     $.ajax({
-        url: `/editService/${servicoId}`,
+        url: `/servicos/${servicoId}`,
         type: 'GET',
         dataType: 'json',
         success: function (servico) {
             const html = `
                     <tr>
-                        <td>${servico.SERVICO_CLINICA_DESC}</td>
-                        <td>${servico.VALOR_SERVICO != null && servico.VALOR_SERVICO !== '' ? 'R$ ' + parseFloat(servico.VALOR_SERVICO).toFixed(2) : ''}</td>
-                        <td>${servico.DISCIPLINA}</td>
-                        <td>${servico.ATIVO}</td>
+                        <td>${servico.descricao}</td>
+                        <td>${servico.valor != null && servico.valor !== '' ? 'R$ ' + parseFloat(servico.valor).toFixed(2) : ''}</td>
+                        <td>${servico.disciplina_codigo ?? ''}</td>
+                        <td>${servico.ativo}</td>
                         <td>
                             <button 
                                 type="button" 
-                                class="edit-service btn btn-link p-0 m-0 border-0" 
+                                class="editService btn btn-link p-0 m-0 border-0" 
                                 style="color: inherit;" 
-                                data-id="${servico.ID_SERVICO_CLINICA}">
+                                data-id="${servico.id}">
                                 <i class="fa fa-pencil-alt"></i>
                             </button>
                         </td>
                     </tr>
             `;
             // Atualiza o corpo da tabela com apenas o paciente selecionado
-            $('#table-patient tbody').html(html);
+            $('#table-service tbody').html(html);
         },
         error: function () {
-            alert("Erro ao buscar os dados do paciente.");
+            alert("Erro ao buscar os dados do serviço.");
         }
     });
 });

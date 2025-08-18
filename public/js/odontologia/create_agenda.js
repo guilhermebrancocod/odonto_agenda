@@ -125,7 +125,7 @@ $(document).ready(function () {
                 return {
                     results: data.map(p => ({
                         id: p.ID,
-                        text: p.SERVICO_CLINICA_DESC + ' (' + p.DISCIPLINA + ')',
+                        text: p.SERVICO_CLINICA_DESC + ' ' + (p.DISCIPLINA ?? ''),
                         disciplina: p.DISCIPLINA
                     }))
                 };
@@ -177,26 +177,9 @@ $(document).ready(function () {
 });
 
 $(document).ready(function () {
-    $.fn.select2.defaults.set("language", "pt-BR");
-
     $('#selectPatient').select2({
         placeholder: "Busque o paciente por nome ou CPF",
         allowClear: true,
-        minimumInputLength: 2,
-        language: {
-            inputTooShort: function (args) {
-                const remainingChars = args.minimum - args.input.length;
-                return `Digite pelo menos mais ${remainingChars} caractere${remainingChars > 1 ? 's' : ''}...`;
-            }
-        }
-    });
-});
-
-$(document).ready(function () {
-    $('#selectPatient').select2({
-        placeholder: "Busque o paciente por nome ou CPF",
-        allowClear: true,
-        minimumInputLength: 2,
         ajax: {
             url: '/getPacientes',
             dataType: 'json',

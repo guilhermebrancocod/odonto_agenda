@@ -37,10 +37,11 @@
             <div style="display: flex; align-items: flex-end; gap: 10px; flex-wrap: wrap; margin: 15px 0;">
                 <div style="flex: 1; min-width: 250px;">
                     <select id="selectPatient" name="ID_PACIENTE" class="form-control" style="width: 100%;">
-                        {{-- A opção será carregada via AJAX --}}
-                        @if(old('ID_PACIENTE') && old('NOME_PACIENTE'))
-                        <option value="{{ old('ID_PACIENTE') }}" selected>{{ old('NOME_PACIENTE') }}</option>
-                        @endif
+                        <option 
+                            value="{{ old('ID_PACIENTE', isset($agenda->ID_PACIENTE) ? $agenda->ID_PACIENTE : '') }}" 
+                            selected>
+                            {{ isset($agenda->NOME_COMPL_PACIENTE) ? $agenda->NOME_COMPL_PACIENTE : 'Selecione um paciente' }}
+                        </option>
                     </select>
                 </div>
                 <div style="flex-shrink: 0;">

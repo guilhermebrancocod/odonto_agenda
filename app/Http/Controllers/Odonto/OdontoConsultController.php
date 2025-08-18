@@ -117,19 +117,21 @@ class OdontoConsultController extends Controller
 
     public function buscarBoxeDisciplinas(Request $request)
     {
-        $disciplines = DB::table('FAESA_CLINICA_BOX_DISCIPLINA')
-            ->join('FAESA_CLINICA_BOXES', 'FAESA_CLINICA_BOXES.ID_BOX_CLINICA', '=', 'FAESA_CLINICA_BOX_DISCIPLINA.ID_BOX')
+        $disciplines = DB::table('FAESA_CLINICA_BOX_DISCIPLINA as bd')
+            ->join('FAESA_CLINICA_BOXES as b', 'b.ID_BOX_CLINICA', '=', 'bd.ID_BOX')
+            ->join('LYCEUM_BKP_PRODUCAO.dbo.LY_DISCIPLINA as ld', 'ld.DISCIPLINA', '=', 'bd.DISCIPLINA')
             ->select(
-                'FAESA_CLINICA_BOX_DISCIPLINA.ID_BOX_DISCIPLINA',
-                'FAESA_CLINICA_BOXES.ID_BOX_CLINICA',
-                'FAESA_CLINICA_BOX_DISCIPLINA.ID_BOX',
-                'FAESA_CLINICA_BOX_DISCIPLINA.DISCIPLINA',
-                'FAESA_CLINICA_BOXES.DESCRICAO',
-                'FAESA_CLINICA_BOX_DISCIPLINA.DIA_SEMANA',
-                'FAESA_CLINICA_BOX_DISCIPLINA.HR_INICIO',
-                'FAESA_CLINICA_BOX_DISCIPLINA.HR_FIM'
+                'bd.ID_BOX_DISCIPLINA',
+                'ld.NOME',
+                'b.ID_BOX_CLINICA',
+                'bd.ID_BOX',
+                'bd.DISCIPLINA',
+                'b.DESCRICAO',
+                'bd.DIA_SEMANA',
+                'bd.HR_INICIO',
+                'bd.HR_FIM'
             )
-            ->where('FAESA_CLINICA_BOX_DISCIPLINA.ID_CLINICA', '=', 2)
+            ->where('bd.ID_CLINICA', '=', 2)
             ->get();
 
         return response()->json($disciplines);
@@ -144,7 +146,7 @@ class OdontoConsultController extends Controller
             ->where('FAESA_CLINICA_BOX_DISCIPLINA.DISCIPLINA', trim($discipline))
             ->get();
 
-    
+
         return response()->json($boxes);
     }
 
@@ -168,32 +170,44 @@ class OdontoConsultController extends Controller
         return response()->json($pacientes);
     }
 
-    public function listaServicosId($servicoId = null)
+    public function listaServicosId(int $servicoId)
     {
-        $query = DB::table('FAESA_CLINICA_SERVICO')
-            ->select('ID_SERVICO_CLINICA', 'SERVICO_CLINICA_DESC');
+        // serviço (sem depender de disciplina)
+        $row = DB::table('FAESA_CLINICA_SERVICO as s')
+            ->leftJoin('FAESA_CLINICA_SERVICO_DISCIPLINA as sd', 'sd.ID_SERVICO_CLINICA', '=', 's.ID_SERVICO_CLINICA')
+            ->leftJoin('LYCEUM_BKP_PRODUCAO.dbo.LY_DISCIPLINA as ld', 'ld.DISCIPLINA', '=', 'sd.DISCIPLINA')
+            ->where('s.ID_SERVICO_CLINICA', $servicoId)
+            ->select(
+                's.ID_SERVICO_CLINICA as id',
+                's.SERVICO_CLINICA_DESC as descricao',
+                's.VALOR_SERVICO as valor',
+                's.ATIVO as ativo',
+                'sd.DISCIPLINA as disciplina_codigo',
+                'ld.NOME as disciplina_nome'
+            )
+            ->orderBy('ld.NOME')   // define um critério para qual disciplina pegar
+            ->limit(1)             // garante apenas UMA disciplina
+            ->first();
 
-        if ($servicoId) {
-            $servico = $query->where('ID_SERVICO_CLINICA', $servicoId)->first();
-
-            if (!$servico) {
-                return response()->json(['erro' => 'Serviço não encontrado'], 404);
-            }
-
-            return response()->json($servico);
+        if (!$row) {
+            return response()->json(['erro' => 'Serviço não encontrado'], 404);
         }
-
-        // Se $pacienteId for vazio, retorna todos os pacientes
-        $servicos = $query->get();
-        return response()->json($servicos);
+        return response()->json([
+            'id'                => $row->id,
+            'descricao'         => $row->descricao,
+            'valor'             => $row->valor,
+            'ativo'             => $row->ativo,
+            'disciplina_codigo' => $row->disciplina_codigo, // pode vir null se não houver
+            'disciplina_nome'   => $row->disciplina_nome,   // pode vir null se não houver
+        ]);
     }
 
     public function services(Request $request)
     {
         $query = DB::table('FAESA_CLINICA_SERVICO as s')
-            ->join('FAESA_CLINICA_SERVICO_DISCIPLINA as sd', 'sd.ID_SERVICO_CLINICA', '=', 's.ID_SERVICO_CLINICA')
-            ->select('sd.ID','s.SERVICO_CLINICA_DESC', 'sd.DISCIPLINA')
-            ->where('s.ID_CLINICA','=',2);
+            ->leftJoin('FAESA_CLINICA_SERVICO_DISCIPLINA as sd', 'sd.ID_SERVICO_CLINICA', '=', 's.ID_SERVICO_CLINICA')
+            ->select('sd.ID', 's.SERVICO_CLINICA_DESC', 'sd.DISCIPLINA')
+            ->where('s.ID_CLINICA', '=', 2);
 
         if ($request->has('query')) {
             $search = $request->query('query');
@@ -208,8 +222,8 @@ class OdontoConsultController extends Controller
     public function listaAgendamentoId($pacienteId)
     {
         $agenda = DB::table('FAESA_CLINICA_AGENDAMENTO')
-            ->join('FAESA_CLINICA_PACIENTE', 'FAESA_CLINICA_AGENDAMENTO.ID_PACIENTE', '=', 'FAESA_CLINICA_PACIENTE.ID_PACIENTE')
-            ->join('FAESA_CLINICA_SERVICO', 'FAESA_CLINICA_SERVICO.ID_SERVICO_CLINICA', '=', 'FAESA_CLINICA_AGENDAMENTO.ID_SERVICO')
+            ->leftjoin('FAESA_CLINICA_PACIENTE', 'FAESA_CLINICA_AGENDAMENTO.ID_PACIENTE', '=', 'FAESA_CLINICA_PACIENTE.ID_PACIENTE')
+            ->leftjoin('FAESA_CLINICA_SERVICO', 'FAESA_CLINICA_SERVICO.ID_SERVICO_CLINICA', '=', 'FAESA_CLINICA_AGENDAMENTO.ID_SERVICO')
             ->select(
                 'FAESA_CLINICA_PACIENTE.ID_PACIENTE',
                 'FAESA_CLINICA_PACIENTE.CPF_PACIENTE',
@@ -224,7 +238,7 @@ class OdontoConsultController extends Controller
                 'FAESA_CLINICA_SERVICO.SERVICO_CLINICA_DESC'
             )
             ->where('FAESA_CLINICA_PACIENTE.ID_PACIENTE', $pacienteId)
-            ->where('FAESA_CLINICA_AGENDAMENTO.ID_CLINICA','=',2)
+            ->where('FAESA_CLINICA_AGENDAMENTO.ID_CLINICA', '=', 2)
             ->get();
 
         if (!$agenda) {
@@ -386,6 +400,43 @@ class OdontoConsultController extends Controller
         $boxes = $query->get();
 
         return response()->json($boxes);
+    }
+
+    public function getBoxesId($boxId, Request $request)
+    {
+        if (!is_numeric($boxId)) {
+            return response()->json(['error' => 'ID inválido'], 400);
+        }
+
+        $query = DB::table('FAESA_CLINICA_BOXES')
+            ->select('DESCRICAO', 'ID_BOX_CLINICA', 'ATIVO')
+            ->where('ATIVO', '=', 'S')
+            ->where('ID_BOX_CLINICA', '=', $boxId);
+
+        if ($request->has('query')) {
+            $search = $request->query('query');
+            $query->where('DESCRICAO', 'like', "%{$search}%");
+        }
+
+        $boxeId = $query->first();
+
+        return response()->json($boxeId);
+    }
+
+    public function consultaboxdisciplina(Request $request, $idBoxDiscipline)
+    {
+        $query = DB::table('FAESA_CLINICA_BOX_DISCIPLINA as bd')
+            ->join('FAESA_CLINICA_BOXES as b', 'b.ID_BOX_CLINICA', '=', 'bd.ID_BOX')
+            ->where('ID_BOX_DISCIPLINA', $idBoxDiscipline);
+
+        if ($request->has('query')) {
+            $search = $request->query('query');
+            $query->where('DESCRICAO', 'like', "%{$search}%");
+        }
+
+        $boxDisciplina = $query->first();
+
+        return response()->json($boxDisciplina);
     }
 
     public function fSelectBoxDiscipline(Request $request)

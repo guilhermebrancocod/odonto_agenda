@@ -23,7 +23,7 @@ class OdontoUpdateController extends Controller
         $request->merge($input);
 
         $rules = [
-            'nome'            => ['required', 'string', 'max:255','regex:/^[A-Za-zÀ-ÿ0-9\s]+$/'],
+            'nome'            => ['required', 'string', 'max:255', 'regex:/^[A-Za-zÀ-ÿ0-9\s]+$/'],
             'cpf'             => ['required', 'regex:/^\d{11}$/'],   // 11 dígitos
             'dt_nasc'         => ['required', 'date_format:d/m/Y', 'before:today'],
             'sexo'            => ['required', 'in:M,F'],
@@ -37,7 +37,7 @@ class OdontoUpdateController extends Controller
             'email'           => ['nullable', 'email:rfc', 'max:100'],
             'celular'         => ['nullable', 'regex:/^\d{10,11}$/'], // 10 ou 11 dígitos
             'cod_sus'         => ['nullable', 'regex:/^\d{15}$/'],   // SUS geralmente 15 dígitos
-            'nome_resposavel' => ['nullable', 'string', 'max:255','regex:/^[A-Za-zÀ-ÿ0-9\s]+$/'],
+            'nome_resposavel' => ['nullable', 'string', 'max:255', 'regex:/^[A-Za-zÀ-ÿ0-9\s]+$/'],
             'cpf_responsavel' => ['nullable', 'regex:/^\d{11}$/'],
             'obs_laudo'       => ['nullable', 'string', 'max:255'],
         ];
@@ -169,7 +169,6 @@ class OdontoUpdateController extends Controller
 
     public function updateAgenda(Request $request, $id)
     {
-
         $agenda = DB::table('FAESA_CLINICA_AGENDAMENTO')->where('ID_AGENDAMENTO', $id)->first();
         if (!$agenda) {
             return back()->withErrors('Agendamento não encontrado.');
@@ -198,7 +197,7 @@ class OdontoUpdateController extends Controller
             ->value('DISCIPLINA');
 
         $servico = DB::table('FAESA_CLINICA_SERVICO_DISCIPLINA')
-            ->where('ID', (int) $request->input('ID_SERVICO'))
+            ->where('ID', (int) $request->input('servico')) // se o PK for outro (ex.: ID_BOX_DISCIPLINA), ajuste aqui
             ->value('ID_SERVICO_CLINICA');
 
         if (!$servico) {

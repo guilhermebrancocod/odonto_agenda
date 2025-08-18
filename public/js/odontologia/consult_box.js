@@ -48,7 +48,7 @@ function carregarTodosBox() {
 }
 
 $(document).ready(function () {
-    const $select = $('#selectBox');
+    const $select = $('#selectBoxes');
 
     $select.select2({
         placeholder: "Busque o boxes",
@@ -84,25 +84,25 @@ $(document).ready(function () {
 });
 
 // Evento ao selecionar um paciente no select2
-$('#selectService').on('select2:select', function (e) {
+$('#selectBoxes').on('select2:select', function (e) {
     const boxId = e.params.data.id;
 
     // Busca os dados completos do paciente via AJAX
     $.ajax({
-        url: `/criarbox/${boxId}`,
+        url: `/odontologia/boxes/${boxId}`,
         type: 'GET',
         dataType: 'json',
-        success: function (box) {
+        success: function (boxId) {
             const html = `
                     <tr>
-                        <td>${box.DESCRICAO}</td>
-                        <td>${box.ATIVO}</td>
+                        <td>${boxId.DESCRICAO}</td>
+                        <td>${boxId.ATIVO}</td>
                         <td>
                             <button 
                                 type="button" 
                                 class="edit-box btn btn-link p-0 m-0 border-0" 
                                 style="color: inherit;" 
-                                data-id="${box.ID_BOX_CLINICA}">
+                                data-id="${boxId.ID_BOX_CLINICA}">
                                 <i class="fa fa-pencil-alt"></i>
                             </button>
                         </td>
@@ -112,7 +112,7 @@ $('#selectService').on('select2:select', function (e) {
             $('#table-box tbody').html(html);
         },
         error: function () {
-            alert("Erro ao buscar os dados do paciente.");
+            alert("Erro ao buscar os dados do box.");
         }
     });
 });
