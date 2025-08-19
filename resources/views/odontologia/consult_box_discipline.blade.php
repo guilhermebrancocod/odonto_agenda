@@ -66,6 +66,46 @@
             </div>
         </form>
     </div>
+    @if (session('success'))
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script>
+        Swal.fire({
+            icon: 'success',
+            title: 'Sucesso!',
+            text: "{{ session('success') }}",
+        }).then(() => {
+            window.location.href = "{{ url('odontologia/consultarservico') }}";
+        });
+    </script>
+    @endif
+
+    @if (session('error'))
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script>
+        Swal.fire({
+            icon: 'error',
+            title: 'Não foi possível excluir',
+            text: "{{ session('error') }}",
+        });
+    </script>
+    @endif
+
+    @if ($errors->any())
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script>
+        Swal.fire({
+            icon: 'error',
+            title: 'Erro ao validar dados',
+            html: `
+        <ul style="text-align:left;">
+            @foreach ($errors->all() as $error)
+                <li>{{ $error }}</li>
+            @endforeach
+        </ul>
+    `,
+        });
+    </script>
+    @endif
     <!-- jQuery primeiro -->
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 

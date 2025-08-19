@@ -92,7 +92,6 @@
                         @endforeach
                     </select>
                 </div>
-
                 <div class="col-md-4">
                     <label for="dia_semana" class="form-label">Dias da semana</label>
                     <select id="dia_semana" name="dia_semana[]" class="form-select" multiple>
@@ -121,7 +120,6 @@
                         @endforeach
                     </select>
                 </div>
-
                 <!-- Pagamento -->
                 @php
                 $pagto = old('pagto');

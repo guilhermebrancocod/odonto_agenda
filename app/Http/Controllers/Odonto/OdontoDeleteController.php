@@ -23,7 +23,7 @@ class OdontoDeleteController extends Controller
 
         if ($hasAgenda) {
             return redirect('odontologia/consultardisciplinabox')
-                ->with('error', 'Não é possível remover: existe agendamento para este local/disciplina.');
+                ->with('error', 'Este Box/Disciplina não pode ser removido porque está vinculado a um ou mais agendamentos.');
         }
 
         // Tenta remover
