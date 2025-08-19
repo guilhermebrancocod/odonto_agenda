@@ -32,19 +32,23 @@ class AuthMiddleware
                 'password' => $request->input('senha'),
             ];
 
+            // DEPENDENDO DA ROTA, CHAMA UMA API DIFERENTE PARA AUTENTICAÇÃO
             $response = $routeName === 'loginPsicologoPOST'
             ? $this->getApiDataPsicologo($credentials)
             : $this->getApiDataAdmin($credentials);
 
             if($response['success']) {
-
                 $validacao = $this->validarUsuario($credentials);
 
                 if ($validacao->isEmpty()) {
                     return redirect()->back()->with('error', "Usuário Inativo");
                 } else {
                     if($routeName === "loginPsicologoPOST") {
-                        session(['psicologo' => $validacao]);
+                        if($validacao->first()->TIPO === "Psicologo") {
+                            session(['psicologo' => $validacao]);
+                        } else {
+                            return redirect()->back()->with('error','Usuário deve ser psicologo');
+                        }
                     } else {
                         session(['usuario' => $validacao]);
                     }
@@ -58,8 +62,12 @@ class AuthMiddleware
         }
 
          // Se não for loginPOST, nem rotas liberadas, pode fazer aqui a checagem da sessão por exemplo
-        if ((!session()->has('usuario')) && !session()->has('psicologo')) {
-            return redirect()->route('loginGET');
+        if (!session()->has('usuario') && !session()->has('psicologo')) {
+            if (str_starts_with($routeName, 'psicologo')) {
+                return redirect()->route('psicologoLoginGet'); // vai para /psicologo/login
+            } else {
+                return redirect()->route('loginGET'); // mantém o login normal
+            }
         }
 
         return $next($request);

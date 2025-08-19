@@ -13,6 +13,7 @@ use App\Http\Controllers\Psicologia\ClinicaController;
 use App\Http\Controllers\Psicologia\SalaController;
 use App\Http\Controllers\Psicologia\HorarioController;
 use App\Http\Controllers\Psicologia\DisciplinaController;
+use App\Http\Controllers\Psicologia\LoginPsicologoController;
 use App\Models\FaesaClinicaServico;
 use App\Models\FaesaClinicaPaciente;
 use App\Http\Middleware\AuthMiddleware;
@@ -308,57 +309,26 @@ Route::middleware([AuthMiddleware::class, CheckClinicaMiddleware::class])
     Route::get('/disciplinas-psicologia', [DisciplinaController::class, 'getDisciplina']);
 });
 
+Route::get('/psicologo/login', function() {
+    if(session()->has('psicologo')) {
+        return redirect()->route('psicologoAgenda');
+    } else {
+        return view('psicologia.login_psicologo');
+    }
+})->name('psicologoLoginGet');
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-// ROTAS DE LOGIN DOS PSICÓLOGOS (SEM MIDDLEWARE)
-Route::get('psicologo/login', function() {
-    return view('psicologia.login_psicologo');
-})->middleware(AuthMiddleware::class)->name('loginPsicologoGET');
-
-
-
-// ROTAS PROTEGIDAS DOS PSICÓLOGOS (COM MIDDLEWARE)
-Route::middleware([AuthMiddleware::class])
-    ->group(function () {
+// Rotas de Psicólogo
+Route::middleware([AuthMiddleware::class])->group(function () {
 
     Route::get('/psicologo', function() {
-        $psicologo = session('psicologo');
-        $tipoUsuario = 'psicologo';
-        return view('psicologia.menu_agenda', compact('psicologo', 'tipoUsuario'));
-    })->name('psicologo.dashboard');
+        if(session()->has('psicologo')) {
+            return view('psicologia.menu_agenda');
+        } else {
+            return redirect()->route('psicologoLoginGet');
+        }
+    })->name('psicologoAgenda');
 
-    // POST de login passando pelo middleware para validar credenciais
-    Route::post('psicologo/login', function() {
-        return redirect()->route('psicologo.dashboard');
-    })->name('loginPsicologoPOST');
-    
-    Route::get('psicologo/agenda', function() {
-        $psicologo = session('psicologo');
-        return view('psicologia.agenda', compact('psicologo'));
-    })->name('psicologo.agenda');
+    Route::post('/psicologo/login', [LoginPsicologoController::class, 'login'])->name('loginPsicologoPOST');
 
-    Route::get('psicologo/pacientes', function() {
-        $psicologo = session('psicologo');
-        return view('psicologia.pacientes', compact('psicologo'));
-    })->name('psicologo.pacientes');
-
-    Route::get('/psicologo/agendamentos-calendar', [AgendamentoController::class, 'getAgendamentosForCalendarPsicologo']);
+    Route::get('/psicologo/logout', [LoginPsicologoController::class, 'logout'])->name('psicologoLogout');
 });
-
-// ROTA DE LOGOUT (COMPARTILHADA)
-Route::get('/psicologo/logout', function() {
-    session()->flush();
-    return redirect()->route('loginPsicologoGET');
-})->name('logout-psicologo');
