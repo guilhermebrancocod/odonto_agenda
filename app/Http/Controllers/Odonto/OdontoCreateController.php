@@ -168,9 +168,7 @@ class OdontoCreateController extends Controller
 
         // 3) Conversões
         $dataInicio = \Carbon\Carbon::createFromFormat('d/m/Y', $request->input('date'))->startOfDay();
-        $dataFim    = $request->filled('date_end')
-            ? \Carbon\Carbon::createFromFormat('d/m/Y', $request->input('date_end'))->endOfDay()
-            : null;
+        $dataFim    = \Carbon\Carbon::createFromFormat('d/m/Y', $request->input('date_end'))->startOfDay();
 
         $hrIni = \Carbon\Carbon::createFromFormat('H:i', $request->hr_ini)->format('H:i:s');
         $hrFim = \Carbon\Carbon::createFromFormat('H:i', $request->hr_fim)->format('H:i:s');
@@ -201,6 +199,7 @@ class OdontoCreateController extends Controller
             }
 
             $data = $dataInicio->copy();
+            $dateEnd = $dataFim->copy();
             $inseridos = 0;
             DB::beginTransaction();
             try {
@@ -210,6 +209,7 @@ class OdontoCreateController extends Controller
                         $conflito = DB::table('FAESA_CLINICA_AGENDAMENTO as a')
                             ->join('FAESA_CLINICA_LOCAL_AGENDAMENTO as l', 'l.ID_AGENDAMENTO', '=', 'a.ID_AGENDAMENTO')
                             ->whereDate('a.DT_AGEND', $data->toDateString())
+                            ->whereDate('a.DT_AGEND', $dateEnd->toDateString())
                             ->where('a.ID_CLINICA', $idClinica)
                             ->where('l.ID_BOX', $idBox)
                             ->whereRaw('CAST(a.HR_AGEND_INI AS time) < CAST(? AS time)', [$hrFim])
@@ -227,6 +227,7 @@ class OdontoCreateController extends Controller
                             'ID_PACIENTE'        => (int) $request->input('ID_PACIENTE'),
                             'ID_SERVICO'         => $idServicoPai,
                             'DT_AGEND'           => $data->toDateString(),
+                            'DT_AGEND_FINAL'     => $dateEnd->toDateString(),
                             'HR_AGEND_INI'       => $hrIni,
                             'HR_AGEND_FIN'       => $hrFim,
                             'STATUS_AGEND'       => $request->input('status'),
@@ -417,7 +418,7 @@ class OdontoCreateController extends Controller
 
     public function editBoxDiscipline(Request $request, $idBoxDiscipline)
     {
-        
+
         $BoxDiscipline = DB::table('FAESA_CLINICA_BOX_DISCIPLINA')->where('ID_BOX_DISCIPLINA', $idBoxDiscipline)->first();
 
         if (!$BoxDiscipline) {

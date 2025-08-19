@@ -47,7 +47,7 @@ function carregarTodosBoxDiscipline() {
                         <td>
                             <button 
                                 type="button" 
-                                class=".delete-boxdisciplines btn btn-link p-0 m-0 border-0" 
+                                class="delete-boxdisciplines btn btn-link p-0 m-0 border-0" 
                                 style="color: inherit;" 
                                 data-id="${disciplines.ID_BOX_DISCIPLINA}">
                                 <i class="fas fa-trash-alt"></i>
@@ -131,7 +131,7 @@ $('#selectBoxDiscipline').on('select2:select', function (e) {
                         <td>
                             <button 
                                 type="button" 
-                                class=".delete-boxdisciplines btn btn-link p-0 m-0 border-0" 
+                                class="delete-boxdisciplines btn btn-link p-0 m-0 border-0" 
                                 style="color: inherit;" 
                                 data-id="${disciplines.ID_BOX_DISCIPLINA}">
                                 <i class="fas fa-trash-alt"></i>

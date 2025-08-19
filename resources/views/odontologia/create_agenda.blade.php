@@ -37,19 +37,16 @@
             <div style="display: flex; align-items: flex-end; gap: 10px; flex-wrap: wrap; margin: 15px 0;">
                 <div style="flex: 1; min-width: 250px;">
                     <select id="selectPatient" name="ID_PACIENTE" class="form-control" style="width: 100%;">
-                        <option 
-                            value="{{ old('ID_PACIENTE', isset($agenda->ID_PACIENTE) ? $agenda->ID_PACIENTE : '') }}" 
+                        <option
+                            value="{{ old('ID_PACIENTE', isset($agenda->ID_PACIENTE) ? $agenda->ID_PACIENTE : '') }}"
                             selected>
                             {{ isset($agenda->NOME_COMPL_PACIENTE) ? $agenda->NOME_COMPL_PACIENTE : 'Selecione um paciente' }}
                         </option>
                     </select>
                 </div>
-                <div style="flex-shrink: 0;">
-                    <button type="button" id="reload"
-                        onclick="location.reload();"
-                        style="background-color: #007bff; color: #fff; border: none; padding: 10px 15px; font-size: 14px; border-radius: 6px; cursor: pointer;"
-                        title="Limpar / Recarregar">
-                        <iconify-icon icon="streamline:arrow-round-left-solid"></iconify-icon>
+                <div style="text-align: right;flex:0.2">
+                    <button class="btn btn-primary btn-lg" id="btn-agendar" type="submit" style="background-color: #007bff; color: #fff; border: none; padding: 10px 20px; font-size: 10px; border-radius: 6px; cursor: pointer;">
+                        <i class="bi bi-calendar-plus"></i> Histórico de Alterações
                     </button>
                 </div>
             </div>

@@ -28,10 +28,10 @@
             <div class="linha-com-titulo">
                 <h5>Dados Pessoais</h5>
                 <div class="linha-flex"></div>
-                <div class="form-check">
-                    <input class="form-check-input" type="checkbox" value="" id="pcd" />
-                    <label class="form-check-label" for="pcd"><strong>PCD</strong></label>
-                    <i class="fas fa-universal-access"></i>
+                <div style="text-align: right;flex:0.2,5">
+                    <button class="btn btn-primary btn-lg" id="btn-agendar" type="submit" style="background-color: #007bff; color: #fff; border: none; padding: 10px 20px; font-size: 10px; border-radius: 6px; cursor: pointer;">
+                        <i class="bi bi-calendar-plus"></i> Histórico de Alterações
+                    </button>
                 </div>
             </div>
             @php

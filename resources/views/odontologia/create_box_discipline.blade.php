@@ -30,6 +30,11 @@
             <div class="linha-com-titulo">
                 <h5>Detalhes</h5>
                 <div class="linha-flex"></div>
+                <div style="text-align: right;flex:0.2">
+                    <button class="btn btn-primary btn-lg" id="btn-agendar" type="submit" style="background-color: #007bff; color: #fff; border: none; padding: 10px 20px; font-size: 10px; border-radius: 6px; cursor: pointer;">
+                        <i class="bi bi-calendar-plus"></i> Histórico de Alterações
+                    </button>
+                </div>
             </div>
             <div class="row fields-bloco" style="margin: 20px 0; display: flex; gap: 40px; align-items: flex-start;">
                 <div class="col-esquerda" style="flex: 1;">
