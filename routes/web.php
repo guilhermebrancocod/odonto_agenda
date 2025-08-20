@@ -266,6 +266,11 @@ Route::middleware([AuthMiddleware::class, CheckClinicaMiddleware::class])
     Route::put('/agendamento/{id}', [AgendamentoController::class, 'updateAgendamento'])->name('agendamento.update');
     Route::delete('/agendamento/{id}', [AgendamentoController::class, 'deleteAgendamento'])->name('psicologia.agendamento.delete');
 
+    // PSICOLOGOS
+    Route::get('/psicologos', function() {
+        return view('psicologia.adm.psicologos');
+    })->name('psicologia.psicologos');
+
     // SERVIÇOS
     Route::get('/criar-servico', function () {
         return view('psicologia.adm/criar_servico');
