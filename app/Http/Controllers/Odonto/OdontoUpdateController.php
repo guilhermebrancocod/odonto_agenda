@@ -169,6 +169,7 @@ class OdontoUpdateController extends Controller
 
     public function updateAgenda(Request $request, $id)
     {
+
         $agenda = DB::table('FAESA_CLINICA_AGENDAMENTO')->where('ID_AGENDAMENTO', $id)->first();
         if (!$agenda) {
             return back()->withErrors('Agendamento não encontrado.');
@@ -197,8 +198,8 @@ class OdontoUpdateController extends Controller
             ->where('ID_SERVICO_CLINICA', (int) $request->input('servico'))
             ->value('DISCIPLINA');
 
-        $servico = DB::table('FAESA_CLINICA_SERVICO_DISCIPLINA')
-            ->where('ID', (int) $request->input('servico')) // se o PK for outro (ex.: ID_BOX_DISCIPLINA), ajuste aqui
+        $servico = DB::table('FAESA_CLINICA_SERVICO')
+            ->where('ID_SERVICO_CLINICA', (int) $request->input('servico')) // se o PK for outro (ex.: ID_BOX_DISCIPLINA), ajuste aqui
             ->value('ID_SERVICO_CLINICA');
 
         if (!$servico) {

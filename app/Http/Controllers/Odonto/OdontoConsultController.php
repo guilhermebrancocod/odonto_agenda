@@ -146,7 +146,6 @@ class OdontoConsultController extends Controller
             ->where('FAESA_CLINICA_BOX_DISCIPLINA.DISCIPLINA', trim($discipline))
             ->get();
 
-
         return response()->json($boxes);
     }
 
