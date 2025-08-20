@@ -65,7 +65,7 @@
                 <div class="col-md-3">
                     <label for="date_end" class="form-label">Dia Fim</label>
                     <input type="text" id="date_end" name="date_end" class="form-control datepicker"
-                        value="{{ old('date_end', isset($agenda->DT_AGEND_FINAL) ? \Carbon\Carbon::parse($agenda->DT_AGEND)->format('d/m/Y') : '') }}">
+                        value="{{ old('date_end', isset($agenda->DT_AGEND_FINAL) ? \Carbon\Carbon::parse($agenda->DT_AGEND_FINAL)->format('d/m/Y') : '') }}">
                 </div>
 
                 <div class="col-md-3">

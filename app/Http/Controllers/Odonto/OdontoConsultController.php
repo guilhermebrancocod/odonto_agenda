@@ -207,7 +207,8 @@ class OdontoConsultController extends Controller
         $query = DB::table('FAESA_CLINICA_SERVICO as s')
             ->leftJoin('FAESA_CLINICA_SERVICO_DISCIPLINA as sd', 'sd.ID_SERVICO_CLINICA', '=', 's.ID_SERVICO_CLINICA')
             ->select('sd.ID', 's.SERVICO_CLINICA_DESC', 'sd.DISCIPLINA')
-            ->where('s.ID_CLINICA', '=', 2);
+            ->where('s.ID_CLINICA', '=', 2)
+            ->where('s.ATIVO','=','S');
 
         if ($request->has('query')) {
             $search = $request->query('query');
