@@ -206,23 +206,23 @@ Route::middleware([AuthMiddleware::class, CheckClinicaMiddleware::class])
     // ROOT
     Route::get('/', function () {
         $usuario = session('usuario');
-        return view('psicologia/menu_agenda', compact('usuario'));
+        return view('psicologia.adm/menu_agenda', compact('usuario'));
     })->name('menu_agenda_psicologia');
 
     // RELATÓRIOS
     Route::get('/relatorios-agendamento', function () {
-        return view('psicologia/relatorios_agendamento');
+        return view('psicologia.adm/relatorios_agendamento');
     })->name('relatorio_psicologia');
 
     // CRIAR PACIENTE
     Route::get('/criar-paciente', function () {
-        return view('psicologia/criar_paciente');
+        return view('psicologia.adm/criar_paciente');
     })->name('criarpaciente_psicologia');
     Route::post('/criar-paciente/criar', [PacienteController::class, 'createPaciente'])->name('criarPaciente-Psicologia');
 
     // EDITAR PACIENTE
     Route::get('/editar-paciente', function () {
-        return view('psicologia/editar_paciente');
+        return view('psicologia.adm/editar_paciente');
     })->name('editarPacienteView-Psicologia');
     Route::post('/editar-paciente/{id}', [PacienteController::class, 'editarPaciente'])->name('editarPaciente-Psicologia');
 
@@ -241,7 +241,7 @@ Route::middleware([AuthMiddleware::class, CheckClinicaMiddleware::class])
 
     // CONSULTAR PACIENTE
     Route::get('/consultar-paciente', function () {
-        return view('psicologia.consultar_paciente');
+        return view('psicologia.adm.consultar_paciente');
     })->name('consultar-paciente');
     Route::get('/consultar-paciente/buscar', [PacienteController::class, 'getPaciente'])->name('getPaciente');
     Route::get('/paciente/{id}/ativar', [PacienteController::class, 'setAtivo'])->name('ativarPaciente-Psicologia');
@@ -249,13 +249,13 @@ Route::middleware([AuthMiddleware::class, CheckClinicaMiddleware::class])
 
     // AGENDAMENTOS
     Route::get('/criar-agendamento', function () {
-        return view('psicologia/criar_agenda');
+        return view('psicologia.adm/criar_agenda');
     })->name('criaragenda_psicologia');
     Route::post('/criar-agendamento/criar', [AgendamentoController::class, 'criarAgendamento'])->name('criarAgendamento-Psicologia');
     Route::put('/agendamentos/{id}/status', [AgendamentoController::class, 'atualizarStatus']);
     Route::put('/agendamentos/{id}/mensagem-cancelamento', [AgendamentoController::class, 'addMensagemCancelamento']);
     Route::get('/consultar-agendamento', function () {
-        return view('psicologia.consultar_agendamento');
+        return view('psicologia.adm.consultar_agendamento');
     })->name('listagem-agendamentos');
     Route::post('/consultar-agendamento/consultar', [AgendamentoController::class, 'getAgendamento'])->name('getAgendamento');
     Route::get('/get-agendamento', [AgendamentoController::class, 'getAgendamento']);
@@ -268,7 +268,7 @@ Route::middleware([AuthMiddleware::class, CheckClinicaMiddleware::class])
 
     // SERVIÇOS
     Route::get('/criar-servico', function () {
-        return view('psicologia/criar_servico');
+        return view('psicologia.adm/criar_servico');
     })->name('criarservico_psicologia');
     Route::post('/criar-servico/criar', [ServicoController::class, 'criarServico'])->name('criarServico-Psicologia');
     Route::get('/pesquisar-servico', [ServicoController::class, 'getServicos'])->name('pesquisarServico-Psicologia');
@@ -289,7 +289,7 @@ Route::middleware([AuthMiddleware::class, CheckClinicaMiddleware::class])
 
     // SALAS
     Route::get('/criar-sala', function () {
-        return view('psicologia.criar_sala');
+        return view('psicologia.adm.criar_sala');
     })->name('salas_psicologia');
     Route::post('/salas/criar', [SalaController::class, 'createSala'])->name('criarSala-Psicologia');
     Route::get('/salas/listar', [SalaController::class, 'listSalas'])->name('listarSalas-Psicologia');
@@ -298,7 +298,7 @@ Route::middleware([AuthMiddleware::class, CheckClinicaMiddleware::class])
 
     // HORÁRIOS
     Route::get('/criar-horario', function () {
-        return view('psicologia.criar_horario');
+        return view('psicologia.adm.adm.criar_horario');
     })->name('criarHorarioView-Psicologia');
     Route::post('/horarios/criar-horario', [HorarioController::class, 'createHorario'])->name('criarHorario-Psicologia');
     Route::get('/horarios/listar', [HorarioController::class, 'listHorarios'])->name('listarHorarios-Psicologia');
@@ -309,26 +309,71 @@ Route::middleware([AuthMiddleware::class, CheckClinicaMiddleware::class])
     Route::get('/disciplinas-psicologia', [DisciplinaController::class, 'getDisciplina']);
 });
 
+
+
+// ROTAS DE PSICÓLOGO
 Route::get('/psicologo/login', function() {
     if(session()->has('psicologo')) {
         return redirect()->route('psicologoAgenda');
     } else {
-        return view('psicologia.login_psicologo');
+        return view('psicologia.psicologo.login_psicologo');
     }
 })->name('psicologoLoginGet');
 
-// Rotas de Psicólogo
+Route::post('/psicologo/login', function() {
+    if(session()->has('psicologo')) {
+        return redirect()->route('psicologoAgenda');
+    }
+})->name('psicologoLoginPost');
+
 Route::middleware([AuthMiddleware::class])->group(function () {
 
     Route::get('/psicologo', function() {
-        if(session()->has('psicologo')) {
-            return view('psicologia.menu_agenda');
-        } else {
-            return redirect()->route('psicologoLoginGet');
-        }
+        return view('psicologia.psicologo.menu_agenda');
     })->name('psicologoAgenda');
 
-    Route::post('/psicologo/login', [LoginPsicologoController::class, 'login'])->name('loginPsicologoPOST');
+    Route::post('/psicologo/login', function() {
+        return redirect()->route('psicologoAgenda');
+    })->name('psicologoLoginPost');
 
-    Route::get('/psicologo/logout', [LoginPsicologoController::class, 'logout'])->name('psicologoLogout');
+    Route::get('/psicologo/agendamentos-calendar', [AgendamentoController::class, 'getAgendamentosForCalendarPsicologo']);
+
+    Route::get('/psicologo/logout', function() {
+        session()->flush();
+        return redirect()->route('psicologoLoginGet');
+    })->name('psicologoLogout');
+});
+
+
+
+
+// ROTAS DE PROFESSOR
+Route::get('/professor/login', function() {
+    if(session()->has('professor')) {
+        return view('psicologia.professor.menu_agenda');
+    } else {
+        return view('psicologia.professor.login_professor');
+    }
+})->name('professorLoginGet');
+
+Route::post('/professor/login', function() {
+    if(session()->has('professor')) {
+        return view('psicologia.professor.menu_agenda');
+    }
+})->name('professorLoginPost');
+
+Route::middleware([AuthMiddleware::class])->group( function() {
+
+    Route::match(['get', 'post'], '/professor', function() {
+        return view('psicologia.professor.menu_agenda');
+    })->name('professorMenu');
+
+    Route::post('/professor/login', function() {
+        return view('psicologia.professor.menu_agenda');
+    })->name('professorLoginPost');
+
+    Route::get('/professor/logout', function() {
+        session()->flush();
+        return redirect()->route('professorLoginGet');
+    })->name('professorLogout');
 });
