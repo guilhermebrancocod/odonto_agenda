@@ -272,6 +272,7 @@ class OdontoConsultController extends Controller
             ->select(
                 'FAESA_CLINICA_AGENDAMENTO.ID_AGENDAMENTO as id',
                 'FAESA_CLINICA_AGENDAMENTO.ID_SERVICO as servicoId',
+                'FAESA_CLINICA_AGENDAMENTO.MENSAGEM',
                 'FAESA_CLINICA_AGENDAMENTO.DT_AGEND',
                 'FAESA_CLINICA_AGENDAMENTO.HR_AGEND_INI',
                 'FAESA_CLINICA_AGENDAMENTO.HR_AGEND_FIN',
@@ -300,6 +301,7 @@ class OdontoConsultController extends Controller
                     },
                     'extendedProps' => [
                         'observacoes' => $item->OBSERVACOES,
+                        'mensagem' => $item->MENSAGEM,
                         'status' => $item->STATUS_AGEND,
                         'local' => $item->LOCAL
                     ]

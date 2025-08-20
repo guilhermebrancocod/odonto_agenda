@@ -86,7 +86,8 @@ document.addEventListener('DOMContentLoaded', function () {
                     </div>
                     <div style="margin-top: 15px;">
                         <label for="mensagem" style="font-weight: bold;">Mensagem:</label><br>
-                        <textarea id="mensagem" class="swal2-textarea" placeholder="Anotação..." style="width: 80%; height: 80px;"></textarea>
+                        <textarea id="mensagem" class="swal2-textarea" placeholder="Anotação..." style="width: 80%; height: 80px;">${info.event.extendedProps.mensagem || ''}</textarea>
+
                     </div>
                 </div>
             `,
