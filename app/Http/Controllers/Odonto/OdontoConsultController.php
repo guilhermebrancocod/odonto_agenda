@@ -146,7 +146,6 @@ class OdontoConsultController extends Controller
             ->where('FAESA_CLINICA_BOX_DISCIPLINA.DISCIPLINA', trim($discipline))
             ->get();
 
-
         return response()->json($boxes);
     }
 
@@ -207,7 +206,8 @@ class OdontoConsultController extends Controller
         $query = DB::table('FAESA_CLINICA_SERVICO as s')
             ->leftJoin('FAESA_CLINICA_SERVICO_DISCIPLINA as sd', 'sd.ID_SERVICO_CLINICA', '=', 's.ID_SERVICO_CLINICA')
             ->select('sd.ID', 's.SERVICO_CLINICA_DESC', 'sd.DISCIPLINA')
-            ->where('s.ID_CLINICA', '=', 2);
+            ->where('s.ID_CLINICA', '=', 2)
+            ->where('s.ATIVO','=','S');
 
         if ($request->has('query')) {
             $search = $request->query('query');
@@ -272,6 +272,7 @@ class OdontoConsultController extends Controller
             ->select(
                 'FAESA_CLINICA_AGENDAMENTO.ID_AGENDAMENTO as id',
                 'FAESA_CLINICA_AGENDAMENTO.ID_SERVICO as servicoId',
+                'FAESA_CLINICA_AGENDAMENTO.MENSAGEM',
                 'FAESA_CLINICA_AGENDAMENTO.DT_AGEND',
                 'FAESA_CLINICA_AGENDAMENTO.HR_AGEND_INI',
                 'FAESA_CLINICA_AGENDAMENTO.HR_AGEND_FIN',
@@ -300,6 +301,7 @@ class OdontoConsultController extends Controller
                     },
                     'extendedProps' => [
                         'observacoes' => $item->OBSERVACOES,
+                        'mensagem' => $item->MENSAGEM,
                         'status' => $item->STATUS_AGEND,
                         'local' => $item->LOCAL
                     ]

@@ -169,6 +169,7 @@ class OdontoUpdateController extends Controller
 
     public function updateAgenda(Request $request, $id)
     {
+
         $agenda = DB::table('FAESA_CLINICA_AGENDAMENTO')->where('ID_AGENDAMENTO', $id)->first();
         if (!$agenda) {
             return back()->withErrors('Agendamento não encontrado.');
@@ -177,10 +178,11 @@ class OdontoUpdateController extends Controller
         $idClinica = 2;
         $idBox     = $request->input('ID_BOX');
         $diaStr = \Carbon\Carbon::createFromFormat('d/m/Y', $request->input('date'))->format('Y-m-d');
+        $dateEnd = $request->input('date_end');
         $hrIni     = \Carbon\Carbon::createFromFormat('H:i', $request->input('hr_ini'))->format('H:i:s');
         $hrFin     = \Carbon\Carbon::createFromFormat('H:i', $request->input('hr_fim'))->format('H:i:s');
 
-        $valor_convert = $request->input('VALOR_AGEND');
+        $valor_convert = $request->input('valor');
         if ($valor_convert === null || $valor_convert === '') {
             $valor_convert = null;
         } else {
@@ -193,11 +195,11 @@ class OdontoUpdateController extends Controller
             ->value('DESCRICAO') ?? null;
 
         $disciplina = DB::table('FAESA_CLINICA_SERVICO_DISCIPLINA')
-            ->where('ID_SERVICO_CLINICA', (int) $request->input('ID'))
+            ->where('ID_SERVICO_CLINICA', (int) $request->input('servico'))
             ->value('DISCIPLINA');
 
-        $servico = DB::table('FAESA_CLINICA_SERVICO_DISCIPLINA')
-            ->where('ID', (int) $request->input('servico')) // se o PK for outro (ex.: ID_BOX_DISCIPLINA), ajuste aqui
+        $servico = DB::table('FAESA_CLINICA_SERVICO')
+            ->where('ID_SERVICO_CLINICA', (int) $request->input('servico')) // se o PK for outro (ex.: ID_BOX_DISCIPLINA), ajuste aqui
             ->value('ID_SERVICO_CLINICA');
 
         if (!$servico) {
@@ -213,7 +215,7 @@ class OdontoUpdateController extends Controller
                 'ID_PACIENTE' => $request->input('ID_PACIENTE'),
                 'ID_SERVICO' => $servico,
                 'DT_AGEND' => $diaStr,
-                'DT_AGEND_FINAL' => $request->input('date_end'),
+                'DT_AGEND_FINAL' => $dateEnd,
                 'HR_AGEND_INI' => $hrIni,
                 'HR_AGEND_FIN' => $hrFin,
                 'STATUS_AGEND' => $request->input('status'),
@@ -224,11 +226,12 @@ class OdontoUpdateController extends Controller
                 'LOCAL' => $descricaoLocal
             ]);
 
-        DB::table('FAESA_CLINICA_LOCAL_AGENDAMENTO')->insert([
-            'ID_AGENDAMENTO' => $id,
-            'ID_BOX'         => $idBox,
-            'DISCIPLINA'     => $disciplina,
-        ]);
+        DB::table('FAESA_CLINICA_LOCAL_AGENDAMENTO')
+            ->where('ID_AGENDAMENTO', $id)
+            ->update([
+                'ID_BOX'     => $idBox,
+                'DISCIPLINA' => $disciplina,
+            ]);
 
         return redirect()->back()->with('success', 'Agendamento atualizado com sucesso!');
     }
