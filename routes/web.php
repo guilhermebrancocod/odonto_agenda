@@ -13,7 +13,7 @@ use App\Http\Controllers\Psicologia\ClinicaController;
 use App\Http\Controllers\Psicologia\SalaController;
 use App\Http\Controllers\Psicologia\HorarioController;
 use App\Http\Controllers\Psicologia\DisciplinaController;
-use App\Http\Controllers\Psicologia\LoginPsicologoController;
+use App\Http\Controllers\Psicologia\PsicologoController;
 use App\Models\FaesaClinicaServico;
 use App\Models\FaesaClinicaPaciente;
 use App\Http\Middleware\AuthMiddleware;
@@ -267,13 +267,17 @@ Route::middleware([AuthMiddleware::class, CheckClinicaMiddleware::class])
     Route::delete('/agendamento/{id}', [AgendamentoController::class, 'deleteAgendamento'])->name('psicologia.agendamento.delete');
 
     // PSICOLOGOS
-    Route::get('/criar-psicologo', function() {
+    Route::get('criar-psicologo', function() {
         return view('psicologia.adm.criar_psicologo');
-    })->name('psicologia.Criar_psicologos');
+    })->name('psicologia.Criar_psicologo');
 
-    Route::get('/consultar-psicologo', function() {
+    Route::post('criar-psicologo', [PsicologoController::class, 'createPsicologo'])->name('psicologia.Criar_psicologoPOST');
+
+    Route::get('consultar-psicologo', function() {
         return view('psicologia.adm.consultar_psicologo');
-    })->name('psicologia.Consult_psicologos');
+    })->name('psicologia.Consult_psicologo');
+
+    Route::get('buscar-aluno/{matricula}', [PsicologoController::class, 'listAlunos'])->name('listAlunos-Psicologia');
 
     // SERVIÇOS
     Route::get('/criar-servico', function () {

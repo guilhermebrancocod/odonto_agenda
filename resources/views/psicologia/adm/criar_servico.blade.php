@@ -515,7 +515,7 @@ document.getElementById('disciplina-servico').addEventListener('focus', function
     fetch('/psicologia/disciplinas-psicologia')
         .then(response => {
             if (!response.ok) throw new Error('Erro ao buscar disciplinas');
-            return response.json(); // <-- converte para JSON
+            return response.json();
         })
         .then(disciplinas => {
             console.log(disciplinas);

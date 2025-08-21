@@ -17,6 +17,8 @@
     <!-- FLATPICKR -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css" />
 
+    @vite(['resources/css/app.css', 'resources/js/app.js'])
+
     <meta name="csrf-token" content="{{ csrf_token() }}">
 
     <style>
@@ -90,8 +92,10 @@
 
                 <h2>Criar Psicólogo</h2>
 
-                 <form action="{{ route('criarPaciente-Psicologia') }}" method="POST" class="needs-validation" id="pacienteForm">
+                <form action="{{ route('psicologia.Criar_psicologoPOST') }}" method="POST" class="needs-validation" id="pacienteForm">
                 @csrf
+
+                <input type="hidden" name="matricula_id" id="matricula_id" value="{{ old('matricula_id') }}">
 
                 <!-- DADOS PESSOAIS -->
                 <hr />
@@ -101,24 +105,26 @@
                     <div class="col-md-2">
                         <label for="matricula" class="form-label">Matrícula</label>
                         <input type="text" id="matricula" name="MATRICULA" class="form-control" value="{{ old('MATRICULA') }}"/>
+
+                        <div id="matricula-list" class="list-group position-absolute w-100" style="z-index: 1000; max-width: 20vw; overflow-y: auto; max-height: 20vh;"></div>
                     </div>
                     
                     <!-- NOME COMPLETO-->
                     <div class="col-md-4">
                         <label for="nome_compl" class="form-label">Nome Completo</label>
-                        <input type="text" id="nome_compl" name="NOME_COMPL", class="form-control" value={{ old('NOME_COMPL') }}>
+                        <input type="text" id="nome_compl" name="NOME_COMPL", class="form-control" value={{ old('NOME_COMPL') }} disabled>
                     </div>
                     
                     <!-- DATA NASCIMENTO -->
                     <div class="col-md-2">
                         <label for="dt_nasc" class="form-label">Dt Nascimento</label>
-                        <input type="text" id="dt_nasc" name="DT_NASC_PACIENTE" class="form-control" value="{{ old('DT_NASC_PACIENTE') }}"/>
+                        <input type="text" id="dt_nasc" name="DT_NASC_PACIENTE" class="form-control" value="{{ old('DT_NASC_PACIENTE') }}" disabled/>
                     </div>
                     
                     <!-- CPF -->
                     <div class="col-md-2">
                         <label for="cpf_paciente" class="form-label">CPF</label>
-                        <input type="text" id="cpf_paciente" name="CPF_PACIENTE" class="form-control" value="{{ old('CPF_PACIENTE') }}"/>
+                        <input type="text" id="cpf_paciente" name="CPF_PACIENTE" class="form-control" value="{{ old('CPF_PACIENTE') }}" disabled/>
                     </div>
                     
                     <!-- SEXO -->
@@ -245,17 +251,78 @@
 
     {{-- BUSCA DE ALUNO - PSICÓLOGO --}}
     <script>
-        $matriculaInput = document.getElementById('matricula');
-        $matriculaList = document.getElementById('matricula-list');
+        const matriculaInput = document.getElementById('matricula');
+        const matriculaList = document.getElementById('matricula-list');
 
-        $query = $matriculaInput.value.trim();
+        // CAMPOS DO FORMULÁRIO
+        const nome_compl = document.getElementById('nome_compl');
+        const dt_nasc = document.getElementById('dt_nasc');
+        const cpf_paciente = document.getElementById('cpf_paciente');
+        const sexo = document.getElementById('sexo');
+
+        let timeout = null;
         
-        $matricula.addEventListener('input', function() {
-            fetch(`/psicologo/buscar-aluno?search=${encodeURIComponent($query)}`).then(res => {
+        matriculaInput.addEventListener('input', function() {
+            const $query = matriculaInput.value.trim();
 
-            }).then(psicologos => {
+            if(!$query) return;
 
-            })
+            clearTimeout(timeout);
+
+            timeout = setTimeout(() => {
+
+                fetch(`/psicologia/buscar-aluno/${encodeURIComponent($query)}`)
+                    .then(response => response.json())
+                    .then(matriculas => {
+                        matriculaList.innerHTML = '';
+
+                        if(matriculas.length === 0) {
+                            matriculaList.innerHTML = `<button type="button" class="list-group-item list-group-item-action disabled">Nenhuma matrícula encontrada</button>`;
+                            document.getElementById('id_psicologo').value = '';
+                            return;
+                        } else {
+                            matriculas.forEach(matricula => {
+                                console.log(matricula);
+                                const item = document.createElement('button');
+                                item.type = 'button';
+                                item.classList.add('list-group-item', 'list-group-item-action');
+                                item.textContent = matricula.ALUNO;
+
+                                item.addEventListener('click', () => {
+                                document.getElementById('matricula').value = matricula.ALUNO;
+                                document.getElementById('matricula_id').value = matricula.ALUNO;
+                                let matriculaList = document.getElementById('matricula-list');
+                                matriculaList.innerHTML = '';
+
+                                // PREENCHE VALORES DO FORMULÁRIO AUTOMATICAMENTE E BLOQUEIA ALTERAÇÕES
+                                nome_compl.value = matricula.NOME_COMPL;
+                                nome_compl.disabled = true;
+                                dt_nasc.value = new Date(matricula.DT_NASC).toLocaleDateString('pt-BR');
+                                dt_nasc.disabled = true;
+                                cpf_paciente.value = matricula.CPF;
+                                cpf_paciente.disabled = true;
+                                sexo.value = matricula.SEXO;
+                                sexo.disabled = true;
+
+                                // PREENCHE CAMPOS DE ENDEREÇO
+
+
+                                });
+                                matriculaList.appendChild(item);
+                            });
+                        }
+                    })
+                    .catch(error => {
+                        console.error(error);
+                        matriculaList.innerHTML = `<button type="button" class="list-group-item list-group-item-action disabled text-danger" style="max-width: 15vw;">Erro ao buscar matrículas</button>`;
+                    });
+            }, 300);
+        })
+
+        matriculaInput.addEventListener('blur', function() {
+            setTimeout(() => {
+                matriculaList.innerHTML = '';
+            }, 200);
         })
     </script>
 
