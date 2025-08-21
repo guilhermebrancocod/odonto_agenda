@@ -60,27 +60,27 @@ nav ul li a i {
 }
 
 .logout-link {
-  margin-top: auto;
-  margin-bottom: 20px;
-  padding: 12px 24px;
-  color: #ffffff;
-  background-color: #c0392b;
-  text-decoration: none;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 10px;
-  width: 90%;
-  border-radius: 8px;
-  font-weight: 500;
-  font-size: 15px;
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
-  transition: background-color 0.2s ease, transform 0.1s ease;
+    margin-top: auto;
+    margin-bottom: 20px;
+    padding: 12px 24px;
+    color: #ffffff;
+    background-color: #c0392b;
+    text-decoration: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    width: 90%;
+    border-radius: 8px;
+    font-weight: 500;
+    font-size: 15px;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+    transition: background-color 0.2s ease, transform 0.1s ease;
 }
 
 .logout-link:hover {
-  background-color: #a93226;
-  transform: translateY(-1px);
+    background-color: #a93226;
+    transform: translateY(-1px);
 }
 
 body {
@@ -232,5 +232,28 @@ body nav img div {
     .fc-button {
         font-size: 0.85rem;
         padding: 4px 8px;
+    }
+
+    /* Badgezinho com iniciais */
+    .fc .fc-badge {
+        border-radius: 6px;
+        padding: 2px 6px;
+        border: 1px solid #cfcfcf;
+        font-weight: 600;
+    }
+
+    .fc .fc-title {
+        font-weight: 600;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+
+    .fc .fc-time {
+        opacity: .75;
+    }
+
+    .fc .fc-timegrid-event {
+        padding: 2px 2px;
     }
 }
