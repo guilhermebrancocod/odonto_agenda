@@ -267,9 +267,13 @@ Route::middleware([AuthMiddleware::class, CheckClinicaMiddleware::class])
     Route::delete('/agendamento/{id}', [AgendamentoController::class, 'deleteAgendamento'])->name('psicologia.agendamento.delete');
 
     // PSICOLOGOS
-    Route::get('/psicologos', function() {
-        return view('psicologia.adm.psicologos');
-    })->name('psicologia.psicologos');
+    Route::get('/criar-psicologo', function() {
+        return view('psicologia.adm.criar_psicologo');
+    })->name('psicologia.Criar_psicologos');
+
+    Route::get('/consultar-psicologo', function() {
+        return view('psicologia.adm.consultar_psicologo');
+    })->name('psicologia.Consult_psicologos');
 
     // SERVIÇOS
     Route::get('/criar-servico', function () {
@@ -303,7 +307,7 @@ Route::middleware([AuthMiddleware::class, CheckClinicaMiddleware::class])
 
     // HORÁRIOS
     Route::get('/criar-horario', function () {
-        return view('psicologia.adm.adm.criar_horario');
+        return view('psicologia.adm.criar_horario');
     })->name('criarHorarioView-Psicologia');
     Route::post('/horarios/criar-horario', [HorarioController::class, 'createHorario'])->name('criarHorario-Psicologia');
     Route::get('/horarios/listar', [HorarioController::class, 'listHorarios'])->name('listarHorarios-Psicologia');
