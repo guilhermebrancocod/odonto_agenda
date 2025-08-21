@@ -20,12 +20,25 @@ class AuthMiddleware
         }
 
         // CASO A ROTA QUE O USUÁRIO TENTA ACESSAR SEJA ALGUMA DESSAS, ELE PERMITE SEGUIR ADIANTE
-        if(in_array($routeName, ['loginGET', 'loginPsicologoGET', 'logout', 'logout-psicologo'])) {
+        if(in_array($routeName, [
+            'loginGET',
+            'psicologoLoginGet',
+            'professorLoginGet',
+            'logout',
+            'psicologoLogout',
+            'professorLogout',
+            ]))
+            {
             return $next($request);
         }
 
         // AUTENTICAÇÃO VIA POST
-        if($routeName === 'loginPOST' || $routeName === 'loginPsicologoPOST') {
+        if( ($routeName === 'loginPOST')
+            ||
+            ($routeName === 'psicologoLoginPost')
+            ||
+            ($routeName === 'professorLoginPost')
+            ) {
             // ARMAZENA CREDENCIAIS
             $credentials = [
                 'username' => $request->input('login'),
@@ -33,25 +46,62 @@ class AuthMiddleware
             ];
 
             // DEPENDENDO DA ROTA, CHAMA UMA API DIFERENTE PARA AUTENTICAÇÃO
-            $response = $routeName === 'loginPsicologoPOST'
+            $response = $routeName === 'psicologoLoginPost'
             ? $this->getApiDataPsicologo($credentials)
-            : $this->getApiDataAdmin($credentials);
+            : $this->getApiData($credentials);
 
             if($response['success']) {
+
+                // VALIDA USUÁRIO NO BANCO DE DADOS
                 $validacao = $this->validarUsuario($credentials);
 
-                if ($validacao->isEmpty()) {
+                if ($validacao->is_null) {
+
                     return redirect()->back()->with('error', "Usuário Inativo");
+                    
                 } else {
-                    if($routeName === "loginPsicologoPOST") {
-                        if($validacao->first()->TIPO === "Psicologo") {
+                    
+                    if($routeName === "psicologoLoginPost") {
+                        
+                        if($validacao->TIPO === "Psicologo") {
+
                             session(['psicologo' => $validacao]);
+                            
                         } else {
-                            return redirect()->back()->with('error','Usuário deve ser psicologo');
+
+                            return redirect()->back()->with('error','Usuário deve ser Psicólogo');
                         }
+
+                    } else if ($routeName === "professorLoginPost") {
+
+                        if($validacao->first()->TIPO === "Professor") {
+
+                            session(['professor' => $validacao]);
+
+                        } else {
+
+                            return redirect()->back()->with('error', 'Usuário deve ser Professor');
+
+                        }
+
+                    } else if ($routeName === "recepcaoMenu") {
+
+                        if($validacao->TIPO === "Recepcao") {
+
+                            session(['recepcao' => $validacao]);
+
+                        } else {
+
+                            return redirect()->back()->with('error', 'Usuário deve ser Recepcionista');
+
+                        }
+
                     } else {
+
                         session(['usuario' => $validacao]);
+
                     }
+
                     return $next($request);
                 }
                 
@@ -61,20 +111,33 @@ class AuthMiddleware
             }
         }
 
-         // Se não for loginPOST, nem rotas liberadas, pode fazer aqui a checagem da sessão por exemplo
-        if (!session()->has('usuario') && !session()->has('psicologo')) {
-            if (str_starts_with($routeName, 'psicologo')) {
-                return redirect()->route('psicologoLoginGet'); // vai para /psicologo/login
+        if ( 
+                ( !session()->has('usuario') )
+            && ( !session()->has('psicologo') )
+            && ( !session()->has('professor') )
+        ) {
+
+            if (str_starts_with($routeName,
+            'psicologo')) {
+
+                return redirect()->route('psicologoLoginGet');
+
+            } else if (str_starts_with($routeName,
+            'professor')) {
+
+                return redirect()->route('professorLoginGet');
+
             } else {
-                return redirect()->route('loginGET'); // mantém o login normal
+
+                return redirect()->route('loginGET');
             }
         }
-
         return $next($request);
     }
 
-    public function getApiDataAdmin(array $credentials)
+    public function getApiData(array $credentials): array
     {
+        // CREDENCIAIS DA API
         $apiUrl = config('services.faesa.api_url');
         $apiKey = config('services.faesa.api_key');
 
@@ -82,65 +145,71 @@ class AuthMiddleware
             $response = Http::withHeaders([
                 'Accept' => "application/json",
                 'Authorization' => $apiKey
-            ])->timeout(5)->post($apiUrl, $credentials);
+            ])
+            ->post($apiUrl, $credentials);
 
             if($response->successful()) {
-                return [
-                    'success' => true,
-                    'data' => $response->json()
-                ];
-            }
 
+                return [
+                    'success' => true
+                ];
+                
+            } else {
+
+                return [
+                    'success' => false
+                ];
+                
+            }
+            
+        } catch (\Exception $e) {
+            
             return [
                 'success' => false,
-                'message' => 'Credenciais Inválidas',
-                'status'  => $response->status()
-            ];
-        } catch (\Exception $e) {
-            return [
-            'success' => false,
                 'message' => $e->getMessage()
             ];
+            
         }
     }
 
-    public function getApiDataPsicologo(array $credentials)
+    public function getApiDataPsicologo(array $credentials): array
     {
         $apiUrl = config('services.faesa.api_psicologos_url');
         $apiKey = config('services.faesa.api_psicologos_key');
+        
         try {
             $response = Http::withHeaders([
-                'Accept' => "application/json",
+                'Accept'        => "application/json",
                 'Authorization' => $apiKey
-            ])->timeout(5)->post($apiUrl, $credentials);
+            ])
+            ->timeout(5)
+            ->post($apiUrl, $credentials);
 
             if($response->successful()) {
                 return [
-                    'success' => true,
-                    'data' => $response->json()
+                    'success' => true
+                ];
+            } else {
+                return [
+                    'success' => false
                 ];
             }
 
-            return [
-                'success' => false,
-                'message' => 'Credenciais Inválidas',
-                'status'  => $response->status()
-            ];
         } catch (\Exception $e) {
             return [
-            'success' => false,
+                'success' => false,
                 'message' => $e->getMessage()
             ];
         }
     }
 
-    public function validarUsuario(array $credentials)
+    // VALIDA USUÁRIO NO BANCO DE DADOS
+    public function validarUsuario(array $credentials): FaesaClinicaUsuarioGeral
     {
         $username = $credentials['username'];
-
         $usuario = FaesaClinicaUsuarioGeral::where('USUARIO', $username)
         ->where('STATUS', '=', 'Ativo')
-        ->get();
+        ->first();
         return $usuario;
     }
 }

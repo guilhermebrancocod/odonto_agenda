@@ -9,10 +9,7 @@
 <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" crossorigin="anonymous">
 
 {{-- Bootstrap JS --}}
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"
-    integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz"
-    crossorigin="anonymous">
-</script>
+
 
 <style>
     body {
@@ -83,6 +80,25 @@
             margin-top: 0;
         }
     }
+
+    /* Esconde o submenu por padrão */
+    .collapse-custom {
+    display: none;
+    transition: all 0.3s ease;
+    }
+
+    /* Mostra quando ativo */
+    .collapse-custom.show {
+    display: block;
+    }
+
+    /* Animação da setinha */
+    #togglePsicologos .bi-chevron-down {
+    transition: transform 0.3s ease;
+    }
+    #togglePsicologos.active .bi-chevron-down {
+    transform: rotate(180deg);
+    }
 </style>
 
 
@@ -150,11 +166,32 @@
             </a>
         </li>
 
-        <!-- PSICOLOGOS -->
-        <li class="list-group-item rounded-1 p-0 overflow-hidden ">
-            <a href="/psicologia/psicologos" class="link-agendar d-flex align-items-center gap-2 p-2">
-                <i class="bi bi-person-workspace"></i> Psicólogos
-            </a>
+        <!-- PSICÓLOGOS -->
+        <li class="list-group-item rounded-1 p-0 overflow-hidden">
+
+        <!-- Botão principal -->
+        <a id="togglePsicologos" 
+            class="link-agendar d-flex align-items-center justify-content-between p-2"
+            href="javascript:void(0)">
+            <span><i class="bi bi-person-workspace me-2"></i> Psicólogos</span>
+            <i class="bi bi-chevron-down small"></i>
+        </a>
+
+        <!-- Submenu -->
+        <div id="submenuPsicologos" class="submenu collapse-custom">
+            <ul class="list-group list-group-flush">
+                <li class="list-group-item p-0 overflow-hidden">
+                    <a href="/psicologia/criar-psicologo" class="link-agendar d-flex align-items-center gap-2 p-2 ps-4">
+                        <i class="bi bi-person-plus"></i> Criar Psicólogo
+                    </a>
+                </li>
+                <li class="list-group-item p-0 overflow-hidden">
+                    <a href="/psicologia/consultar-psicologo" class="link-agendar d-flex align-items-center gap-2 p-2 ps-4">
+                        <i class="bi bi-search"></i> Consultar Psicólogo
+                    </a>
+                </li>
+            </ul>
+        </div>
         </li>
 
         <!-- CADASTRAR SERVIÇO -->
@@ -271,4 +308,18 @@
             </li>
         </ul>
     </div>
+
+
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+    const toggleBtn = document.getElementById("togglePsicologos");
+    const submenu = document.getElementById("submenuPsicologos");
+
+    toggleBtn.addEventListener("click", function() {
+        submenu.classList.toggle("show");
+        toggleBtn.classList.toggle("active");
+    });
+    });
+</script>
+    
 </div>
