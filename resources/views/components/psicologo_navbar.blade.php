@@ -113,7 +113,7 @@
 
         <!-- PÁGINA INICIAL - MENU AGENDA -->
         <li class="list-group-item rounded-1 p-0 overflow-hidden ">
-            <a href="/psicologia" class="link-agendar d-flex align-items-center gap-2 p-2">
+            <a href="/psicologo" class="link-agendar d-flex align-items-center gap-2 p-2">
                 <i class="fas fa-home"></i> Início
             </a>
         </li>
