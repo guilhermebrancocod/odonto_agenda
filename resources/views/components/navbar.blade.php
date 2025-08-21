@@ -110,7 +110,7 @@
 </nav>
 
 
-<div id="main-container" class="d-flex">
+<div id="main-container" class="d-flex min-vh-100">
 
 <!-- SIDEBAR DESKTOP -->
 <nav class="p-3 d-none d-lg-flex flex-column align-items-center" style="width: 250px; background-color: var(--blue-color);">
