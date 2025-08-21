@@ -99,6 +99,13 @@
     #togglePsicologos.active .bi-chevron-down {
     transform: rotate(180deg);
     }
+
+    #toggleProfessores .bi-chevron-down {
+    transition: transform 0.3s ease;
+    }
+    #toggleProfessores.active .bi-chevron-down {
+    transform: rotate(180deg);
+    }
 </style>
 
 
@@ -110,7 +117,7 @@
 </nav>
 
 
-<div id="main-container" class="d-flex">
+<div id="main-container" class="d-flex vh-100">
 
 <!-- SIDEBAR DESKTOP -->
 <nav class="p-3 d-none d-lg-flex flex-column align-items-center" style="width: 250px; background-color: var(--blue-color);">
@@ -188,6 +195,34 @@
                 <li class="list-group-item p-0 overflow-hidden">
                     <a href="/psicologia/consultar-psicologo" class="link-agendar d-flex align-items-center gap-2 p-2 ps-4">
                         <i class="bi bi-search"></i> Consultar Psicólogo
+                    </a>
+                </li>
+            </ul>
+        </div>
+        </li>
+
+        <!-- PROFESSORES -->
+        <li class="list-group-item rounded-1 p-0 overflow-hidden">
+
+        <!-- Botão principal -->
+        <a id="toggleProfessores" 
+            class="link-agendar d-flex align-items-center justify-content-between p-2"
+            href="javascript:void(0)">
+            <span><i class="bi bi-person-rolodex me-2"></i> Professores</span>
+            <i class="bi bi-chevron-down small"></i>
+        </a>
+
+        <!-- Submenu -->
+        <div id="submenuProfessores" class="submenu collapse-custom">
+            <ul class="list-group list-group-flush">
+                <li class="list-group-item p-0 overflow-hidden">
+                    <a href="/psicologia/criar-professor" class="link-agendar d-flex align-items-center gap-2 p-2 ps-4">
+                        <i class="bi bi-person-plus"></i> Criar Professor
+                    </a>
+                </li>
+                <li class="list-group-item p-0 overflow-hidden">
+                    <a href="/psicologia/consultar_professor" class="link-agendar d-flex align-items-center gap-2 p-2 ps-4">
+                        <i class="bi bi-search"></i> Consultar Professor
                     </a>
                 </li>
             </ul>
@@ -312,13 +347,21 @@
 
 <script>
     document.addEventListener("DOMContentLoaded", function() {
-    const toggleBtn = document.getElementById("togglePsicologos");
-    const submenu = document.getElementById("submenuPsicologos");
+    const toggleBtnPsico = document.getElementById("togglePsicologos");
+    const submenuPsico = document.getElementById("submenuPsicologos");
 
-    toggleBtn.addEventListener("click", function() {
-        submenu.classList.toggle("show");
-        toggleBtn.classList.toggle("active");
+        toggleBtnPsico.addEventListener("click", function() {
+            submenuPsico.classList.toggle("show");
+            toggleBtnPsico.classList.toggle("active");
+        });
     });
+
+    const toggleBtnProf = document.getElementById("toggleProfessores");
+    const submenuProf = document.getElementById("submenuProfessores");
+
+    toggleBtnProf.addEventListener("click", function() {
+        submenuProf.classList.toggle("show");
+        toggleBtnProf.classList.toggle("active");
     });
 </script>
     
