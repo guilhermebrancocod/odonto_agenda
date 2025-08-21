@@ -26,6 +26,21 @@ class PsicologoController extends Controller
 
     public function createPsicologo(Request $request)
     {
-        dd($request->all());
+        // VALIDA DADOS
+        $validatedData = $request->validate([
+            'MATRICULA' => 'required|min:8|max:8',
+            'NOME_COMPL' => 'required|string|max:255',
+            'DT_NASC_PSICOLOGO' => 'required|date',
+            'CPF_PSICOLOGO' => 'required|string|max:14',
+            'SEXO_PSCIOLOGO' => 'required|string|in:M,F,O',
+            'E_MAIL_PSICOLOGO' => 'required|email|max:255',
+            'FONE_PSICOLOGO' => 'required|string|max:20',
+            // Criar validação dos campos de horário e disciplinas
+        ]);
+
+        // CRIA NO USUARIO_GERAL
+        // CRIA NO PSICOLOGO
+        // CRIA NO PSICLOGO_DISPONIBILIDADE
+        // CRIA NO PSICOLOGO_DISCIPLINA
     }
 }

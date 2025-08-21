@@ -112,25 +112,25 @@
                     <!-- NOME COMPLETO-->
                     <div class="col-md-4">
                         <label for="nome_compl" class="form-label">Nome Completo</label>
-                        <input type="text" id="nome_compl" name="NOME_COMPL", class="form-control" value={{ old('NOME_COMPL') }} disabled>
+                        <input type="text" id="nome_compl" name="NOME_COMPL", class="form-control" value="{{ old('NOME_COMPL') }}" disabled />
                     </div>
                     
                     <!-- DATA NASCIMENTO -->
                     <div class="col-md-2">
                         <label for="dt_nasc" class="form-label">Dt Nascimento</label>
-                        <input type="text" id="dt_nasc" name="DT_NASC_PACIENTE" class="form-control" value="{{ old('DT_NASC_PACIENTE') }}" disabled/>
+                        <input type="text" id="dt_nasc" name="DT_NASC_PSICOLOGO" class="form-control" value="{{ old('DT_NASC_PACIENTE') }}" disabled/>
                     </div>
                     
                     <!-- CPF -->
                     <div class="col-md-2">
                         <label for="cpf_paciente" class="form-label">CPF</label>
-                        <input type="text" id="cpf_paciente" name="CPF_PACIENTE" class="form-control" value="{{ old('CPF_PACIENTE') }}" disabled/>
+                        <input type="text" id="cpf_paciente" name="CPF_PSICOLOGO" class="form-control" value="{{ old('CPF_PACIENTE') }}" disabled/>
                     </div>
                     
                     <!-- SEXO -->
                     <div class="col-md-2">
                         <label for="sexo" class="form-label">Sexo</label>
-                        <select id="sexo" name="SEXO_PACIENTE" class="form-select">
+                        <select id="sexo" name="SEXO_PSICOLOGO" class="form-select" disabled>
                             <option value="" {{ old('SEXO_PACIENTE') == '' ? 'selected' : '' }}>Selecione</option>
                             <option value="M" {{ old('SEXO_PACIENTE') == 'M' ? 'selected' : '' }}>Masculino</option>
                             <option value="F" {{ old('SEXO_PACIENTE') == 'F' ? 'selected' : '' }}>Feminino</option>
@@ -223,11 +223,11 @@
                 <hr />
                 <div class="mb-3">
                     <label for="email" class="form-label">Email</label>
-                    <input type="email" id="email" name="E_MAIL_PACIENTE" class="form-control" value="{{ old('E_MAIL_PACIENTE') }}"/>
+                    <input type="email" id="email" name="E_MAIL_PSICOLOGO" class="form-control" value="{{ old('E_MAIL_PACIENTE') }}"/>
                 </div>
                 <div class="mb-3">
                     <label for="telefone" class="form-label">Telefone</label>
-                    <input type="text" id="telefone" name="FONE_PACIENTE" class="form-control" value="{{ old('FONE_PACIENTE') }}"/>
+                    <input type="text" id="telefone" name="FONE_PSICOLOGO" class="form-control" value="{{ old('FONE_PACIENTE') }}"/>
                 </div>
 
                 <!-- CAMPO DE OBSERVAÇÃO -->
