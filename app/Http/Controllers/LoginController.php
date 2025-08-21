@@ -18,8 +18,6 @@ class LoginController extends Controller
             return redirect()->route('loginGET');
         } 
 
-        dd($usuario->pluck('USUARIO')->toArray());
-
         // VERIFICA CLINICAS QUE USUÁRIO TEM ACESSO
         if(in_array(1, $clinicas) && in_array(2, $clinicas)) {
             return redirect()->route('selecionar-clinica-get');
