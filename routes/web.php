@@ -279,6 +279,15 @@ Route::middleware([AuthMiddleware::class, CheckClinicaMiddleware::class])
 
     Route::get('buscar-aluno/{matricula}', [PsicologoController::class, 'listAlunos'])->name('listAlunos-Psicologia');
 
+    // PROFESSORES
+    Route::get('criar-professor', function() {
+        return view('psicologia.adm.criar_professor');
+    })->name('psicologia.CriarProfessor');
+
+    Route::get('consultar-professor', function() {
+        return view('psicologia.adm.consultar_professor');
+    })->name('psicologia.COnsult_professor');
+
     // SERVIÇOS
     Route::get('/criar-servico', function () {
         return view('psicologia.adm/criar_servico');

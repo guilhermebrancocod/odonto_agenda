@@ -7,8 +7,20 @@ use Illuminate\Http\Request;
 
 class ProfessorController extends Controller
 {
+    // RETORNA PROFESSORES
     public function getProfessor()
     {
-        return;
+        
+    }
+
+    // CRIA PROFESSOR
+    public function createProfessor(Request $request)
+    {
+        // VALIDA OS DADOS
+        $validatedData = $request->validate([
+            ''
+        ]);
+
+        // CRIA REGISTRO
     }
 }
