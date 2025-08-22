@@ -174,7 +174,7 @@
 
 
 
-        /* BOÃO SUBMETER FORMULÁRIO */
+        /* BOTÃO SUBMETER FORMULÁRIO */
         input[type="submit"] {
             background-color: #2596be;
             color: white;
@@ -198,6 +198,10 @@
             box-shadow: 0 3px 6px rgba(0, 0, 0, 0.1);
         }
 
+        h5 {
+            text-align: center;
+            font-size: 16px;
+        }
 
 
     </style>
@@ -211,7 +215,7 @@
         <!-- LOGO FAESA -->
         <img src="{{ asset('faesa.png') }}" alt="Logo">
 
-        <h5 class="text-center">Acesso Psicólogo</h5>
+        <h5>Acesso Psicólogo</h5>
         
         <form action="{{ route('psicologoLoginPost') }}" method="POST">
             @csrf

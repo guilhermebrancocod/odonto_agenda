@@ -12,13 +12,11 @@ class LoginController extends Controller
         $usuario = session('usuario');
 
         if ($usuario) {
-            $clinicas = collect($usuario)->pluck('ID_CLINICA')->toArray();
+            $clinicas = $usuario->pluck('ID_CLINICA')->toArray();
         } else {
             
             return redirect()->route('loginGET');
         } 
-
-        $clinicas = $usuario->pluck('ID_CLINICA')->toArray();
 
         // VERIFICA CLINICAS QUE USUÁRIO TEM ACESSO
         if(in_array(1, $clinicas) && in_array(2, $clinicas)) {
