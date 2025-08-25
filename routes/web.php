@@ -183,7 +183,7 @@ Route::middleware([AuthMiddleware::class])->group(function () {
 
     Route::get('/login', function () {
         if (session()->has('usuario')) {
-            return redirect()->route('menu_agenda_psicologia');
+            return redirect('/');
         }
         return view('login');
     })->name('loginGET');
@@ -266,27 +266,7 @@ Route::middleware([AuthMiddleware::class, CheckClinicaMiddleware::class])
     Route::put('/agendamento/{id}', [AgendamentoController::class, 'updateAgendamento'])->name('agendamento.update');
     Route::delete('/agendamento/{id}', [AgendamentoController::class, 'deleteAgendamento'])->name('psicologia.agendamento.delete');
 
-    // PSICOLOGOS
-    Route::get('criar-psicologo', function() {
-        return view('psicologia.adm.criar_psicologo');
-    })->name('psicologia.Criar_psicologo');
-
-    Route::post('criar-psicologo', [PsicologoController::class, 'createPsicologo'])->name('psicologia.Criar_psicologoPOST');
-
-    Route::get('consultar-psicologo', function() {
-        return view('psicologia.adm.consultar_psicologo');
-    })->name('psicologia.Consult_psicologo');
-
     Route::get('buscar-aluno/{matricula}', [PsicologoController::class, 'listAlunos'])->name('listAlunos-Psicologia');
-
-    // PROFESSORES
-    Route::get('criar-professor', function() {
-        return view('psicologia.adm.criar_professor');
-    })->name('psicologia.CriarProfessor');
-
-    Route::get('consultar-professor', function() {
-        return view('psicologia.adm.consultar_professor');
-    })->name('psicologia.COnsult_professor');
 
     // SERVIÇOS
     Route::get('/criar-servico', function () {
@@ -330,6 +310,7 @@ Route::middleware([AuthMiddleware::class, CheckClinicaMiddleware::class])
     // BUSCA DE DISCIPLINAS PARA VINCULAR AO SERVIÇO
     Route::get('/disciplinas-psicologia', [DisciplinaController::class, 'getDisciplina']);
 });
+
 
 
 
