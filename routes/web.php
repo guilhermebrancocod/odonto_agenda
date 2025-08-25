@@ -183,7 +183,7 @@ Route::middleware([AuthMiddleware::class])->group(function () {
 
     Route::get('/login', function () {
         if (session()->has('usuario')) {
-            return redirect()->route('menu_agenda_psicologia');
+            return redirect('/');
         }
         return view('login');
     })->name('loginGET');
@@ -330,6 +330,7 @@ Route::middleware([AuthMiddleware::class, CheckClinicaMiddleware::class])
     // BUSCA DE DISCIPLINAS PARA VINCULAR AO SERVIÇO
     Route::get('/disciplinas-psicologia', [DisciplinaController::class, 'getDisciplina']);
 });
+
 
 
 
