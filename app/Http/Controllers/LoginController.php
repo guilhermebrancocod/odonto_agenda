@@ -13,8 +13,7 @@ class LoginController extends Controller
 
         if ($usuario) {
             $clinicas = $usuario->pluck('ID_CLINICA')->toArray();
-        } else {
-            
+        } else {          
             return redirect()->route('loginGET');
         } 
 
