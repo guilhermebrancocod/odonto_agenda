@@ -198,6 +198,11 @@
             box-shadow: 0 3px 6px rgba(0, 0, 0, 0.1);
         }
 
+        h5 {
+            text-align: center;
+            font-size: 16px;
+        }
+
 
 
     </style>
