@@ -92,20 +92,6 @@
     display: block;
     }
 
-    /* Animação da setinha */
-    #togglePsicologos .bi-chevron-down {
-    transition: transform 0.3s ease;
-    }
-    #togglePsicologos.active .bi-chevron-down {
-    transform: rotate(180deg);
-    }
-
-    #toggleProfessores .bi-chevron-down {
-    transition: transform 0.3s ease;
-    }
-    #toggleProfessores.active .bi-chevron-down {
-    transform: rotate(180deg);
-    }
 </style>
 
 
@@ -173,61 +159,6 @@
             </a>
         </li>
 
-        <!-- PSICÓLOGOS -->
-        <li class="list-group-item rounded-1 p-0 overflow-hidden">
-
-        <!-- Botão principal -->
-        <a id="togglePsicologos" 
-            class="link-agendar d-flex align-items-center justify-content-between p-2"
-            href="javascript:void(0)">
-            <span><i class="bi bi-person-workspace me-2"></i> Psicólogos</span>
-            <i class="bi bi-chevron-down small"></i>
-        </a>
-
-        <!-- Submenu -->
-        <div id="submenuPsicologos" class="submenu collapse-custom">
-            <ul class="list-group list-group-flush">
-                <li class="list-group-item p-0 overflow-hidden">
-                    <a href="/psicologia/criar-psicologo" class="link-agendar d-flex align-items-center gap-2 p-2 ps-4">
-                        <i class="bi bi-person-plus"></i> Criar Psicólogo
-                    </a>
-                </li>
-                <li class="list-group-item p-0 overflow-hidden">
-                    <a href="/psicologia/consultar-psicologo" class="link-agendar d-flex align-items-center gap-2 p-2 ps-4">
-                        <i class="bi bi-search"></i> Consultar Psicólogo
-                    </a>
-                </li>
-            </ul>
-        </div>
-        </li>
-
-        <!-- PROFESSORES -->
-        <li class="list-group-item rounded-1 p-0 overflow-hidden">
-
-        <!-- Botão principal -->
-        <a id="toggleProfessores" 
-            class="link-agendar d-flex align-items-center justify-content-between p-2"
-            href="javascript:void(0)">
-            <span><i class="bi bi-person-rolodex me-2"></i> Professores</span>
-            <i class="bi bi-chevron-down small"></i>
-        </a>
-
-        <!-- Submenu -->
-        <div id="submenuProfessores" class="submenu collapse-custom">
-            <ul class="list-group list-group-flush">
-                <li class="list-group-item p-0 overflow-hidden">
-                    <a href="/psicologia/criar-professor" class="link-agendar d-flex align-items-center gap-2 p-2 ps-4">
-                        <i class="bi bi-person-plus"></i> Criar Professor
-                    </a>
-                </li>
-                <li class="list-group-item p-0 overflow-hidden">
-                    <a href="/psicologia/consultar_professor" class="link-agendar d-flex align-items-center gap-2 p-2 ps-4">
-                        <i class="bi bi-search"></i> Consultar Professor
-                    </a>
-                </li>
-            </ul>
-        </div>
-        </li>
 
         <!-- CADASTRAR SERVIÇO -->
         <li class="list-group-item rounded-1 p-0 overflow-hidden ">
