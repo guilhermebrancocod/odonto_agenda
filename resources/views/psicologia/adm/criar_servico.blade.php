@@ -276,6 +276,7 @@
             </table>
         </div>
 
+        {{-- MODAL DE EDIÇÃO DE SERVIÇO --}}
         <div class="modal fade" id="editarServicoModal" tabindex="-1" aria-hidden="true">
             <div class="modal-dialog">
                 <div class="modal-content">
@@ -297,8 +298,11 @@
                             </div>
 
                             <div class="mb-3">
-                                <label class="form-label">Código Interno</label>
-                                <input type="text" id="edit-servico-cod" name="COD_INTERNO_SERVICO_CLINICA" class="form-control"/>
+                                <label class="form-label">Disciplina</label>
+                                    <select name="DISCIPLINA" id="edit-servico-disc" class="form-select form-select-sm">
+                                        <option id="edit-servico-disc-selected"></option>
+                                        <!-- Outras opções serão inseridas dinamicamente -->
+                                    </select>
                             </div>
                             
                             <div class="mb-3">
@@ -396,6 +400,7 @@ document.addEventListener('DOMContentLoaded', () => {
                             <button class="btn btn-sm btn-primary btn-editar"
                                 data-id="${s.ID_SERVICO_CLINICA}"
                                 data-desc="${s.SERVICO_CLINICA_DESC}"
+                                data-disc="${s.DISCIPLINA}"
                                 data-cod="${s.COD_INTERNO_SERVICO_CLINICA}"
                                 data-valor="${s.VALOR_SERVICO ?? 0}"
                                 data-observacao="${s.OBSERVACAO ? s.OBSERVACAO : ''}"
@@ -420,6 +425,7 @@ document.addEventListener('DOMContentLoaded', () => {
                         document.getElementById('edit-permite-simultaneo').checked = (btn.dataset.permite === 'S');
                         document.getElementById('edit-observacao-servico').value = btn.dataset.observacao ?? '';
                         document.getElementById('edit-tempo-recorrencia-meses').value = btn.dataset.tempo ?? '';
+                        document.getElementById('edit-servico-disc').value = btn.dataset.disc ?? '';
                         editarServicoModal.show();
                     });
                 });
@@ -536,6 +542,36 @@ document.getElementById('disciplina-servico').addEventListener('focus', function
 });
 
 </script>
+
+<!-- BUSCA DE DISCIPLINAS PARA VINCULAR AO SERVICO -->
+<script>
+document.getElementById('edit-servico-disc').addEventListener('focus', function () {
+    fetch('/psicologia/disciplinas-psicologia')
+        .then(response => {
+            if (!response.ok) throw new Error('Erro ao buscar disciplinas');
+            return response.json();
+        })
+        .then(disciplinas => {
+            console.log(disciplinas);
+            const select = document.getElementById('edit-servico-disc');
+            select.innerHTML = '<option value="">Selecione uma disciplina</option>';
+            disciplinas.forEach(d => {
+                const option = document.createElement('option');
+                option.value = d.DISCIPLINA;
+                option.textContent = d.DISCIPLINA + " - " + d.NOME;
+                select.appendChild(option);
+            });
+        })
+        .catch(err => {
+            console.error(err);
+            const select = document.getElementById('edit-servico-disc');
+            select.innerHTML = '<option value="">Erro ao carregar disciplinas</option>';
+        });
+});
+
+</script>
+
+
 
 
 </body>
