@@ -517,7 +517,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
 <!-- BUSCA DE DISCIPLINAS PARA VINCULAR AO SERVICO -->
 <script>
-document.getElementById('disciplina-servico').addEventListener('focus', function () {
+document.addEventListener('DOMContentLoaded', function () {
     fetch('/psicologia/disciplinas-psicologia')
         .then(response => {
             if (!response.ok) throw new Error('Erro ao buscar disciplinas');
@@ -545,7 +545,7 @@ document.getElementById('disciplina-servico').addEventListener('focus', function
 
 <!-- BUSCA DE DISCIPLINAS PARA VINCULAR AO SERVICO -->
 <script>
-document.getElementById('edit-servico-disc').addEventListener('focus', function () {
+document.addEventListener('DOMContentLoaded', function () {
     fetch('/psicologia/disciplinas-psicologia')
         .then(response => {
             if (!response.ok) throw new Error('Erro ao buscar disciplinas');
