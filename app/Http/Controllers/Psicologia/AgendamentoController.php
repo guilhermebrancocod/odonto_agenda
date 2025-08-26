@@ -409,14 +409,14 @@ public function getAgendamentosForCalendarPsicologo()
             abort(404, 'Agendamento não encontrado');
         }
 
-        return view('psicologia.agendamento_show', compact('agendamento'));
+        return view('psicologia.adm.agendamento_show', compact('agendamento'));
     }
 
     // RETORNA VIEW DE EDIÇÃO DE AGENDAMENTO - Utiliza Injeção de Dependência
     public function editAgendamento($id, FaesaClinicaAgendamento $agendamentoModel)
     {
         $agendamento = $agendamentoModel->with('paciente', 'servico')->findOrFail($id);
-        return view('psicologia.editar_agendamento', compact('agendamento'));
+        return view('psicologia.adm.editar_agendamento', compact('agendamento'));
     }
 
     // CONTROLLER DE EDIÇÃO DE PACIENTE - Utiliza Injeção de Dependência
