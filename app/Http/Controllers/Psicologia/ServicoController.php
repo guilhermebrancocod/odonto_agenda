@@ -138,6 +138,7 @@ class ServicoController extends Controller
         $validated = $request->validate([
             'SERVICO_CLINICA_DESC' => 'required|string|max:255',
             'COD_INTERNO_SERVICO_CLINICA' => 'nullable|integer|min:0',
+            'DISCIPLINA' => 'nullable|string|max:50',
             'VALOR_SERVICO' => 'nullable',
             'OBSERVACAO' => 'nullable|max:500',
             'TEMPO_RECORRENCIA_MESES' => 'nullable|integer|min:0',
@@ -188,7 +189,6 @@ class ServicoController extends Controller
         if (!isset($validated['PERMITE_ATENDIMENTO_SIMULTANEO'])) {
             $validated['PERMITE_ATENDIMENTO_SIMULTANEO'] = 'N';
         }
-
         $servico->update($validated);
 
         return response()->json(['message' => 'Serviço atualizado com sucesso']);

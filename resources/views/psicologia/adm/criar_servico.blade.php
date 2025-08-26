@@ -446,6 +446,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         const id = document.getElementById('edit-servico-id').value;
         const desc = document.getElementById('edit-servico-desc').value;
+        const disc = document.getElementById('edit-servico-disc').value;
         const cod = document.getElementById('edit-servico-cod').value;
         let valor = document.getElementById('edit-valor-servico').value.trim();
         const observacao = document.getElementById('edit-observacao-servico').value;
@@ -467,6 +468,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 SERVICO_CLINICA_DESC: desc,
                 COD_INTERNO_SERVICO_CLINICA: cod,
                 VALOR_SERVICO: valor,
+                DISCIPLINA: disc,
                 PERMITE_ATENDIMENTO_SIMULTANEO: permiteSimultaneo,
                 OBSERVACAO: observacao,
                 TEMPO_RECORRENCIA_MESES: tempoRecorrencia
