@@ -157,8 +157,6 @@
             user-select: none;
         }
 
-
-
         /* ESQUECEU A SENHA? */
         .forgot-password-link a {
             display: inline-block;
@@ -171,8 +169,6 @@
             color:rgb(6, 91, 128);
             transform: translateX(5px);
         }
-
-
 
         /* BOTÃO SUBMETER FORMULÁRIO */
         input[type="submit"] {
@@ -205,8 +201,6 @@
 
 
     </style>
-
-
 
 <body>
     <div class="container">
