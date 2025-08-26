@@ -31,6 +31,7 @@ class FaesaClinicaAgendamento extends Model
         'CREATED_AT',
         'UPDATED_AT',
         'STATUS_PAG',
+        'ID_PSICOLOGO'
     ];
 
     protected $casts = [

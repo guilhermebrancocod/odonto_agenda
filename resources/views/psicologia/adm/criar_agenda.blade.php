@@ -111,6 +111,12 @@
         max-height: 50px;
         overflow-y: auto;
     }
+
+    .list-psicologo-option {
+        max-width: 700px;
+        max-height: 50px;
+        overflow-y: auto;
+    }
     </style>
 </head>
 <body>
@@ -198,7 +204,7 @@
                                 <i class="fas fa-info-circle"></i>
                             </span>
                         </label>
-                        <input type="text" id="servico" name="servico" class="form-control" autocomplete="off" value="{{ old('servico') }}">
+                        <input type="text" id="servico" name="servico" class="form-control" autocomplete="off" value="{{ old('servico') }}" placeholder="Serviço do Atendimento">
                         
                         <div id="servicos-list" class="list-group position-absolute w-100" style="z-index: 1000;"></div>
                     </div>
@@ -206,7 +212,7 @@
                     <!-- DIA -->
                     <div class="col-sm-6 col-md-3">
                         <label for="data" class="form-label">Dia</label>
-                        <input type="date" id="data" name="dia_agend" class="form-control" value="{{ old('dia_agend') }}">
+                        <input type="date" id="data" name="dia_agend" class="form-control" value="{{ old('dia_agend') }}" placeholder="Dia do Atendimento">
                     </div>
 
                     <!-- HORÁRIO INÍCIO -->
@@ -295,9 +301,18 @@
                     <input type="hidden" name="id_sala_clinica" id="id_sala_clinica">
                     <div class="col-sm-6 col-md-3 mt-2 position-relative">
                         <label for="local_agend" class="form-label">Local</label>
-                        <input type="text" name="local_agend" id="local_agend" class="form-control" placeholder="Local do atendimento" value="{{ old('local_agend') }}" autocomplete="off">
+                        <input type="text" name="local_agend" id="local_agend" class="form-control" placeholder="Local do atendimento" value="{{ old('local_agend') }}">
 
                         <div id="local-list" class="list-group position-absolute w-100" style="z-index: 1000; top: 100%"></div>
+                    </div>
+
+                    <!-- PSICOLOGO -->
+                    <input type="hidden" name="id_psicologo" id="id_psicologo">
+                    <div class="col-md-6 col-md-3 mt-2 position-relative">
+                        <label for="psicologo_agend" class="form-label">Psicologo</label>
+                        <input type="text" name="psicologo_agend" id="psicologo_agend" class="form-control" placeholder="Psicólogo de Atendimento" value="{{ old('id_psicologo') }}" autocomplete="off">
+                        
+                        <div id="psicologo_list" class="list-group position-absolute w-100" style="z-index: 1000; top: 100%"></div>
                     </div>
                         
                     <!-- OBSERVAÇÕES -->
@@ -578,6 +593,11 @@
     function aoSelecionarLocal(local) {
         document.getElementById('local_agend').value = local.DESCRICAO;
         document.getElementById('id_sala_clinica').value = local.ID_SALA_CLINICA;
+    }
+
+    function aoSelecionarPsicologo(psicologo) {
+        document.getElementById('psicologo_agend').value = psicologo.NOME_COMPL;
+        document.getElementById('id_psicologo').value = psicologo.ALUNO;
     }
 </script>
 
@@ -941,6 +961,61 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // Atualiza na carga da página
     window.addEventListener('load', atualizarCamposRecorrencia);
+</script>
+
+<!-- BUSCA PSICOLOGOS PARA VINCULAR AO AGENDAMENTO -->
+<script>
+    psicologoInput = document.getElementById('psicologo_agend');
+    psicologoList = document.getElementById('psicologo_list')
+
+    psicologoInput.addEventListener("input", function() {
+        clearTimeout(timeout);
+
+        timeout = setTimeout(() => {
+            const query = psicologoInput.value.trim();
+
+            if(!query) {
+                psicologoList.innerHTML = '';
+                return;
+            }
+
+            fetch(`/psicologia/listar-psicologos?search=${encodeURIComponent(query)}`)
+            .then(response => response.json())
+            .then(psicologos => {
+                psicologoList.innerHTML = '';
+
+                if(psicologos.length === 0) {
+                    psicologoList.innerHTML = `<button type="button" class="list-group-item list-group-item-action disabled">Nenhum Psicólogo encontrado</button>`;
+                    return;
+                }
+
+                const psicologoExato = psicologos.find(p => p.NOME_COMPL.toLowerCase() === query.toLowerCase());
+
+                if (psicologoExato) {
+                    aoSelecionarPsicologo(psicologoExato);
+                    psicologoList.innerHTML = '';
+                    return;
+                }
+
+                psicologos.forEach(psicologo => {
+                    const item = document.createElement('button');
+                    item.type = 'button';
+                    item.classList.add('list-group-item', 'list-psicologo-option', 'list-group-item-action');
+                    item.textContent = psicologo.NOME_COMPL + ' - ' + psicologo.ALUNO;
+                    item.addEventListener('click', () => {
+                        aoSelecionarPsicologo(psicologo);
+                        psicologoList.innerHTML = '';
+                    });
+                    psicologoList.appendChild(item);
+                });
+            })
+            .catch(error => {
+                console.error(error);
+                psicologoList.innerHTML = `<button type="button" class="list-group-item list-group-item-action disabled text-danger">Erro ao buscar Psicólogos</button>`;
+            });
+
+        }, 300);
+    });
 </script>
 
 </body>

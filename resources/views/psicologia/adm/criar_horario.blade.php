@@ -23,9 +23,9 @@
             font-family: "Montserrat", sans-serif;
             background-color: #f8f9fa;
         }
-        /* Estilo padrão (largura maior ou igual a 992px) */
+        
         #content-wrapper {
-            width: 80vw;
+            width: 83vw;
             height: 90vh;
             margin: auto;
             margin-top: 10px;
@@ -34,7 +34,7 @@
             gap: 12px;
             overflow: hidden;
             align-items: stretch;
-            flex-direction: row; /* mantém lado a lado em telas grandes */
+            flex-direction: row;
         }
 
         main {

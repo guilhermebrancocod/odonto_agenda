@@ -8,6 +8,7 @@ use App\Models\FaesaClinicaAgendamento;
 use App\Models\FaesaClinicaServico;
 use App\Models\FaesaClinicaHorario;
 use App\Http\Controllers\Psicologia\PacienteController;
+use App\Models\FaesaClinicaPsicologo;
 use App\Models\FaesaClinicaSala;
 use App\Services\Psicologia\PacienteService;
 use App\Services\Psicologia\AgendamentoService;
@@ -172,6 +173,7 @@ public function getAgendamentosForCalendarPsicologo()
             'duracao_meses_recorrencia' => 'nullable|integer|min:1|max:12',
             'local_agend' => 'nullable|string|max:255',
             'id_sala_clinica' => 'nullable|integer|exists:faesa_clinica_sala,ID_SALA_CLINICA',
+            'id_psicologo' => 'nullable|integer',
         ], [
             'paciente_id.required' => 'A seleção de paciente é obrigatória.',
             'id_servico.required' => 'A seleção de serviço obrigatória.',
@@ -187,6 +189,7 @@ public function getAgendamentosForCalendarPsicologo()
             'observacoes.string' => 'As observações devem ser um texto.',
             'status_agend.required' => 'O status do agendamento é obrigatório.',
             'id_agend_remarcado.integer' => 'A identificação do agendamento remarcado deve ser um número inteiro.',
+            'id_psicologo.integer' => 'A identificação do Psicólogo deve ser o número de matrícula',
         ]);
 
         $valorAgend = $request->valor_agend ? str_replace(',', '.', $request->valor_agend) : null;
@@ -232,6 +235,7 @@ public function getAgendamentosForCalendarPsicologo()
                         'OBSERVACOES' => $request->observacoes,
                         'ID_SALA_CLINICA' => $request->id_sala_clinica ?? null,
                         'LOCAL' => $request->local_agend ?? null,
+                        'ID_PSICOLOGO' => $request->id_psicologo ?? null,
                     ]);
                 }
             } else {
@@ -259,6 +263,7 @@ public function getAgendamentosForCalendarPsicologo()
                             'OBSERVACOES' => $request->observacoes,
                             'ID_SALA_CLINICA' => $request->id_sala_clinica ?? null,
                             'LOCAL' => $request->local_agend ?? null,
+                            'ID_PSICOLOGO' => $request->id_psicologo ?? null,
                         ]);
                     }
                 }
@@ -318,6 +323,7 @@ public function getAgendamentosForCalendarPsicologo()
                     'OBSERVACOES' => $request->observacoes,
                     'ID_SALA_CLINICA' => $request->id_sala_clinica ?? null,
                     'LOCAL' => $request->local_agend ?? null,
+                    'ID_PSICOLOGO' => $request->id_psicologo ?? null,
                 ]);
             }
 
@@ -359,6 +365,7 @@ public function getAgendamentosForCalendarPsicologo()
             'OBSERVACOES' => $request->observacoes,
             'ID_SALA_CLINICA' => $request->id_sala_clinica ?? null,
             'LOCAL' => $request->local_agend ?? null,
+            'ID_PSICOLOGO' => $request->id_psicologo ?? null,
         ];
 
         if (!$this->salaEstaAtiva($request->local_agend)) {
@@ -386,7 +393,6 @@ public function getAgendamentosForCalendarPsicologo()
         return redirect('/psicologia/criar-agendamento/')
             ->with('success', 'Agendamento criado com sucesso!');
     }
-
 
     // MOSTRA AGENDAMENTOS - Utiliza Injeção de Dependência
     public function showAgendamento($id, FaesaClinicaAgendamento $agendamentoModel)
@@ -572,7 +578,7 @@ public function getAgendamentosForCalendarPsicologo()
     }
 
     // VERIFICA CONFLITO DE AGENDAMENTO
-    private function existeConflitoAgendamento($idClinica, $local, $dataAgend, $hrIni, $hrFim, $idPaciente, $idAgendamentoAtual = null)
+    private function existeConflitoAgendamento($idClinica, $local, $dataAgend, $hrIni, $hrFim, $idPaciente, $idAgendamentoAtual = null, $idPsicologo = null)
     {
         $dataAgend = Carbon::parse($dataAgend)->format('Y-m-d');
         $hrIni = Carbon::parse($hrIni)->format('H:i:s');
@@ -588,8 +594,16 @@ public function getAgendamentosForCalendarPsicologo()
                 $q->where('LOCAL', $local)
                 ->orWhere('ID_PACIENTE', $idPaciente);
             })
+           ->where(function($q) use ($hrIni, $hrFim, $idPsicologo) {
+                if ($idPsicologo) {
+                    $q->where('HR_AGEND_INI', '<', $hrFim)
+                    ->where('HR_AGEND_FIN', '>', $hrIni)
+                    ->where('ID_PSICOLOGO', $idPsicologo);
+                }
+            })
             ->where('STATUS_AGEND', '<>', 'Excluido')
             ->where('STATUS_AGEND', '<>', 'Remarcado');
+            
 
         if ($idAgendamentoAtual) {
             $query->where('ID_AGENDAMENTO', '<>', $idAgendamentoAtual);
@@ -646,8 +660,6 @@ public function getAgendamentosForCalendarPsicologo()
 
         return true; // Nenhuma sala inativa bate com a descrição
     }
-
-
     private function horarioEstaDisponivel($idClinica, $dataAgendamento, $horaInicio, $horaFim)
     {
         $data = Carbon::parse($dataAgendamento)->format('Y-m-d');

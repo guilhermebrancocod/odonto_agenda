@@ -313,6 +313,8 @@ Route::middleware([AuthMiddleware::class, CheckClinicaMiddleware::class])
 
     // BUSCA DE DISCIPLINAS PARA VINCULAR AO SERVIÇO
     Route::get('/disciplinas-psicologia', [DisciplinaController::class, 'getDisciplina']);
+
+    Route::get('/listar-psicologos', [PsicologoController::class, 'listAlunos']);
 });
 
 
@@ -344,7 +346,7 @@ Route::middleware([AuthMiddleware::class])->group(function () {
     Route::get('/psicologo/agendamentos-calendar', [AgendamentoController::class, 'getAgendamentosForCalendarPsicologo']);
 });
 Route::get('/psicologo/logout', function() {
-    session()->flush();
+    session()->forget('psicologo');
     return redirect()->route('psicologoLoginGet');
 })->name('psicologoLogout');
 
