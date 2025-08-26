@@ -21,7 +21,7 @@
             background-color: #f8f9fa;
         }
         #content-wrapper {
-            width: 80vw;
+            width: 83vw;
             height: 90vh;
             margin: auto;
             margin-top: 10px;
