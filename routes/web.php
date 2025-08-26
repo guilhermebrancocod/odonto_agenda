@@ -179,6 +179,14 @@ Route::get('/', function () {
     return view('login');
 })->name('loginGET');
 
+Route::get('/selecionar-clinica', function () {
+    if(session()->has('usuario')) {
+        return view('selecionar_clinica');
+    } else {
+        return redirect()->route('loginGET');
+    }
+})->name('selecionar-clinica-get');
+
 Route::middleware([AuthMiddleware::class])->group(function () {
 
     Route::get('/login', function () {
@@ -191,10 +199,6 @@ Route::middleware([AuthMiddleware::class])->group(function () {
     Route::post('/login', [LoginController::class, 'login'])->name('loginPOST');
 
     Route::get('/logout', [LoginController::class, 'logout'])->name('logout');
-
-    Route::get('/selecionar-clinica', function () {
-        return view('selecionar_clinica');
-    })->name('selecionar-clinica-get');
 
     Route::post('/selecionar-clinica', [ClinicaController::class, 'selecionarClinica'])->name('selecionar-clinica-post');
 });
@@ -261,7 +265,7 @@ Route::middleware([AuthMiddleware::class, CheckClinicaMiddleware::class])
     Route::get('/get-agendamento', [AgendamentoController::class, 'getAgendamento']);
     Route::get('/agendamentos/paciente/{id}', [AgendamentoController::class, 'getAgendamentosByPaciente']);
     Route::get('/agendamento/{id}', [AgendamentoController::class, 'showAgendamento'])->name('agendamento.show');
-    Route::get('/agendamentos-calendar', [AgendamentoController::class, 'getAgendamentosForCalendar']);
+    Route::get('/agendamentos-calendar/adm', [AgendamentoController::class, 'getAgendamentosForCalendar']);
     Route::get('/agendamento/{id}/editar', [AgendamentoController::class, 'editAgendamento'])->name('agendamento.edit');
     Route::put('/agendamento/{id}', [AgendamentoController::class, 'updateAgendamento'])->name('agendamento.update');
     Route::delete('/agendamento/{id}', [AgendamentoController::class, 'deleteAgendamento'])->name('psicologia.agendamento.delete');
@@ -323,29 +327,27 @@ Route::get('/psicologo/login', function() {
     }
 })->name('psicologoLoginGet');
 
-Route::post('/psicologo/login', function() {
+Route::get('/psicologo', function() {
     if(session()->has('psicologo')) {
-        return redirect()->route('psicologoAgenda');
+        return view(view: 'psicologia.psicologo.menu_agenda');
+    } else {
+        return redirect()->route('psicologoLoginGet');
     }
-})->name('psicologoLoginPost');
+})->name('psicologoAgenda');
 
 Route::middleware([AuthMiddleware::class])->group(function () {
-
-    Route::get('/psicologo', function() {
-        return view('psicologia.psicologo.menu_agenda');
-    })->name('psicologoAgenda');
-
     Route::post('/psicologo/login', function() {
         return redirect()->route('psicologoAgenda');
+        // return view('psicologia.psicologo.menu_agenda');
     })->name('psicologoLoginPost');
 
     Route::get('/psicologo/agendamentos-calendar', [AgendamentoController::class, 'getAgendamentosForCalendarPsicologo']);
-
-    Route::get('/psicologo/logout', function() {
-        session()->flush();
-        return redirect()->route('psicologoLoginGet');
-    })->name('psicologoLogout');
 });
+Route::get('/psicologo/logout', function() {
+    session()->flush();
+    return redirect()->route('psicologoLoginGet');
+})->name('psicologoLogout');
+
 
 
 

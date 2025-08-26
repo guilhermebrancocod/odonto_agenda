@@ -33,13 +33,16 @@ class AuthMiddleware
             return $next($request);
         }
 
-        //dd(session()->all());
-        if(session()->has('usuario')){
-            return $next($request);
-        };
+        if(session()->has('usuario')) {
+            if($routeName === 'psicologoLoginPost') {
+                session()->forget('usuario');
+            } else {
+                return $next($request);
+            }
+        }
 
         // AUTENTICAÇÃO VIA POST
-        if( ($routeName === 'loginPOST') ||  ($routeName === 'psicologoLoginPost') || ($routeName === 'professorLoginPost')) {
+        if( ($routeName === 'loginPOST') || ($routeName === 'psicologoLoginPost') || ($routeName === 'professorLoginPost')) {
 
             // ARMAZENA CREDENCIAIS
             $credentials = [
@@ -53,12 +56,11 @@ class AuthMiddleware
             : $this->apiAdm($credentials);
 
             if($response['success']) {
-
                 if($routeName === 'psicologoLoginPost') {
                     $validacao = $this->validarPsicologo($credentials);
                     if (!$validacao) {
                         return redirect()->back()->with('error', 'Credenciais inválidas');
-                    }   
+                    }
                     session(['psicologo' => $validacao]);
                     return $next($request);                  
                 } else if ($routeName === 'professorLoginPost') {
@@ -66,7 +68,7 @@ class AuthMiddleware
                     if (!$validacao) {
                         return redirect()->back()->with('error', 'Credenciais inválidas');
                     }   
-                    session(['psicologo' => $validacao]);
+                    session(['professor' => $validacao]);
                     return $next($request);
                 } else {
                     $validacao = $this->validarADM($credentials);
@@ -75,14 +77,12 @@ class AuthMiddleware
                     }
                     session(['usuario' => $validacao]);
                     return $next($request);
-                }
-
-                
+                }                
             } else {
-                return redirect()->to('/login')->withErrors(['login' => 'Credenciais Inválidas']);
+                return redirect()->back()->withErrors(['login' => 'Credenciais Inválidas']);
             }
         } else {
-            return redirect()->route('loginGET')->withErrors(['auth' => 'Acesso não autorizado']);
+            return redirect()->back()->withErrors(['login' => 'Credenciais Inválidas']);
         }
     }
 
@@ -122,7 +122,6 @@ class AuthMiddleware
             
         }
     }
-
 
     // USUÁRIO ADM
     public function apiAdm(array $credentials): array
@@ -263,13 +262,7 @@ class AuthMiddleware
 
         $usuarioADM = FaesaClinicaUsuario::where('ID_USUARIO_CLINICA', $usuario)->where('SIT_USUARIO', 'Ativo')->get();
 
-        if(count($usuarioADM) > 1) {
-            return $usuarioADM;
-        } else if(!$usuarioADM) {
-            return null;
-        } else {
-            return $usuarioADM;
-        }
+        return $usuarioADM->isNotEmpty() ? $usuarioADM : null;
     }
 
     public function buscarDisciplinasClinica()

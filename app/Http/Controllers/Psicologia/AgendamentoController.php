@@ -81,14 +81,14 @@ class AgendamentoController extends Controller
         return response()->json($events);
     }
 
-    public function getAgendamentosForCalendarPsicologo()
+public function getAgendamentosForCalendarPsicologo()
     {
         $psicologo = session('psicologo');
         $agendamentos = FaesaClinicaAgendamento::with('paciente', 'servico')
         ->where('ID_CLINICA', 1)
         ->where('STATUS_AGEND', '<>', 'Excluido')
         ->where('STATUS_AGEND', '<>', 'Remarcado')
-        ->where('ID_PSICOLOGO', $psicologo->ID ?? $psicologo['ID'])
+        ->where('ID_PSICOLOGO', $psicologo[1] ?? null)
         ->get();
         
         $events = $agendamentos
@@ -126,7 +126,6 @@ class AgendamentoController extends Controller
                 'local' => $agendamento->LOCAL ?? 'Não informado',
             ];
         });
-
         return response()->json($events);
     }
 
