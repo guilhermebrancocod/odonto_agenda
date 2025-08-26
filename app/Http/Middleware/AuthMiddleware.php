@@ -7,6 +7,8 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Http;
 use App\Models\FaesaClinicaUsuario;
 use App\Models\FaesaClinicaUsuarioGeral;
+use Illuminate\Support\Facades\DB;
+use stdClass;
 
 class AuthMiddleware
 {
@@ -22,23 +24,23 @@ class AuthMiddleware
         // CASO A ROTA QUE O USUÁRIO TENTA ACESSAR SEJA ALGUMA DESSAS, ELE PERMITE SEGUIR ADIANTE
         if(in_array($routeName, [
             'loginGET',
+            'logout',
             'psicologoLoginGet',
             'professorLoginGet',
-            'logout',
             'psicologoLogout',
             'professorLogout',
-            ]))
-            {
+        ])){
             return $next($request);
         }
 
+        //dd(session()->all());
+        if(session()->has('usuario')){
+            return $next($request);
+        };
+
         // AUTENTICAÇÃO VIA POST
-        if( ($routeName === 'loginPOST')
-            ||
-            ($routeName === 'psicologoLoginPost')
-            ||
-            ($routeName === 'professorLoginPost')
-            ) {
+        if( ($routeName === 'loginPOST') ||  ($routeName === 'psicologoLoginPost') || ($routeName === 'professorLoginPost')) {
+
             // ARMAZENA CREDENCIAIS
             $credentials = [
                 'username' => $request->input('login'),
@@ -46,100 +48,50 @@ class AuthMiddleware
             ];
 
             // DEPENDENDO DA ROTA, CHAMA UMA API DIFERENTE PARA AUTENTICAÇÃO
-            $response = $routeName === 'psicologoLoginPost'
-            ? $this->getApiDataPsicologo($credentials)
-            : $this->getApiData($credentials);
+            $response = ($routeName === 'psicologoLoginPost' || $routeName === 'professorLoginPost')
+            ? $this->apiData($credentials)
+            : $this->apiAdm($credentials);
 
             if($response['success']) {
 
-                // VALIDA USUÁRIO NO BANCO DE DADOS
-                $validacao = $this->validarUsuario($credentials);
-
-                if ($validacao->is_null) {
-
-                    return redirect()->back()->with('error', "Usuário Inativo");
-                    
+                if($routeName === 'psicologoLoginPost') {
+                    $validacao = $this->validarPsicologo($credentials);
+                    if (!$validacao) {
+                        return redirect()->back()->with('error', 'Credenciais inválidas');
+                    }   
+                    session(['psicologo' => $validacao]);
+                    return $next($request);                  
+                } else if ($routeName === 'professorLoginPost') {
+                    $validacao = $this->validarProfessor($credentials);
+                    if (!$validacao) {
+                        return redirect()->back()->with('error', 'Credenciais inválidas');
+                    }   
+                    session(['psicologo' => $validacao]);
+                    return $next($request);
                 } else {
-                    
-                    if($routeName === "psicologoLoginPost") {
-                        
-                        if($validacao->TIPO === "Psicologo") {
-
-                            session(['psicologo' => $validacao]);
-                            
-                        } else {
-
-                            return redirect()->back()->with('error','Usuário deve ser Psicólogo');
-                        }
-
-                    } else if ($routeName === "professorLoginPost") {
-
-                        if($validacao->first()->TIPO === "Professor") {
-
-                            session(['professor' => $validacao]);
-
-                        } else {
-
-                            return redirect()->back()->with('error', 'Usuário deve ser Professor');
-
-                        }
-
-                    } else if ($routeName === "recepcaoMenu") {
-
-                        if($validacao->TIPO === "Recepcao") {
-
-                            session(['recepcao' => $validacao]);
-
-                        } else {
-
-                            return redirect()->back()->with('error', 'Usuário deve ser Recepcionista');
-
-                        }
-
-                    } else {
-
-                        session(['usuario' => $validacao]);
-
+                    $validacao = $this->validarADM($credentials);
+                    if (!$validacao) {
+                        return redirect()->back()->with('error', 'Credenciais inválidas');
                     }
-
+                    session(['usuario' => $validacao]);
                     return $next($request);
                 }
+
                 
             } else {
-                session()->flush();
-                return redirect()->back()->with('error', "Credenciais Inválidas");
+                return redirect()->to('/login')->withErrors(['login' => 'Credenciais Inválidas']);
             }
+        } else {
+            return redirect()->route('loginGET')->withErrors(['auth' => 'Acesso não autorizado']);
         }
-
-        if ( 
-                ( !session()->has('usuario') )
-            && ( !session()->has('psicologo') )
-            && ( !session()->has('professor') )
-        ) {
-
-            if (str_starts_with($routeName,
-            'psicologo')) {
-
-                return redirect()->route('psicologoLoginGet');
-
-            } else if (str_starts_with($routeName,
-            'professor')) {
-
-                return redirect()->route('professorLoginGet');
-
-            } else {
-
-                return redirect()->route('loginGET');
-            }
-        }
-        return $next($request);
     }
 
-    public function getApiData(array $credentials): array
+    // ALUNO E PROFESSOR
+    public function apiData(array $credentials): array
     {
         // CREDENCIAIS DA API
-        $apiUrl = config('services.faesa.api_url');
-        $apiKey = config('services.faesa.api_key');
+        $apiUrl = config('services.faesa.api_psicologos_url');
+        $apiKey = config('services.faesa.api_psicologos_key');
 
         try {
             $response = Http::withHeaders([
@@ -163,7 +115,6 @@ class AuthMiddleware
             }
             
         } catch (\Exception $e) {
-            
             return [
                 'success' => false,
                 'message' => $e->getMessage()
@@ -172,10 +123,12 @@ class AuthMiddleware
         }
     }
 
-    public function getApiDataPsicologo(array $credentials): array
+
+    // USUÁRIO ADM
+    public function apiAdm(array $credentials): array
     {
-        $apiUrl = config('services.faesa.api_psicologos_url');
-        $apiKey = config('services.faesa.api_psicologos_key');
+        $apiUrl = config('services.faesa.api_url');
+        $apiKey = config('services.faesa.api_key');
         
         try {
             $response = Http::withHeaders([
@@ -203,13 +156,126 @@ class AuthMiddleware
         }
     }
 
-    // VALIDA USUÁRIO NO BANCO DE DADOS
-    public function validarUsuario(array $credentials): FaesaClinicaUsuarioGeral
+    public function validarPsicologo(array $credentials)
     {
-        $username = $credentials['username'];
-        $usuario = FaesaClinicaUsuarioGeral::where('USUARIO', $username)
-        ->where('STATUS', '=', 'Ativo')
+        $usuario = $credentials['username'];
+        $retorno[0] = $usuario;
+
+        // BUSCA CPF DO USUÁRIO COM CÓD. DE USUÁRIO
+        $cpf = DB::table('LYCEUM_BKP_PRODUCAO.dbo.LY_PESSOA as p')
+        ->where('p.WINUSUARIO', 'FAESA\\' . $usuario)
+        ->value('CPF');
+
+        // VERIFICA SE É ALUNO
+        $aluno = DB::table('LYCEUM_BKP_PRODUCAO.dbo.LY_ALUNO as a')
+        ->join('LYCEUM_BKP_PRODUCAO.dbo.LY_PESSOA as p', 'p.NOME_COMPL', '=', 'a.NOME_COMPL')
+        ->where('p.CPF', $cpf)
+        ->where('a.SIT_ALUNO', 'Ativo')
+        ->select('a.ALUNO', 'p.NOME_COMPL', 'p.E_MAIL_COM', 'p.CELULAR')
         ->first();
-        return $usuario;
+
+        if($aluno) {
+            $disciplinas = ['D009373', 'D009376', 'D009381', 'D009385', 'D009393', 'D009403', 'D009402', 'D009406', 'D009404'];
+            // $disciplinas = $this->buscarDisciplinasClinica();
+            $matricula = DB::table('LYCEUM_BKP_PRODUCAO.dbo.LY_MATRICULA as m')
+            ->where('m.ALUNO', $aluno->ALUNO)
+            ->whereIn('m.DISCIPLINA', $disciplinas)
+            ->get();
+
+            if(!$matricula->isEmpty()) {
+
+                $retorno[] = $aluno->ALUNO;
+                $retorno[] = $aluno->NOME_COMPL;
+                $retorno[] = $aluno->E_MAIL_COM;
+                $retorno[] = $aluno->CELULAR;
+
+                $retorno[] = ($matricula->map(function($item) {
+                    return [
+                        'DISCIPLINA' => $item->DISCIPLINA,
+                        'TURMA' => $item->TURMA,
+                    ];
+                }))->toArray();
+
+                return $retorno;
+            } else {
+                return null;
+            }
+        } else {
+            return null;
+        }
+    }
+
+    public function validarProfessor(array $credentials)
+    {
+        $usuario = $credentials['username'];
+        $retorno[0] = $usuario;
+
+        $anoSemestreLetivo = DB::table('LYCEUM_BKP_PRODUCAO.dbo.LY_OPCOES as o')
+        ->where('o.CHAVE', 4)
+        ->select('o.ANO_LETIVO', 'o.SEM_LETIVO')
+        ->first();
+
+        // BUSCA CPF DO USUÁRIO COM CÓD. DE USUÁRIO
+        $cpf = DB::table('LYCEUM_BKP_PRODUCAO.dbo.LY_PESSOA as p')
+        ->where('p.WINUSUARIO', 'FAESA\\' . $usuario)
+        ->value('CPF');
+
+        $docente = DB::table('LYCEUM_BKP_PRODUCAO.dbo.LY_DOCENTE as d')
+        ->where('d.CPF', $cpf)
+        ->first();
+
+        if($docente) {
+            // $disciplinas = $this->buscarDisciplinasClinica();
+            $disciplinas = ['D009373', 'D009376', 'D009381', 'D009385', 'D009393', 'D009403', 'D009402', 'D009406', 'D009404'];
+            $vinculos = DB::table('LYCEUM_BKP_PRODUCAO.dbo.LY_TURMA as t')
+            ->where('t.NUM_FUNC', $docente->NUM_FUNC)
+            ->whereIn('t.DISCIPLINA', $disciplinas)
+            ->where('t.ANO', $anoSemestreLetivo->ANO_LETIVO)
+            ->where('t.SEMESTRE', $anoSemestreLetivo->SEM_LETIVO)
+            ->get();
+
+
+            if(!$vinculos->isEmpty()) {
+                $retorno[] = $docente->NUM_FUNC;
+                $retorno[] = $docente->NOME_COMPL;
+                $retorno[] = $docente->CPF;
+
+                $retorno[] = ($vinculos->map(function($item) {
+                    return [
+                        'DISCIPLINA' => $item->DISCIPLINA,
+                        'TURMA' => $item->TURMA,
+                    ];
+                }))->toArray();
+
+                return $retorno;
+            } else {
+                return null;
+            }
+
+        } else {
+            return null;
+        }
+    }
+
+    public function validarADM(array $credentials)
+    {
+        $usuario = $credentials['username'];
+
+        $usuarioADM = FaesaClinicaUsuario::where('ID_USUARIO_CLINICA', $usuario)->where('SIT_USUARIO', 'Ativo')->get();
+
+        if(count($usuarioADM) > 1) {
+            return $usuarioADM;
+        } else if(!$usuarioADM) {
+            return null;
+        } else {
+            return $usuarioADM;
+        }
+    }
+
+    public function buscarDisciplinasClinica()
+    {
+        $disciplinas = DB::table('LYCEUM_BKP_PRODUCAO.dbo.LY_TURMA as t')
+        ->where('t.FL_FIELD_17', 'CLINICA')->get();
+        return $disciplinas->toArray();
     }
 }
