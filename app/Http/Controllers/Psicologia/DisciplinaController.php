@@ -17,7 +17,7 @@ class DisciplinaController extends Controller
 
         $disciplinas = DB::table('LYCEUM_BKP_PRODUCAO.dbo.LY_TURMA as t')
             ->join('LYCEUM_BKP_PRODUCAO.dbo.LY_DISCIPLINA as d', 'd.DISCIPLINA', 't.DISCIPLINA')
-            //->where('t.FL_FIELD_17', 'CLINICA')
+            ->where('t.FL_FIELD_17', 'CLINICA')
             ->where('t.ANO', $anoSemestre->ANO_LETIVO)
             ->where('t.SEMESTRE', $anoSemestre->SEM_LETIVO)
             ->select('d.DISCIPLINA', 'd.NOME')
