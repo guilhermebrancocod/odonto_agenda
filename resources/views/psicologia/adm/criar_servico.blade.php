@@ -293,7 +293,7 @@
                             </div>
                             <div class="mb-3">
                                 <label class="form-label">Código Interno</label>
-                                <input type="text" id="edit-servico-cod" name="COD_INTERNO_SERVICO_CLINICA" class="form-control"/>
+                                <input type="number" id="edit-servico-cod" name="COD_INTERNO_SERVICO_CLINICA" class="form-control"/>
                             </div>
 
                             <div class="mb-3" id="edit-disciplina-container">
@@ -686,6 +686,21 @@ document.addEventListener('DOMContentLoaded', () => {
             this.value = parts[0] + ',' + parts[1];
         }
     });
+</script>
+
+{{-- CONTROLA INPUT DE VALOR PARA PERMITIR APENAS NÚMERO E VÍRGULA --}}
+<script>
+    const editValorServicoInput = document.getElementById('edit-valor-servico');
+
+    editValorServicoInput.addEventListener('input', function() {
+        this.value = this.value.replace(/[^\d,]/g, '');
+
+        // Permitir apenas uma vírgula
+        const parts = this.value.split(',');
+        if (parts.length > 2) {
+            this.value = parts[0] + ',' + parts[1];
+        }
+    })
 </script>
 
 </body>
