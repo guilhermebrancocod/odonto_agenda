@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Psicologia;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\FaesaClinicaServico;
+use Illuminate\Support\Facades\DB;
 
 class ServicoController extends Controller
 {
@@ -89,6 +90,11 @@ class ServicoController extends Controller
 
         return response()->json($servicos);
     }
+
+    public function getDisciplinaServico(Request $request)
+    {
+        dd($request);
+    } 
 
     // RETORNA SERVIÇO PELO NOME
     public function getServicoByName(string|null $request)
@@ -203,7 +209,7 @@ class ServicoController extends Controller
             return response()->json(['message' => 'Serviço não encontrado.'], 404);
         }
 
-        $temAgendamentos = \DB::table('FAESA_CLINICA_AGENDAMENTO')
+        $temAgendamentos = DB::table('FAESA_CLINICA_AGENDAMENTO')
             ->where('ID_SERVICO', $id)
             ->exists();
 
