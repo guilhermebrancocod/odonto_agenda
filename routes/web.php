@@ -345,6 +345,8 @@ Route::middleware([AuthPsicologoMiddleware::class])->group(function () {
 
     Route::get('/psicologo/agendamentos-calendar', [AgendamentoController::class, 'getAgendamentosForCalendarPsicologo']);
 
+    Route::get('/psicologo/consultar-paciente/buscar', [PacienteController::class, 'getPaciente'])->name('psicologoGetPaciente');
+
     Route::get('/psicologo/criar-agendamento', function() {
         return view('psicologia.psicologo.criar_agenda');
     })->name('psicologoCriarAgenda-Get');

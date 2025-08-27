@@ -21,7 +21,6 @@ class PacienteController extends Controller
     // CRIA PACIENTE
     public function createPaciente(Request $request)
     {
-
         $validatedData = $request->validate([
             'NOME_COMPL_PACIENTE' => 'required|string|max:255',
             'DT_NASC_PACIENTE' => 'nullable|date',
