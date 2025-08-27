@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+ <!DOCTYPE html>
 <html lang="pt-br">
 
 <head>
@@ -203,7 +203,7 @@
                 <label for="cod-interno-servico" class="form-label text-muted" style="font-size: 14px;">
                     Código Interno do Serviço
                 </label>
-                <input type="text"
+                <input type="number"
                        id="cod-interno-servico"
                        name="COD_INTERNO_SERVICO_CLINICA"
                        class="form-control"
@@ -341,6 +341,17 @@
 
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/mdb-ui-kit/7.1.0/mdb.min.js"></script>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const form = document.getElementById('form-criar-servico');
+        form.addEventListener('keydown', function(e) {
+            if(e.key === 'Enter') {
+                e.preventDefault();
+            }
+        })
+    });
+</script>
 
 <script>
     function showAlert(message, type = 'success') {
@@ -661,5 +672,21 @@ document.addEventListener('DOMContentLoaded', () => {
         editSelect.size = 1;
     });
 </script>
+
+{{-- CONTROLA INPUT DE VALOR PARA PERMITIR APENAS NÚMERO E VÍRGULA --}}
+<script>
+    const valorServicoInput = document.getElementById('valor-servico');
+
+    valorServicoInput.addEventListener('input', function () {
+        this.value = this.value.replace(/[^\d,]/g, '');
+
+        // Permitir apenas uma vírgula
+        const parts = this.value.split(',');
+        if (parts.length > 2) {
+            this.value = parts[0] + ',' + parts[1];
+        }
+    });
+</script>
+
 </body>
 </html>
