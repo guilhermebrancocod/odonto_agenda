@@ -17,6 +17,7 @@ use App\Http\Controllers\Psicologia\PsicologoController;
 use App\Models\FaesaClinicaServico;
 use App\Models\FaesaClinicaPaciente;
 use App\Http\Middleware\AuthMiddleware;
+use App\Http\Middleware\AuthProfessorMiddleware;
 use App\Http\Middleware\CheckClinicaMiddleware;
 use App\Http\Middleware\AuthPsicologoMiddleware;
 
@@ -377,7 +378,7 @@ Route::post('/professor/login', function() {
     }
 })->name('professorLoginPost');
 
-Route::middleware([AuthMiddleware::class])->group( function() {
+Route::middleware([AuthProfessorMiddleware::class])->group( function() {
 
     Route::match(['get', 'post'], '/professor', function() {
         return view('psicologia.professor.menu_agenda');

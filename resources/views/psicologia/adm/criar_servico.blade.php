@@ -296,7 +296,7 @@
                                 <input type="text" id="edit-servico-cod" name="COD_INTERNO_SERVICO_CLINICA" class="form-control"/>
                             </div>
 
-                            <div class="mb-3">
+                            <div class="mb-3" id="disciplina-edit-container">
                                 <label class="form-label">Disciplina</label>
                                     <select name="DISCIPLINA" id="edit-servico-disc" class="form-select form-select-sm">
                                         <option id="edit-servico-disc-selected"></option>
@@ -588,5 +588,79 @@ document.addEventListener('DOMContentLoaded', () => {
         select.size = 1;
     });
 </script>
+
+<!-- BUSCA DE DISCIPLINAS PARA VINCULAR AO SERVICO -->
+<script>
+    const select = document.getElementById('edit-servico-disc');
+    const container = document.getElementById('disciplina-edit-container');
+
+    let disciplinasCarregadas = false;
+    let searchBox = document.getElementById('search-disciplina');
+
+    // Cria o searchBox apenas uma vez
+    if (!searchBox) {
+        searchBox = document.createElement('input');
+        searchBox.type = 'search';
+        searchBox.placeholder = 'Pesquise pela Disciplina';
+        searchBox.classList.add('form-control', 'mb-2');
+        searchBox.id = 'search-disciplina';
+
+        container.insertBefore(searchBox, select);
+
+        // Filtra opções em tempo real
+        searchBox.addEventListener('input', function() {
+            const termo = this.value.toLowerCase();
+            Array.from(select.options).forEach(opt => {
+                if (opt.value === "") return;
+                opt.style.display = opt.textContent.toLowerCase().includes(termo) ? '' : 'none';
+            });
+        });
+
+        // Enter foca no select
+        searchBox.addEventListener('keydown', function(e) {
+            if (e.key === 'Enter') {
+
+                // Informa ao User Agent que a ação padrão não será realizada
+                e.preventDefault();
+
+                select.focus();
+                // opcional: abre as opções como um "dropdown"
+                select.size = select.options.length; 
+            }
+        });
+    }
+
+    // Carrega disciplinas apenas uma vez
+    if (!disciplinasCarregadas) {
+        fetch('/psicologia/disciplinas-psicologia')
+            .then(response => {
+                if (!response.ok) throw new Error('Erro ao buscar disciplinas');
+                return response.json();
+            })
+            .then(disciplinas => {
+                select.innerHTML = '<option value=""></option>';
+                disciplinas.forEach(d => {
+                    const option = document.createElement('option');
+                    option.value = d.DISCIPLINA;
+                    option.textContent = d.DISCIPLINA + " - " + d.NOME;
+                    select.appendChild(option);
+                });
+                disciplinasCarregadas = true;
+            })
+            .catch(err => {
+                console.error(err);
+                select.innerHTML = '<option value="">Erro ao carregar disciplinas</option>';
+            });
+    }
+
+    // Inicialmente foca no searchBox
+    searchBox.focus();
+
+    // Quando o usuário seleciona uma opção, fecha o "dropdown"
+    select.addEventListener('change', function() {
+        select.size = 1;
+    });
+</script>
+
 </body>
 </html>
