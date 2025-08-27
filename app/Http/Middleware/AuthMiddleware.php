@@ -6,9 +6,7 @@ use Closure;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Http;
 use App\Models\FaesaClinicaUsuario;
-use App\Models\FaesaClinicaUsuarioGeral;
 use Illuminate\Support\Facades\DB;
-use stdClass;
 
 class AuthMiddleware
 {
@@ -42,7 +40,7 @@ class AuthMiddleware
         }
 
         // AUTENTICAÇÃO VIA POST
-        if( ($routeName === 'loginPOST') || ($routeName === 'psicologoLoginPost') || ($routeName === 'professorLoginPost')) {
+        if( $routeName === 'loginPOST' || str_starts_with($routeName, 'psicologo') || str_starts_with($routeName, 'professor')) {
 
             // ARMAZENA CREDENCIAIS
             $credentials = [
@@ -51,19 +49,19 @@ class AuthMiddleware
             ];
 
             // DEPENDENDO DA ROTA, CHAMA UMA API DIFERENTE PARA AUTENTICAÇÃO
-            $response = ($routeName === 'psicologoLoginPost' || $routeName === 'professorLoginPost')
+            $response = str_starts_with($routeName, 'psicologo') || str_starts_with($routeName, 'professor')
             ? $this->apiData($credentials)
             : $this->apiAdm($credentials);
 
             if($response['success']) {
-                if($routeName === 'psicologoLoginPost') {
+                if(str_starts_with($routeName, 'psicologo')) {
                     $validacao = $this->validarPsicologo($credentials);
                     if (!$validacao) {
                         return redirect()->back()->with('error', 'Credenciais inválidas');
                     }
                     session(['psicologo' => $validacao]);
                     return $next($request);                  
-                } else if ($routeName === 'professorLoginPost') {
+                } else if (str_starts_with($routeName, 'professor')) {
                     $validacao = $this->validarProfessor($credentials);
                     if (!$validacao) {
                         return redirect()->back()->with('error', 'Credenciais inválidas');

@@ -25,8 +25,8 @@
         }
         
         #content-wrapper {
-            width: 83vw;
-            height: 90vh;
+            width: 78vw;
+            height: 100h;
             margin: auto;
             margin-top: 10px;
             margin-bottom: 10px;

@@ -21,8 +21,8 @@
             background-color: #f8f9fa;
         }
         #content-wrapper {
-            width: 83vw;
-            height: 90vh;
+            width: 78vw;
+            height: 100h;
             margin: auto;
             margin-top: 10px;
             margin-bottom: 10px;
@@ -32,7 +32,6 @@
             align-items: stretch;
             flex-direction: row; /* mantém lado a lado em telas grandes */
         }
-
         main {
             background-color: #ffffff;
             padding: 24px;

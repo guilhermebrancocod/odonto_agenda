@@ -5,8 +5,7 @@ namespace App\Http\Middleware;
 use Closure;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Http;
-use App\Models\FaesaClinicaUsuarioGeral;
-use Termwind\Components\Dd;
+use Illuminate\Support\Facades\DB;
 
 class AuthPsicologoMiddleware
 {
@@ -14,46 +13,40 @@ class AuthPsicologoMiddleware
     {
         $routeName = $request->route()->getName();
 
-        $rotasLiberadas = ['loginPsicologoGET', 'loginPsicologoPOST', 'logout-psicologo'];
+        $rotasLiberadas = ['psicologoLoginGet', 'psicologoLoginPost', 'psicologoLogout'];
 
-        // if (in_array('admin', session()->get('usuario')->pluck('TIPO')->toArray())) {
-        //     return $next($request);
-        // }
-
-         // 2️⃣ Redireciona psicólogos autenticados longe da página de login
-
-        if (session()->has('psicologo') && in_array($routeName, ['loginPsicologoGET', 'loginPsicologoPOST'])) {
-            return redirect()->route('psicologo.dashboard');
+        // CASO JÁ TENHA SESSÃO, REDIRECIONA PARA MENU
+        if (session()->has('psicologo')) {
+            return $next($request);
         }
 
-        if ($routeName === 'loginPsicologoPOST' && $request->isMethod('post')) {
+        // SE A ROTA FOR DE POST, ARMAZENA CREDENCIAIS
+        if ($routeName === 'psicologoLoginPost') {
             $credentials = [
                 'username' => $request->input('login'),
                 'password' => $request->input('senha'),
             ];
 
+            // ARMAZENA RESPOSTTA DA API
             $response = $this->getApiData($credentials);
 
             if ($response['success']) {
-                $validacao = $this->validarUsuarioPsicologo($credentials);
+                $validacao = $this->validarPsicologo($credentials);
 
-                if ($validacao->isEmpty()) {
-                    return redirect()->back()->with('error', "Usuário Inativo");
+                if (!$validacao) {
+                    return redirect()->back()->with('error', "Aluno sem permissão de acesso");
                 }
 
-                // Salva o psicólogo na sessão e adiciona ID_CLINICA
-                $psicologo = $validacao->first();
-                $psicologo->ID_CLINICA = 1;
-                session(['psicologo' => $psicologo]);
+                // SALVA O PSICÓLOGO NA SESSÃO NA CHAVE 'psicologo'
+                session(['psicologo' => $validacao]);
 
                 return $next($request);
             }
 
             session()->flush();
-            return redirect()->route('loginPsicologoGET')->with('error', "Credenciais Inválidas");
+            return redirect()->route('psicologoLoginGet')->with('error', "Credenciais Inválidas");
         }
 
-        // 3️⃣ Para rotas protegidas, verifica se há sessão
         if (!in_array($routeName, $rotasLiberadas)) {
             if (!session()->has('psicologo')) {
                 return redirect()->route('loginPsicologoGET');
@@ -95,12 +88,52 @@ class AuthPsicologoMiddleware
     }
 
     // VALIDA USUÁRIO PSICÓLOGO
-    public function validarUsuarioPsicologo(array $credentials)
+    public function validarPsicologo(array $credentials)
     {
-        $username = $credentials['username'];
-        $usuario = FaesaClinicaUsuarioGeral::where('USUARIO', $username)
-            ->where('STATUS', '=', 'Ativo')
+        $usuario = $credentials['username'];
+        $retorno[0] = $usuario;
+
+        // BUSCA CPF DO USUÁRIO COM CÓD. DE USUÁRIO
+        $cpf = DB::table('LYCEUM_BKP_PRODUCAO.dbo.LY_PESSOA as p')
+        ->where('p.WINUSUARIO', 'FAESA\\' . $usuario)
+        ->value('CPF');
+
+        // VERIFICA SE É ALUNO
+        $aluno = DB::table('LYCEUM_BKP_PRODUCAO.dbo.LY_ALUNO as a')
+        ->join('LYCEUM_BKP_PRODUCAO.dbo.LY_PESSOA as p', 'p.NOME_COMPL', '=', 'a.NOME_COMPL')
+        ->where('p.CPF', $cpf)
+        ->where('a.SIT_ALUNO', 'Ativo')
+        ->select('a.ALUNO', 'p.NOME_COMPL', 'p.E_MAIL_COM', 'p.CELULAR')
+        ->first();
+
+        if($aluno) {
+            $disciplinas = ['D009373', 'D009376', 'D009381', 'D009385', 'D009393', 'D009403', 'D009402', 'D009406', 'D009404'];
+            // $disciplinas = $this->buscarDisciplinasClinica();
+            $matricula = DB::table('LYCEUM_BKP_PRODUCAO.dbo.LY_MATRICULA as m')
+            ->where('m.ALUNO', $aluno->ALUNO)
+            ->whereIn('m.DISCIPLINA', $disciplinas)
             ->get();
-        return $usuario;
+
+            if(!$matricula->isEmpty()) {
+
+                $retorno[] = $aluno->ALUNO;
+                $retorno[] = $aluno->NOME_COMPL;
+                $retorno[] = $aluno->E_MAIL_COM;
+                $retorno[] = $aluno->CELULAR;
+
+                $retorno[] = ($matricula->map(function($item) {
+                    return [
+                        'DISCIPLINA' => $item->DISCIPLINA,
+                        'TURMA' => $item->TURMA,
+                    ];
+                }))->toArray();
+
+                return $retorno;
+            } else {
+                return null;
+            }
+        } else {
+            return null;
+        }
     }
 }

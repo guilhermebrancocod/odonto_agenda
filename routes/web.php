@@ -337,13 +337,17 @@ Route::get('/psicologo', function() {
     }
 })->name('psicologoAgenda');
 
-Route::middleware([AuthMiddleware::class])->group(function () {
+Route::middleware([AuthPsicologoMiddleware::class])->group(function () {
     Route::post('/psicologo/login', function() {
         return redirect()->route('psicologoAgenda');
         // return view('psicologia.psicologo.menu_agenda');
     })->name('psicologoLoginPost');
 
     Route::get('/psicologo/agendamentos-calendar', [AgendamentoController::class, 'getAgendamentosForCalendarPsicologo']);
+
+    Route::get('/psicologo/criar-agendamento', function() {
+        return view('psicologia.psicologo.criar_agenda');
+    })->name('psicologoCriarAgenda-Get');
 });
 Route::get('/psicologo/logout', function() {
     session()->forget('psicologo');

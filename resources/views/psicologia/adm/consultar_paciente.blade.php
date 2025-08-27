@@ -23,7 +23,7 @@
         html, body { height: 100%; margin: 0; }
         #content-wrapper {
             width: 85vw;
-            height: 97vh;
+            height: 100vh;
             margin: auto;
             display: column;
             gap: 24px;
@@ -37,7 +37,7 @@
         }
         main {
             background-color: #ffffff;
-            padding: 24px;
+            padding: 18px;
             border-radius: 10px;
             box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
             flex-direction: column;

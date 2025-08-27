@@ -100,6 +100,11 @@ class AgendamentoService
         
     }
 
+    public function criarAgendamentoPsicologo(Request $request)
+    {
+
+    }
+
     public function existeConflitoAgendamento()
     {
 

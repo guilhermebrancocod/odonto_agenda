@@ -20,9 +20,10 @@
             font-family: "Montserrat", sans-serif;
             background-color: #f8f9fa;
         }
+
         #content-wrapper {
-            width: 83vw;
-            height: 90vh;
+            width: 78vw;
+            height: 100h;
             margin: auto;
             margin-top: 10px;
             margin-bottom: 10px;

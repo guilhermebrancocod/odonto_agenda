@@ -82,8 +82,8 @@ class AgendamentoController extends Controller
         return response()->json($events);
     }
 
-public function getAgendamentosForCalendarPsicologo()
-    {
+    public function getAgendamentosForCalendarPsicologo()
+    {        
         $psicologo = session('psicologo');
         $agendamentos = FaesaClinicaAgendamento::with('paciente', 'servico')
         ->where('ID_CLINICA', 1)
@@ -144,7 +144,7 @@ public function getAgendamentosForCalendarPsicologo()
         return response()->json($agendamentos);
     }
 
-    // CRIAR AGENDAMENTO
+    // CRIAR AGENDAMENTO - ADM | RECEPÇÃO
     public function criarAgendamento(Request $request)
     {
         $idClinica = 1;
@@ -392,6 +392,16 @@ public function getAgendamentosForCalendarPsicologo()
 
         return redirect('/psicologia/criar-agendamento/')
             ->with('success', 'Agendamento criado com sucesso!');
+    }
+
+    // CRIAR AGENDAMENTO - PSICOLOGO
+    public function criarAgendamentoPsicologo(Request $request)
+    {
+        $this->agendamentoService->criarAgendamentoPsicologo($request);
+        return response()->json([
+            'success' => true,
+            // 'message' => ''
+        ]);
     }
 
     // MOSTRA AGENDAMENTOS - Utiliza Injeção de Dependência

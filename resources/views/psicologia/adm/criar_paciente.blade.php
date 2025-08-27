@@ -19,7 +19,7 @@
         html, body { height: 100%; margin: 0; }
         #content-wrapper {
             width: 85vw;
-            height: 97vh;
+            height: 100vh;
             margin: auto;
             display: column;
             gap: 24px;

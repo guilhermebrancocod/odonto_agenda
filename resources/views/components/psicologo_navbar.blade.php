@@ -120,7 +120,7 @@
 
         <!-- INCLUIR AGENDAMENTO -->
         <li class="list-group-item rounded-1 p-0 overflow-hidden ">
-            <a href="/psicologo /criar-agendamento" class="link-agendar d-flex align-items-center gap-2 p-2">
+            <a href="/psicologo/criar-agendamento" class="link-agendar d-flex align-items-center gap-2 p-2">
                 <i class="fas fa-calendar-plus"></i> Criar Agenda
             </a>
         </li>
@@ -132,7 +132,6 @@
                 Logout
             </a>
         </li>
-
 
     </ul>
 </nav>

@@ -20,7 +20,7 @@
         html, body { height: 100%; margin: 0; }
         #content-wrapper {
             width: 85vw;
-            height: 97vh;
+            height: 100vh;
             margin: auto;
             display: column;
             gap: 24px;
@@ -47,7 +47,7 @@
         }
         main {
             background-color: #ffffff;
-            padding: 24px;
+            padding: 18px;
             border-radius: 10px;
             box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
             flex-direction: column;
@@ -121,7 +121,7 @@
                         <div class="row g-3">
 
                             <!-- Linha 1 -->
-                            <div class="col-12 col-sm-6 col-md-4">
+                            <div class="col-12 col-sm-6 col-md-3">
                                 <div class="input-group">
                                     <span class="input-group-text"><i class="bi bi-person"></i></span>
                                     <input
@@ -135,35 +135,35 @@
                             </div>
 
                             <!-- FILTRO POR DATA -->
-                            <div class="col-12 col-sm-6 col-md-4">
-                            <div class="input-group">
-                                <span class="input-group-text"><i class="bi bi-calendar"></i></span>
-                                <input
-                                id="date-input"
-                                name="date"
-                                type="date"
-                                class="form-control"
-                                placeholder="Data"
-                                />
-                            </div>
+                            <div class="col-12 col-sm-6 col-md-3">
+                                <div class="input-group">
+                                    <span class="input-group-text"><i class="bi bi-calendar"></i></span>
+                                    <input
+                                    id="date-input"
+                                    name="date"
+                                    type="date"
+                                    class="form-control"
+                                    placeholder="Data"
+                                    />
+                                </div>
                             </div>
 
                             <!-- FILTRO POR HORÁRIO DE INICIAL -->
-                            <div class="col-12 col-sm-6 col-md-4">
-                            <div class="input-group">
-                                <span class="input-group-text"><i class="bi bi-clock"></i></span>
-                                <input
-                                id="start-time-input"
-                                name="start_time"
-                                type="time"
-                                class="form-control"
-                                placeholder="Hora Início"
-                                />
-                            </div>
+                            <div class="col-12 col-sm-6 col-md-3">
+                                <div class="input-group">
+                                    <span class="input-group-text"><i class="bi bi-clock"></i></span>
+                                    <input
+                                    id="start-time-input"
+                                    name="start_time"
+                                    type="time"
+                                    class="form-control"
+                                    placeholder="Hora Início"
+                                    />
+                                </div>
                             </div>
 
                             <!-- FILTRO POR HORÁRIO FINAL -->
-                            <div class="col-12 col-sm-6 col-md-4">
+                            <div class="col-12 col-sm-6 col-md-3">
                             <div class="input-group">
                                 <span class="input-group-text"><i class="bi bi-clock"></i></span>
                                 <input
@@ -177,7 +177,7 @@
                             </div>
 
                             <!-- FILTRO POR STATUS -->
-                            <div class="col-12 col-sm-6 col-md-4">
+                            <div class="col-12 col-sm-6 col-md-3">
                             <div class="input-group">
                                 <span class="input-group-text"><i class="bi bi-list-check"></i></span>
                                 <select id="status-input" name="status" class="form-select">
@@ -192,7 +192,7 @@
                             </div>
 
                             <!-- FILTRO POR SERVIÇO -->
-                            <div class="col-12 col-sm-6 col-md-4">
+                            <div class="col-12 col-sm-6 col-md-3">
                             <div class="input-group">
                                 <span class="input-group-text"><i class="bi bi-briefcase"></i></span>
                                 <input
@@ -206,7 +206,7 @@
                             </div>
 
                             <!-- FILTRO POR LOCAL -->
-                            <div class="col-12 col-sm-6 col-md-4">
+                            <div class="col-12 col-sm-6 col-md-3">
                             <div class="input-group">
                                 <span class="input-group-text"><i class="bi bi-house"></i></span>
                                 <input
@@ -220,7 +220,7 @@
                             </div>
 
                             <!-- FILTRO POR VALOR -->
-                            <div class="col-12 col-sm-6 col-md-4">
+                            <div class="col-12 col-sm-6 col-md-3">
                             <div class="input-group">
                                 <span class="input-group-text"><i class="bi bi-currency-dollar"></i></i></span>
                                 <input
@@ -233,17 +233,19 @@
                             </div>
                             </div>
 
-                            <div class="col-12 col-sm-6 col-md-4 d-flex gap-2">
-                                <button type="submit" class="btn btn-primary flex-grow-1">Pesquisar</button>
+                            <div class="col-12 col-sm-6 col-md-3 d-flex gap-2">
+                                <button type="submit" class="btn btn-primary">Pesquisar</button>
                                 <button type="button" class="btn btn-outline-secondary flex-grow-1" id="btnClearFilters">Limpar filtros</button>
-                                </div>
+                            </div>
 
                         </div>
                     </form>
 
+                    <hr>
+
                     <div class="w-100">
                         <h5 class="mb-3">Resultados</h5>
-                        <div class="table-responsive" style="max-height: 500px; overflow-y: auto;">
+                        <div class="table-responsive border border-3 rounded" style="max-height: 500px; overflow-y: auto;">
                             <table class="table table-hover table-bordered align-middle">
                                 <thead class="table-light" style="position: sticky; top: 0; background-color: white; z-index: 10;">
                                     <tr>
@@ -277,7 +279,9 @@
                             </div>
 
                             <div id="limitador-registros">
-                                <label for="limit-select">Mostrar:</label>
+                                <label for="limit-select">  
+                                    <span style="font-size: 15px;">Mostrar</span>
+                                </label>
                                 <select id="limit-select" class="form-select" style="width: auto;">
                                     <option value="5">5</option>
                                     <option value="10" selected>10</option>
@@ -383,7 +387,7 @@
                             <td>${valor}</td>
                             <td>${checkPagamento}</td>
                             <td>${valorPagamento}</td>
-                            <td>
+                            <td class="d-flex flex-row gap-1">
                                 <a href="/psicologia/agendamento/${ag.ID_AGENDAMENTO}" class="btn btn-sm btn-primary">Visualizar</a>
                                 <a href="/psicologia/agendamento/${ag.ID_AGENDAMENTO}/editar" class="btn btn-sm btn-warning">Editar</a>
                                 <form action="/psicologia/agendamento/${ag.ID_AGENDAMENTO}" method="POST" style="display:inline;" onsubmit="return confirm('Confirma a exclusão deste agendamento?');">

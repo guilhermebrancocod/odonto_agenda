@@ -122,7 +122,7 @@
 <body>
 
 <!-- COMPONENT NAVBAR -->
-@include('components.navbar')
+@include('components.psicologo_navbar')
 
 @if ($errors->any())
     <div id="alert-error" class="alert alert-danger shadow text-center position-fixed top-0 start-50 translate-middle-x mt-3" style="z-index: 1050; max-width: 90%;">
@@ -168,7 +168,7 @@
                 <input type="hidden" name="status_agend" value="Em aberto"/>
 
                 <div class="mb-3 position-relative">
-                    <input id="search-input" name="search" class="form-control" placeholder="Pesquisar paciente" value="{{ old('search') }}">
+                    <input id="search-input" name="search" class="form-control" placeholder="Pesquisar paciente (CPF)" value="{{ old('search') }}">
 
                     <!-- LISTA DE PACIENTES ENCONTRADOS PARA AGENDAMENTO -->
                     <div id="pacientes-list" class="list-group position-absolute w-100" style="z-index: 1000; top: 100%"></div>
@@ -182,18 +182,6 @@
 
                 <div class="row g-2">
 
-                    <!-- CHECKBOX TEM RECORRÊNCIA E SELETOR DE DURAÇÃO -->
-                    <div class="col-12 mb-2">
-                        <div class="form-check form-switch d-flex flex-column align-items-start gap-3">
-                            <div class="flex flex-row align-items-center">
-                                <input class="form-check-input" type="checkbox" value="1" id="temRecorrencia" name="tem_recorrencia">
-                                <label class="form-check-label fw-semibold mb-0" for="temRecorrencia">
-                                    <i class="fas fa-redo-alt me-1 text-primary"></i> Ativar recorrência
-                                    <span id="recorrenciaBadge" class="badge bg-success ms-2 d-none">Ativa</span>
-                                </label>
-                            </div>
-                        </div>
-                    </div>
 
                     <!-- SERVIÇO -->
                     <div class="col-sm-6 col-md-3 position-relative" style="position: relative;">
@@ -226,62 +214,6 @@
                         <input type="time" id="hr_fim" name="hr_fim" class="form-control" value="{{ old('hr_fim') }}">
                     </div>
 
-                    <!-- CAMPOS DE RECORRÊNCIA -->
-                    <div id="recorrenciaCampos" class="col-12 mt-2 d-none">
-                        <div class="card border-primary">
-                            <div class="card-body">
-
-                                <!-- TÍTULO DA CONFIGURAÇÃO DE RECORRÊNCIA -->
-                                <h6 class="card-title text-primary mb-3">
-                                    <i class="fas fa-calendar-alt me-1"></i> Configuração de Recorrência
-                                </h6>
-
-                                <div class="d-flex flex-wrap gap-3 align-items-center justify-content-around">
-                                    <!-- DIAS DA SEMANA (NOVA SELEÇÃO) -->
-                                    <div class="flex-grow-1">
-                                        <label class="form-label">Dias da Semana</label>
-                                        <div id="diasSemanaBtns" class="d-flex flex-wrap gap-2">
-                                            <button type="button" class="btn btn-outline-primary btn-sm" data-dia="0">Dom</button>
-                                            <button type="button" class="btn btn-outline-primary btn-sm" data-dia="1">Seg</button>
-                                            <button type="button" class="btn btn-outline-primary btn-sm" data-dia="2">Ter</button>
-                                            <button type="button" class="btn btn-outline-primary btn-sm" data-dia="3">Qua</button>
-                                            <button type="button" class="btn btn-outline-primary btn-sm" data-dia="4">Qui</button>
-                                            <button type="button" class="btn btn-outline-primary btn-sm" data-dia="5">Sex</button>
-                                            <button type="button" class="btn btn-outline-primary btn-sm" data-dia="6">Sáb</button>
-                                        </div>
-                                        <small class="text-muted">Clique nos dias desejados para selecionar.</small>
-                                    </div>
-
-                                    <!-- DURAÇÃO DA RECORRÊNCIA EM MESES -->
-                                    <div id="duracaoMesesContainer" class="" style="min-width: 200px;">
-                                        <label for="duracao_meses_recorrencia" class="form-label">Duração (meses)</label>
-                                        <select id="duracao_meses_recorrencia" name="duracao_meses_recorrencia" class="form-select form-select-sm" aria-label="Duração da recorrência em meses">
-                                            <option value="" selected>Selecione</option>
-                                            <option value="1">1 mês</option>
-                                            <option value="2">2 meses</option>
-                                            <option value="3">3 meses</option>
-                                            <option value="4">4 meses</option>
-                                            <option value="5">5 meses</option>
-                                            <option value="6">6 meses</option>
-                                            <option value="7">7 meses</option>
-                                            <option value="8">8 meses</option>
-                                            <option value="9">9 meses</option>
-                                            <option value="10">10 meses</option>
-                                            <option value="11">11 meses</option>
-                                            <option value="12">12 meses</option>
-                                        </select>
-                                    </div>
-
-                                    <!-- DATA FIM DA RECORRÊNCIA -->
-                                    <div style="min-width: 200px;">
-                                        <label for="data_fim_recorrencia" class="form-label">Data Fim</label>
-                                        <input type="date" id="data_fim_recorrencia" name="data_fim_recorrencia" class="form-control">
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
                     <!-- Mensagem que aparece quando ativa recorrência -->
                     <div id="msg-recorrencia" class="alert alert-info mt-2 d-none">
                         Caso não selecione dia da semana e/ou data fim, serão gerados agendamentos por 1 mês por padrão.
@@ -305,15 +237,6 @@
                         <div id="local-list" class="list-group position-absolute w-100" style="z-index: 1000; top: 100%"></div>
                     </div>
 
-                    <!-- PSICOLOGO -->
-                    <input type="hidden" name="id_psicologo" id="id_psicologo">
-                    <div class="col-md-6 col-md-3 mt-2 position-relative">
-                        <label for="psicologo_agend" class="form-label">Psicologo</label>
-                        <input type="text" name="psicologo_agend" id="psicologo_agend" class="form-control" placeholder="Psicólogo de Atendimento" value="{{ old('id_psicologo') }}" autocomplete="off">
-                        
-                        <div id="psicologo_list" class="list-group position-absolute w-100" style="z-index: 1000; top: 100%"></div>
-                    </div>
-                        
                     <!-- OBSERVAÇÕES -->
                     <div class="col-12 mt-2">
                         <label for="observacoes" class="form-label">Observações</label>
