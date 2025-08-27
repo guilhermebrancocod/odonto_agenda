@@ -296,12 +296,12 @@
                                 <input type="text" id="edit-servico-cod" name="COD_INTERNO_SERVICO_CLINICA" class="form-control"/>
                             </div>
 
-                            <div class="mb-3">
+                            <div class="mb-3" id="edit-disciplina-container">
                                 <label class="form-label">Disciplina</label>
-                                    <select name="DISCIPLINA" id="edit-servico-disc" class="form-select form-select-sm">
-                                        <option id="edit-servico-disc-selected"></option>
-                                        <!-- Outras opções serão inseridas dinamicamente -->
-                                    </select>
+                                <select name="DISCIPLINA" id="edit-servico-disc" class="form-select form-select-sm">
+                                    <option id="edit-servico-disc-selected"></option>
+                                    <!-- Outras opções serão inseridas dinamicamente -->
+                                </select>
                             </div>
                             
                             <div class="mb-3">
@@ -586,6 +586,79 @@ document.addEventListener('DOMContentLoaded', () => {
     // Quando o usuário seleciona uma opção, fecha o "dropdown"
     select.addEventListener('change', function() {
         select.size = 1;
+    });
+</script>
+
+<!-- BUSCA DE DISCIPLINAS PARA EDITAR O SERVIÇO -->
+<script>
+    const editSelect = document.getElementById('edit-servico-disc');
+    const editContainer = document.getElementById('edit-disciplina-container');
+
+    let editDisciplinasCarregadas = false;
+    let editSearchBox = document.getElementById('edit-search-disciplina');
+
+    // Cria o searchBox apenas uma vez
+    if (!editSearchBox) {
+        editSearchBox = document.createElement('input');
+        editSearchBox.type = 'search';
+        editSearchBox.placeholder = 'Pesquise pela Disciplina';
+        editSearchBox.classList.add('form-control', 'mb-2');
+        editSearchBox.id = 'edit-search-disciplina';
+
+        editContainer.insertBefore(editSearchBox, editSelect);
+
+        // Filtra opções em tempo real
+        editSearchBox.addEventListener('input', function() {
+            const termo = this.value.toLowerCase();
+            Array.from(editSelect.options).forEach(opt => {
+                if (opt.value === "" || opt.id === "edit-servico-disc-selected") return;
+                opt.style.display = opt.textContent.toLowerCase().includes(termo) ? '' : 'none';
+            });
+        });
+
+        // Enter foca no select
+        editSearchBox.addEventListener('keydown', function(e) {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                editSelect.focus();
+                editSelect.size = editSelect.options.length;
+            }
+        });
+    }
+
+    // Carrega disciplinas apenas uma vez
+    if (!editDisciplinasCarregadas) {
+        fetch('/psicologia/disciplinas-psicologia')
+            .then(response => {
+                if (!response.ok) throw new Error('Erro ao buscar disciplinas');
+                return response.json();
+            })
+            .then(disciplinas => {
+                // Mantém a primeira option (selected do serviço)
+                const selectedOption = document.getElementById('edit-servico-disc-selected');
+                editSelect.innerHTML = '';
+                if (selectedOption) editSelect.appendChild(selectedOption);
+
+                disciplinas.forEach(d => {
+                    const option = document.createElement('option');
+                    option.value = d.DISCIPLINA;
+                    option.textContent = d.DISCIPLINA + " - " + d.NOME;
+                    editSelect.appendChild(option);
+                });
+                editDisciplinasCarregadas = true;
+            })
+            .catch(err => {
+                console.error(err);
+                editSelect.innerHTML = '<option value="">Erro ao carregar disciplinas</option>';
+            });
+    }
+
+    // Inicialmente foca no searchBox
+    editSearchBox.focus();
+
+    // Quando o usuário seleciona uma opção, fecha o "dropdown"
+    editSelect.addEventListener('change', function() {
+        editSelect.size = 1;
     });
 </script>
 </body>
