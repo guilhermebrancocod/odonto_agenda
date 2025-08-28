@@ -172,6 +172,10 @@
 
                 <input type="hidden" name="id_psicologo" id="id_psicologo" value="{{ session('psicologo')[1] }}"/>
 
+                <div id="session-data"
+                   data-psicologo='@json(session('psicologo'))'
+                ></div>
+
                 {{-- CAMPO DE PESQUISA POR PACIENTES --}}
                 <div class="mb-3 position-relative">
                     <input id="search-input" name="search" class="form-control" placeholder="Pesquisar paciente (CPF)" value="{{ old('search') }}">
@@ -347,8 +351,6 @@
             fetch(`/psicologo/pesquisar-disciplina?search=${encodeURIComponent(query)}`)
                 .then(response => response.json())
                 .then(disciplinas => {
-
-                    console.log(disciplinas);
 
                     disciplinasList.innerHTML = '';
 

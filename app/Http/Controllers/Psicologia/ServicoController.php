@@ -98,17 +98,22 @@ class ServicoController extends Controller
 
     public function getDisciplinaServico(Request $request)
     {
+        $matriculasPsicologo = array_column(session('psicologo')[5], 'DISCIPLINA');
+
         $search = trim($request->query('search', ''));
-        $query = FaesaClinicaServico::where('ID_CLINICA', 1);
+
+        $query = FaesaClinicaServico::where('ID_CLINICA', 1)->whereIn('DISCIPLINA', $matriculasPsicologo);
 
         if ($search) {
-            $query->where('DISCIPLINA', 'LIKE', "%{$search}%");
+            $query->where(function($q) use ($search) {
+                $q->where('DISCIPLINA', 'LIKE', "%{$search}%")
+                ->orWhere('SERVICO_CLINICA_DESC', 'LIKE', "%{$search}%");
+            });
         }
 
         $servicos = $query->orderBy('ID_SERVICO_CLINICA', 'desc')->get();
 
         return $servicos;
-
     } 
 
     // RETORNA SERVIÇO PELO NOME
