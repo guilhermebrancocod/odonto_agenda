@@ -119,6 +119,13 @@ class PacienteController extends Controller
         return response()->json($pacientes);
     }
 
+    public function getPacienteByNameCpf(Request $request)
+    {
+        $pacientes = $this->pacienteService->filtrarPacientesByNameOrCpf($request->only('search'));
+
+        return response()->json($pacientes);
+    }
+
     // EDITA PACIENTE
     public function editarPaciente(Request $request, $id)
     {

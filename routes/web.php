@@ -20,7 +20,7 @@ use App\Http\Middleware\AuthMiddleware;
 use App\Http\Middleware\AuthProfessorMiddleware;
 use App\Http\Middleware\CheckClinicaMiddleware;
 use App\Http\Middleware\AuthPsicologoMiddleware;
-
+use App\Services\Psicologia\PacienteService;
 
 // -------------------- ODONTOLOGIA --------------------
 
@@ -249,6 +249,7 @@ Route::middleware([AuthMiddleware::class, CheckClinicaMiddleware::class])
         return view('psicologia.adm.consultar_paciente');
     })->name('consultar-paciente');
     Route::get('/consultar-paciente/buscar', [PacienteController::class, 'getPaciente'])->name('getPaciente');
+    Route::get('/consultar-paciente/buscar-nome-cpf', [PacienteController::class, 'getPacienteByNameCpf'])->name('getPacienteByNameCpf');
     Route::get('/paciente/{id}/ativar', [PacienteController::class, 'setAtivo'])->name('ativarPaciente-Psicologia');
     Route::delete('/excluir-paciente/{id}', [PacienteController::class, 'deletePaciente'])->name('deletePaciente-Psicologia');
 
