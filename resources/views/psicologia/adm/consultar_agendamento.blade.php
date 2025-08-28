@@ -120,7 +120,7 @@
                     <form id="search-form" class="w-100 mb-4">
                         <div class="row g-3">
 
-                            <!-- Linha 1 -->
+                            <!-- FILTRO POR PACIENTE -->
                             <div class="col-12 col-sm-6 col-md-3">
                                 <div class="input-group">
                                     <span class="input-group-text"><i class="bi bi-person"></i></span>
@@ -130,6 +130,20 @@
                                         type="search"
                                         class="form-control"
                                         placeholder="Nome ou CPF do paciente"
+                                    />
+                                </div>
+                            </div>
+
+                            <!-- FILTRO POR PSICÓLOGO -->
+                            <div class="col-12 col-sm-6 col-md-3">
+                                <div class="input-group">
+                                    <span class="input-group-text"><i class="bi bi-person-workspace"></i></span>
+                                    <input
+                                        id="psicologo-input"
+                                        name="psicologo"
+                                        type="search"
+                                        class="form-control"
+                                        placeholder="Nome/Matrícula do Professor"
                                     />
                                 </div>
                             </div>
@@ -233,9 +247,13 @@
                             </div>
                             </div>
 
-                            <div class="col-12 col-sm-6 col-md-3 d-flex gap-2">
-                                <button type="submit" class="btn btn-primary">Pesquisar</button>
-                                <button type="button" class="btn btn-outline-secondary flex-grow-1" id="btnClearFilters">Limpar filtros</button>
+                            <div class="col-12 col-sm-6 col-md-3 d-flex flex-row gap-2">
+                                <button type="submit" class="btn btn-primary p-1 m-0">
+                                    <span>Pesquisar</span>
+                                </button>
+                                <button type="button" class="btn btn-outline-secondary flex-grow-1 p-1 m-0" id="btnClearFilters">
+                                    <span>Limpar Filtros</span>
+                                </button>
                             </div>
 
                         </div>
@@ -250,6 +268,7 @@
                                 <thead class="table-light" style="position: sticky; top: 0; background-color: white; z-index: 10;">
                                     <tr>
                                         <th>Paciente</th>
+                                        <th>Psicólogo</th>
                                         <th>Serviço</th>
                                         <th>Data</th>
                                         <th>Hora Início</th>
@@ -315,6 +334,7 @@
         function getFilters() {
             return {
                 search: document.getElementById('search-input').value.trim(),
+                psicologo: document.getElementById('psicologo-input').value.trim(),
                 date: document.getElementById('date-input').value,
                 start_time: document.getElementById('start-time-input').value,
                 end_time: document.getElementById('end-time-input').value,
@@ -351,6 +371,7 @@
 
                     agendamentos.forEach(ag => {
                         const paciente = ag.paciente ? ag.paciente.NOME_COMPL_PACIENTE : '-';
+                        const psicologo = ag.ID_PSICOLOGO ? ag.ID_PSICOLOGO : '-';
                         const servico = ag.servico ? ag.servico.SERVICO_CLINICA_DESC : '-';
                         const data = ag.DT_AGEND ? ag.DT_AGEND.substring(0, 10).split('-').reverse().join('/') : '-';
                         const horaIni = ag.HR_AGEND_INI ? ag.HR_AGEND_INI.substring(0, 5) : '-';
@@ -377,6 +398,7 @@
 
                         row.innerHTML = `
                             <td>${paciente}</td>
+                            <td>${psicologo}</td>
                             <td>${servico}</td>
                             <td>${data}</td>
                             <td>${horaIni}</td>
