@@ -298,9 +298,9 @@
                         const item = document.createElement('button');
                         item.type = 'button';
                         item.classList.add('list-group-item', 'list-group-item-action', 'border');
-                        item.textContent = `${paciente.CPF_PACIENTE}`;
+                        item.textContent = `${paciente.NOME_COMPL_PACIENTE}`;
                         item.addEventListener('click', () => {
-                            searchInput.value = `${paciente.CPF_PACIENTE}`;                            
+                            searchInput.value = `${paciente.NOME_COMPL_PACIENTE}` + ' - ' + `${paciente.CPF_PACIENTE}`;                            
                             pacienteIdInput.value = paciente.ID_PACIENTE;
                             pacientesList.innerHTML = '';
                         });
