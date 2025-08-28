@@ -13,6 +13,7 @@ use App\Models\FaesaClinicaSala;
 use App\Services\Psicologia\PacienteService;
 use App\Services\Psicologia\AgendamentoService;
 use Carbon\Carbon;
+use Illuminate\Support\Facades\DB;
 
 class AgendamentoController extends Controller
 {
@@ -155,7 +156,7 @@ class AgendamentoController extends Controller
             ]);
         }
 
-        $request->validate([
+        $validated = $request->validate([
             'paciente_id' => 'required|integer',
             'id_servico' => 'required|integer',
             'dia_agend' => 'required|date',
@@ -195,6 +196,11 @@ class AgendamentoController extends Controller
         $valorAgend = $request->valor_agend ? str_replace(',', '.', $request->valor_agend) : null;
         $duracaoMesesRecorrencia = (int) $request->input('duracao_meses_recorrencia');
         $servico = FaesaClinicaServico::find($request->id_servico);
+
+        if ($this->verificaFeriado($validated['dia_agend'])) {
+            return redirect('/psicologia/criar-agendamento/')
+                ->with('error', 'Agendamento não foi criado devido a um feriado');
+        }
 
         // Tratamento de recorrência customizada
         if ($request->input('tem_recorrencia') === "1") {
@@ -400,7 +406,7 @@ class AgendamentoController extends Controller
         // CLINICA FIXO
         $idClinica = 1;
         
-        $request->validate([
+        $validated = $request->validate([
             'paciente_id' => 'required|integer',
             'id_servico' => 'required|integer',
             'dia_agend' => 'required|date',
@@ -427,6 +433,12 @@ class AgendamentoController extends Controller
 
         // BUSCA QUAL SERVIÇO PSICÓLOGO SELECIONOU
         $servico = FaesaClinicaServico::find($request->id_servico);
+        
+        // VERIFICA SE A DATA NAO CAI EM FERIADO
+        if ($this->verificaFeriado($validated['dia_agend'])) {
+            return redirect('/psicologia/criar-agendamento/')
+                ->with('error', 'Agendamento não foi criado devido a um feriado');
+        }
 
         // AGENDAMENTO SIMPLES
         if ($this->existeConflitoAgendamento($idClinica, $request->local_agend, $request->dia_agend, $request->hr_ini, $request->hr_fim, $request->paciente_id, idPsicologo: $request->id_psicologo)) {
@@ -544,6 +556,12 @@ class AgendamentoController extends Controller
         $valor_agend = $validatedData['valor_agend'];
         $observacoes = $validatedData['observacoes'];
         $mensagem = $validatedData['mensagem'];
+
+        // VERIFICA SE A DATA NAO CAI EM FERIADO
+        if ($this->verificaFeriado($data)) {
+            return redirect('/psicologia/criar-agendamento/')
+                ->with('error', 'Agendamento não foi criado devido a um feriado');
+        }
 
         //Verifica se a sala está ativa
         if (!$this->salaEstaAtiva($request->local)) 
@@ -782,5 +800,19 @@ class AgendamentoController extends Controller
             'success' => true,
             'message' => 'Mensagem de Cancelamento adicionada com sucesso!'
         ]);
+    }
+
+    private function verificaFeriado($data)
+    {
+        $data = \Carbon\Carbon::createFromFormat('d-m-Y', $data)->format('Y-m-d');
+        $dataFeriado = DB::table('LYCEUM_BKP_PRODUCAO.dbo.LY_FERIADO')
+            ->where('DATA', '=', $data )
+            ->get();
+
+        if ($dataFeriado->isNotEmpty()){
+            return true;
+        }
+
+        return false;
     }
 }
