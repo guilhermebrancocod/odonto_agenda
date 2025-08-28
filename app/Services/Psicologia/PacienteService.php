@@ -98,10 +98,11 @@ class PacienteService
     {
         $query = FaesaClinicaPaciente::query();
 
+        $query->where('STATUS', '<>', 'Inativo');
+
         // Filtro por nome ou CPF
         if (!empty($filtros['search'])) {
-            $query->where('STATUS', '<>', 'Inativo')
-            ->where(function ($q) use ($filtros) {
+            $query->where(function ($q) use ($filtros) {
                 $q->where('NOME_COMPL_PACIENTE', 'LIKE', '%' . $filtros['search'] . '%')
                 ->orWhere('CPF_PACIENTE', 'LIKE', '%' . $filtros['search'] . '%');
             });
