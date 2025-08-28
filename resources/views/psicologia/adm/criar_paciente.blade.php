@@ -107,14 +107,21 @@
                 <div class="row g-3 mb-4">
 
                     <!-- NOME COMPLETO -->
-                    <div class="col-md-6">
-                        <label for="nome" class="form-label">Nome Completo</label>
+                    <div class="col-md-5">
+                        <label for="nome" class="form-label">
+                            Nome Completo
+                            <span style="color: red; font-size: 10px">*</span>
+                        </label>
                         <input type="text" id="nome" name="NOME_COMPL_PACIENTE" class="form-control" value="{{ old('NOME_COMPL_PACIENTE') }}"/>
                     </div>
                     
                     <!-- DATA NASCIMENTO -->
-                    <div class="col-md-2">
-                        <label for="dt_nasc" class="form-label">Dt Nascimento</label>
+                    <div class="col-md-3">
+                        <label for="dt_nasc" class="form-label">
+                            Data de nascimento
+                            
+                            <span style="font-size: 12px">(dia/mes/ano)</span>
+                        </label>
                         <input type="text" id="dt_nasc" name="DT_NASC_PACIENTE" class="form-control" value="{{ old('DT_NASC_PACIENTE') }}"/>
                     </div>
                     
@@ -153,13 +160,17 @@
 
                     <!-- NOME COMPLETO -->
                     <div class="col-md-6">
-                        <label for="nome_responsavel" class="form-label">Nome Completo</label>
+                        <label for="nome_responsavel" class="form-label">
+                            Nome Completo
+                        </label>
                         <input type="text" id="nome_responsavel" name="NOME_RESPONSAVEL" class="form-control" value="{{ old('NOME_RESPONSAVEL') }}"/>
                     </div>
                     
                     <!-- CPF -->
                     <div class="col-md-2">
-                        <label for="cpf_responsavel" class="form-label">CPF</label>
+                        <label for="cpf_responsavel" class="form-label">
+                            CPF
+                        </label>
                         <input type="text" id="cpf_responsavel" name="CPF_RESPONSAVEL" class="form-control" value="{{ old('CPF_RESPONSAVEL') }}"/>
                     </div>
 
@@ -286,15 +297,36 @@
         inputCheckSus.addEventListener('input',  function () {
             if (inputCheckSus.checked) {
                 codSusDiv.innerHTML += `
-                    <div class="input-group mb-3">
-                        <span class="input-group-text">Cod. SUS</span>
-                        <input type="text" class="form-control" name="COD_SUS">
+                    <div class="d-flex flex-column mb-3">
+                        <div>
+                            <span style="font-size: 12px">(Carteira Nacional de Saúde)</span>
+                        </div>
+                        <div class="d-flex flex-row input-group">
+                            <span class="input-group-text">
+                                Cod. SUS
+                            </span>
+                            <input type="text" class="form-control" name="COD_SUS" id="cod-sus-input">
+                        </div>  
                     </div>
                     `
+                const inputCodSus = document.getElementById('cod-sus-input');
+                inputCodSus.addEventListener('input', function () {
+
+                    // Remove tudo o que não é número
+                    let value = inputCodSus.value.replace(/\D/g, '');
+
+                    // Limita a 15 dígitos
+                    value = value.slice(0, 15);
+
+                    // Agrupa em blocos de 4 dígitos
+                    let formatted = value.match(/.{1,4}/g)?.join('-') || '';
+            
+                    inputCodSus.value = formatted;
+                })
             } else {
                 codSusDiv.innerHTML = ''
             }
-        })
+        })        
     </script>
 
     <!-- API DOS CORREIOS PARA PREENCHER AUTOMATICAMENTE DADOS DE ENDEREÇO AO INFORMAR O CEP -->
