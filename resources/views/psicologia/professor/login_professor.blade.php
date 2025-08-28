@@ -218,7 +218,7 @@
 
         <h5 class="text-center">Acesso Professor</h5>
         
-        <form action="{{ route('professorMenu') }}" method="POST">
+        <form action="{{ route('professorLoginPost') }}" method="POST">
             @csrf
 
             <!-- USUARIO -->
