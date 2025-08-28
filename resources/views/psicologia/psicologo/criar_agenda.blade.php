@@ -294,7 +294,7 @@
                         item.classList.add('list-group-item', 'list-group-item-action', 'border');
                         item.textContent = `${paciente.CPF_PACIENTE}`;
                         item.addEventListener('click', () => {
-                            searchInput.value = `(${paciente.CPF_PACIENTE})`;                            
+                            searchInput.value = `${paciente.CPF_PACIENTE}`;                            
                             pacienteIdInput.value = paciente.ID_PACIENTE;
                             pacientesList.innerHTML = '';
                         });
@@ -370,7 +370,7 @@
                         const item = document.createElement('button');
                         item.type = 'button';
                         item.classList.add('list-group-item', 'list-group-item-action');
-                        item.textContent = servico.DISCIPLINA;
+                        item.textContent = disciplina.DISCIPLINA + '-' + disciplina.SERVICO_CLINICA_DESC;
                         item.addEventListener('click', () => {
                             aoSelecionarDisciplina(disciplina);
                             disciplinasList.innerHTML = '';
@@ -387,8 +387,8 @@
 
     // Fecha a lista de serviços ao clicar fora
     document.addEventListener('click', (e) => {
-        if (!servicoInput.contains(e.target) && !servicosList.contains(e.target)) {
-            servicosList.innerHTML = '';
+        if (!disciplinaInput.contains(e.target) && !disciplinasList.contains(e.target)) {
+            disciplinasList.innerHTML = '';
         }
     });
 
@@ -453,11 +453,9 @@
     // =========================
     // FUNÇÕES DE SELEÇÃO
     // =========================
-    function aoSelecionarServico(servico) {
-        document.getElementById('servico').value = servico.SERVICO_CLINICA_DESC;
-        document.getElementById('id_servico').value = servico.ID_SERVICO;
-        document.getElementById('info-observacao').style.display = servico.OBSERVACAO ? 'inline-block' : 'none';
-        document.getElementById('info-observacao').title = servico.OBSERVACAO || '';
+    function aoSelecionarDisciplina(disciplina) {
+        document.getElementById('disciplina').value = disciplina.DISCIPLINA;
+        document.getElementById('id_servico').value = disciplina.ID_SERVICO_CLINICA;
     }
 
     function aoSelecionarLocal(local) {

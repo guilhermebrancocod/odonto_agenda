@@ -7,6 +7,8 @@ use Illuminate\Http\Request;
 use App\Models\FaesaClinicaServico;
 use Illuminate\Support\Facades\DB;
 
+use function Laravel\Prompts\search;
+
 class ServicoController extends Controller
 {
     // CRIAÇÃO DE SERVIÇO
@@ -96,7 +98,17 @@ class ServicoController extends Controller
 
     public function getDisciplinaServico(Request $request)
     {
-        dd($request);
+        $search = trim($request->query('search', ''));
+        $query = FaesaClinicaServico::where('ID_CLINICA', 1);
+
+        if ($search) {
+            $query->where('DISCIPLINA', 'LIKE', "%{$search}%");
+        }
+
+        $servicos = $query->orderBy('ID_SERVICO_CLINICA', 'desc')->get();
+
+        return $servicos;
+
     } 
 
     // RETORNA SERVIÇO PELO NOME
