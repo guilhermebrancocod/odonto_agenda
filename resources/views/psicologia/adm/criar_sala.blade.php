@@ -202,6 +202,15 @@
                        required>
             </div>
 
+            <!-- DISCIPLINA PRATICADA NA SALA -->
+            <div class="mb-3" id="disciplina-container">
+                <label for="disciplina-sala" class="form-label" style="font-size: 14px;">Disciplina</label>
+                <select name="DISCIPLINA" id="disciplina-sala" class="form-select form-select-sm">
+                    <option value=""></option>
+                    <!-- Outras opções serão inseridas dinamicamente -->
+                </select>
+            </div>
+
             <!-- BOTÃO DE SALVAR | SUBMIT -->
             <div class="text-end">
                 <button id="salvar" type="submit">Salvar</button>
@@ -224,6 +233,7 @@
                 <thead>
                 <tr>
                     <th>Descrição</th>
+                    <th>Disciplina</th>
                     <th>Status</th>
                 </tr>
                 </thead>
@@ -256,6 +266,14 @@
                                 <label class="form-label">Descrição</label>
                                 <input type="text" id="edit-sala-desc" name="DESCRICAO" class="form-control" required />
                             </div>
+
+                            <div class="mb-3" id="edit-disciplina-container">
+                                <label class="form-label">Disciplina</label>
+                                <select name="DISCIPLINA" id="edit-sala-disc" class="form-select form-select-sm">
+                                    <option id="edit-sala-disc-selected"></option>
+                                    <!-- Outras opções serão inseridas dinamicamente -->
+                                </select>
+                            </div>
                             
                             <!-- EDIÇÃO DE STATUS DA SALA -->
                             <div>
@@ -267,7 +285,7 @@
                             </div>
                         </div>
 
-                        <!-- RODAÉ DO MODAL -->
+                        <!-- RODAPÉ DO MODAL -->
                         <div class="modal-footer d-flex justify-content-between">
                             <button type="button" class="btn btn-danger" id="btn-deletar-sala">Excluir</button>
                             <div>
@@ -350,11 +368,13 @@
                         const tr = document.createElement('tr');
                         tr.innerHTML = `
                             <td>${sala.DESCRICAO}</td>
+                            <td>${sala.DISCIPLINA ? sala.DISCIPLINA : '-'}</td>
                             <td>${sala.ATIVO === 'S' ? 'Ativo' : 'Inativo'}</td>
                             <td>
                                 <button class="btn btn-primary btn-sm btn-editar"
                                     data-id="${sala.ID_SALA_CLINICA}"
                                     data-desc="${sala.DESCRICAO}"
+                                    data-disc="${sala.DISCIPLINA}"
                                     data-status="${sala.ATIVO}">
                                     Editar
                                 </button>
@@ -367,6 +387,7 @@
                         btn.addEventListener('click', () => {
                             document.getElementById('edit-sala-id').value = btn.dataset.id;
                             document.getElementById('edit-sala-desc').value = btn.dataset.desc;
+                            document.getElementById('edit-sala-disc').value = btn.dataset.disc;
                             document.getElementById('edit-sala-status').value = btn.dataset.status;
                             editarSalaModal.show();
                         });
@@ -395,6 +416,7 @@
             e.preventDefault();
 
             const desc = document.getElementById('edit-sala-desc').value;
+            const disc = document.getElementById('edit-sala-disc').value;
             const status = document.getElementById('edit-sala-status').value;
             const id = document.getElementById('edit-sala-id').value;
 
@@ -406,6 +428,7 @@
                 },
                 body: JSON.stringify({
                     DESCRICAO: desc,
+                    DISCIPLINA: disc,
                     ATIVO: status
                 })
             })
@@ -426,6 +449,151 @@
     });
 </script>
 
+<!-- BUSCA DE DISCIPLINAS PARA VINCULAR AO SERVICO -->
+<script>
+    const select = document.getElementById('disciplina-sala');
+    const container = document.getElementById('disciplina-container');
+
+    let disciplinasCarregadas = false;
+    let searchBox = document.getElementById('search-disciplina');
+
+    // Cria o searchBox apenas uma vez
+    if (!searchBox) {
+        searchBox = document.createElement('input');
+        searchBox.type = 'search';
+        searchBox.placeholder = 'Pesquise pela Disciplina';
+        searchBox.classList.add('form-control', 'mb-2');
+        searchBox.id = 'search-disciplina';
+
+        container.insertBefore(searchBox, select);
+
+        // Filtra opções em tempo real
+        searchBox.addEventListener('input', function() {
+            const termo = this.value.toLowerCase();
+            Array.from(select.options).forEach(opt => {
+                if (opt.value === "") return;
+                opt.style.display = opt.textContent.toLowerCase().includes(termo) ? '' : 'none';
+            });
+        });
+
+        // Enter foca no select
+        searchBox.addEventListener('keydown', function(e) {
+            if (e.key === 'Enter') {
+
+                // Informa ao User Agent que a ação padrão não será realizada
+                e.preventDefault();
+
+                select.focus();
+                // opcional: abre as opções como um "dropdown"
+                select.size = select.options.length; 
+            }
+        });
+    }
+
+    // Carrega disciplinas apenas uma vez
+    if (!disciplinasCarregadas) {
+        fetch('/psicologia/disciplinas-psicologia')
+            .then(response => {
+                if (!response.ok) throw new Error('Erro ao buscar disciplinas');
+                return response.json();
+            })
+            .then(disciplinas => {
+                select.innerHTML = '<option value=""></option>';
+                disciplinas.forEach(d => {
+                    const option = document.createElement('option');
+                    option.value = d.DISCIPLINA;
+                    option.textContent = d.DISCIPLINA + " - " + d.NOME;
+                    select.appendChild(option);
+                });
+                disciplinasCarregadas = true;
+            })
+            .catch(err => {
+                console.error(err);
+                select.innerHTML = '<option value="">Erro ao carregar disciplinas</option>';
+            });
+    }
+
+    // Inicialmente foca no searchBox
+    searchBox.focus();
+
+    // Quando o usuário seleciona uma opção, fecha o "dropdown"
+    select.addEventListener('change', function() {
+        select.size = 1;
+    });
+</script>
+
+<!-- BUSCA DE DISCIPLINAS PARA EDITAR O SERVIÇO -->
+<script>
+    const editSelect = document.getElementById('edit-sala-disc');
+    const editContainer = document.getElementById('edit-disciplina-container');
+
+    let editDisciplinasCarregadas = false;
+    let editSearchBox = document.getElementById('edit-search-disciplina');
+
+    // Cria o searchBox apenas uma vez
+    if (!editSearchBox) {
+        editSearchBox = document.createElement('input');
+        editSearchBox.type = 'search';
+        editSearchBox.placeholder = 'Pesquise pela Disciplina';
+        editSearchBox.classList.add('form-control', 'mb-2');
+        editSearchBox.id = 'edit-search-disciplina';
+
+        editContainer.insertBefore(editSearchBox, editSelect);
+
+        // Filtra opções em tempo real
+        editSearchBox.addEventListener('input', function() {
+            const termo = this.value.toLowerCase();
+            Array.from(editSelect.options).forEach(opt => {
+                if (opt.value === "" || opt.id === "edit-sala-disc-selected") return;
+                opt.style.display = opt.textContent.toLowerCase().includes(termo) ? '' : 'none';
+            });
+        });
+
+        // Enter foca no select
+        editSearchBox.addEventListener('keydown', function(e) {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                editSelect.focus();
+                editSelect.size = editSelect.options.length;
+            }
+        });
+    }
+
+    // Carrega disciplinas apenas uma vez
+    if (!editDisciplinasCarregadas) {
+        fetch('/psicologia/disciplinas-psicologia')
+            .then(response => {
+                if (!response.ok) throw new Error('Erro ao buscar disciplinas');
+                return response.json();
+            })
+            .then(disciplinas => {
+                // Mantém a primeira option (selected do serviço)
+                const selectedOption = document.getElementById('edit-sala-disc-selected');
+                editSelect.innerHTML = '';
+                if (selectedOption) editSelect.appendChild(selectedOption);
+
+                disciplinas.forEach(d => {
+                    const option = document.createElement('option');
+                    option.value = d.DISCIPLINA;
+                    option.textContent = d.DISCIPLINA + " - " + d.NOME;
+                    editSelect.appendChild(option);
+                });
+                editDisciplinasCarregadas = true;
+            })
+            .catch(err => {
+                console.error(err);
+                editSelect.innerHTML = '<option value="">Erro ao carregar disciplinas</option>';
+            });
+    }
+
+    // Inicialmente foca no searchBox
+    editSearchBox.focus();
+
+    // Quando o usuário seleciona uma opção, fecha o "dropdown"
+    editSelect.addEventListener('change', function() {
+        editSelect.size = 1;
+    });
+</script>
 
 </body>
 </html>

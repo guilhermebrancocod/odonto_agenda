@@ -274,26 +274,4 @@
             </li>
         </ul>
     </div>
-
-
-<script>
-    document.addEventListener("DOMContentLoaded", function() {
-    const toggleBtnPsico = document.getElementById("togglePsicologos");
-    const submenuPsico = document.getElementById("submenuPsicologos");
-
-        toggleBtnPsico.addEventListener("click", function() {
-            submenuPsico.classList.toggle("show");
-            toggleBtnPsico.classList.toggle("active");
-        });
-    });
-
-    const toggleBtnProf = document.getElementById("toggleProfessores");
-    const submenuProf = document.getElementById("submenuProfessores");
-
-    toggleBtnProf.addEventListener("click", function() {
-        submenuProf.classList.toggle("show");
-        toggleBtnProf.classList.toggle("active");
-    });
-</script>
-    
 </div>

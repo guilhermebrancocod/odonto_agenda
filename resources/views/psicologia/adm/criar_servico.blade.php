@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+ <!DOCTYPE html>
 <html lang="pt-br">
 
 <head>
@@ -203,7 +203,7 @@
                 <label for="cod-interno-servico" class="form-label text-muted" style="font-size: 14px;">
                     Código Interno do Serviço
                 </label>
-                <input type="text"
+                <input type="number"
                        id="cod-interno-servico"
                        name="COD_INTERNO_SERVICO_CLINICA"
                        class="form-control"
@@ -293,7 +293,7 @@
                             </div>
                             <div class="mb-3">
                                 <label class="form-label">Código Interno</label>
-                                <input type="text" id="edit-servico-cod" name="COD_INTERNO_SERVICO_CLINICA" class="form-control"/>
+                                <input type="number" id="edit-servico-cod" name="COD_INTERNO_SERVICO_CLINICA" class="form-control"/>
                             </div>
 
                             <div class="mb-3" id="edit-disciplina-container">
@@ -343,6 +343,17 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/mdb-ui-kit/7.1.0/mdb.min.js"></script>
 
 <script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const form = document.getElementById('form-criar-servico');
+        form.addEventListener('keydown', function(e) {
+            if(e.key === 'Enter') {
+                e.preventDefault();
+            }
+        })
+    });
+</script>
+
+<script>
     function showAlert(message, type = 'success') {
         const alertContainer = document.getElementById('alert-container');
         const alert = document.createElement('div');
@@ -373,147 +384,147 @@
         `;
     }
 
-document.addEventListener('DOMContentLoaded', () => {
-    const servicosTbody = document.getElementById('servicos-tbody');
-    const searchInput = document.getElementById('search-servico');
-    const editarServicoModal = new bootstrap.Modal(document.getElementById('editarServicoModal'));
-    const formEditarServico = document.getElementById('form-editar-servico');
+    document.addEventListener('DOMContentLoaded', () => {
+        const servicosTbody = document.getElementById('servicos-tbody');
+        const searchInput = document.getElementById('search-servico');
+        const editarServicoModal = new bootstrap.Modal(document.getElementById('editarServicoModal'));
+        const formEditarServico = document.getElementById('form-editar-servico');
 
-    function carregarServicos(search = '') {
-        fetch(`/psicologia/servicos?search=${encodeURIComponent(search)}`)
-            .then(res => res.json())
-            .then(servicos => {
-                servicosTbody.innerHTML = '';
-                if (servicos.length === 0) {
-                    servicosTbody.innerHTML = `<tr><td colspan="5" class="text-center">Nenhum serviço encontrado.</td></tr>`;
-                    return;
-                }
-                servicos.forEach(s => {
-                    const valorFormatado = parseFloat(s.VALOR_SERVICO ?? 0).toFixed(2);
-                    const tr = document.createElement('tr');
-                    tr.innerHTML = `
-                        <td>${s.SERVICO_CLINICA_DESC}</td>
-                        <td>${s.COD_INTERNO_SERVICO_CLINICA}</td>
-                        <td>R$ ${valorFormatado}</td>
-                        <td>
-                            <button class="btn btn-sm btn-primary btn-editar"
-                                data-id="${s.ID_SERVICO_CLINICA}"
-                                data-desc="${s.SERVICO_CLINICA_DESC}"
-                                data-disc="${s.DISCIPLINA}"
-                                data-cod="${s.COD_INTERNO_SERVICO_CLINICA}"
-                                data-valor="${s.VALOR_SERVICO ?? 0}"
-                                data-observacao="${s.OBSERVACAO ? s.OBSERVACAO : ''}"
-                                data-tempo="${s.TEMPO_RECORRENCIA_MESES ?? ''}"
-                            >
-                                Editar
-                            </button>
-                        </td>
-                    `;
-                    servicosTbody.appendChild(tr);
-                });
-
-                document.querySelectorAll('.btn-editar').forEach(btn => {
-                    btn.addEventListener('click', () => {
-                        document.getElementById('edit-servico-id').value = btn.dataset.id;
-                        document.getElementById('edit-servico-desc').value = btn.dataset.desc;
-
-                        // Se for '--', envia vazio para o campo para não quebrar a validação
-                        // VALORES ATUAIS PARA EDIÇÃO NO MODAL DE EDIÇÃO    
-                        document.getElementById('edit-servico-cod').value = (btn.dataset.cod === '--') ? '' : btn.dataset.cod;
-                        document.getElementById('edit-valor-servico').value = btn.dataset.valor;
-                        document.getElementById('edit-permite-simultaneo').checked = (btn.dataset.permite === 'S');
-                        document.getElementById('edit-observacao-servico').value = btn.dataset.observacao ?? '';
-                        document.getElementById('edit-tempo-recorrencia-meses').value = btn.dataset.tempo ?? '';
-                        document.getElementById('edit-servico-disc').value = btn.dataset.disc ?? '';
-                        editarServicoModal.show();
+        function carregarServicos(search = '') {
+            fetch(`/psicologia/servicos?search=${encodeURIComponent(search)}`)
+                .then(res => res.json())
+                .then(servicos => {
+                    servicosTbody.innerHTML = '';
+                    if (servicos.length === 0) {
+                        servicosTbody.innerHTML = `<tr><td colspan="5" class="text-center">Nenhum serviço encontrado.</td></tr>`;
+                        return;
+                    }
+                    servicos.forEach(s => {
+                        const valorFormatado = parseFloat(s.VALOR_SERVICO ?? 0).toFixed(2);
+                        const tr = document.createElement('tr');
+                        tr.innerHTML = `
+                            <td>${s.SERVICO_CLINICA_DESC}</td>
+                            <td>${s.COD_INTERNO_SERVICO_CLINICA}</td>
+                            <td>R$ ${valorFormatado}</td>
+                            <td>
+                                <button class="btn btn-sm btn-primary btn-editar"
+                                    data-id="${s.ID_SERVICO_CLINICA}"
+                                    data-desc="${s.SERVICO_CLINICA_DESC}"
+                                    data-disc="${s.DISCIPLINA}"
+                                    data-cod="${s.COD_INTERNO_SERVICO_CLINICA}"
+                                    data-valor="${s.VALOR_SERVICO ?? 0}"
+                                    data-observacao="${s.OBSERVACAO ? s.OBSERVACAO : ''}"
+                                    data-tempo="${s.TEMPO_RECORRENCIA_MESES ?? ''}"
+                                >
+                                    Editar
+                                </button>
+                            </td>
+                        `;
+                        servicosTbody.appendChild(tr);
                     });
+
+                    document.querySelectorAll('.btn-editar').forEach(btn => {
+                        btn.addEventListener('click', () => {
+                            document.getElementById('edit-servico-id').value = btn.dataset.id;
+                            document.getElementById('edit-servico-desc').value = btn.dataset.desc;
+
+                            // Se for '--', envia vazio para o campo para não quebrar a validação
+                            // VALORES ATUAIS PARA EDIÇÃO NO MODAL DE EDIÇÃO    
+                            document.getElementById('edit-servico-cod').value = (btn.dataset.cod === '--') ? '' : btn.dataset.cod;
+                            document.getElementById('edit-valor-servico').value = btn.dataset.valor;
+                            document.getElementById('edit-permite-simultaneo').checked = (btn.dataset.permite === 'S');
+                            document.getElementById('edit-observacao-servico').value = btn.dataset.observacao ?? '';
+                            document.getElementById('edit-tempo-recorrencia-meses').value = btn.dataset.tempo ?? '';
+                            document.getElementById('edit-servico-disc').value = btn.dataset.disc ?? '';
+                            editarServicoModal.show();
+                        });
+                    });
+                })
+                .catch(() => {
+                    servicosTbody.innerHTML = `<tr><td colspan="5" class="text-center text-danger">Erro ao carregar serviços.</td></tr>`;
                 });
+        }
+
+        carregarServicos();
+
+        searchInput.addEventListener('input', () => {
+            carregarServicos(searchInput.value);
+        });
+
+        formEditarServico.addEventListener('submit', e => {
+            e.preventDefault();
+
+            const id = document.getElementById('edit-servico-id').value;
+            const desc = document.getElementById('edit-servico-desc').value;
+            const disc = document.getElementById('edit-servico-disc').value;
+            const cod = document.getElementById('edit-servico-cod').value;
+            let valor = document.getElementById('edit-valor-servico').value.trim();
+            const observacao = document.getElementById('edit-observacao-servico').value;
+            const tempoRecorrencia = document.getElementById('edit-tempo-recorrencia-meses').value;
+
+            valor = valor.replace(',', '.');
+            valor = parseFloat(valor);
+            if (isNaN(valor)) valor = 0;
+
+            const permiteSimultaneo = document.getElementById('edit-permite-simultaneo').checked ? 'S' : 'N';
+
+            fetch(`/psicologia/servicos/${id}`, {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+                },
+                body: JSON.stringify({
+                    SERVICO_CLINICA_DESC: desc,
+                    COD_INTERNO_SERVICO_CLINICA: cod,
+                    VALOR_SERVICO: valor,
+                    DISCIPLINA: disc,
+                    PERMITE_ATENDIMENTO_SIMULTANEO: permiteSimultaneo,
+                    OBSERVACAO: observacao,
+                    TEMPO_RECORRENCIA_MESES: tempoRecorrencia
+                })
+            })
+            .then(res => {
+                if (!res.ok) throw new Error('Erro ao salvar');
+                return res.json();
+            })
+            .then(() => {
+                showAlert('Serviço atualizado com sucesso!', 'success');
+                editarServicoModal.hide();
+                carregarServicos(searchInput.value);
             })
             .catch(() => {
-                servicosTbody.innerHTML = `<tr><td colspan="5" class="text-center text-danger">Erro ao carregar serviços.</td></tr>`;
+                showModalAlert('Erro ao atualizar serviço. Verifique os campos ou tente novamente.', 'danger');
             });
-    }
+        });
 
-    carregarServicos();
+        document.getElementById('btn-deletar-servico').addEventListener('click', () => {
+            if (!confirm('Tem certeza que deseja excluir este serviço?')) return;
+            const id = document.getElementById('edit-servico-id').value;
 
-    searchInput.addEventListener('input', () => {
-        carregarServicos(searchInput.value);
-    });
-
-    formEditarServico.addEventListener('submit', e => {
-        e.preventDefault();
-
-        const id = document.getElementById('edit-servico-id').value;
-        const desc = document.getElementById('edit-servico-desc').value;
-        const disc = document.getElementById('edit-servico-disc').value;
-        const cod = document.getElementById('edit-servico-cod').value;
-        let valor = document.getElementById('edit-valor-servico').value.trim();
-        const observacao = document.getElementById('edit-observacao-servico').value;
-        const tempoRecorrencia = document.getElementById('edit-tempo-recorrencia-meses').value;
-
-        valor = valor.replace(',', '.');
-        valor = parseFloat(valor);
-        if (isNaN(valor)) valor = 0;
-
-        const permiteSimultaneo = document.getElementById('edit-permite-simultaneo').checked ? 'S' : 'N';
-
-        fetch(`/psicologia/servicos/${id}`, {
-            method: 'PUT',
-            headers: {
-                'Content-Type': 'application/json',
-                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
-            },
-            body: JSON.stringify({
-                SERVICO_CLINICA_DESC: desc,
-                COD_INTERNO_SERVICO_CLINICA: cod,
-                VALOR_SERVICO: valor,
-                DISCIPLINA: disc,
-                PERMITE_ATENDIMENTO_SIMULTANEO: permiteSimultaneo,
-                OBSERVACAO: observacao,
-                TEMPO_RECORRENCIA_MESES: tempoRecorrencia
+            fetch(`/psicologia/servicos/${id}`, {
+                method: 'DELETE',
+                headers: {
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+                }
             })
-        })
-        .then(res => {
-            if (!res.ok) throw new Error('Erro ao salvar');
-            return res.json();
-        })
-        .then(() => {
-            showAlert('Serviço atualizado com sucesso!', 'success');
-            editarServicoModal.hide();
-            carregarServicos(searchInput.value);
-        })
-        .catch(() => {
-            showModalAlert('Erro ao atualizar serviço. Verifique os campos ou tente novamente.', 'danger');
+            .then(async res => {
+                if (!res.ok) {
+                    const data = await res.json();
+                    throw new Error(data.message || 'Erro ao excluir.');
+                }
+                return res.json();
+            })
+            .then(() => {
+                showAlert('Serviço excluído com sucesso!', 'success');
+                editarServicoModal.hide();
+                carregarServicos(searchInput.value);
+            })
+            .catch(err => {
+                showModalAlert(err.message, 'warning');
+            });
         });
     });
-
-    document.getElementById('btn-deletar-servico').addEventListener('click', () => {
-        if (!confirm('Tem certeza que deseja excluir este serviço?')) return;
-        const id = document.getElementById('edit-servico-id').value;
-
-        fetch(`/psicologia/servicos/${id}`, {
-            method: 'DELETE',
-            headers: {
-                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
-            }
-        })
-        .then(async res => {
-            if (!res.ok) {
-                const data = await res.json();
-                throw new Error(data.message || 'Erro ao excluir.');
-            }
-            return res.json();
-        })
-        .then(() => {
-            showAlert('Serviço excluído com sucesso!', 'success');
-            editarServicoModal.hide();
-            carregarServicos(searchInput.value);
-        })
-        .catch(err => {
-            showModalAlert(err.message, 'warning');
-        });
-    });
-});
 </script>
 
 <!-- BUSCA DE DISCIPLINAS PARA VINCULAR AO SERVICO -->
@@ -661,5 +672,36 @@ document.addEventListener('DOMContentLoaded', () => {
         editSelect.size = 1;
     });
 </script>
+
+{{-- CONTROLA INPUT DE VALOR PARA PERMITIR APENAS NÚMERO E VÍRGULA --}}
+<script>
+    const valorServicoInput = document.getElementById('valor-servico');
+
+    valorServicoInput.addEventListener('input', function () {
+        this.value = this.value.replace(/[^\d,]/g, '');
+
+        // Permitir apenas uma vírgula
+        const parts = this.value.split(',');
+        if (parts.length > 2) {
+            this.value = parts[0] + ',' + parts[1];
+        }
+    });
+</script>
+
+{{-- CONTROLA INPUT DE VALOR PARA PERMITIR APENAS NÚMERO E VÍRGULA --}}
+<script>
+    const editValorServicoInput = document.getElementById('edit-valor-servico');
+
+    editValorServicoInput.addEventListener('input', function() {
+        this.value = this.value.replace(/[^\d,]/g, '');
+
+        // Permitir apenas uma vírgula
+        const parts = this.value.split(',');
+        if (parts.length > 2) {
+            this.value = parts[0] + ',' + parts[1];
+        }
+    })
+</script>
+
 </body>
 </html>

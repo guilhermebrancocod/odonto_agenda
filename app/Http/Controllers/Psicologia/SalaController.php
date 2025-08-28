@@ -15,15 +15,18 @@ class SalaController extends Controller
 
         $validatedData = $request->validate([
             'DESCRICAO' => 'required|string|max:255|unique:FAESA_CLINICA_SALA,DESCRICAO',
+            'DISCIPLINA' => 'string|max:10'
         ], [
             'DESCRICAO.required' => 'A descrição da Sala é obrigatória',
             'DESCRICAO.unique' => 'Já existe uma sala com essa descrição.',
             'DESCRICAO.string' => 'A descrição da sala não pode ser numérica',
             'DESCRICAO.max' => 'A descrição da sala não pode ter mais de 255 caracteres',
+            'DISCIPLINA.string' => 'A Disciplina deve conter o código da Disciplina',
         ]);
 
         $sala = new FaesaClinicaSala();
         $sala->DESCRICAO = $validatedData['DESCRICAO'];
+        $sala->DISCIPLINA = $validatedData['DISCIPLINA'];
         $sala->save();
 
         return redirect()->route('salas_psicologia')->with('success', 'Sala criada com sucesso!');
@@ -55,12 +58,14 @@ class SalaController extends Controller
                 'max:255',
                 Rule::unique('FAESA_CLINICA_SALA', 'DESCRICAO')->ignore($id, 'ID_SALA_CLINICA'),
             ],
+            'DISCIPLINA' => 'nullable|string|max:10',
             'ATIVO' => 'required|in:S,N',
         ], [
             'DESCRICAO.required' => 'A descrição da Sala é obrigatória',
             'DESCRICAO.unique' => 'Já existe uma sala com essa descrição.',
             'DESCRICAO.string' => 'A descrição da sala não pode ser numérica',
             'DESCRICAO.max' => 'A descrição da sala não pode ter mais de 255 caracteres',
+            'DISCIPLINA.string' => 'A Disciplina deve conter o código da Disciplina',
         ])->validate();
 
         $sala = FaesaClinicaSala::findOrFail($id);

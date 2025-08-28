@@ -35,6 +35,9 @@ class ServicoController extends Controller
             'VALOR_SERVICO' => 'nullable|numeric',
             'OBSERVACAO' => 'nullable|string|max:500',
             'TEMPO_RECORRENCIA_MESES' => 'nullable|integer|min:0',
+        ], [
+            'SERVICO_CLINICA_DESC.required' => 'Informe o nome do Serviço antes de prosseguir',
+            'COD_INTERNO_SERVICO_CLINICA' => 'O Código Interno deve ser um número, não pode conter letras',
         ]);
 
         // Verificação de duplicidade por nome
