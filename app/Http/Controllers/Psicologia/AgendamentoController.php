@@ -397,11 +397,81 @@ class AgendamentoController extends Controller
     // CRIAR AGENDAMENTO - PSICOLOGO
     public function criarAgendamentoPsicologo(Request $request)
     {
-        $this->agendamentoService->criarAgendamentoPsicologo($request);
-        return response()->json([
-            'success' => true,
-            // 'message' => ''
+        // CLINICA FIXO
+        $idClinica = 1;
+        
+        $request->validate([
+            'paciente_id' => 'required|integer',
+            'id_servico' => 'required|integer',
+            'dia_agend' => 'required|date',
+            'hr_ini' => 'required',
+            'hr_fim' => 'required|after:hr_ini',
+            'status_agend' => 'required|string',
+            'observacoes' => 'nullable|string',
+            'local_agend' => 'nullable|string|max:255',
+            'id_sala_clinica' => 'nullable|integer|exists:faesa_clinica_sala,ID_SALA_CLINICA',
+            'id_psicologo' => 'required|integer',
+        ], [
+            'paciente_id.required' => 'A seleção de paciente é obrigatória.',
+            'id_servico.required' => 'A seleção de serviço obrigatória.',
+            'dia_agend.required' => 'A data do agendamento é obrigatória.',
+            'hr_ini.required' => 'A hora de início é obrigatória.',
+            'hr_fim.required' => 'A hora de término é obrigatória.',
+            'hr_fim.after' => 'A hora de término deve ser posterior à hora de início.',
+            'id_sala_clinica.exists' => 'A sala selecionada não existe.',
+            'observacoes.string' => 'As observações devem ser um texto.',
+            'status_agend.required' => 'O status do agendamento é obrigatório.',
+            'id_psicologo.integer' => 'A identificação do Psicólogo deve ser o número de matrícula',
+            'id_psicologo.required' => 'A identificação do Psicólogo é necesária'
         ]);
+
+        // BUSCA QUAL SERVIÇO PSICÓLOGO SELECIONOU
+        $servico = FaesaClinicaServico::find($request->id_servico);
+
+        // AGENDAMENTO SIMPLES
+        if ($this->existeConflitoAgendamento($idClinica, $request->local_agend, $request->dia_agend, $request->hr_ini, $request->hr_fim, $request->paciente_id, idPsicologo: $request->id_psicologo)) {
+            return redirect()->back()
+                ->withInput()
+                ->withErrors(['conflito' => 'Conflito de Agendamento identificado']);
+        }
+
+        $dados = [
+            'ID_CLINICA' => $idClinica,
+            'ID_PACIENTE' => $request->paciente_id,
+            'ID_SERVICO' => $request->id_servico,
+            'DT_AGEND' => $request->dia_agend,
+            'HR_AGEND_INI' => $request->hr_ini,
+            'HR_AGEND_FIN' => $request->hr_fim,
+            'STATUS_AGEND' => 'Agendado',
+            'OBSERVACOES' => $request->observacoes ?? null,
+            'ID_SALA_CLINICA' => $request->id_sala_clinica,
+            'LOCAL' => $request->local_agend,
+            'ID_PSICOLOGO' => $request->id_psicologo,
+        ];
+
+        if (!$this->salaEstaAtiva($request->local_agend)) {
+            return redirect()->back()
+                ->withInput()
+                ->withErrors(['sala_indisponivel' => 'Sala não está ativa.']);
+        }
+
+        if (!$this->horarioEstaDisponivel($idClinica, $request->dia_agend, $request->hr_ini, $request->hr_fim)) {
+            return redirect()->back()
+                ->withInput()
+                ->withErrors(['horario_indisponivel' => 'O horário solicitado não está disponível.']);
+        }
+
+        FaesaClinicaAgendamento::create($dados);
+
+        try {
+            $this->pacienteService->setEmAtendimento($request->paciente_id);
+        } catch (\Illuminate\Database\Eloquent\ModelNotFoundException $e) {
+            return redirect()->back()->with('error', 'Paciente não encontrado.');
+        } catch (\Exception $e) {
+            return redirect()->back()->with('error', 'Erro ao atualizar o status do paciente.');
+        }
+        return redirect('/psicologo/criar-agendamento/')
+            ->with('success', 'Agendamento criado com sucesso!');
     }
 
     // MOSTRA AGENDAMENTOS - Utiliza Injeção de Dependência
@@ -483,7 +553,7 @@ class AgendamentoController extends Controller
                 ->withErrors(['sala_indisponivel' => 'Sala não está disponível.']);
         }
 
-        // Valida conflito de agendamento
+        // VALIDA CONFLITO DE AGENDAMENTO
         if ($this->existeConflitoAgendamento($idClinica, $local, $data, $horaIni, $horaFim, $idPaciente, $idAgendamento)) {
             return redirect()->back()
                 ->withInput()
@@ -651,24 +721,20 @@ class AgendamentoController extends Controller
 
     private function salaEstaAtiva($salaAgendamento)
     {
-
-
         if ($salaAgendamento == null) {
-            return true; //Se nenhuma sala for selecionada, não retorna erro
+            return true;
         }
 
-        // Busca todas as salas INATIVAS da clínica
+        // BUSCA TODAS AS SALAS INATIVAS DA CLÍNICA
         $salasInativas = FaesaClinicaSala::where('ATIVO', 'N')->get();
-
 
         // Verifica se alguma dessas salas tem a descrição igual à sala do agendamento
         foreach ($salasInativas as $sala) {
             if ($sala->DESCRICAO === $salaAgendamento) {
-                return false; // A sala está disponível (está inativa e é a sala desejada)
+                return false;
             }
         }
-
-        return true; // Nenhuma sala inativa bate com a descrição
+        return true;
     }
     private function horarioEstaDisponivel($idClinica, $dataAgendamento, $horaInicio, $horaFim)
     {
@@ -676,7 +742,7 @@ class AgendamentoController extends Controller
         $horaInicio = Carbon::parse($horaInicio)->format('H:i:s');
         $horaFim = Carbon::parse($horaFim)->format('H:i:s');
 
-        // Verifica bloqueios
+        // VERIFICA BLOQUEIOS
         $bloqueios = FaesaClinicaHorario::where('ID_CLINICA', $idClinica)
             ->where('BLOQUEADO', 'S')
             ->whereDate('DATA_HORARIO_INICIAL', '<=', $data)
@@ -687,7 +753,7 @@ class AgendamentoController extends Controller
 
         if ($bloqueios) return false;
 
-        // Verifica se existe algum horário permitido
+        // VERIFICA SE EXISTE ALGUM HORÁRIO PERMITIDO
         $horariosPermitidos = FaesaClinicaHorario::where('ID_CLINICA', $idClinica)
             ->where('BLOQUEADO', 'N')
             ->whereDate('DATA_HORARIO_INICIAL', '<=', $data)
@@ -705,8 +771,7 @@ class AgendamentoController extends Controller
                 return true;
             }
         }
-
-        return false; // Nenhum horário permitido contemplou esse intervalo
+        return false;
     }
 
     // ADICIONA MENSAGEM DE MOTIVO DE CANCELAMENTO AO AGENDAMENTO

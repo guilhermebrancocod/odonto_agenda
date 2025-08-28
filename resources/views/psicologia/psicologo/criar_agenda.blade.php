@@ -157,7 +157,7 @@
             </div>
 
             <!-- FORM DE AGENDAMENTO -->
-            <form action="{{ route('criarAgendamento-Psicologia') }}" method="POST" id="agendamento-form" class="w-100" validate>
+            <form action="{{ route('criarAgendamento-Psicologo') }}" method="POST" id="agendamento-form" class="w-100" validate>
                 @csrf
 
                 <!-- VALORES PASSADOS NO FORMATO HIDDEN | USUÁRIO NÃO SELECIONA DIRETAMENTE -->
@@ -169,6 +169,8 @@
                 <input type="hidden" name="recorrencia" id="recorrencia"/>
 
                 <input type="hidden" name="status_agend" value="Em aberto"/>
+
+                <input type="hidden" name="id_psicologo" id="id_psicologo" value="{{ session('psicologo')[1] }}"/>
 
                 {{-- CAMPO DE PESQUISA POR PACIENTES --}}
                 <div class="mb-3 position-relative">

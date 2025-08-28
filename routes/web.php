@@ -354,7 +354,7 @@ Route::middleware([AuthPsicologoMiddleware::class])->group(function () {
         return view('psicologia.psicologo.criar_agenda');
     })->name('psicologoCriarAgenda-Get');
 
-    Route::post('/psicologo/criar-agendamento/criar', [AgendamentoController::class, 'criarAgendamentoPsicologo'])->name('criarAgendamento-Psicologia');
+    Route::post('/psicologo/criar-agendamento/criar', [AgendamentoController::class, 'criarAgendamentoPsicologo'])->name('criarAgendamento-Psicologo');
 });
 Route::get('/psicologo/logout', function() {
     session()->forget('psicologo');
