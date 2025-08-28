@@ -100,7 +100,8 @@ class PacienteService
 
         // Filtro por nome ou CPF
         if (!empty($filtros['search'])) {
-            $query->where(function ($q) use ($filtros) {
+            $query->where('STATUS', '<>', 'Inativo')
+            ->where(function ($q) use ($filtros) {
                 $q->where('NOME_COMPL_PACIENTE', 'LIKE', '%' . $filtros['search'] . '%')
                 ->orWhere('CPF_PACIENTE', 'LIKE', '%' . $filtros['search'] . '%');
             });
