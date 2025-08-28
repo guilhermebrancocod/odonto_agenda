@@ -80,6 +80,17 @@ class FaesaClinicaAgendamento extends Model
     }
 
     /**
+     * Define um relacionamento BelongsTo com a tabela LY_ALUNO
+     * Um ID_PSICOLOGO pertence a um LY_ALUNO
+     * 
+     * @return Illuminate\Database\Eloquent\Relations\BelongsTo
+     */
+    public function psicologo(): BelongsTo
+    {
+        return $this->belongsTo(LyAluno::class, 'ID_PSICOLOGO', 'ALUNO');
+    }
+
+    /**
      * Define o relacionamento BelongsTo para o agendamento original que foi remarcado.
      * Self-Referencing (um agendamento pode ter sido remarcado a partir de outro).
      * 

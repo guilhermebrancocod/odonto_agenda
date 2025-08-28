@@ -19,7 +19,6 @@ class AgendamentoService
         ])
         ->where('ID_CLINICA', 1)
         ->where('STATUS_AGEND', '<>', 'Excluido');
-        // ->where('STATUS_AGEND', '<>', 'Remarcado');
 
         // Filtro por nome ou CPF do paciente
         if ($request->filled('search')) {
@@ -27,6 +26,15 @@ class AgendamentoService
             $query->whereHas('paciente', function($q) use ($search) {
                 $q->where('NOME_COMPL_PACIENTE', 'like', "%{$search}%")
                 ->orWhere('CPF_PACIENTE', 'like', "%{$search}%");
+            });
+        }
+
+        if ($request->filled('psicologo')) {
+            $psicologo = $request->input('psicologo');
+
+            $query->whereHas('psicologo', function($q) use ($psicologo) {
+                $q->where('ALUNO', 'like', "{$psicologo}%")
+                ->orWhere('NOME_COMPL', 'like', "%{$psicologo}%");
             });
         }
 
