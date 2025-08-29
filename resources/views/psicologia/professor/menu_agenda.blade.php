@@ -31,7 +31,7 @@
     
 <body>
     
-    @include('components.psicologo_navbar')
+    @include('components.professor_navbar')
 
     <!-- CALENDÁRIO -->
     <div id="calendar" class="flex-grow-1 p-3 overflow-auto"></div>

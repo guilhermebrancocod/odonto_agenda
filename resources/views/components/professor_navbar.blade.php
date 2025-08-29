@@ -106,7 +106,7 @@
     <h5 class="mb-2 mt-3 p-2 rounded-3 text-center"
         style="color: white; font-size: 18px;">
         <strong>Clínica de Psicologia</strong>
-        <p class="p-0 m-0 text-center" style="font-size: 12px;"><em>Aluno</em></p>
+        <p class="p-0 m-0 text-center" style="font-size: 12px;"><em>Docente</em></p>
     </h5>
 
     <!-- DADOS DA SESSAO DO USUARIO -->
@@ -125,7 +125,7 @@
         </p>
     </div>
 
-    <ul class="list-group list-group-flush w-100 gap-1 mt-3">
+    <ul class="list-group list-group-flush w-100 gap-1 mt-2">
         <!-- LINKS -->
 
         <!-- PÁGINA INICIAL - MENU AGENDA -->

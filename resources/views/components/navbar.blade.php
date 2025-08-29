@@ -94,7 +94,6 @@
 
 </style>
 
-
 <nav class="navbar navbar-dark bg-primary d-lg-none fixed-top shadow-sm px-3" style="height: 56px">
     <button class="btn btn-primary" type="button" data-bs-toggle="offcanvas" data-bs-target="#offcanvasMenu">
         <i class="fas fa-bars"></i>
@@ -106,16 +105,16 @@
 <div id="main-container" class="d-flex min-vh-100">
 
 <!-- SIDEBAR DESKTOP -->
-<nav class="p-3 d-none d-lg-flex flex-column align-items-center shadow-lg" style="width: 250px; background-color: var(--blue-color);">
-
+<nav class="p-3 d-none d-lg-flex flex-column align-items-center shadow-lg" id="mainNavbar">
     <!-- LOGO DA FAESA - NAVBAR -->
     <img src="{{ asset('faesa_branco.png') }}" alt="Logo" class="img-fluid mb-2" />
 
     <!-- TITULO SIDEBAR -->
-    <h4 class="mb-2 mt-3 p-2 rounded-3"
-        style="color: white;">
-        <strong>Psicologia</strong>
-    </h4>
+    <h5 class="mb-2 mt-3 p-2 rounded-3 text-center"
+        style="color: white; font-size: 18px;">
+        <strong>Clínica de Psicologia</strong>
+        <p class="p-0 m-0 text-center" style="font-size: 12px;"><em>Administrador</em></p>
+    </h5>
 
     <!-- DADOS DA SESSAO DO USUARIO -->
     <div classs="">

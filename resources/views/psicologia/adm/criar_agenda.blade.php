@@ -168,6 +168,7 @@
                 <input type="hidden" name="status_agend" value="Em aberto"/>
 
                 <div class="mb-3 position-relative">
+                    <label for="search-input" class="form-label">Paciente</label>
                     <input id="search-input" name="search" class="form-control" placeholder="Pesquisar paciente" value="{{ old('search') }}">
 
                     <!-- LISTA DE PACIENTES ENCONTRADOS PARA AGENDAMENTO -->
