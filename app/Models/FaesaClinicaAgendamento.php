@@ -87,7 +87,7 @@ class FaesaClinicaAgendamento extends Model
      */
     public function psicologo(): BelongsTo
     {
-        return $this->belongsTo(LyAluno::class, 'ID_PSICOLOGO', 'ALUNOw');
+        return $this->belongsTo(LyAluno::class, 'ID_PSICOLOGO', 'ALUNO');
     }
 
     /**

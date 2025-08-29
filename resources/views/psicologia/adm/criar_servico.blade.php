@@ -194,7 +194,7 @@
                        id="nome-servico"
                        name="SERVICO_CLINICA_DESC"
                        class="form-control"
-                       value="{{ old('SERVICO_CLINICA_DESC') }}"
+                       value="{{ old('SERVICO_CLINICA_DESC', request('nome_servico')) }}"
                        required>
             </div>
 

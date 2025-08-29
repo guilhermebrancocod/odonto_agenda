@@ -385,7 +385,17 @@
 
                     // CASO NENHUM PACIENTE SEJA ENCONTRADO - MOSTRA MENSAGEM
                     if (pacientes.length === 0) {
-                        pacientesList.innerHTML = `<div class="alert alert-warning">Nenhum paciente encontrado.</div>`;
+                        pacientesList.innerHTML = `<div class="alert alert-warning">
+                            Nenhum paciente encontrado
+                            <button type="button" class="btn btn-success ms-1" style="font-size: 10px;" id="add-paciente">Adicionar</button>
+                        </div>`;
+
+                        const buttonAddPaciente = document.getElementById('add-paciente');
+                        buttonAddPaciente.addEventListener('click', () => {
+                            const nome_compl_paciente = document.getElementById('search-input').value;
+                            window.location.href = "{{ route('criarpaciente_psicologia') }}"  + "?nome_compl_paciente=" + encodeURIComponent(nome_compl_paciente);
+                        });
+                        
                         return;
                     }
 
@@ -476,7 +486,17 @@
                     servicosList.innerHTML = '';
 
                     if (servicos.length === 0) {
-                        servicosList.innerHTML = `<button type="button" class="list-group-item list-group-item-action disabled">Nenhum serviço encontrado</button>`;
+                        servicosList.innerHTML = `<button type="button" class="list-group-item list-group-item-action disabled">
+                            Nenhum serviço encontrado
+                            <button type="button" class="btn btn-success" id="add-servico" style="font-size: 12px">Adicionar</button>
+                        </button>`;
+
+                        const buttonAddServico = document.getElementById('add-servico');
+                        buttonAddServico.addEventListener('click', () => {
+                            const nome_servico = document.getElementById('servico').value;
+                            window.location.href = "{{ route('criarservico_psicologia') }}" + "?nome_servico=" + encodeURIComponent(nome_servico);
+                        });
+
                         document.getElementById('id_servico').value = '';
                         infoObs.style.display = 'none';
                         infoObs.title = '';
@@ -541,7 +561,17 @@
                     localList.innerHTML = '';
 
                     if (locais.length === 0) {
-                        localList.innerHTML = `<button type="button" class="list-group-item list-group-item-action disabled">Nenhum local encontrado</button>`;
+                        localList.innerHTML = `<button type="button" class="list-group-item list-group-item-action disabled">
+                            Nenhum local encontrado
+                            <button type="button" class="btn btn-success" id="add-local">Adicionar</button>
+                        </button>`;
+
+                        const buttonAddLocal = document.getElementById('add-local');
+                        buttonAddLocal.addEventListener('click', () => {
+                            const nome_local = document.getElementById('local_agend').value;
+                            window.location.href = "{{ route('salas_psicologia') }}" + "?nome_local=" + encodeURIComponent(nome_local);
+                        });
+                        
                         return;
                     }
 

@@ -110,16 +110,15 @@
                     <div class="col-md-5">
                         <label for="nome" class="form-label">
                             Nome Completo
-                            <span style="color: red; font-size: 10px">*</span>
+                            <span style="color: red; font-size: 13px">*</span>
                         </label>
-                        <input type="text" id="nome" name="NOME_COMPL_PACIENTE" class="form-control" value="{{ old('NOME_COMPL_PACIENTE') }}"/>
+                        <input type="text" id="nome" name="NOME_COMPL_PACIENTE" class="form-control" value="{{ old('NOME_COMPL_PACIENTE', request('nome_compl_paciente')) }}" />
                     </div>
                     
                     <!-- DATA NASCIMENTO -->
                     <div class="col-md-3">
                         <label for="dt_nasc" class="form-label">
                             Data de nascimento
-                            
                             <span style="font-size: 12px">(dia/mes/ano)</span>
                         </label>
                         <input type="text" id="dt_nasc" name="DT_NASC_PACIENTE" class="form-control" value="{{ old('DT_NASC_PACIENTE') }}"/>
@@ -127,13 +126,19 @@
                     
                     <!-- CPF -->
                     <div class="col-md-2">
-                        <label for="cpf_paciente" class="form-label">CPF</label>
+                        <label for="cpf_paciente" class="form-label">
+                            CPF
+                            <span style="color: red; font-size: 13px">*</span>
+                        </label>
                         <input type="text" id="cpf_paciente" name="CPF_PACIENTE" class="form-control" value="{{ old('CPF_PACIENTE') }}"/>
                     </div>
                     
                     <!-- SEXO -->
                     <div class="col-md-2">
-                        <label for="sexo" class="form-label">Sexo</label>
+                        <label for="sexo" class="form-label">
+                            Sexo
+                            <span style="color: red; font-size: 13px">*</span>
+                        </label>
                         <select id="sexo" name="SEXO_PACIENTE" class="form-select">
                             <option value="" {{ old('SEXO_PACIENTE') == '' ? 'selected' : '' }}>Selecione</option>
                             <option value="M" {{ old('SEXO_PACIENTE') == 'M' ? 'selected' : '' }}>Masculino</option>
@@ -183,19 +188,28 @@
 
                     <!-- CEP -->
                     <div class="col-md-3">
-                        <label for="cep" class="form-label">CEP</label>
+                        <label for="cep" class="form-label">
+                            CEP
+                            <span style="color: red; font-size: 13px">*</span>
+                        </label>
                         <input type="text" id="cep" name="CEP" class="form-control" value="{{ old('CEP') }}"/>
                     </div>
 
                     <!-- RUA - LOGRADOURO -->
                     <div class="col-md-6">
-                        <label for="rua" class="form-label">Rua</label>
+                        <label for="rua" class="form-label">
+                            Rua
+                            <span style="color: red; font-size: 13px">*</span>
+                        </label>
                         <input type="text" id="rua" name="ENDERECO" class="form-control" value="{{ old('ENDERECO') }}"/>
                     </div>
                     
                     <!-- NÚMERO -->
                     <div class="col-md-3">
-                        <label for="numero" class="form-label">Número</label>
+                        <label for="numero" class="form-label">
+                            Número
+                            <span style="color: red; font-size: 13px">*</span>
+                        </label>
                         <input type="text" id="numero" name="END_NUM" class="form-control" value="{{ old('END_NUM') }}"/>
                     </div>
 
@@ -209,19 +223,28 @@
 
                 <!-- BAIRRO -->
                 <div class="mb-4">
-                    <label for="bairro" class="form-label">Bairro</label>
+                    <label for="bairro" class="form-label">
+                        Bairro
+                        <span style="color: red; font-size: 13px">*</span>
+                    </label>
                     <input type="text" id="bairro" name="BAIRRO" class="form-control" value="{{ old('BAIRRO') }}"/>
                 </div>
                 
                 <!-- MUNICIPIO -->
                 <div class="mb-4">
-                    <label for="municipio" class="form-label">Municipio</label>
+                    <label for="municipio" class="form-label">
+                        Municipio
+                        <span style="color: red; font-size: 13px">*</span>
+                    </label>
                     <input type="text" id="municipio" name="municipio" class="form-control" value="{{ old('municipio') }}"/>
                 </div>
 
                 <!-- ESTADO -->
                 <div class="mb-4">
-                    <label for="estado" class="form-label">Estado</label>
+                    <label for="estado" class="form-label">
+                        Estado
+                        <span style="color: red; font-size: 13px">*</span>
+                    </label>
                     <select id="estado" name="UF" class="form-select">
                         <option value="" selected disabled>Selecione o estado</option>
                         <option value="AC" {{ old('UF') == 'AC' ? 'selected' : '' }}>Acre</option>
@@ -262,7 +285,10 @@
                     <input type="email" id="email" name="E_MAIL_PACIENTE" class="form-control" value="{{ old('E_MAIL_PACIENTE') }}"/>
                 </div>
                 <div class="mb-3">
-                    <label for="telefone" class="form-label">Telefone</label>
+                    <label for="telefone" class="form-label">
+                        Telefone
+                        <span style="color: red; font-size: 13px">*</span>
+                    </label>
                     <input type="text" id="telefone" name="FONE_PACIENTE" class="form-control" value="{{ old('FONE_PACIENTE') }}"/>
                 </div>
 

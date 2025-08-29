@@ -198,7 +198,7 @@
                        id="nome-sala"
                        name="DESCRICAO"
                        class="form-control"
-                       value="{{ old('DESCRICAO') }}"
+                       value="{{ old('DESCRICAO', request('nome_local')) }}"
                        required>
             </div>
 
