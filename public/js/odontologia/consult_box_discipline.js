@@ -5,6 +5,19 @@ function maskTime(value) {
         .replace(/^(\d{2}):(\d{2}).*/, '$1:$2')
 }
 
+function diaSemana(value) {
+    switch (value) {
+        case "1": return 'Domingo';
+        case "2": return 'Segunda-feira';
+        case "3": return 'Terça-feira';
+        case "4": return 'Quarta-feira';
+        case "5": return 'Quinta-feira';
+        case "6": return 'Sexta-feira';
+        case "7": return 'Sábado';
+        default: return 'Valor inválido';
+    }
+}
+
 function carregarTodosBoxDiscipline() {
     const $select = $('#selectBoxDiscipline');
     const $tbody = $('#box-discipline tbody');
@@ -32,7 +45,8 @@ function carregarTodosBoxDiscipline() {
                     <tr>
                         <td>${disciplines.DISCIPLINA}</td>
                         <td>${disciplines.DESCRICAO}</td>
-                        <td>${disciplines.DIA_SEMANA}</td>
+                        <td>${disciplines.TURMA}</td>
+                        <td>${diaSemana(disciplines.DIA_SEMANA)}</td>
                         <td>${maskTime(disciplines.HR_INICIO)}</td>
                         <td>${maskTime(disciplines.HR_FIM)}</td>
                         <td>

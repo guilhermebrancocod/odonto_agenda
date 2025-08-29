@@ -34,16 +34,16 @@ function validarDataAnoAtual(campo) {
 }
 
 $(document).ready(function () {
-  $('#valor').on('blur', function () {
-    let valor = parseFloat($(this).val().replace(',', '.'));
+    $('#valor').on('blur', function () {
+        let valor = parseFloat($(this).val().replace(',', '.'));
 
-    if (!isNaN(valor) && valor > 100) {
-      if (!confirm("O valor informado é superior a R$ 100,00. Deseja continuar?")) {
-        $(this).val('');
-        $(this).focus();
-      }
-    }
-  });
+        if (!isNaN(valor) && valor > 100) {
+            if (!confirm("O valor informado é superior a R$ 100,00. Deseja continuar?")) {
+                $(this).val('');
+                $(this).focus();
+            }
+        }
+    });
 });
 
 
@@ -106,16 +106,14 @@ $(document).ready(function () {
 
 $(document).ready(function () {
     $.fn.select2.defaults.set("language", "pt-BR");
-    let disciplinaSelecionada = null;
 
-    const $servicoSelect = $('#form-select');
+    const $disciplineSelect = $('#form-select-proc');
 
-    $servicoSelect.select2({
-        placeholder: "Busque o serviço",
+    $disciplineSelect.select2({
         allowClear: true,
         minimumInputLength: 0,
         ajax: {
-            url: '/servicos',
+            url: '/procedimentos',
             dataType: 'json',
             delay: 250,
             data: function (params) {
@@ -124,7 +122,7 @@ $(document).ready(function () {
             processResults: function (data) {
                 return {
                     results: data.map(p => ({
-                        id: p.ID,
+                        id: p.ID_SERVICO_CLINICA,
                         text: p.SERVICO_CLINICA_DESC + ' ' + (p.DISCIPLINA ?? ''),
                         disciplina: p.DISCIPLINA
                     }))
@@ -133,19 +131,72 @@ $(document).ready(function () {
             cache: true
         }
     });
+});
 
-    console.log($servicoSelect);
+$(document).ready(function () {
+    $.fn.select2.defaults.set("language", "pt-BR");
+    let disciplinaSelecionada = null;
 
-    $servicoSelect.on('select2:select', function () {
-        const selectedData = $(this).select2('data')[0];
-        disciplinaSelecionada = selectedData.disciplina;
-        console.log(disciplinaSelecionada);
-        $('#form-select-box').val(null).trigger('change');
+    const $disciplineSelect = $('#form-select-discipline');
+    const $boxSelect = $('#form-select-box');
+    const $turmaSelect = $('#form-select-turma');
+
+
+    $boxSelect.prop('disabled', true);
+    $turmaSelect.prop('disabled', true);
+
+    $disciplineSelect.select2({
+        allowClear: true,
+        ajax: {
+            url: '/odontologia/disciplinascombox/',
+            dataType: 'json',
+            delay: 250,
+            data: params => ({ query: params.term || '' }),
+            processResults: data => {
+                const list = Array.isArray(data) ? data : (data?.data || []);
+                return {
+                    results: list.map(p => ({
+                        id: p.DISCIPLINA,
+                        text: p.DISCIPLINA + '-' + p.NOME
+                    }))
+                };
+            },
+            cache: true
+        }
+    });
+
+    $disciplineSelect.on('select2:select', (e) => {
+        disciplinaSelecionada = e.params.data.id;
+        $boxSelect.prop('disabled', false).val(null).trigger('change');
+        $turmaSelect.prop('disabled', false).val(null).trigger('change'); // limpa boxes e habilita
+    });
+
+    $disciplineSelect.on('select2:clear select2:unselect', () => {
+        disciplinaSelecionada = null;
+        $boxSelect.val(null).trigger('change').prop('disabled', true);
+        $turmaSelect.val(null).trigger('change').prop('disabled', true);
+    });
+
+    $turmaSelect.select2({
+        allowClear: true,
+        minimumInputLength: 0,
+        ajax: {
+            url: () => `/odontologia/turmas?disciplina=${encodeURIComponent(disciplinaSelecionada || '')}`,
+            dataType: 'json',
+            delay: 250,
+            data: params => ({
+                query: params.term || '',
+                disciplina: disciplinaSelecionada || ''   // <<< envia a disciplina
+            }),
+            processResults: data => ({
+                results: (Array.isArray(data) ? data : []).map(t => ({ id: t, text: t }))
+            }),
+            cache: true
+        }
     });
 
     // Inicializa o segundo select (boxes)
     $('#form-select-box').select2({
-        placeholder: "Selecione o box",
         allowClear: true,
         ajax: {
             url: function () {
@@ -168,17 +219,139 @@ $(document).ready(function () {
         }
     });
 
+    // utilitário para pré-selecionar programaticamente no Select2
+    function hydrateSelect2($el, id, text) {
+        if (!id || !text) return;
+        const exists = Array.from($el[0].options).some(o => String(o.value) === String(id));
+        if (!exists) {
+            const opt = new Option(text, id, true, true);
+            $el.append(opt).trigger('change', { silentInit: true });
+        } else {
+            $el.val(String(id)).trigger('change', { silentInit: true });
+        }
+    }
+
+    // 1) Rehidrata a disciplina e o box com os valores do edit
+    const discInitId = $disciplineSelect.data('initial-id');
+    const discInitText = $disciplineSelect.data('initial-text');
+    if (discInitId && discInitText) {
+        hydrateSelect2($disciplineSelect, discInitId, discInitText);
+    }
+
+    const boxInitId = $boxSelect.data('initial-id');
+    const boxInitText = $boxSelect.data('initial-text');
+    if (boxInitId && boxInitText) {
+        hydrateSelect2($boxSelect, boxInitId, boxInitText);
+    }
+
+    // 2) Só limpa o BOX se o usuário realmente TROCAR a disciplina
+    $disc.on('select2:select select2:clear select2:unselect', function (e) {
+        // se veio de hydrate inicial, ignore
+        if (e?.params?.silentInit) return;
+
+        // disciplina mudou => limpar box
+        $box.val(null).trigger('change');
+    });
+
+    // 3) garanta que o BOX não fique disabled no edit
+    $box.prop('disabled', false);
+
     // Foco automático na busca quando abrir
-    $servicoSelect.on('select2:open', function () {
+    $disciplineSelect.on('select2:open', function () {
         setTimeout(() => {
             document.querySelector('.select2-container--open .select2-search__field')?.focus();
         }, 0);
     });
 });
 
+const hrIni = document.getElementById('hr_ini');
+const hrFim = document.getElementById('hr_fim');
+
+function normalize(hhmm) {
+    if (!hhmm) return '';
+    const [h, m] = String(hhmm).split(':');
+    return `${parseInt(h, 10)}:${m}`; // "07:30" -> "7:30"
+}
+
+function getAllTimeBoxes() {
+    return Array.from(document.querySelectorAll('.time-check')).map(box => {
+        const input = box.querySelector('input.form-check-input');
+        const label = box.querySelector('label.form-check-label');
+        const base = (label.dataset.time || label.textContent).trim();
+        return { box, input, label, base, norm: normalize(base) };
+    });
+}
+
+const all = getAllTimeBoxes();
+
+function disableAllHorarios() {
+    all.forEach(({ input }) => {
+        input.checked = false;
+        input.disabled = true;
+    });
+    if (hrIni) hrIni.value = '';
+    if (hrFim) hrFim.value = '';
+}
+
+function enableHorariosFrom(items) {
+    // items esperado: [{inicio: "07:30", fim: "08:15"}, ...]
+    const allowed = new Set(items.map(i => normalize(i.inicio)));
+
+    all.forEach(({ input, norm }) => {
+        if (allowed.has(norm)) {
+            input.disabled = false;        // habilita
+            // input.checked = true;       // (opcional) já marcar
+        } else {
+            input.checked = false;
+            input.disabled = true;
+        }
+    });
+}
+
+const toMinutes = hm => { const [h, m] = String(hm).split(':').map(Number); return h * 60 + m; };
+const padHHMM = hm => { const [h, m] = String(hm).split(':'); return `${String(h).padStart(2, '0')}:${m}`; };
+
+function updateHrBoundsFrom(items) {
+    if (!items || !items.length) {
+        if (hrIni) hrIni.value = '';
+        if (hrFim) hrFim.value = '';
+        return;
+    }
+    // pega todos os inícios permitidos
+    const starts = items.map(i => normalize(i.inicio)).sort((a, b) => toMinutes(a) - toMinutes(b));
+    const first = starts[0];
+    const last = starts[starts.length - 1];
+
+    if (hrIni) hrIni.value = padHHMM(first);
+
+    // tenta usar o fim do último slot; se não vier, usa o próprio last
+    const lastObj = items.find(i => normalize(i.inicio) === last);
+    if (hrFim) hrFim.value = padHHMM(normalize(lastObj?.fim || last));
+}
+
+function reloadHorarios(disc, turma, dataISO) {
+    if (!disc || !turma || !dataISO) {
+        disableAllHorarios();
+        return;
+    }
+
+    disableAllHorarios(); // trava tudo enquanto carrega
+
+    fetch(`/odontologia/horarios/${encodeURIComponent(disc)}/${encodeURIComponent(turma)}/${encodeURIComponent(dataISO)}`)
+        .then(r => r.ok ? r.json() : Promise.reject(r))
+        .then(items => {
+            enableHorariosFrom(items);
+            updateHrBoundsFrom(items);
+        })
+        .catch(() => {
+            disableAllHorarios();
+        });
+}
+
+
 $(document).ready(function () {
     $('#selectPatient').select2({
-        placeholder: "Busque o paciente por nome ou CPF",
+        placeholder: "Selecione o paciente por nome ou CPF",
         allowClear: true,
         ajax: {
             url: '/getPacientes',
@@ -206,8 +379,6 @@ $(document).ready(function () {
         }, 0);
     });
 });
-
-
 
 const pagto = document.getElementById('pagto');
 const valor = document.getElementById('valor');

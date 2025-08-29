@@ -72,9 +72,9 @@ Route::put('/updatePatient/{id}', [OdontoUpdateController::class, 'updatePatient
 Route::get('/odontologia/criarservico', function () {
     return view('odontologia/create_service');
 })->name('criarservico');
-Route::post('/odontologia/criarservico', [OdontoCreateController::class, 'createService'])->name('createService');
+Route::post('/odontologia/criarservico', [OdontoCreateController::class, 'createProcedures'])->name('createProcedures');
 Route::get('/criarservico/{idService}', [OdontoCreateController::class, 'editService'])->name('editService');
-Route::put('/criarservico/{idService}', [OdontoUpdateController::class, 'updateService'])->name('updateService');
+Route::put('/criarservico/{idService}', [OdontoUpdateController::class, 'updateProcedures'])->name('updateProcedures');
 
 // BOXES
 Route::get('/odontologia/criarbox', function () {
@@ -95,22 +95,32 @@ Route::post('/odontologia/criaragenda', [OdontoCreateController::class, 'fCreate
 Route::get('/odontologia/criaragenda/{agendaId}', [OdontoCreateController::class, 'editAgenda'])->name('editAgenda');
 Route::put('/updateAgenda/{id}', [OdontoUpdateController::class, 'updateAgenda'])->name('updateAgenda');
 
+//PERFIL
+
+Route::get('/perfil', [LoginController::class, 'login']);
+
 // CONSULTAS
 Route::get('/odontologia/agendamentos', [OdontoConsultController::class, 'getAgendamentos']);
-Route::get('/odontologia/disciplinas', [OdontoConsultController::class, 'getDisciplinas']);
+Route::get('/odontologia/disciplinascombox/', [OdontoConsultController::class, 'disciplinascombox']);
+Route::get('/getBoxDisciplines/{discipline}', [OdontoConsultController::class, 'boxesDisciplina']);
+Route::get('/procedimentos', [OdontoConsultController::class, 'procedimento']);
+Route::get('/odontologia/turmas/', [OdontoConsultController::class, 'getTodasTurmas']);
+Route::get('/getHorariosBoxDisciplinas/{discipline}', [OdontoConsultController::class, 'getHorariosBoxDisciplinas']);
+Route::get('/odontologia/disciplinas/', [OdontoConsultController::class, 'getDisciplinas']);
+Route::get('/odontologia/turmas/{disciplina}', [OdontoConsultController::class, 'getTurmas']);
+Route::get('/odontologia/datas/{disciplina}/{turma}', [OdontoConsultController::class, 'getDatasTurmaDisciplina']);
+Route::get('/odontologia/horarios/{disciplina}/{turma}/{diasemana}',[OdontoConsultController::class,'getHorariosDatasTurmaDisciplina']);
 Route::get('/odontologia/boxes', [OdontoConsultController::class, 'getBoxes']);
 Route::get('/odontologia/boxes/{boxId}', [OdontoConsultController::class, 'getBoxesId']);
 Route::get('/odontologia/boxeservicos/{servicoId}', [OdontoConsultController::class, 'getBoxeServicos']);
 Route::get('/getPacientes', [OdontoConsultController::class, 'buscarPacientes']);
-Route::get('/getServices', [OdontoConsultController::class, 'buscarServicos']);
+Route::get('/getProcedures', [OdontoConsultController::class, 'buscarProcedimentos']);
 Route::get('/getAgenda', [OdontoConsultController::class, 'buscarAgendamentos']);
 Route::get('/getBoxes', [OdontoConsultController::class, 'buscarBoxes']);
 Route::get('/getBoxDisciplines', [OdontoConsultController::class, 'buscarBoxeDisciplinas']);
-Route::get('/getBoxDisciplines/{discipline}', [OdontoConsultController::class, 'boxesDisciplina']);
 Route::get('/consultaboxdisciplina/{idBoxDiscipline}', [OdontoConsultController::class, 'consultaboxdisciplina']);
 Route::get('/paciente/{pacienteId}', [OdontoConsultController::class, 'listaPacienteId']);
 Route::get('/servicos/{servicoId}', [OdontoConsultController::class, 'listaServicosId']);
-Route::get('/servicos', [OdontoConsultController::class, 'services']);
 Route::get('/agenda/{pacienteId}', [OdontoConsultController::class, 'listaAgendamentoId']);
 
 // CONSULTA DE VIEWS

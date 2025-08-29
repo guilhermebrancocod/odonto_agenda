@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Odonto;
 
 use Carbon\Carbon;
+use Illuminate\Validation\Rule;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Http\Request;
@@ -20,12 +21,26 @@ class OdontoUpdateController extends Controller
         $input['cep']              = preg_replace('/\D/', '', $input['cep'] ?? '');
         $input['cod_sus']          = preg_replace('/\D/', '', $input['cod_sus'] ?? '');
         $input['estado']           = strtoupper(trim($input['estado'] ?? ''));
+
         $request->merge($input);
 
         $rules = [
             'nome'            => ['required', 'string', 'max:255', 'regex:/^[A-Za-zÀ-ÿ0-9\s]+$/'],
             'cpf'             => ['required', 'regex:/^\d{11}$/'],   // 11 dígitos
             'dt_nasc'         => ['required', 'date_format:d/m/Y', 'before:today'],
+            'nome_responsavel' => [
+                Rule::requiredIf(function () use ($request) {
+                    try {
+                        $dob = Carbon::createFromFormat('d/m/Y', $request->input('dt_nasc'));
+                    } catch (\Exception $e) {
+                        return false;
+                    }   // se data inválida, não força
+                    return $dob->age < 18;
+                }),
+                'nullable',
+                'string',
+                'max:255',
+            ],
             'sexo'            => ['required', 'in:M,F'],
             'cep'             => ['nullable', 'regex:/^\d{8}$/'],
             'rua'             => ['nullable', 'string', 'max:255'],
@@ -47,6 +62,7 @@ class OdontoUpdateController extends Controller
             'nome.regex'             => 'O nome não pode conter caracteres especiais.',
             'cpf.required'           => 'O CPF é obrigatório.',
             'cpf.regex'              => 'Informe um CPF com 11 dígitos (apenas números).',
+            'nome_responsavel'       => 'Responsável obrigatório para menores de 18 anos.',
             'dt_nasc.required'       => 'A data de nascimento é obrigatória.',
             'dt_nasc.date_format'    => 'Use o formato de data dd/mm/aaaa.',
             'dt_nasc.before'         => 'A data de nascimento deve ser anterior a hoje.',
@@ -110,20 +126,17 @@ class OdontoUpdateController extends Controller
         return redirect()->back()->with('success', 'Paciente atualizado com sucesso!');
     }
 
-    public function updateService(Request $request, $idService)
+    public function updateProcedures(Request $request, $idService)
     {
         $request->validate([
-            'valor' => ['regex:/^\d+(\.\d{1,2})?$/'],
             'descricao' => ['required', 'regex:/^[A-Za-zÀ-ÿ0-9\s]+$/'],
         ], [
-            'valor.regex' => 'O valor deve conter apenas números (e opcionalmente decimais).',
             'descricao.required' => 'O campo descrição é obrigatório.',
             'descricao.regex' => 'A descrição não pode conter caracteres especiais.',
         ]);
         $valorServico = $request->input('valor');
         $descricao = $request->input('descricao');
-
-        $disciplinas = $request->input('disciplines', []);
+        $ativo = $request->input('ativo');
 
         // Atualiza os dados do serviço
         DB::table('FAESA_CLINICA_SERVICO')
@@ -132,23 +145,10 @@ class OdontoUpdateController extends Controller
                 'ID_CLINICA' => 2,
                 'SERVICO_CLINICA_DESC' => $descricao,
                 'VALOR_SERVICO' => $valorServico,
-                'ATIVO' => empty($disciplinas) ? 'N' : 'S',
+                'ATIVO' => $ativo
             ]);
 
-        // Remove todas as disciplinas associadas anteriormente
-        DB::table('FAESA_CLINICA_SERVICO_DISCIPLINA')
-            ->where('ID_SERVICO_CLINICA', $idService)
-            ->delete();
-
-        // Se houver disciplinas marcadas, associa novamente
-        foreach ($disciplinas as $disciplina) {
-            DB::table('FAESA_CLINICA_SERVICO_DISCIPLINA')->insert([
-                'ID_SERVICO_CLINICA' => $idService,
-                'DISCIPLINA' => $disciplina
-            ]);
-        }
-
-        return back()->with('success', 'Serviço atualizado com sucesso!');
+        return back()->with('success', 'Procedimento atualizado com sucesso!');
     }
 
     public function updateBox(Request $request, $idBox)
@@ -178,9 +178,46 @@ class OdontoUpdateController extends Controller
         $idClinica = 2;
         $idBox     = $request->input('ID_BOX');
         $diaStr = \Carbon\Carbon::createFromFormat('d/m/Y', $request->input('date'))->format('Y-m-d');
-        $dateEnd = $request->input('date_end');
-        $hrIni     = \Carbon\Carbon::createFromFormat('H:i', $request->input('hr_ini'))->format('H:i:s');
-        $hrFin     = \Carbon\Carbon::createFromFormat('H:i', $request->input('hr_fim'))->format('H:i:s');
+        $dateEnd = \Carbon\Carbon::createFromFormat('d/m/Y', $request->input('date_end'))->format('Y-m-d');
+
+        $dias = [
+            '1' =>  '7:30',
+            '2' =>  '8:15',
+            '3' =>  '9:00',
+            '4' =>  '9:45',
+            '5' =>  '10:15',
+            '6' =>  '11:00',
+            '7' =>  '11:45',
+            '8' =>  '12:30',
+            '9' =>  '13:15',
+            '10' => '14:00',
+            '11' => '14:45',
+            '12' => '15:30',
+            '13' => '16:15',
+            '14' => '17:00',
+            '15' => '17:45',
+            '16' => '18:30',
+        ];
+
+        $horarios = collect((array) $request->input('dias_semana', []))
+            ->map(fn($v) => (string) $v)                     // normaliza p/ string
+            ->filter(fn($v) => array_key_exists($v, $dias))  // só os válidos no mapa
+            ->map(fn($v) => (int) $v)                        // para ordenar numericamente
+            ->sort()
+            ->values();
+
+        if ($horarios->isNotEmpty()) {
+            $minKey = (string) $horarios->first();
+            $maxKey = (string) $horarios->last();
+
+            // Usa 'G:i' porque suas horas podem vir sem zero à esquerda (ex.: "7:30")
+            $hrIni = Carbon::createFromFormat('G:i', $dias[$minKey])->format('H:i:s');
+            $hrFim = Carbon::createFromFormat('G:i', $dias[$maxKey])->format('H:i:s');
+        } else {
+            // fallback: se nada foi enviado em dias_semana, usa os campos do formulário
+            $hrIni = Carbon::createFromFormat('H:i', $request->input('hr_ini'))->format('H:i:s');
+            $hrFim = Carbon::createFromFormat('H:i', $request->input('hr_fim'))->format('H:i:s');
+        }
 
         $valor_convert = $request->input('valor');
         if ($valor_convert === null || $valor_convert === '') {
@@ -194,17 +231,13 @@ class OdontoUpdateController extends Controller
             ->where('ID_BOX_CLINICA', $idBox)
             ->value('DESCRICAO') ?? null;
 
-        $disciplina = DB::table('FAESA_CLINICA_SERVICO_DISCIPLINA')
-            ->where('ID_SERVICO_CLINICA', (int) $request->input('servico'))
+        $disciplina = DB::table('FAESA_CLINICA_SERVICO')
+            ->where('ID_SERVICO_CLINICA', (int) $request->input('procedimento'))
             ->value('DISCIPLINA');
 
         $servico = DB::table('FAESA_CLINICA_SERVICO')
-            ->where('ID_SERVICO_CLINICA', (int) $request->input('servico')) // se o PK for outro (ex.: ID_BOX_DISCIPLINA), ajuste aqui
+            ->where('ID_SERVICO_CLINICA', (int) $request->input('procedimento')) // se o PK for outro (ex.: ID_BOX_DISCIPLINA), ajuste aqui
             ->value('ID_SERVICO_CLINICA');
-
-        if (!$servico) {
-            return back()->withErrors('Serviço inválido para a disciplina selecionada.');
-        }
 
         DB::table('FAESA_CLINICA_AGENDAMENTO as a')
             ->join('FAESA_CLINICA_LOCAL_AGENDAMENTO as la', 'la.ID_AGENDAMENTO', '=', 'A.ID_AGENDAMENTO')
@@ -217,7 +250,7 @@ class OdontoUpdateController extends Controller
                 'DT_AGEND' => $diaStr,
                 'DT_AGEND_FINAL' => $dateEnd,
                 'HR_AGEND_INI' => $hrIni,
-                'HR_AGEND_FIN' => $hrFin,
+                'HR_AGEND_FIN' => $hrFim,
                 'STATUS_AGEND' => $request->input('status'),
                 'ID_AGEND_REMARCADO' => $request->input('ID_AGEND_REMARCADO') ?: null,
                 'RECORRENCIA' => $request->input('recorrencia'),
@@ -226,12 +259,22 @@ class OdontoUpdateController extends Controller
                 'LOCAL' => $descricaoLocal
             ]);
 
+        $updLocal = ['DISCIPLINA' => $request->input('disciplina')];
+
+        if ($request->filled('ID_BOX')) {
+            $updLocal['ID_BOX'] = (int) $request->input('ID_BOX');
+        }
+
+        /*DB::table('FAESA_CLINICA_LOCAL_AGENDAMENTO')
+            ->where('ID_AGENDAMENTO', $id)
+            ->update($updLocal);
+
         DB::table('FAESA_CLINICA_LOCAL_AGENDAMENTO')
             ->where('ID_AGENDAMENTO', $id)
             ->update([
-                'ID_BOX'     => $idBox,
+                'ID_BOX'     => $descricaoLocal,
                 'DISCIPLINA' => $disciplina,
-            ]);
+            ]);*/
 
         return redirect()->back()->with('success', 'Agendamento atualizado com sucesso!');
     }

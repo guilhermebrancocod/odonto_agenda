@@ -6,8 +6,7 @@ use App\Http\Controllers\Controller;
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
-
-use function Laravel\Prompts\select;
+use Carbon\Carbon;
 
 class OdontoConsultController extends Controller
 {
@@ -125,6 +124,7 @@ class OdontoConsultController extends Controller
                 'ld.NOME',
                 'b.ID_BOX_CLINICA',
                 'bd.ID_BOX',
+                'bd.TURMA',
                 'bd.DISCIPLINA',
                 'b.DESCRICAO',
                 'bd.DIA_SEMANA',
@@ -147,6 +147,17 @@ class OdontoConsultController extends Controller
             ->get();
 
         return response()->json($boxes);
+    }
+
+    public function getHorariosBoxDisciplinas($discipline)
+    {
+        $horarios = DB::table('FAESA_CLINICA_BOX_DISCIPLINA')
+            ->select('')
+            ->where('FAESA_CLINICA_BOX_DISCIPLINA.ID_CLINICA', '=', 2)
+            ->where('FAESA_CLINICA_BOX_DISCIPLINA.DISCIPLINA', trim($discipline))
+            ->get();
+
+        return response()->json($horarios);
     }
 
     public function listaPacienteId($pacienteId = null)
@@ -201,22 +212,21 @@ class OdontoConsultController extends Controller
         ]);
     }
 
-    public function services(Request $request)
+    public function procedimento(Request $request)
     {
-        $query = DB::table('FAESA_CLINICA_SERVICO as s')
-            ->leftJoin('FAESA_CLINICA_SERVICO_DISCIPLINA as sd', 'sd.ID_SERVICO_CLINICA', '=', 's.ID_SERVICO_CLINICA')
-            ->select('sd.ID', 's.SERVICO_CLINICA_DESC', 'sd.DISCIPLINA')
-            ->where('s.ID_CLINICA', '=', 2)
-            ->where('s.ATIVO','=','S');
+        $query = DB::table('FAESA_CLINICA_SERVICO')
+            ->select('ID_SERVICO_CLINICA', 'SERVICO_CLINICA_DESC')
+            ->where('ID_CLINICA', '=', 2)
+            ->where('ATIVO', '=', 'S');
 
         if ($request->has('query')) {
             $search = $request->query('query');
-            $query->where('s.SERVICO_CLINICA_DESC', 'like', '%' . $search . '%');
+            $query->where('SERVICO_CLINICA_DESC', 'like', '%' . $search . '%');
         }
 
-        $servicos = $query->get();
+        $procedimentos = $query->get();
 
-        return response()->json($servicos);
+        return response()->json($procedimentos);
     }
 
     public function listaAgendamentoId($pacienteId)
@@ -265,13 +275,16 @@ class OdontoConsultController extends Controller
         // Você pode usar os parâmetros se quiser filtrar:
         $start = $request->query('start');
         $end = $request->query('end');
+        $turma = $request->query('TURMA') ?? $request->query('turma');
 
         // Consulta os dados do banco
         $agendamentos = DB::table('FAESA_CLINICA_AGENDAMENTO')
             ->join('FAESA_CLINICA_PACIENTE', 'FAESA_CLINICA_AGENDAMENTO.ID_PACIENTE', '=', 'FAESA_CLINICA_PACIENTE.ID_PACIENTE')
+            ->join('FAESA_CLINICA_LOCAL_AGENDAMENTO', 'FAESA_CLINICA_AGENDAMENTO.ID_AGENDAMENTO', '=', 'FAESA_CLINICA_LOCAL_AGENDAMENTO.ID_AGENDAMENTO')
             ->select(
                 'FAESA_CLINICA_AGENDAMENTO.ID_AGENDAMENTO as id',
                 'FAESA_CLINICA_AGENDAMENTO.ID_SERVICO as servicoId',
+                'FAESA_CLINICA_LOCAL_AGENDAMENTO.TURMA',
                 'FAESA_CLINICA_AGENDAMENTO.MENSAGEM',
                 'FAESA_CLINICA_AGENDAMENTO.DT_AGEND',
                 'FAESA_CLINICA_AGENDAMENTO.HR_AGEND_INI',
@@ -284,6 +297,9 @@ class OdontoConsultController extends Controller
             ->where('FAESA_CLINICA_AGENDAMENTO.ID_CLINICA', '=', 2)
             ->when($start && $end, function ($query) use ($start, $end) {
                 $query->whereBetween('FAESA_CLINICA_AGENDAMENTO.DT_AGEND', [$start, $end]);
+            })
+            ->when(!empty($turma), function ($q) use ($turma) {
+                $q->where('FAESA_CLINICA_LOCAL_AGENDAMENTO.TURMA', $turma);
             })
             ->get()
             ->map(function ($item) {
@@ -303,7 +319,8 @@ class OdontoConsultController extends Controller
                         'observacoes' => $item->OBSERVACOES,
                         'mensagem' => $item->MENSAGEM,
                         'status' => $item->STATUS_AGEND,
-                        'local' => $item->LOCAL
+                        'local' => $item->LOCAL,
+                        'turma' => $item->TURMA
                     ]
                 ];
             });
@@ -326,29 +343,22 @@ class OdontoConsultController extends Controller
         return view('odontologia/consult_servico', compact('selectService', 'query_servico'));
     }
 
-    public function buscarServicos(Request $request)
+    public function buscarProcedimentos(Request $request)
     {
         $query = $request->input('query');
 
-        $servicos =  DB::table('FAESA_CLINICA_SERVICO')
+        $procedimentos =  DB::table('FAESA_CLINICA_SERVICO')
             ->select(
                 'FAESA_CLINICA_SERVICO.ID_SERVICO_CLINICA',
                 'SERVICO_CLINICA_DESC',
                 'VALOR_SERVICO',
-                'FAESA_CLINICA_SERVICO_DISCIPLINA.DISCIPLINA',
                 'ATIVO'
-            )
-            ->leftJoin(
-                'FAESA_CLINICA_SERVICO_DISCIPLINA',
-                'FAESA_CLINICA_SERVICO_DISCIPLINA.ID_SERVICO_CLINICA',
-                '=',
-                'FAESA_CLINICA_SERVICO.ID_SERVICO_CLINICA'
             )
             ->where('SERVICO_CLINICA_DESC', 'like', '%' . $query . '%')
             ->where('ID_CLINICA', '=', 2)
             ->get();
 
-        return response()->json($servicos);
+        return response()->json($procedimentos);
     }
 
     public function fSelectBox(Request $request)
@@ -366,27 +376,86 @@ class OdontoConsultController extends Controller
         return view('odontologia/consult_box', compact('selectBox', 'query_box'));
     }
 
-    public function getDisciplinas(Request $request)
+    public function disciplinascombox(Request $request)
     {
-        $query = DB::table('LYCEUM_BKP_PRODUCAO.dbo.LY_MATRICULA')
-            ->join('LYCEUM_BKP_PRODUCAO.dbo.LY_ALUNO', 'LY_MATRICULA.ALUNO', '=', 'LY_ALUNO.ALUNO')
-            ->join('LYCEUM_BKP_PRODUCAO.dbo.LY_CURSO', 'LY_ALUNO.CURSO', '=', 'LY_CURSO.CURSO')
-            ->join('LYCEUM_BKP_PRODUCAO.dbo.LY_DISCIPLINA', 'LY_MATRICULA.DISCIPLINA', '=', 'LY_DISCIPLINA.DISCIPLINA')
-            ->select('LY_MATRICULA.DISCIPLINA', 'LY_DISCIPLINA.NOME')
+        $disciplina = DB::table('FAESA_CLINICA_BOX_DISCIPLINA as A')
+            ->join('LYCEUM_BKP_PRODUCAO.dbo.LY_DISCIPLINA as D', 'D.DISCIPLINA', '=', 'A.DISCIPLINA')
+            ->select('D.DISCIPLINA', 'D.NOME')
             ->distinct()
-            ->where('LY_ALUNO.CURSO', '2009')
-            ->where('LY_MATRICULA.SIT_MATRICULA', 'MATRICULADO')
-            ->where('LY_CURSO.FACULDADE', 'AEV')
-            ->whereIn('LY_DISCIPLINA.TIPO', ['PRATICA', 'TEOPRA']);
+            ->get();
 
-        $search = $request->query('query');
-        if (!empty($search)) {
-            $query->where('LY_MATRICULA.DISCIPLINA', 'like', '%' . $search . '%');
-        }
-
-        return response()->json($query->get());
+        return response()->json($disciplina);
     }
 
+    public function getDisciplinas(Request $request)
+    {
+        $turmas = DB::table('LYCEUM_BKP_PRODUCAO.dbo.LY_AGENDA as A')
+            ->join('LYCEUM_BKP_PRODUCAO.dbo.LY_DISCIPLINA as D', 'D.DISCIPLINA', '=', 'A.DISCIPLINA')
+            ->join('LYCEUM_BKP_PRODUCAO.dbo.LY_TURMA as T', function ($join) {
+                $join->on('T.DISCIPLINA', '=', 'D.DISCIPLINA')
+                    ->on('T.ANO', '=', 'A.ANO')
+                    ->on('T.SEMESTRE', '=', 'A.SEMESTRE');
+            })
+            ->where('A.ANO', 2025)
+            ->where('A.SEMESTRE', 2)
+            ->where('T.CURSO', 2009)
+            ->select('D.DISCIPLINA', 'D.NOME')
+            ->distinct()
+            ->get();
+
+        return response()->json($turmas);
+    }
+
+    public function getTodasTurmas(Request $request)
+    {
+        $turma = DB::table('FAESA_CLINICA_BOX_DISCIPLINA')
+            ->select('TURMA')
+            ->distinct()
+            ->pluck('TURMA');
+        return response()->json($turma);
+    }
+
+    public function getTurmas($disciplina)
+    {
+        $turmas = DB::table('LYCEUM_BKP_PRODUCAO.dbo.LY_AGENDA as A')
+            ->where('A.ANO', 2025)
+            ->where('A.SEMESTRE', 2)
+            ->where('A.DISCIPLINA', $disciplina)
+            ->distinct()
+            ->orderBy('A.TURMA')
+            ->pluck('A.TURMA'); // array de strings
+        return response()->json($turmas);
+    }
+
+    public function getDatasTurmaDisciplina($disciplina, $turma)
+    {
+        $diasemana = DB::table('LYCEUM_BKP_PRODUCAO.dbo.LY_AGENDA as A')
+            ->where('A.ANO', 2025)
+            ->where('A.SEMESTRE', 2)
+            ->where('A.DISCIPLINA', $disciplina)
+            ->where('A.TURMA', $turma)
+            ->distinct()
+            ->orderBy('A.DIA_SEMANA')
+            ->pluck('DIA_SEMANA');
+        return response()->json($diasemana);
+    }
+
+    public function getHorariosDatasTurmaDisciplina($disciplina, $turma, $diasemana)
+    {
+
+        $diasemana = (int) $diasemana;
+        $horarios = DB::table('LYCEUM_BKP_PRODUCAO.dbo.LY_AGENDA as A')
+            ->where('A.ANO', 2025)
+            ->where('A.SEMESTRE', 2)
+            ->where('A.DISCIPLINA', $disciplina)
+            ->where('A.TURMA', $turma)
+            ->where('A.DIA_SEMANA', $diasemana)
+            ->selectRaw("CONVERT(varchar(5), CAST(A.HORA_INICIO as time), 108) as inicio")
+            ->addSelect(DB::raw("CONVERT(varchar(5), CAST(A.HORA_FIM as time), 108) as fim"))
+            ->distinct()
+            ->get();
+        return response()->json($horarios);
+    }
 
     public function getBoxes(Request $request)
     {

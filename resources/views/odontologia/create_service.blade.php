@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Cadastro</title>
+    <title>Cadastro de Procedimento</title>
     <link rel="icon" type="image/png" href="/img/faesa_favicon.png">
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700&display=swap" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datepicker/1.10.0/css/bootstrap-datepicker.min.css" rel="stylesheet" />
@@ -16,10 +16,10 @@
     @include('components.sidebar')
     <div style="margin-left:220px; padding: 30px; border-radius: 10px; background-color: #fff; box-shadow: 0 4px 12px rgba(0,0,0,0.05); width: 100%;">
         <fieldset class="border p-3 rounded mb-3">
-            <legend class="w-auto px-2">Cadastro de serviço</legend>
+            <legend class="w-auto px-2">Cadastro de Procedimento</legend>
         </fieldset>
         <form id="form" class="row g-3 needs-validation"
-            action="{{ isset($servico) ? route('updateService', $servico->ID_SERVICO_CLINICA) : route('createService') }}"
+            action="{{ isset($servico) ? route('updateProcedures', $servico->ID_SERVICO_CLINICA) : route('createProcedures') }}"
             method="POST">
             @csrf
             @if(isset($servico))
@@ -64,19 +64,11 @@
             <div class="linha-com-titulo" style="margin-bottom: 5px">
                 <div class="linha-flex"></div>
             </div>
-            <div class="row g-3" style="margin: 15px 0;">
-                <div style="flex: 1;">
-                    <label style="font-size: 16px; color: #666;">Selecionar Disciplina</label>
-                    <div id="boxes-discipline"
-                        style="margin-top: 5px; border: 1px solid #ddd; border-radius: 6px; padding: 10px; max-height: 325px; overflow-y: auto; background-color: #f9f9f9;">
-                    </div>
-                </div>
-            </div>
             <div style="display: flex; justify-content: space-between; gap: 10px;">
                 <button id="voltar" name="voltar" style="background-color: #007bff; color: #fff; border: none; padding: 10px 20px; font-size: 14px; border-radius: 6px; cursor: pointer;">
                     Voltar
                 </button>
-                <button id="salvar" name="salvar" type="submit" style="background-color: #007bff; color: #fff; border: none; padding: 10px 20px; font-size: 14px; border-radius: 6px; cursor: pointer;">
+                <button style="background-color: #007bff; color: #fff; border: none; padding: 10px 20px; font-size: 14px; border-radius: 6px; cursor: pointer;">
                     Salvar
                 </button>
             </div>
@@ -111,18 +103,6 @@
         });
     </script>
     @endif
-    </script>
-    @php
-    $disciplinas = old('disciplines');
-    if (!$disciplinas && isset($servico)) {
-    $disciplinas = DB::table('FAESA_CLINICA_SERVICO_DISCIPLINA')
-    ->where('ID_SERVICO_CLINICA', $servico->ID_SERVICO_CLINICA)
-    ->pluck('DISCIPLINA')
-    ->toArray();
-    }
-    @endphp
-    <script>
-        const disciplinasSelecionadas = @json($disciplinas);
     </script>
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datepicker/1.10.0/js/bootstrap-datepicker.min.js"></script>

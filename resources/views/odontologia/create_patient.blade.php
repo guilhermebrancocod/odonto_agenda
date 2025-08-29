@@ -152,9 +152,9 @@
 
                 <div class="row g-3" style="margin: 20px 0;">
                     <div style="flex: 1">
-                        <label for="nome_resposavel" style="font-size: 14px; color: #666;">Nome do resposável</label>
-                        <input type="text" id="nome_resposavel" name="nome_resposavel" class="form-control"
-                            value="{{ old('nome_resposavel', $paciente->NOME_RESPONSAVEL ?? '') }}" style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 6px; font-size: 14px;" maxlength="100">
+                        <label for="nome_responsavel" style="font-size: 14px; color: #666;">Nome do resposável</label>
+                        <input type="text" id="nome_responsavel" name="nome_responsavel" class="form-control"
+                            value="{{ old('nome_responsavel', $paciente->NOME_RESPONSAVEL ?? '') }}" style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 6px; font-size: 14px;" maxlength="100">
                     </div>
                     <div style="flex: 1;">
                         <label for="cpf_responsavel" style="font-size: 14px; color: #666;">CPF do responsável</label>
@@ -163,7 +163,7 @@
                     </div>
                 </div>
                 <div style="flex: 1;">
-                    <label for="obs_laudo" style="font-size: 14px; color: #666;">Laudo</label>
+                    <label for="obs_laudo" style="font-size: 14px; color: #666;">Laudo/informações</label>
                     <input type="text" id="obs_laudo" name="obs_laudo" class="form-control"
                         value="{{ old('obs_laudo', $paciente->OBSERVACAO ?? '') }}" style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 6px; font-size: 14px;" maxlength="20">
                 </div>

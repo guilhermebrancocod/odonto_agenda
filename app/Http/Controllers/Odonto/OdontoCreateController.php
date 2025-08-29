@@ -31,7 +31,20 @@ class OdontoCreateController extends Controller
         $rules = [
             'nome'            => ['required', 'string', 'max:255'],
             'cpf'             => ['required', 'regex:/^\d{11}$/'],   // 11 dígitos
-            'dt_nasc'         => ['required', 'date_format:d/m/Y', 'before:today'],
+            'dt_nasc'         => ['required', 'date_format:d/m/Y', 'before:today', ''],
+            'nome_responsavel' => [
+                Rule::requiredIf(function () use ($request) {
+                    try {
+                        $dob = Carbon::createFromFormat('d/m/Y', $request->input('dt_nasc'));
+                    } catch (\Exception $e) {
+                        return false;
+                    }   // se data inválida, não força
+                    return $dob->age < 18;
+                }),
+                'nullable',
+                'string',
+                'max:255',
+            ],
             'sexo'            => ['required', 'in:M,F'],
             'cep'             => ['required', 'regex:/^\d{8}$/'],
             'rua'             => ['nullable', 'string', 'max:255'],
@@ -53,6 +66,8 @@ class OdontoCreateController extends Controller
             'cpf.required'           => 'O CPF é obrigatório.',
             'cpf.regex'              => 'Informe um CPF com 11 dígitos (apenas números).',
             'dt_nasc.required'       => 'A data de nascimento é obrigatória.',
+            'dt_nasc.required'       => 'A data de nascimento é obrigatória.',
+            'nome_responsavel.required' => 'Nome do Resposável obrigatório para menores de 18 anos.',
             'dt_nasc.date_format'    => 'Use o formato de data dd/mm/aaaa.',
             'dt_nasc.before'         => 'A data de nascimento deve ser anterior a hoje.',
             'sexo.required'          => 'Informe o sexo.',
@@ -125,53 +140,89 @@ class OdontoCreateController extends Controller
 
     public function fCreateAgenda(Request $request)
     {
-        // 1) Validação
-        $validator = Validator::make($request->all(), [
-            'ID_PACIENTE'            => ['required', 'integer', 'exists:FAESA_CLINICA_PACIENTE,ID_PACIENTE'],
-            'ID_BOX'                 => ['required', 'integer', 'exists:FAESA_CLINICA_BOXES,ID_BOX_CLINICA'],
-            'servico'                => ['required', 'integer', 'exists:FAESA_CLINICA_SERVICO_DISCIPLINA,ID'],
-            'date'                   => ['required', 'date_format:d/m/Y'],
-            'date_end'               => ['nullable', 'date_format:d/m/Y'],
-            'hr_ini'                 => ['required', 'date_format:H:i'],
-            'hr_fim'                 => ['required', 'date_format:H:i', 'after:hr_ini'],
-            'status'                 => ['required', 'string'],
-            'recorrencia'            => ['required', 'in:pontual,recorrencia'],
-            'dia_semana'             => ['required_if:recorrencia,recorrencia', 'array'],
-            'valor'                  => ['nullable', 'regex:/^\s*R?\$?\s*\d{1,3}(\.\d{3})*(,\d{2})?\s*$/'],
-        ], [
-            'dia_semana.required_if' => 'Selecione ao menos um dia da semana para recorrência.',
-        ]);
-
-        if ($validator->fails()) {
-            return back()->withErrors($validator)->withInput()
-                ->with('alert', 'Verifique os campos do agendamento.');
-        }
 
         $idClinica = 2;
         $idBox     = (int) $request->input('ID_BOX');
+        $idServico = $request->input('procedimento');
+        $disciplina   = $request->input('disciplina');
+        $turma = $request->input('turma');
+        $recorrencia = $request->input('recorrencia');
 
-        // 2) Serviço pai e disciplina
-        $servDisc = DB::table('FAESA_CLINICA_SERVICO_DISCIPLINA')
-            ->where('ID', (int) $request->input('servico'))
-            ->first();
+        $ini = Carbon::createFromFormat('d/m/Y', $request->input('date'))->startOfDay();
+        $fim   = $request->filled('date_end')
+            ? Carbon::createFromFormat('d/m/Y', $request->input('date_end'))->startOfDay()
+            : $ini->copy();
 
-        if (!$servDisc) return back()->withInput()->with('alert', 'Serviço/Disciplina inválido.');
+        if ($fim->lt($ini)) {
+            [$ini, $fim] = [$fim, $ini];
+        }
 
-        $idServicoPai = (int) $servDisc->ID_SERVICO_CLINICA;
-        $disciplina   = $servDisc->DISCIPLINA;
+        if ($ini->equalTo($fim)) {
+            // PONTUAL: checa apenas o dia
+            $ehFeriado = DB::table('LYCEUM_BKP_PRODUCAO.dbo.LY_FERIADO')
+                ->whereDate('DATA', $ini->toDateString())
+                ->exists();
 
-        $existePai = DB::table('FAESA_CLINICA_SERVICO')
-            ->where('ID_SERVICO_CLINICA', $idServicoPai)
-            ->exists();
+            if ($ehFeriado) {
+                return back()->withInput()->with('alert', 'Data do agendamento será feriado.');
+            }
+        } else {
+            // PERÍODO: checa qualquer feriado entre ini e fim (inclusivo)
+            // forma sargável: [ini, fim+1dia)
+            $fimExclusivo = $fim->copy()->addDay()->startOfDay();
 
-        if (!$existePai) return back()->withInput()->with('alert', 'Serviço pai não encontrado.');
+            $temFeriado = DB::table('LYCEUM_BKP_PRODUCAO.dbo.LY_FERIADO')
+                ->where('DATA', '>=', $ini)           // 2025-09-08 00:00:00
+                ->where('DATA', '<',  $fimExclusivo)  // até antes de 2025-09-09 00:00:00
+                ->exists();
+
+            if ($temFeriado) {
+                return back()->withInput()->with('alert', 'Data do agendamento será feriado.');
+            }
+        }
 
         // 3) Conversões
         $dataInicio = \Carbon\Carbon::createFromFormat('d/m/Y', $request->input('date'))->startOfDay();
         $dataFim    = \Carbon\Carbon::createFromFormat('d/m/Y', $request->input('date_end'))->startOfDay();
 
-        $hrIni = \Carbon\Carbon::createFromFormat('H:i', $request->hr_ini)->format('H:i:s');
-        $hrFim = \Carbon\Carbon::createFromFormat('H:i', $request->hr_fim)->format('H:i:s');
+        $dias = [
+            '1' =>  '7:30',
+            '2' =>  '8:15',
+            '3' =>  '9:00',
+            '4' =>  '9:45',
+            '5' =>  '10:15',
+            '6' =>  '11:00',
+            '7' =>  '11:45',
+            '8' =>  '12:30',
+            '9' =>  '13:15',
+            '10' => '14:00',
+            '11' => '14:45',
+            '12' => '15:30',
+            '13' => '16:15',
+            '14' => '17:00',
+            '15' => '17:45',
+            '16' => '18:30',
+        ];
+
+        $horarios = collect((array) $request->input('dias_semana', []))
+            ->map(fn($v) => (string) $v)                     // normaliza p/ string
+            ->filter(fn($v) => array_key_exists($v, $dias))  // só os válidos no mapa
+            ->map(fn($v) => (int) $v)                        // para ordenar numericamente
+            ->sort()
+            ->values();
+
+        if ($horarios->isNotEmpty()) {
+            $minKey = (string) $horarios->first();
+            $maxKey = (string) $horarios->last();
+
+            // Usa 'G:i' porque suas horas podem vir sem zero à esquerda (ex.: "7:30")
+            $hrIni = Carbon::createFromFormat('G:i', $dias[$minKey])->format('H:i:s');
+            $hrFim = Carbon::createFromFormat('G:i', $dias[$maxKey])->format('H:i:s');
+        } else {
+            // fallback: se nada foi enviado em dias_semana, usa os campos do formulário
+            $hrIni = Carbon::createFromFormat('H:i', $request->input('hr_ini'))->format('H:i:s');
+            $hrFim = Carbon::createFromFormat('H:i', $request->input('hr_fim'))->format('H:i:s');
+        }
 
         $rawValor = $request->input('valor');
         $valor_convert = null;
@@ -184,13 +235,13 @@ class OdontoCreateController extends Controller
             ->where('ID_BOX_CLINICA', $idBox)
             ->value('DESCRICAO');
 
-        // 4) Lógica
-        if ($request->recorrencia === 'recorrencia') {
+        // 4) Lógica de agendamento recorrência ou pontual (se recorrência deve agendamento entre a data inicial e a data final se pontual dia inicial e final igual, só um agendamento)
+        if ($recorrencia === '2') {
             // mapa de nomes -> números do Carbon (0=domingo ... 6=sábado)
-            $map = ['domingo' => 0, 'segunda' => 1, 'terca' => 2, 'quarta' => 3, 'quinta' => 4, 'sexta' => 5, 'sabado' => 6];
+            $map = ['segunda' => 1, 'terca' => 2, 'quarta' => 3, 'quinta' => 4, 'sexta' => 5, 'sabado' => 6, 'domingo' => 7];
             $selecionados = array_map(
                 fn($k) => $map[$k] ?? null,
-                (array) $request->input('dia_semana', [])
+                (array) $request->input('dia_recorrencia', [])
             );
             $selecionados = array_filter($selecionados, fn($v) => $v !== null);
 
@@ -198,41 +249,60 @@ class OdontoCreateController extends Controller
                 return back()->withInput()->with('alert', 'Informe a data final para recorrência.');
             }
 
-            $data = $dataInicio->copy();
-            $dateEnd = $dataFim->copy();
+            $houveDuplicata = false;
             $inseridos = 0;
-            DB::beginTransaction();
+
+            /*recorrência*/
             try {
-                while ($data->lte($dataFim)) {
-                    if (in_array($data->dayOfWeek, $selecionados, true)) {
-                        // checa conflito nesta data
-                        $conflito = DB::table('FAESA_CLINICA_AGENDAMENTO as a')
-                            ->join('FAESA_CLINICA_LOCAL_AGENDAMENTO as l', 'l.ID_AGENDAMENTO', '=', 'a.ID_AGENDAMENTO')
-                            ->whereDate('a.DT_AGEND', $data->toDateString())
-                            ->whereDate('a.DT_AGEND', $dateEnd->toDateString())
+                /* RECORRÊNCIA */
+                DB::beginTransaction();
+
+                // garanta que $dataBase seja o início do período
+                $dataBase = $dataInicio->copy();          // evita mutar o original
+                $dataFim  = $dataFim->copy();             // (se já for Carbon)
+
+                // Se o front envia dias 1..7 (seg=1..dom=7), use dayOfWeekIso
+                $selecionadosInt = collect((array) $request->input('dia_recorrencia', []))
+                    ->map(fn($v) => (int) $v)
+                    ->filter(fn($v) => $v >= 1 && $v <= 7) // se não usar domingo, pode deixar <= 6
+                    ->unique()
+                    ->values()
+                    ->all();
+
+                $data = $dataBase->copy();
+                for ($d = $dataInicio->copy(); $d->lte($dataFim); $d->addDay()) {
+                    if (in_array($data->dayOfWeekIso, $selecionadosInt, true)) {
+
+                        $duplicado = DB::table('FAESA_CLINICA_AGENDAMENTO as a')
                             ->where('a.ID_CLINICA', $idClinica)
-                            ->where('l.ID_BOX', $idBox)
-                            ->whereRaw('CAST(a.HR_AGEND_INI AS time) < CAST(? AS time)', [$hrFim])
-                            ->whereRaw('CAST(a.HR_AGEND_FIN AS time) > CAST(? AS time)', [$hrIni])
+                            ->whereDate('a.DT_AGEND', $data->toDateString())
+                            // se as colunas forem TIME, pode trocar por where('a.HR_AGEND_INI', $hrIni) etc.
+                            ->whereRaw('CAST(a.HR_AGEND_INI AS time) = CAST(? AS time)', [$hrIni])
+                            ->whereRaw('CAST(a.HR_AGEND_FIN  AS time) = CAST(? AS time)', [$hrFim])
+                            ->whereExists(function ($q) use ($idBox) {
+                                $q->select(DB::raw(1))
+                                    ->from('FAESA_CLINICA_LOCAL_AGENDAMENTO as l')
+                                    ->whereColumn('l.ID_AGENDAMENTO', 'a.ID_AGENDAMENTO')
+                                    ->where('l.ID_BOX', $idBox);
+                            })
                             ->exists();
 
-                        if ($conflito) {
-                            // pule ou trate como erro; aqui vou pular e continuar:
-                            $data->addDay();
-                            continue;
+                        if ($duplicado) {
+                            $houveDuplicata = true;
+                            break; // aborta toda a série
                         }
 
                         $idAg = DB::table('FAESA_CLINICA_AGENDAMENTO')->insertGetId([
                             'ID_CLINICA'         => $idClinica,
                             'ID_PACIENTE'        => (int) $request->input('ID_PACIENTE'),
-                            'ID_SERVICO'         => $idServicoPai,
+                            'ID_SERVICO'         => $idServico,
                             'DT_AGEND'           => $data->toDateString(),
-                            'DT_AGEND_FINAL'     => $dateEnd->toDateString(),
+                            'DT_AGEND_FINAL'     => $data->toDateString(), // ocorrência de 1 dia
                             'HR_AGEND_INI'       => $hrIni,
                             'HR_AGEND_FIN'       => $hrFim,
                             'STATUS_AGEND'       => $request->input('status'),
                             'ID_AGEND_REMARCADO' => null,
-                            'RECORRENCIA'        => 'recorrencia',
+                            'RECORRENCIA'        => $recorrencia,
                             'VALOR_AGEND'        => $valor_convert,
                             'OBSERVACOES'        => $request->input('obs'),
                             'LOCAL'              => $descricaoLocal,
@@ -242,57 +312,80 @@ class OdontoCreateController extends Controller
                             'ID_AGENDAMENTO' => $idAg,
                             'ID_BOX'         => $idBox,
                             'DISCIPLINA'     => $disciplina,
+                            'TURMA'          => $request->input('turma'),
                         ]);
 
                         $inseridos++;
                     }
                     $data->addDay();
                 }
+
+                if ($houveDuplicata) {
+                    DB::rollBack();
+                    return back()->withInput()->with('alert', 'Já existe agendamento no mesmo horário e box para pelo menos uma das datas.');
+                }
+
                 DB::commit();
+                return back()->with('success', "Agendamento de recorrência criado com sucesso. Ocorrências inseridas: {$inseridos}");
             } catch (\Throwable $e) {
                 DB::rollBack();
                 return back()->withInput()->with('alert', 'Erro ao criar recorrência: ' . $e->getMessage());
             }
-
-            return back()->with('success', "Recorrência criada! Ocorrências inseridas: {$inseridos}");
         }
 
-        // pontual
-        $conflitoPontual = DB::table('FAESA_CLINICA_AGENDAMENTO as a')
-            ->join('FAESA_CLINICA_LOCAL_AGENDAMENTO as l', 'l.ID_AGENDAMENTO', '=', 'a.ID_AGENDAMENTO')
-            ->whereDate('a.DT_AGEND', $dataInicio->toDateString())
-            ->where('a.ID_CLINICA', $idClinica)
-            ->where('l.ID_BOX', $idBox)
-            ->whereRaw('CAST(a.HR_AGEND_INI AS time) < CAST(? AS time)', [$hrFim])
-            ->whereRaw('CAST(a.HR_AGEND_FIN AS time) > CAST(? AS time)', [$hrIni])
-            ->exists();
+        /*pontual*/
+        DB::beginTransaction();
 
-        if ($conflitoPontual) {
-            return back()->withInput()->with('alert', 'Conflito: já existe agendamento no mesmo box e horário.');
+        if ($request->recorrencia === '1') {
+            $dt = $dataInicio->toDateString(); // ou derive de $request; pontual: um único dia
+
+            $duplicadoPontual = DB::table('FAESA_CLINICA_AGENDAMENTO as a')
+                ->where('a.ID_CLINICA', $idClinica)
+                ->whereDate('a.DT_AGEND', $dt)
+                // se TIME, prefira where simples:
+                //->where('a.HR_AGEND_INI', $hrIni)
+                //->where('a.HR_AGEND_FIN', $hrFim)
+                ->whereRaw('CAST(a.HR_AGEND_INI AS time) = CAST(? AS time)', [$hrIni])
+                ->whereRaw('CAST(a.HR_AGEND_FIN  AS time) = CAST(? AS time)', [$hrFim])
+                ->whereExists(function ($q) use ($idBox) {
+                    $q->select(DB::raw(1))
+                        ->from('FAESA_CLINICA_LOCAL_AGENDAMENTO as l')
+                        ->whereColumn('l.ID_AGENDAMENTO', 'a.ID_AGENDAMENTO')
+                        ->where('l.ID_BOX', $idBox);
+                })
+                ->exists();
+
+            if ($duplicadoPontual) {
+                DB::rollBack();
+                return back()->withInput()->with('alert', 'Conflito: já existe agendamento no mesmo box e horário.');
+            }
+
+            $idAgendamento = DB::table('FAESA_CLINICA_AGENDAMENTO')->insertGetId([
+                'ID_CLINICA'         => $idClinica,
+                'ID_PACIENTE'        => (int) $request->input('ID_PACIENTE'),
+                'ID_SERVICO'         => $idServico,
+                'DT_AGEND'           => $dt,
+                'DT_AGEND_FINAL'     => $dt, // pontual: mesma data
+                'HR_AGEND_INI'       => $hrIni,
+                'HR_AGEND_FIN'       => $hrFim,
+                'STATUS_AGEND'       => $request->input('status'),
+                'ID_AGEND_REMARCADO' => null,
+                'RECORRENCIA'        => 'pontual',
+                'VALOR_AGEND'        => $valor_convert,
+                'OBSERVACOES'        => $request->input('obs'),
+                'LOCAL'              => $descricaoLocal,
+            ]);
+
+            DB::table('FAESA_CLINICA_LOCAL_AGENDAMENTO')->insert([
+                'ID_AGENDAMENTO' => $idAgendamento,
+                'ID_BOX'         => $idBox,
+                'DISCIPLINA'     => $disciplina,
+                'TURMA'          => $turma,
+            ]);
         }
 
-        $idAgendamento = DB::table('FAESA_CLINICA_AGENDAMENTO')->insertGetId([
-            'ID_CLINICA'         => $idClinica,
-            'ID_PACIENTE'        => (int) $request->input('ID_PACIENTE'),
-            'ID_SERVICO'         => $idServicoPai,
-            'DT_AGEND'           => $dataInicio->toDateString(),
-            'HR_AGEND_INI'       => $hrIni,
-            'HR_AGEND_FIN'       => $hrFim,
-            'STATUS_AGEND'       => $request->input('status'),
-            'ID_AGEND_REMARCADO' => null,
-            'RECORRENCIA'        => 'pontual',
-            'VALOR_AGEND'        => $valor_convert,
-            'OBSERVACOES'        => $request->input('obs'),
-            'LOCAL'              => $descricaoLocal,
-        ]);
-
-        DB::table('FAESA_CLINICA_LOCAL_AGENDAMENTO')->insert([
-            'ID_AGENDAMENTO' => $idAgendamento,
-            'ID_BOX'         => $idBox,
-            'DISCIPLINA'     => $disciplina,
-        ]);
-
-        return back()->with('success', 'Agendamento realizado com sucesso!');
+        DB::commit();
+        return back()->with('success', 'Agendamento pontual criado com sucesso.');
     }
 
     public function editPatient($pacienteId)
@@ -316,6 +409,25 @@ class OdontoCreateController extends Controller
             ->join('FAESA_CLINICA_SERVICO as s', 's.ID_SERVICO_CLINICA', '=', 'a.ID_SERVICO')
             ->where('a.ID_CLINICA', '=', 2)
             ->where('a.ID_AGENDAMENTO', $agendaId)
+            ->select(
+                'a.ID_AGENDAMENTO',
+                'a.ID_SERVICO',
+                'a.ID_PACIENTE',
+                'a.DT_AGEND',
+                'a.DT_AGEND_FINAL',
+                'a.HR_AGEND_INI',
+                'a.HR_AGEND_FIN',
+                'la.ID_BOX',
+                'a.LOCAL',
+                'cb.DESCRICAO',
+                'a.RECORRENCIA',
+                'la.DISCIPLINA',
+                'la.TURMA',
+                'a.UPDATED_AT',
+                'a.VALOR_AGEND',
+                's.SERVICO_CLINICA_DESC',
+                'p.NOME_COMPL_PACIENTE'
+            )
             ->first();
 
         if (!$agenda) {
@@ -325,13 +437,11 @@ class OdontoCreateController extends Controller
         return view('odontologia.create_agenda', compact('agenda'));
     }
 
-    public function createService(Request $request)
+    public function createProcedures(Request $request)
     {
         $request->validate([
-            'valor' => ['regex:/^\d+(\.\d{1,2})?$/'],
             'descricao' => ['required', 'regex:/^[A-Za-zÀ-ÿ0-9\s]+$/'],
         ], [
-            'valor.regex' => 'O valor deve conter apenas números (e opcionalmente decimais).',
             'descricao.required' => 'O campo descrição é obrigatório.',
             'descricao.regex' => 'A descrição não pode conter caracteres especiais.',
         ]);
@@ -339,9 +449,7 @@ class OdontoCreateController extends Controller
         $valorServico = $request->input('valor');
         $descricao = $request->input('descricao');
 
-        $disciplines = $request->input('disciplines');
-
-        $idService = DB::table('FAESA_CLINICA_SERVICO')->insertGetId([
+        DB::table('FAESA_CLINICA_SERVICO')->insertGetId([
             'ID_CLINICA' => 2,
             'SERVICO_CLINICA_DESC' => $descricao,
             'COD_INTERNO_SERVICO_CLINICA' => 0,
@@ -349,14 +457,7 @@ class OdontoCreateController extends Controller
             'ATIVO' => $request->input('ativo')
         ]);
 
-        foreach ($disciplines as $disciplina) {
-            DB::table('FAESA_CLINICA_SERVICO_DISCIPLINA')->insert([
-                'ID_SERVICO_CLINICA' => $idService,
-                'DISCIPLINA' => $disciplina
-            ]);
-        }
-
-        return redirect()->back()->with('success', 'Serviço cadastrado com sucesso!');
+        return redirect()->back()->with('success', 'Procedimento cadastrado com sucesso!');
     }
 
     public function editService($idService)
@@ -395,30 +496,88 @@ class OdontoCreateController extends Controller
 
     public function createBoxDiscipline(Request $request)
     {
-        $boxes = $request->input('boxes');
+        // 1) Coletas básicas
+        $boxes       = (array) $request->input('boxes', []);
+        $diaSemana   = $request->input('dia_semana');     // 1..7 (domingo..sábado)
+        $selecionados = (array) $request->input('dias_semana', []); // 1..16 (slots)
 
-        if (!$boxes || count($boxes) === 0) {
+        if (empty($boxes)) {
             return redirect()->back()->with('error', 'Nenhum box foi selecionado.');
         }
 
+        if (empty($selecionados)) {
+            return redirect()->back()->with('error', 'Selecione pelo menos um horário.');
+        }
+
+        // 2) Mapa de slots -> horário
+        $horarios = [
+            '1'  => '7:30',
+            '2'  => '8:15',
+            '3'  => '9:00',
+            '4'  => '9:45',
+            '5'  => '10:15',
+            '6'  => '11:00',
+            '7'  => '11:45',
+            '8'  => '12:30',
+            '9'  => '13:15',
+            '10' => '14:00',
+            '11' => '14:45',
+            '12' => '15:30',
+            '13' => '16:15',
+            '14' => '17:00',
+            '15' => '17:45',
+            '16' => '18:30',
+        ];
+
+        // 3) Normaliza, filtra válidos e ordena
+        $selecionados = collect($selecionados)
+            ->map(fn($v) => (int) $v)
+            ->filter(fn($i) => isset($horarios[(string)$i]))
+            ->unique()
+            ->sort()
+            ->values();
+
+        if ($selecionados->isEmpty()) {
+            return redirect()->back()->with('error', 'Horários inválidos.');
+        }
+
+        // 4) Define hr_inicio (menor) e hr_fim (maior)
+        $minKey   = (string) $selecionados->first();
+        $maxKey   = (string) $selecionados->last();
+        $hr_inicio = $horarios[$minKey]; // ex.: "7:30"
+        $hr_fim    = $horarios[$maxKey]; // ex.: "9:00"
+
+        $data = $request->input('data');
+
+
+        // (opcional) padronizar para HH:mm
+        $pad = function (string $hm) {
+            [$h, $m] = array_pad(explode(':', $hm), 2, '00');
+            return str_pad($h, 2, '0', STR_PAD_LEFT) . ':' . $m;
+        };
+        $hr_inicio = $pad($hr_inicio); // "07:30"
+        $hr_fim    = $pad($hr_fim);    // "09:00"
+
+        // 5) Insert por box
         foreach ($boxes as $boxId) {
             DB::table('FAESA_CLINICA_BOX_DISCIPLINA')->insertGetId([
-                'ID_CLINICA' => 2,
-                'ID_BOX' => $boxId,
-                'DISCIPLINA' => $request->input('disciplina'),
-                'DIA_SEMANA' => $request->input('dia_semana'),
-                'HR_INICIO' => $request->input('hr_inicio'),
-                'HR_FIM' => $request->input('hr_fim'),
+                'ID_CLINICA'  => 2,
+                'ID_BOX'      => $boxId,
+                'DISCIPLINA'  => $request->input('disciplina'),
+                'TURMA' => $request->input('turma'),
+                'DIA_SEMANA'  => $data,       // <- código 1..7
+                'HR_INICIO'   => $hr_inicio,       // "HH:mm"
+                'HR_FIM'      => $hr_fim,          // "HH:mm"
                 'DT_CADASTRO' => now(),
-
             ]);
         }
-        return redirect()->back()->with('success', ' Disciplina e dia da semana vinculado a um ou mais boxes!');
+
+        return redirect()->back()->with('success', 'Disciplina e dia da semana vinculados ao(s) box(es) com sucesso!');
     }
+
 
     public function editBoxDiscipline(Request $request, $idBoxDiscipline)
     {
-
         $BoxDiscipline = DB::table('FAESA_CLINICA_BOX_DISCIPLINA')->where('ID_BOX_DISCIPLINA', $idBoxDiscipline)->first();
 
         if (!$BoxDiscipline) {

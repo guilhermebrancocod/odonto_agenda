@@ -1,38 +1,35 @@
-function carregarTodosServicos() {
+function carregarTodosProcedimentos() {
     const $select = $('#selectService');
     const $tbody = $('#table-service tbody');
 
     $.ajax({
-        url: '/getServices',
+        url: '/getProcedures',
         dataType: 'json',
         data: { query: '' },
         success: function (data) {
             $select.empty();
             $tbody.empty();
 
-            data.forEach(servico => {
+            data.forEach(procedimento => {
                 // Adiciona ao select
                 const newOption = new Option(
-                    servico.SERVICO_CLINICA_DESC,
-                    servico.ID_SERVICO_CLINICA,
-                    servico.DISCIPLINA,
+                    procedimento.SERVICO_CLINICA_DESC,
+                    procedimento.ID_SERVICO_CLINICA,
                     false,
                     false
                 );
                 $select.append(newOption);
-
                 const html = `
                     <tr>
-                        <td>${servico.SERVICO_CLINICA_DESC}</td>
-                        <td>${servico.VALOR_SERVICO != null && servico.VALOR_SERVICO !== '' ? 'R$ ' + parseFloat(servico.VALOR_SERVICO).toFixed(2) : ''}</td>
-                        <td>${servico.DISCIPLINA ? servico.DISCIPLINA : ''}</td>
-                        <td>${servico.ATIVO}</td>
+                        <td>${procedimento.SERVICO_CLINICA_DESC}</td>
+                        <td>${procedimento.VALOR_SERVICO != null && servico.VALOR_SERVICO !== '' ? 'R$ ' + parseFloat(servico.VALOR_SERVICO).toFixed(2) : ''}</td>
+                        <td>${procedimento.ATIVO}</td>
                         <td>
                             <button 
                                 type="button" 
                                 class="editService btn btn-link p-0 m-0 border-0" 
                                 style="color: inherit;" 
-                                data-id="${servico.ID_SERVICO_CLINICA}">
+                                data-id="${procedimento.ID_SERVICO_CLINICA}">
                                 <i class="fa fa-pencil-alt"></i>
                             </button>
                         </td>
@@ -44,7 +41,7 @@ function carregarTodosServicos() {
             $select.val(null).trigger('change');
         },
         error: function () {
-            console.error('Erro ao carregar os serviços.');
+            console.error('Erro ao carregar os procedimentos.');
         }
     });
 }
@@ -53,11 +50,11 @@ $(document).ready(function () {
     const $select = $('#selectService');
 
     $select.select2({
-        placeholder: "Busque o serviço",
+        placeholder: "Selecione o procedimento",
         allowClear: true,
         minimumInputLength: 0,
         ajax: {
-            url: '/getServices',
+            url: '/getProcedures',
             dataType: 'json',
             delay: 250,
             data: function (params) {
@@ -68,7 +65,6 @@ $(document).ready(function () {
                     results: data.map(p => ({
                         id: p.ID_SERVICO_CLINICA,
                         text: p.SERVICO_CLINICA_DESC,
-                        discipline: p.DISCIPLINA
 
                     }))
                 };
@@ -84,7 +80,7 @@ $(document).ready(function () {
         }, 0);
     });
 
-    carregarTodosServicos();
+    carregarTodosProcedimentos();
 });
 
 // Evento ao selecionar um paciente no select2
@@ -101,7 +97,6 @@ $('#selectService').on('select2:select', function (e) {
                     <tr>
                         <td>${servico.descricao}</td>
                         <td>${servico.valor != null && servico.valor !== '' ? 'R$ ' + parseFloat(servico.valor).toFixed(2) : ''}</td>
-                        <td>${servico.disciplina_codigo ?? ''}</td>
                         <td>${servico.ativo}</td>
                         <td>
                             <button 
@@ -118,7 +113,7 @@ $('#selectService').on('select2:select', function (e) {
             $('#table-service tbody').html(html);
         },
         error: function () {
-            alert("Erro ao buscar os dados do serviço.");
+            alert("Erro ao buscar os dados dos procedimentos.");
         }
     });
 });

@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Cadastro</title>
+    <title>Consultando Procedimentos</title>
     <link rel="icon" type="image/png" href="/img/faesa_favicon.png">
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700&display=swap" rel="stylesheet">
 
@@ -17,7 +17,7 @@
     @include('components.sidebar')
     <div style="margin-left:220px; padding: 30px; border-radius: 10px; background-color: #fff; box-shadow: 0 4px 12px rgba(0,0,0,0.05);width: 100%;">
         <fieldset class="border p-3 rounded mb-3">
-            <legend class="w-auto px-2">Buscando serviços</legend>
+            <legend class="w-auto px-2">Buscando procedimentos</legend>
         </fieldset>
         <form id="form-search-service" class="row g-3 needs-validation">
             <div class="linha-com-titulo">
@@ -53,12 +53,14 @@
                         <tr style="padding-left: 1rem;">
                             <th>Descrição</th>
                             <th>Valor</th>
-                            <th>Disciplina</th>
                             <th>Ativo</th>
                             <th>Editar</th>
                         </tr>
                     </thead>
                     <tbody>
+                        <tr id="row-empty">
+                            <td colspan="4" class="text-center text-muted">Carregando procedimentos...</td>
+                        </tr>
                     </tbody>
                 </table>
             </div>

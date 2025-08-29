@@ -53,7 +53,8 @@
                         <tr style="padding-left: 1rem;">
                             <th>Disciplina</th>
                             <th>Box</th>
-                            <th>Dia da semana</th>
+                            <th>Turma</th>
+                            <th>Dia</th>
                             <th>Hora inicio</th>
                             <th>Hora Fim</th>
                             <th>Editar</th>
