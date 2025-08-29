@@ -94,11 +94,27 @@ class PacienteService
     /**
      * Retorna uma lista de pacientes com filtros simples.
      */
-    public function filtrarPacientes(array $filtros): Collection
+
+    public function filtrarPacientesByNameOrCpf($filtros)
     {
         $query = FaesaClinicaPaciente::query();
 
         $query->where('STATUS', '<>', 'Inativo');
+
+        // Filtro por nome ou CPF
+        if (!empty($filtros['search'])) {
+            $query->where(function ($q) use ($filtros) {
+                $q->where('NOME_COMPL_PACIENTE', 'LIKE', '%' . $filtros['search'] . '%')
+                ->orWhere('CPF_PACIENTE', 'LIKE', '%' . $filtros['search'] . '%');
+            });
+        }
+
+        return $query->orderBy('ID_PACIENTE', 'desc')->get();
+    }
+
+    public function filtrarPacientes(array $filtros): Collection
+    {
+        $query = FaesaClinicaPaciente::query();
 
         // Filtro por nome ou CPF
         if (!empty($filtros['search'])) {

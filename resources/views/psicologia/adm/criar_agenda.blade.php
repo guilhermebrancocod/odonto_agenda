@@ -375,7 +375,7 @@
         //e.preventDefault(); // EVITA RECARREGAMENTO DA PÁGINA
         // RESGATA O NOME DO PACIENTE | REMOVE OS ESPAÇOS EM BRANCO COM A FUNÇÃO TRIM()
         const nome = searchInput.value.trim();
-        fetch(`/psicologia/consultar-paciente/buscar?search=${encodeURIComponent(nome)}`)
+        fetch(`/psicologia/consultar-paciente/buscar-nome-cpf?search=${encodeURIComponent(nome)}`)
                 .then(response => response.json())
                 .then(pacientes => {
 
