@@ -112,12 +112,22 @@
     <img src="{{ asset('faesa_branco.png') }}" alt="Logo" class="img-fluid mb-2" />
 
     <!-- TITULO SIDEBAR -->
-    <h4 class="mb-3 mt-3 p-2 rounded-3"
+    <h4 class="mb-2 mt-3 p-2 rounded-3"
         style="color: white;">
         <strong>Psicologia</strong>
     </h4>
 
-    <ul class="list-group list-group-flush w-100 gap-1">
+    <!-- DADOS DA SESSAO DO USUARIO -->
+    <div classs="">
+        <p style="color:#ecf5f9" class="p-0 m-0 text-center">
+            {{ session('usuario')[0]->ID_USUARIO_CLINICA }}
+        </p>
+        <p class="p-0 m-0 text-center" style="color: white;">
+            {{ request()->ip() }}
+        </p>
+    </div>
+
+    <ul class="list-group list-group-flush w-100 gap-1 mt-3">
         <!-- LINKS -->
 
         <!-- PÁGINA INICIAL - MENU AGENDA -->

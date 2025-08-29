@@ -74,6 +74,7 @@ class AuthMiddleware
                         return redirect()->back()->with('error', 'Credenciais inválidas');
                     }
                     session(['usuario' => $validacao]);
+                    // dd(session('usuario'));
                     return $next($request);
                 }                
             } else {
