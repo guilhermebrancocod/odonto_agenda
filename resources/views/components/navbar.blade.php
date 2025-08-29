@@ -91,34 +91,43 @@
     .collapse-custom.show {
     display: block;
     }
-
-            /* Navbar normal */
-        #mainNavbar {
-            width: 240px;
-            transition: width 0.3s ease;
-            overflow: hidden;
-        }
-
-        /* Navbar encolhida */
-        #mainNavbar.collapsed {
-            width: 70px;
-        }
-
-        #mainNavbar.collapsed .nav-link span {
-            display: none; /* esconde só os textos, mantém ícones */
-        }
-        #mainNavbar {
+    
+    /* --- ESTILOS DA NAVBAR E TRANSIÇÃO --- */
+    #mainNavbar {
         width: 250px;
         background-color: var(--blue-color);
         transition: width 0.3s ease;
-        overflow: hidden;
-        }
+        overflow-x: hidden; /* Previne conteúdo de vazar durante a transição */
+    }
 
-        #mainNavbar.collapsed {
-        width: 70px;
-        }
+    /* --- ESTILOS PARA NAVBAR RECOLHIDA (CLASSE .collapsed) --- */
+    
+    /* 1. Reduz a largura da navbar */
+    #mainNavbar.collapsed {
+        width: 80px;
+    }
 
+    /* 2. Esconde os elementos que não são ícones */
 
+    #mainNavbar.collapsed h5,
+    #mainNavbar.collapsed div[classs=""] { /* OBS: Há um typo 'classs' no seu HTML original */
+        opacity: 0;
+    }
+
+    /* 3. Esconde o texto dos links e centraliza os ícones */
+    #mainNavbar.collapsed .link-agendar,
+    #mainNavbar.collapsed .link-logout {
+        font-size: 0; /* Truque para esconder o nó de texto */
+        justify-content: center;
+        padding: 0.75rem;
+    }
+
+    /* 4. Restaura o tamanho do ícone, que foi afetado pelo font-size: 0 */
+    #mainNavbar.collapsed .link-agendar i,
+    #mainNavbar.collapsed .link-logout i {
+        font-size: 1.1rem; /* Ou o tamanho que preferir para os ícones */
+        margin: 0;
+    }
 </style>
 
 <nav class="navbar navbar-dark bg-primary d-lg-none fixed-top shadow-sm px-3" style="height: 56px">

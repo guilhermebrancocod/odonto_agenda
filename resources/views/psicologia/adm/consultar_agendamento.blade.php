@@ -5,511 +5,355 @@
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>Consulta de Agendamento</title>
 
-    <!-- FAVICON - IMAGEM DA GUIA -->
     <link rel="icon" type="image/png" href="/favicon_faesa.png">
     
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700&display=swap" rel="stylesheet" />
     <link href="https://cdnjs.cloudflare.com/ajax/libs/mdb-ui-kit/7.1.0/mdb.min.css" rel="stylesheet" />
 
-    <!-- Flatpickr CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
 
     <meta name="csrf-token" content="{{ csrf_token() }}">
 
     <style>
-        html, body { height: 100%; margin: 0; }
-        #content-wrapper {
-            width: 85vw;
-            height: 100vh;
-            margin: auto;
-            display: column;
-            gap: 24px;
-            overflow-y: auto;
-            align-items: stretch;
-        }
-        .modal-body { max-height: 60vh; overflow-y: auto; }
-
+        /* Estilos mantidos e adaptados */
         #limit-container {
             margin-top: 12px;
             display: flex;
-            justify-content: flex-end;
+            justify-content: space-between; /* Ajustado para alinhar contador e seletor */
             align-items: center;
             gap: 8px;
         }
-        #limit-container label {
-            font-weight: 600;
+        #limitador-registros {
+            display: flex;
+            align-items: center;
+            gap: 8px;
         }
         .flatpickr-input {
-            background-image: none !important;
+            background-color: #fff; /* Garante fundo branco com Bootstrap 5 */
         }
-        .flatpickr-calendar-arrow {
-            display: none !important;
-        }
-        main {
-            background-color: #ffffff;
-            padding: 18px;
-            border-radius: 10px;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
-            flex-direction: column;
-            overflow-y: auto;
-            border: 1.8px solid #dee2e6;
+        .shadow-dark {
+            box-shadow: 0 0.75rem 1.25rem rgba(0,0,0,0.4) !important;
         }
 
-
-        /* CSS DA MENSAGEM DE SUCESSO */
+        /* Animação para alertas */
         @keyframes slideDownFadeOut {
-        0% {
-            opacity: 0;
-            transform: translateY(-100%);
+            0%   { transform: translate(-50%, -100%); opacity: 0; }
+            10%  { transform: translate(-50%, 0); opacity: 1; }
+            90%  { transform: translate(-50%, 0); opacity: 1; }
+            100% { transform: translate(-50%, -100%); opacity: 0; }
         }
-        10% {
-            opacity: 1;
-            transform: translateY(0);
+        .animate-alert {
+            animation: slideDownFadeOut 5s ease forwards;
+            z-index: 1050;
         }
-        90% {
-            opacity: 1;
-            transform: translateY(0);
-        }
-        100% {
-            opacity: 0;
-            transform: translateY(-100%);
-        }
-    }
 
-    .animate-slide-down {
-        animation: slideDownFadeOut 5s ease forwards;
-        z-index: 9999;
-    }
+        /* Botões de ação na listagem de agendamentos */
+        .agendamento-actions .btn:hover {
+            filter: brightness(85%); /* deixa 15% mais escuro */
+            transition: filter 0.2s ease-in-out; /* animação suave */
+        }
+
     </style>
 </head>
 
-<body>
+<body class="bg-body-secondary">
     @include('components.navbar')
 
-    <!-- CONTEÚDO PRINCIPAL -->
-    <div id="content-wrapper">
+    @if($errors->any())
+        <div class="alert alert-danger shadow text-center position-fixed top-0 start-50 translate-middle-x mt-3 animate-alert" style="max-width: 90%;">
+            <strong>Ops!</strong> Corrija os itens abaixo:
+            <ul class="mb-0 mt-1 list-unstyled">
+                @foreach($errors->all() as $error)
+                    <li><i class="bi bi-exclamation-circle-fill me-1"></i> {{ $error }}</li>
+                @endforeach
+            </ul>
+        </div>
+    @endif
 
-        <!-- INFORMA ERROS DE VALIDAÇÃO DO BACKEND EM CASOS DE SUBMISSÃO DE FORMULÁRIO -->
-        @if($errors->any())
-            <div class="alert alert-danger">
-                <ul class="mb-0">
-                    @foreach($errors->all() as $erro)
-                        <li>{{ $erro }}</li>
-                    @endforeach
-                </ul>
-            </div>
-        @endif
+    @if(session('success'))
+        <div class="alert alert-success text-center shadow position-fixed top-0 start-50 translate-middle-x mt-3 animate-alert">
+            {{ session('success') }}
+        </div>
+    @endif
 
-        <!-- MOSTRA MENSAGEM DE SUCESSO AO USUARIO APÓS UMA AÇÃO BEM SUCEDIDA -->
-        @if(session('success'))
-            <div id="success-alert" class="alert alert-success fixed-top text-center mx-auto w-50 shadow animate-slide-down mt-4">
-                {{ session('success') }}
-            </div>
-        @endif
+    <div class="container ms-3 mw-100">
+        <div class="row">
+            <x-page-title>
+            </x-page-title>
 
-            <main>
-
-                <div class="bg-white p-4 rounded shadow-sm w-100">
-
-                    <!-- TÍTULO -->
-                    <div class="text-center mb-5">
-                        <h2 class="fs-4 mb-0">Agendamentos</h2>
-                    </div>
-
-                    <!-- CAMPOS DE PESQUISA - FILTRO -->
-                    <form id="search-form" class="w-100 mb-4">
-                        <div class="row g-3">
-
-                            <!-- FILTRO POR PACIENTE -->
-                            <div class="col-12 col-sm-6 col-md-3">
-                                <div class="input-group">
-                                    <span class="input-group-text"><i class="bi bi-person"></i></span>
-                                    <input
-                                        id="search-input"
-                                        name="search"
-                                        type="search"
-                                        class="form-control"
-                                        placeholder="Nome ou CPF do paciente"
-                                    />
-                                </div>
+            <div class="col-12 shadow-lg shadow-dark p-4 bg-body-tertiary rounded">
+                
+                <form id="search-form" class="w-100 mb-4">
+                    <div class="row g-3">
+                        <div class="col-12 col-sm-6 col-md-3">
+                            <div class="input-group">
+                                <span class="input-group-text"><i class="bi bi-person"></i></span>
+                                <input id="search-input" name="search" type="search" class="form-control" placeholder="Nome ou CPF do paciente" />
                             </div>
+                        </div>
 
-                            <!-- FILTRO POR PSICÓLOGO -->
-                            <div class="col-12 col-sm-6 col-md-3">
-                                <div class="input-group">
-                                    <span class="input-group-text"><i class="bi bi-person-workspace"></i></span>
-                                    <input
-                                        id="psicologo-input"
-                                        name="psicologo"
-                                        type="search"
-                                        class="form-control"
-                                        placeholder="Nome/Matrícula do Professor"
-                                    />
-                                </div>
+                        <div class="col-12 col-sm-6 col-md-3">
+                            <div class="input-group">
+                                <span class="input-group-text"><i class="bi bi-person-workspace"></i></span>
+                                <input id="psicologo-input" name="psicologo" type="search" class="form-control" placeholder="Nome/Matrícula do Psicólogo" />
                             </div>
+                        </div>
 
-                            <!-- FILTRO POR DATA -->
-                            <div class="col-12 col-sm-6 col-md-3">
-                                <div class="input-group">
-                                    <span class="input-group-text"><i class="bi bi-calendar"></i></span>
-                                    <input
-                                    id="date-input"
-                                    name="date"
-                                    type="date"
-                                    class="form-control"
-                                    placeholder="Data"
-                                    />
-                                </div>
+                        <div class="col-12 col-sm-6 col-md-3">
+                            <div class="input-group">
+                                <span class="input-group-text"><i class="bi bi-calendar-event"></i></span>
+                                <input id="date-input" name="date" type="text" class="form-control" placeholder="Data" />
                             </div>
+                        </div>
 
-                            <!-- FILTRO POR HORÁRIO DE INICIAL -->
-                            <div class="col-12 col-sm-6 col-md-3">
-                                <div class="input-group">
-                                    <span class="input-group-text"><i class="bi bi-clock"></i></span>
-                                    <input
-                                    id="start-time-input"
-                                    name="start_time"
-                                    type="time"
-                                    class="form-control"
-                                    placeholder="Hora Início"
-                                    />
-                                </div>
+                        <div class="col-12 col-sm-6 col-md-3">
+                            <div class="input-group">
+                                <span class="input-group-text"><i class="bi bi-clock-history"></i></span>
+                                <input id="start-time-input" name="start_time" type="text" class="form-control" placeholder="Hora Início" />
                             </div>
+                        </div>
 
-                            <!-- FILTRO POR HORÁRIO FINAL -->
-                            <div class="col-12 col-sm-6 col-md-3">
+                        <div class="col-12 col-sm-6 col-md-3">
                             <div class="input-group">
                                 <span class="input-group-text"><i class="bi bi-clock"></i></span>
-                                <input
-                                id="end-time-input"
-                                name="end_time"
-                                type="time"
-                                class="form-control"
-                                placeholder="Hora Fim"
-                                />
+                                <input id="end-time-input" name="end_time" type="text" class="form-control" placeholder="Hora Fim" />
                             </div>
-                            </div>
+                        </div>
 
-                            <!-- FILTRO POR STATUS -->
-                            <div class="col-12 col-sm-6 col-md-3">
+                        <div class="col-12 col-sm-6 col-md-3">
                             <div class="input-group">
                                 <span class="input-group-text"><i class="bi bi-list-check"></i></span>
                                 <select id="status-input" name="status" class="form-select">
-                                <option value="">Status</option>
-                                <option value="Agendado">Agendado</option>
-                                <option value="Presente">Presente</option>
-                                <option value="Remarcado">Reagendado</option>
-                                <option value="Cancelado">Cancelado</option>
-                                <option value="Finalizado">Finalizado</option>
+                                    <option value="" selected>Todos os Status</option>
+                                    <option value="Agendado">Agendado</option>
+                                    <option value="Presente">Presente</option>
+                                    <option value="Remarcado">Reagendado</option>
+                                    <option value="Cancelado">Cancelado</option>
+                                    <option value="Finalizado">Finalizado</option>
                                 </select>
                             </div>
-                            </div>
+                        </div>
 
-                            <!-- FILTRO POR SERVIÇO -->
-                            <div class="col-12 col-sm-6 col-md-3">
+                        <div class="col-12 col-sm-6 col-md-3">
                             <div class="input-group">
                                 <span class="input-group-text"><i class="bi bi-briefcase"></i></span>
-                                <input
-                                id="service-input"
-                                name="service"
-                                type="text"
-                                class="form-control"
-                                placeholder="Serviço"
-                                />
+                                <input id="service-input" name="service" type="text" class="form-control" placeholder="Serviço" />
                             </div>
-                            </div>
-
-                            <!-- FILTRO POR LOCAL -->
-                            <div class="col-12 col-sm-6 col-md-3">
-                            <div class="input-group">
-                                <span class="input-group-text"><i class="bi bi-house"></i></span>
-                                <input
-                                id="local-input"
-                                name="local"
-                                type="text"
-                                class="form-control"
-                                placeholder="Local"
-                                />
-                            </div>
-                            </div>
-
-                            <!-- FILTRO POR VALOR -->
-                            <div class="col-12 col-sm-6 col-md-3">
-                            <div class="input-group">
-                                <span class="input-group-text"><i class="bi bi-currency-dollar"></i></i></span>
-                                <input
-                                id="valor-input"
-                                name="valor"
-                                type="text"
-                                class="form-control"
-                                placeholder="Valor"
-                                novalidate/>
-                            </div>
-                            </div>
-
-                            <div class="col-12 col-sm-6 col-md-3 d-flex flex-row gap-2">
-                                <button type="submit" class="btn btn-primary p-1 m-0">
-                                    <span>Pesquisar</span>
-                                </button>
-                                <button type="button" class="btn btn-outline-secondary flex-grow-1 p-1 m-0" id="btnClearFilters">
-                                    <span>Limpar Filtros</span>
-                                </button>
-                            </div>
-
-                        </div>
-                    </form>
-
-                    <hr>
-
-                    <div class="w-100">
-                        <h5 class="mb-3">Resultados</h5>
-                        <div class="table-responsive border border-3 rounded" style="max-height: 500px; overflow-y: auto;">
-                            <table class="table table-hover table-bordered align-middle">
-                                <thead class="table-light" style="position: sticky; top: 0; background-color: white; z-index: 10;">
-                                    <tr>
-                                        <th>Paciente</th>
-                                        <th>Psicólogo</th>
-                                        <th>Serviço</th>
-                                        <th>Data</th>
-                                        <th>Hora Início</th>
-                                        <th>Hora Fim</th>
-                                        <th>Local</th>
-                                        <th>Status</th>
-                                        <th>É Reagendamento?</th>
-                                        <th>Valor</th>
-                                        <th>Pago?</th>
-                                        <th>Valor Pago</th>
-                                        <th>Ações</th>
-                                    </tr>
-                                </thead>
-                                <tbody id="agendamentos-tbody">
-                                    <tr>
-                                        <td colspan="8" class="text-center">Nenhuma pesquisa realizada ainda.</td>
-                                    </tr>
-                                </tbody>
-                            </table>
                         </div>
 
-                        <!-- Seletor de limite de registros abaixo da tabela -->
-                        <div id="limit-container" class="d-flex justify-content-between">
-
-                            <div id="contador-registros">
-                                <span>total de registros</span>
+                        <div class="col-12 col-sm-6 col-md-3">
+                            <div class="input-group">
+                                <span class="input-group-text"><i class="bi bi-geo-alt"></i></span>
+                                <input id="local-input" name="local" type="text" class="form-control" placeholder="Local" />
                             </div>
+                        </div>
 
-                            <div id="limitador-registros">
-                                <label for="limit-select">  
-                                    <span style="font-size: 15px;">Mostrar</span>
-                                </label>
-                                <select id="limit-select" class="form-select" style="width: auto;">
-                                    <option value="5">5</option>
-                                    <option value="10" selected>10</option>
-                                    <option value="20">20</option>
-                                    <option value="50">50</option>
-                                    <option value="100">100</option>
-                                </select>
+                        <div class="col-12 col-sm-6 col-md-3">
+                            <div class="input-group">
+                                <span class="input-group-text"><i class="bi bi-currency-dollar"></i></span>
+                                <input id="valor-input" name="valor" type="text" class="form-control" placeholder="Valor" />
                             </div>
-                            
+                        </div>
+
+                        <div class="col-12 col-sm-6 col-md-3 d-flex gap-2">
+                            <button type="submit" class="btn btn-primary w-50">
+                                <i class="bi bi-search"></i> Pesquisar
+                            </button>
+                            <button type="button" class="btn btn-outline-secondary w-50" id="btnClearFilters">
+                                Limpar
+                            </button>
+                        </div>
+                    </div>
+                </form>
+
+                <hr>
+
+                <div class="w-100">
+                    <h5 class="mb-3">Resultados</h5>
+                    <div class="table-responsive border rounded" style="max-height: 55vh; overflow-y: auto;">
+                        <table class="table table-hover table-bordered align-middle mb-0">
+                            <thead class="table-light" style="position: sticky; top: 0; z-index: 1;">
+                                <tr>
+                                    <th>Paciente</th>
+                                    <th>Psicólogo</th>
+                                    <th>Serviço</th>
+                                    <th>Data</th>
+                                    <th>Início</th>
+                                    <th>Fim</th>
+                                    <th>Local</th>
+                                    <th>Status</th>
+                                    <th>Reagend.</th>
+                                    <th>Valor</th>
+                                    <th>Pago?</th>
+                                    <th>Valor Pago</th>
+                                    <th>Ações</th>
+                                </tr>
+                            </thead>
+                            <tbody id="agendamentos-tbody">
+                                <tr>
+                                    <td colspan="13" class="text-center">Nenhuma pesquisa realizada ainda.</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <div id="limit-container">
+                        <div id="contador-registros">
+                            <span class="text-muted">Total de registros: 0</span>
+                        </div>
+                        <div id="limitador-registros">
+                            <label for="limit-select" class="form-label mb-0">Mostrar</label>
+                            <select id="limit-select" class="form-select form-select-sm" style="width: auto;">
+                                <option value="10" selected>10</option>
+                                <option value="25">25</option>
+                                <option value="50">50</option>
+                                <option value="100">100</option>
+                            </select>
                         </div>
                     </div>
                 </div>
 
-            </main>
-
+            </div>
+        </div>
     </div>
 
-    <!-- Scripts -->
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/mdb-ui-kit/7.1.0/mdb.min.js"></script>
-    <!-- Flatpickr JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" crossorigin="anonymous"></script>
     <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
-    <script src="https://cdn.jsdelivr.net/npm/flatpickr/dist/l10n/pt.js"></script> <!-- Adiciona Linguagem em Português -->
-
-    <script>
-        const agendamentosTbody = document.getElementById('agendamentos-tbody');
-        const searchForm = document.getElementById('search-form');
-        const limitSelect = document.getElementById('limit-select');
-
-        // Função para coletar filtros atuais (do formulário) e o limite selecionado
-        function getFilters() {
-            return {
-                search: document.getElementById('search-input').value.trim(),
-                psicologo: document.getElementById('psicologo-input').value.trim(),
-                date: document.getElementById('date-input').value,
-                start_time: document.getElementById('start-time-input').value,
-                end_time: document.getElementById('end-time-input').value,
-                local: document.getElementById('local-input') ? document.getElementById('local-input').value.trim() : '',
-                status: document.getElementById('status-input').value,
-                service: document.getElementById('service-input').value.trim(),
-                valor: document.getElementById('valor-input').value,
-                limit: limitSelect.value,
-            };
-        }
-
-        function carregarAgendamentos(params = {}) {
-            const urlParams = new URLSearchParams(params).toString();
-            const url = `/psicologia/get-agendamento` + (urlParams ? `?${urlParams}` : '');
-
-            fetch(url)
-                .then(response => response.json())
-                .then(agendamentos => {
-                    agendamentosTbody.innerHTML = '';
-
-                    // Atualiza contador aqui, antes do loop
-                    document.getElementById('contador-registros').innerHTML = `
-                        <span>Total: ${agendamentos.length}</span>
-                    `;
-
-                    if (agendamentos.length === 0) {
-                        agendamentosTbody.innerHTML = `
-                            <tr>
-                                <td colspan="12" class="text-center">Nenhum agendamento encontrado.</td>
-                            </tr>
-                        `;
-                        return;
-                    }
-
-                    agendamentos.forEach(ag => {
-                        const paciente = ag.paciente ? ag.paciente.NOME_COMPL_PACIENTE : '-';
-                        const psicologo = ag.ID_PSICOLOGO ? ag.ID_PSICOLOGO : '-';
-                        const servico = ag.servico ? ag.servico.SERVICO_CLINICA_DESC : '-';
-                        const data = ag.DT_AGEND ? ag.DT_AGEND.substring(0, 10).split('-').reverse().join('/') : '-';
-                        const horaIni = ag.HR_AGEND_INI ? ag.HR_AGEND_INI.substring(0, 5) : '-';
-                        const horaFim = ag.HR_AGEND_FIN ? ag.HR_AGEND_FIN.substring(0, 5) : '-';
-                        const local = ag.LOCAL ?? '-';
-                        const status = ag.STATUS_AGEND ?? '-';
-                        const valor = ag.VALOR_AGEND ?? '-';
-                        const checkPagamento = ag.STATUS_PAG === 'S' ? 'Sim' :
-                                            ag.STATUS_PAG === 'N' ? 'Não' :
-                                            'Não informado';
-                        const valorPagamento = ag.VALOR_PAG ?? '-';
-                        const reagendamento = ag.ID_AGEND_REMARCADO != null ? 'Sim' : 'Não';
-                        const row = document.createElement('tr');
-
-                        let statusColor = '';
-                        switch (status) {
-                            case 'Agendado':    statusColor = '#4CAF50'; break;
-                            case 'Cancelado':   statusColor = '#F44336'; break;
-                            case 'Concluído':   statusColor = '#2E7D32'; break;
-                            case 'Reagendado':  statusColor = '#FF9800'; break;
-                            case 'Presente':    statusColor = '#2196F3'; break;
-                            default:            statusColor = '#616161';
-                        }
-
-                        row.innerHTML = `
-                            <td>${paciente}</td>
-                            <td>${psicologo}</td>
-                            <td>${servico}</td>
-                            <td>${data}</td>
-                            <td>${horaIni}</td>
-                            <td>${horaFim}</td>
-                            <td>${local}</td>
-                            <td style="color: ${statusColor}; font-weight: bold;">${status}</td>
-                            <td>${reagendamento}</td>
-                            <td>${valor}</td>
-                            <td>${checkPagamento}</td>
-                            <td>${valorPagamento}</td>
-                            <td class="d-flex flex-row gap-1">
-                                <a href="/psicologia/agendamento/${ag.ID_AGENDAMENTO}" class="btn btn-sm btn-primary">Visualizar</a>
-                                <a href="/psicologia/agendamento/${ag.ID_AGENDAMENTO}/editar" class="btn btn-sm btn-warning">Editar</a>
-                                <form action="/psicologia/agendamento/${ag.ID_AGENDAMENTO}" method="POST" style="display:inline;" onsubmit="return confirm('Confirma a exclusão deste agendamento?');">
-                                    <input type="hidden" name="_method" value="DELETE" />
-                                    <input type="hidden" name="_token" value="${document.querySelector('meta[name=csrf-token]').content}" />
-                                    <button type="submit" class="btn btn-sm btn-danger">Excluir</button>
-                                </form>
-                            </td>
-                        `;
-
-                        agendamentosTbody.appendChild(row);
-                    });
-                })
-                .catch(error => {
-                    console.error(error);
-                    agendamentosTbody.innerHTML = `
-                        <tr>
-                            <td colspan="12" class="text-center text-danger">Erro ao buscar agendamentos.</td>
-                        </tr>
-                    `;
-                });
-        }
-
-        // Ao enviar o formulário, carrega agendamentos com filtros atuais e limite selecionado
-        searchForm.addEventListener('submit', function(e) {
-            e.preventDefault();
-            carregarAgendamentos(getFilters());
-        });
-
-        // Ao mudar o limite, recarrega automaticamente com filtros atuais
-        limitSelect.addEventListener('change', () => {
-            carregarAgendamentos(getFilters());
-        });
-
-        // Carrega a lista ao abrir a página com limite padrão 10
-        document.addEventListener('DOMContentLoaded', () => {
-            carregarAgendamentos(getFilters());
-        });
-    </script>
-
-    <script>
-        document.getElementById('btnClearFilters').addEventListener('click', () => {
-            const form = document.getElementById('search-form');
-
-            // Para cada input do form, limpar o valor
-            form.querySelectorAll('input').forEach(input => {
-                input.value = '';
-            });
-
-            // Para cada select do form, resetar para a opção vazia (ou a primeira)
-            form.querySelectorAll('select').forEach(select => {
-                select.selectedIndex = 0;
-            });
-        });
-    </script>
-
-
-    <!-- FLATPICKR PARA MELHORAR VISUALIZAÇÃO DE DIAS E HORÁRIOS -->
-    <script>
-        flatpickr("#date-input", {
-            dateFormat: "Y-m-d",   
-            altInput: true,
-            altFormat: "d-m-Y",
-            locale: "pt",
-            // minDate: "today",
-            allowInput: true,
-        });
-
-        flatpickr("#start-time-input", {
-            enableTime: true,
-            noCalendar: true,
-            dateFormat: "H:i",
-            time_24hr: true,
-            minuteIncrement: 15,
-            altInput: true,
-            altFormat: "H:i"
-        });
-
-        flatpickr("#end-time-input", {
-            enableTime: true,
-            noCalendar: true,
-            dateFormat: "H:i",
-            time_24hr: true,
-            minuteIncrement: 15,
-            altInput: true,
-            altFormat: "H:i"
-        });
-
-        flatpickr.localize(flatpickr.l10ns.pt);
-    </script>
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr/dist/l10n/pt.js"></script>
 
     <script>
         document.addEventListener("DOMContentLoaded", function () {
-            const alert = document.getElementById("success-alert");
-            if (alert) {
-                setTimeout(() => {
-                    alert.remove();
-                }, 5000);
+            const agendamentosTbody = document.getElementById('agendamentos-tbody');
+            const searchForm = document.getElementById('search-form');
+            const limitSelect = document.getElementById('limit-select');
+            const contadorRegistros = document.getElementById('contador-registros');
+
+            function getFilters() {
+                const formData = new FormData(searchForm);
+                const params = new URLSearchParams(formData);
+                params.append('limit', limitSelect.value);
+                return params;
             }
+
+            function carregarAgendamentos() {
+                const params = getFilters();
+                const url = `/psicologia/get-agendamento?${params.toString()}`;
+
+                // Adiciona um feedback visual de carregamento
+                agendamentosTbody.innerHTML = `<tr><td colspan="13" class="text-center"><div class="spinner-border spinner-border-sm" role="status"><span class="visually-hidden">Loading...</span></div> Carregando...</td></tr>`;
+
+                fetch(url)
+                    .then(response => {
+                        if (!response.ok) throw new Error('Erro na resposta da rede.');
+                        return response.json();
+                    })
+                    .then(agendamentos => {
+                        agendamentosTbody.innerHTML = '';
+                        contadorRegistros.innerHTML = `<span class="text-muted">Total de registros: ${agendamentos.length}</span>`;
+
+                        if (agendamentos.length === 0) {
+                            agendamentosTbody.innerHTML = `<tr><td colspan="13" class="text-center">Nenhum agendamento encontrado para os filtros aplicados.</td></tr>`;
+                            return;
+                        }
+
+                        agendamentos.forEach(ag => {
+                            const paciente = ag.paciente ? ag.paciente.NOME_COMPL_PACIENTE : '-';
+                            const psicologo = ag.psicologo ? ag.psicologo.NOME_COMPL : (ag.ID_PSICOLOGO || '-');
+                            const servico = ag.servico ? ag.servico.SERVICO_CLINICA_DESC : '-';
+                            const data = ag.DT_AGEND ? new Date(ag.DT_AGEND).toLocaleDateString('pt-BR', {timeZone: 'UTC'}) : '-';
+                            const horaIni = ag.HR_AGEND_INI ? ag.HR_AGEND_INI.substring(0, 5) : '-';
+                            const horaFim = ag.HR_AGEND_FIN ? ag.HR_AGEND_FIN.substring(0, 5) : '-';
+                            const local = ag.sala_clinica ? ag.sala_clinica.DESCRICAO : '-';
+                            const status = ag.STATUS_AGEND || '-';
+                            const valor = ag.VALOR_AGEND ? parseFloat(ag.VALOR_AGEND).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' }) : '-';
+                            const checkPagamento = ag.STATUS_PAG === 'S' ? '<span class="badge bg-success">Sim</span>' : '<span class="badge bg-danger">Não</span>';
+                            const valorPagamento = ag.VALOR_PAG ? parseFloat(ag.VALOR_PAG).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' }) : '-';
+                            const reagendamento = ag.ID_AGEND_REMARCADO != null ? 'Sim' : 'Não';
+                            
+                            const statusMap = {
+                                'Agendado': { color: 'text-success', icon: 'bi-calendar-check' },
+                                'Cancelado': { color: 'text-danger', icon: 'bi-calendar-x' },
+                                'Presente': { color: 'text-primary', icon: 'bi-check2-circle' },
+                                'Finalizado': { color: 'text-secondary', icon: 'bi-calendar2-check-fill' },
+                                'Remarcado': { color: 'text-warning', icon: 'bi-arrow-repeat' }
+                            };
+                            const statusInfo = statusMap[status] || { color: 'text-muted', icon: 'bi-question-circle' };
+
+                            const row = document.createElement('tr');
+                            row.innerHTML = `
+                                <td>${paciente}</td>
+                                <td>${psicologo}</td>
+                                <td>${servico}</td>
+                                <td>${data}</td>
+                                <td>${horaIni}</td>
+                                <td>${horaFim}</td>
+                                <td>${local}</td>
+                                <td class="fw-bold ${statusInfo.color}"><i class="bi ${statusInfo.icon} me-1"></i>${status}</td>
+                                <td>${reagendamento}</td>
+                                <td>${valor}</td>
+                                <td class="text-center">${checkPagamento}</td>
+                                <td>${valorPagamento}</td>
+                                <td class="d-flex flex-nowrap gap-1 agendamento-actions">
+                                    <a href="/psicologia/agendamento/${ag.ID_AGENDAMENTO}/editar" class="btn btn-warning flex-grow-1" title="Editar"><i class="bi bi-pencil"></i></a>
+                                    <form action="/psicologia/agendamento/${ag.ID_AGENDAMENTO}" method="POST" onsubmit="return confirm('Confirma a exclusão deste agendamento?');">
+                                        @csrf
+                                        @method('DELETE')
+                                        <button type="submit" class="btn btn-danger flex-grow-1" title="Excluir"><i class="bi bi-trash"></i></button>
+                                    </form>
+                                </td>
+                            `;
+                            agendamentosTbody.appendChild(row);
+                        });
+                    })
+                    .catch(error => {
+                        console.error('Erro ao buscar agendamentos:', error);
+                        agendamentosTbody.innerHTML = `<tr><td colspan="13" class="text-center text-danger">Falha ao carregar os dados. Tente novamente mais tarde.</td></tr>`;
+                    });
+            }
+
+            searchForm.addEventListener('submit', function(e) {
+                e.preventDefault();
+                carregarAgendamentos();
+            });
+
+            limitSelect.addEventListener('change', carregarAgendamentos);
+
+            document.getElementById('btnClearFilters').addEventListener('click', () => {
+                searchForm.reset();
+                // Limpa também os campos do Flatpickr
+                flatpickrInstances.forEach(instance => instance.clear());
+                carregarAgendamentos();
+            });
+
+            // Carrega a lista ao abrir a página
+            carregarAgendamentos();
         });
+    </script>
+    
+    <script>
+        // Inicialização do Flatpickr
+        const flatpickrInstances = flatpickr.localize(flatpickr.l10ns.pt) && [
+            flatpickr("#date-input", {
+                dateFormat: "Y-m-d", 
+                altInput: true,
+                altFormat: "d/m/Y"
+            }),
+            flatpickr("#start-time-input", {
+                enableTime: true,
+                noCalendar: true,
+                dateFormat: "H:i",
+                time_24hr: true
+            }),
+            flatpickr("#end-time-input", {
+                enableTime: true,
+                noCalendar: true,
+                dateFormat: "H:i",
+                time_24hr: true
+            })
+        ];
     </script>
 </body>
 </html>

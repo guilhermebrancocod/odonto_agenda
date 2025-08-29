@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Menu</title>
+    <title>Calendário</title>
 
     <!-- FAVICON - IMAGEM DA GUIA -->
     <link rel="icon" type="image/png" href="/favicon_faesa.png">
@@ -131,20 +131,11 @@
 
     <div class="container ms-3 mw-100">
         <div class="row">
-            <div class="col-12 text-center mb-1">
-                <div class="d-flex flex-row justify-content-between align-items-center">
-                    <p class="p-0 mt-2 mb-1 text-start" style="font-size: 25px;">
-                        <i class="bi bi-list" id="btnToggleNavbar" style="cursor: pointer;"></i>
-                        <strong>Calendário</strong>
+            <x-page-title>
+                    <p class="btn btn-success p-2 me-3" style="font-size: 15px;">
+                        <span>Novo Agendamento</span>
                     </p>
-                    <div class="me-2">
-                        <p class="btn btn-success p-2 me-3" style="font-size: 15px;">
-                            <span>Novo Agendamento</span>
-                        </p>
-                        <i class="bi bi-person-circle" style="font-size: 40px;"></i>
-                    </div>
-                </div>
-            </div>
+            </x-page-title>
             <div class="col-12 shadow-lg shadow-dark pt-3 bg-body-tertiary rounded">
                 <!-- CALENDÁRIO -->
                 <div id="calendar" style="max-width: 100%;" class="bg-light-subtle pe-4"></div>
@@ -451,22 +442,7 @@
     })
 </script>
 
-<script>
-document.addEventListener("DOMContentLoaded", function () {
-    const btnToggle = document.getElementById("btnToggleNavbar");
-    const navbar = document.getElementById("mainNavbar");
-    const calendarContainer = document.getElementById("calendar");
 
-    btnToggle.addEventListener("click", function () {
-        navbar.classList.toggle("collapsed");
-
-        // Atualiza o tamanho do calendário depois de 300ms para dar tempo da animação da sidebar
-        setTimeout(() => {
-            renderCalendar() // FullCalendar irá se redimensionar
-        }, 300);
-    });
-});
-</script>
 
 
 </html>

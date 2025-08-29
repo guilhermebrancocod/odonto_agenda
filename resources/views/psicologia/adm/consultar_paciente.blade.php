@@ -5,247 +5,171 @@
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>Consulta de Paciente</title>
 
-    <!-- FAVICON - IMAGEM DA GUIA -->
     <link rel="icon" type="image/png" href="/favicon_faesa.png">
     
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700&display=swap" rel="stylesheet" />
     <link href="https://cdnjs.cloudflare.com/ajax/libs/mdb-ui-kit/7.1.0/mdb.min.css" rel="stylesheet" />
-
-    <!-- BOOTSTRAP ICONS -->
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.1/font/bootstrap-icons.min.css">
-
-    <!-- FLATPICKR -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css" />
 
     <meta name="csrf-token" content="{{ csrf_token() }}">
 
     <style>
-        html, body { height: 100%; margin: 0; }
-        #content-wrapper {
-            width: 85vw;
-            height: 100vh;
-            margin: auto;
-            display: column;
-            gap: 24px;
-            overflow-y: auto;
-            align-items: stretch;
+        .shadow-dark {
+            box-shadow: 0 0.75rem 1.25rem rgba(0,0,0,0.4) !important;
         }
-        /* ADICIONA SCROLL CASO EXCEDA O MÁXIMO DE ALTURA DEFINIDO */
-        .modal-body {
-            max-height: 60vh;
-            overflow-y: auto;
+        #limit-container {
+            margin-top: 12px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
         }
-        main {
-            background-color: #ffffff;
-            padding: 18px;
-            border-radius: 10px;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
-            flex-direction: column;
-            overflow-y: auto;
-            border: 1.8px solid #dee2e6;
+        #limitador-registros {
+            display: flex;
+            align-items: center;
+            gap: 8px;
         }
-        .table-responsive {
-            overflow-x: auto;
-            overflow-y: auto;
+        @keyframes slideDownFadeOut {
+            0%   { transform: translate(-50%, -100%); opacity: 0; }
+            10%  { transform: translate(-50%, 0); opacity: 1; }
+            90%  { transform: translate(-50%, 0); opacity: 1; }
+            100% { transform: translate(-50%, -100%); opacity: 0; }
         }
-        tr {
-            max-height: 10px; /* ajuste conforme a altura das linhas da tabela original */
+        .animate-alert {
+            animation: slideDownFadeOut 5s ease forwards;
+            z-index: 1050;
         }
         .modal-xxl {
-          min-width: 95vw;
-          max-width: 95vw;
-          min-height: 95vh;
-          max-height: 95vh;
+           max-width: 90%;
+        }
+        .modal-body {
+           max-height: 75vh;
+           overflow-y: auto;
         }
     </style>
 </head>
 
-<body>
+<body class="bg-body-secondary">
     @include('components.navbar')
 
-    <!-- CONTEUDO PRINCIPAL -->
-    <div id="content-wrapper">
+    @if($errors->any())
+        <div class="alert alert-danger shadow text-center position-fixed top-0 start-50 translate-middle-x mt-3 animate-alert" style="max-width: 90%;">
+            <strong>Ops!</strong> Corrija os itens abaixo:
+            <ul class="mb-0 mt-1 list-unstyled">
+                @foreach($errors->all() as $error)
+                    <li><i class="bi bi-exclamation-circle-fill me-1"></i> {{ $error }}</li>
+                @endforeach
+            </ul>
+        </div>
+    @endif
 
-        <!-- INFORMA ERROS DE VALIDAÇÃO DO BACKEND EM CASOS DE SUBMISSÃO DE FORMULÁRIO -->
-        @if($errors->any())
-            <div class="alert alert-danger">
-                <ul class="mb-0">
-                    @foreach($errors->all() as $erro)
-                        <li>{{ $erro }}</li>
-                    @endforeach
-                </ul>
-            </div>
-        @endif
+    @if(session('success'))
+        <div class="alert alert-success text-center shadow position-fixed top-0 start-50 translate-middle-x mt-3 animate-alert">
+            {{ session('success') }}
+        </div>
+    @endif
 
-        <!-- MOSTRA MENSAGEM DE SUCESSO AO USUARIO APÓS UMA AÇÃO BEM SUCEDIDA -->
-        @if(session('success'))
-            <div class="alert alert-success">
-                {{ session('success') }}
-            </div>
-        @endif
+    <div class="container ms-3 mw-100">
+        <div class="row">
+            <x-page-title></x-page-title>
 
-        <main>
+            <div class="col-12 shadow-lg shadow-dark p-4 bg-body-tertiary rounded">
 
-            <div class="bg-white p-4 rounded shadow-sm w-100">  
-
-                <!-- TÍTULO -->
-                <div class="text-center mb-5">
-                    <h2 class="fs-4 mb-0">Pacientes</h2>
-                </div>
-
-                <!-- FORMULÁIO DE PESQUISA -->
                 <form id="search-form" class="w-100 mb-4">
                     <div class="row g-3">
-
-                        <!-- PESQUISA POR NOME DO PACIENTE OU CPF -->
-                        <div class="col-12 col-sm-6 col-md-4">
+                        <div class="col-12 col-sm-6 col-lg-3">
                             <div class="input-group">
-                                <span class="input-group-text">
-                                    <i class="bi bi-person"></i>
-                                </span>
-                                <input
-                                    id="search-input"
-                                    name="search"
-                                    type="search"
-                                    class="form-control"
-                                    placeholder="Nome ou CPF do paciente"
-                                />
+                                <span class="input-group-text"><i class="bi bi-person"></i></span>
+                                <input id="search-input" name="search" type="search" class="form-control" placeholder="Nome ou CPF" />
                             </div>
                         </div>
-
-                    <!-- DATA DE NASCIMENTO -->
-                    <div class="col-12 col-sm-6 col-md-4">
-                        <div class="input-group">
-                            <span class="input-group-text">
-                                <i class="bi bi-calendar-event"></i>
-                            </span>
-                            <input
-                            id="DT_NASC_PACIENTE-input"
-                            name="DT_NASC_PACIENTE"
-                            type="text"
-                            class="form-control"
-                            placeholder="Data de Nascimento"
-                            />
+                        <div class="col-12 col-sm-6 col-lg-3">
+                            <div class="input-group">
+                                <span class="input-group-text"><i class="bi bi-calendar-event"></i></span>
+                                <input id="DT_NASC_PACIENTE-input" name="DT_NASC_PACIENTE" type="text" class="form-control" placeholder="Data de Nascimento" />
+                            </div>
+                        </div>
+                        <div class="col-12 col-sm-6 col-lg-2">
+                            <div class="input-group">
+                                <span class="input-group-text"><i class="bi bi-gender-ambiguous"></i></span>
+                                <select id="sexo" name="SEXO_PACIENTE" class="form-select">
+                                    <option value="" selected>Sexo</option>
+                                    <option value="M">Masculino</option>
+                                    <option value="F">Feminino</option>
+                                    <option value="O">Outro</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-12 col-sm-6 col-lg-2">
+                            <div class="input-group">
+                                <span class="input-group-text"><i class="bi bi-telephone"></i></span>
+                                <input id="telefone-input" name="FONE_PACIENTE" type="text" class="form-control" placeholder="Telefone" />
+                            </div>
+                        </div>
+                        <div class="col-12 col-sm-6 col-lg-2">
+                            <div class="input-group">
+                                <span class="input-group-text"><i class="bi bi-check2-circle"></i></span>
+                                <select id="status-input" name="STATUS" class="form-select">
+                                    <option value="" selected>Status</option>
+                                    <option value="Em espera">Em espera</option>
+                                    <option value="Em atendimento">Em atendimento</option>
+                                    <option value="Finalizado">Finalizado</option>
+                                    <option value="Inativo">Inativo</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-12 col-lg-auto d-flex gap-2">
+                            <button type="submit" class="btn btn-primary flex-grow-1"><i class="bi bi-search"></i> Pesquisar</button>
+                            <button type="button" class="btn btn-outline-secondary flex-grow-1" id="btnCleanFilters">Limpar</button>
                         </div>
                     </div>
-
-                    <!-- SEXO -->
-                    <div class="col-12 col-sm-6 col-md-4">
-                        <div class="input-group">
-                            <span class="input-group-text">
-                                <i class="bi bi-arrow-down-circle"></i>
-                            </span>
-                            <select id="sexo" name="SEXO_PACIENTE" class="form-select form-select-sm">
-                                <option value="">Sexo</option>
-                                <option value="M">Masculino</option>
-                                <option value="F">Feminino</option>
-                                <option value="O">Outro</option>
-                            </select>
-                        </div>
-                    </div>
-
-                    <!-- TELEFONE -->
-                    <div class="col-12 col-sm-6 col-md-4">
-                        <div class="input-group">
-                            <span class="input-group-text">
-                                <i class="bi bi-telephone"></i>
-                            </span>
-                            <input
-                                id="telefone-input"
-                                name="FONE_PACIENTE"
-                                type="text"
-                                class="form-control"
-                                placeholder="Telefone"
-                            />
-                        </div>
-                    </div>
-
-                    <!-- STATUS PACIENTE -->
-                    <div class="col-12 col-sm-6 col-md-4">
-                        <div class="input-group">
-                            <span class="input-group-text">
-                                <i class="bi bi-check2-circle"></i>
-                            </span>
-                            <select id="status-input" name="STATUS" class="form-select form-select-sm">
-                                <option value="">Status</option>
-                                <option value="Em espera">Em espera</option>
-                                <option value="Em atendimento">Em atendimento</option>
-                                <option value="Finalizado">Finalizado</option>
-                                <option value="Inativo">Inativo</option>
-                            </select>
-                        </div>
-                    </div>
-
-                    <!-- BOTÃO DE PESQUISA -->
-                    <div class="col-12 col-sm-6 col-md-4">
-                        <button type="submit" class="btn btn-primary btn-sm px-3 mb-2">Pesquisar</button>
-                        <button type="button" class="btn btn-outline-secondary btn-sm px-3 mb-2" id="btnCleanFilters">Limpar Filtros</button>
-                    </div>
-
                 </form>
 
                 <hr>
 
-
-                <!-- RESULTADOS - TABELA -->
                 <div class="w-100">
-
                     <h5 class="mb-3">Resultados</h5>
-
-                    <div class="table-responsive" style="max-height: 460px; overflow-x: auto;">
+                    <div class="table-responsive border rounded" style="max-height: 55vh; overflow-y: auto;">
                         <table class="table table-hover table-bordered align-middle mb-0">
-                            <thead class="table-light">
+                            <thead class="table-light" style="position: sticky; top: 0; z-index: 1;">
                                 <tr>
-                                    <th style="min-width: 150px;">Nome</th>
-                                    <th class="text-nowrap">CPF</th>
-                                    <th class="text-nowrap">Data de Nascimento</th>
-                                    <th class="text-nowrap">Sexo</th>
-                                    <th style="min-width: 120px;">Telefone</th>
-                                    <th style="min-width: 180px;">Email</th>
+                                    <th>Nome</th>
+                                    <th>CPF</th>
+                                    <th>Nascimento</th>
+                                    <th>Sexo</th>
+                                    <th>Telefone</th>
+                                    <th>Email</th>
                                     <th>Status</th>
-                                    <th style="">Ações</th>
+                                    <th>Ações</th>
                                 </tr>
                             </thead>
-
-                            <!-- SEM PACIENTES -->
                             <tbody id="pacientes-tbody">
                                 <tr>
                                     <td colspan="8" class="text-center">Nenhuma pesquisa realizada ainda.</td>
                                 </tr>
                             </tbody>
-
                         </table>
                     </div>
-
-                    <!-- SELEÇÃO DE TOTAL DE REGISTROS A SEREM MOSTRADOS -->
-                    <div class="d-flex justify-content-between align-items-center mt-2">
-
+                    <div id="limit-container">
                         <div id="contador-registros">
-
+                            <span class="text-muted">Total de registros: 0</span>
                         </div>
-                    
                         <div id="limitador-registros">
-                            <label for="limite-visualizacao" class="form-label me-2 mb-0">Mostrar:</label>
-                            <select id="limite-visualizacao" class="form-select form-select-sm w-auto">
-                                <option value="5">5</option>
-                                <option value="10">10</option>
+                            <label for="limite-visualizacao" class="form-label mb-0">Mostrar</label>
+                            <select id="limite-visualizacao" class="form-select form-select-sm" style="width: auto;">
+                                <option value="10" selected>10</option>
                                 <option value="25">25</option>
                                 <option value="50">50</option>
                                 <option value="100">100</option>
                             </select>
                         </div>
                     </div>
-
                 </div>
-
-
             </div>
-
-        </main>
-
+        </div>
     </div>
 
-    <!-- MODA DE CONFIRMAÇÃO DE EDIÇÃO DE PACIENTE -->
     <div class="modal fade" id="confirmEditModal" tabindex="-1" aria-labelledby="confirmEditModalLabel" aria-hidden="true">
         <div class="modal-dialog">
             <div class="modal-content">
@@ -254,7 +178,7 @@
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fechar"></button>
                 </div>
                 <div class="modal-body">
-                    <p id="modal-paciente-nome">Deseja editar este paciente?</p>
+                    <p>Deseja editar o paciente: <strong id="modal-paciente-nome"></strong>?</p>
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
@@ -264,7 +188,6 @@
         </div>
     </div>
 
-    <!-- MODAL DE CONFIRMAÇÃO DE EXCLUSÃO DE PACIENTE -->
     <div class="modal fade" id="confirmDeleteModal" tabindex="-1" aria-labelledby="confirmDeleteModalLabel" aria-hidden="true">
         <div class="modal-dialog">
             <div class="modal-content">
@@ -273,8 +196,8 @@
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fechar"></button>
                 </div>
                 <div class="modal-body">
-                    <p id="modal-delete-nome">Deseja inativar este paciente?</p>
-                    <p class="text-danger">Essa ação não pode ser desfeita.</p>
+                    <strong id="modal-delete-nome"></strong>
+                    <p class="text-danger small mt-2"><i class="bi bi-exclamation-triangle-fill"></i> Esta ação não pode ser desfeita.</p>
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
@@ -284,7 +207,6 @@
         </div>
     </div>
 
-    <!-- MODAL DE CONFIRMAÇÃO DE EXCLUSÃO DE PACIENTE -->
     <div class="modal fade" id="confirmAtivarModal" tabindex="-1" aria-labelledby="confirmAtivarModalLabel" aria-hidden="true">
         <div class="modal-dialog">
             <div class="modal-content">
@@ -293,8 +215,7 @@
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fechar"></button>
                 </div>
                 <div class="modal-body">
-                    <p id="modal-ativar-nome">Deseja reativar este paciente?</p>
-                    <p class="text-danger">Essa ação não pode ser desfeita.</p>
+                    <strong id="modal-ativar-nome"></strong>
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
@@ -304,152 +225,28 @@
         </div>
     </div>
 
-
-    <!-- MODAL DE EDIÇÃO DO PACIENTE -->
     <div class="modal fade" id="editPacienteModal" tabindex="-1" aria-labelledby="editPacienteModalLabel" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered modal-lg">
             <div class="modal-content">
-
-                <!-- HEADER DO MODAL -->
                 <div class="modal-header">
                     <h5 class="modal-title">Editar Paciente</h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fechar"></button>
                 </div>
-
                 <div class="modal-body">
                     <form id="editPacienteForm">
-
-                        <!-- INFORMAÇÕES PESSOAIS -->
-                        <h6>Informações Pessoais</h6>
-                        <hr>
-
-                        <div class="row g-3">
-
-                            <!-- NOME -->
-                            <div class="col-md-6 form-floating">
-                                <input type="text" class="form-control" id="editPacienteNome" name="nome" placeholder="Nome">
-                                <label for="editPacienteNome">Nome</label>
-                            </div>
-
-                            <!-- STATUS -->
-                            <div class="col-md-6 form-floating">
-                                <input type="text" class="form-control" id="editPacienteStatus" name="status" readonly>
-                                <label for="editPacienteStatus">Status</label>
-                            </div>
-
-                            <!-- CPF -->
-                            <div class="col-md-6 form-floating">
-                                <input type="text" class="form-control" id="editPacienteCPF" name="cpf" placeholder="CPF">
-                                <label for="editPacienteCPF">CPF</label>
-                            </div>
-
-                            <!-- DATA DE NASCIMENTO -->
-                            <div class="col-md-6 form-floating">
-                                <input type="date" class="form-control" id="editPacienteDTNASC" name="dt_nasc" placeholder="Data de Nascimento">
-                                <label for="editPacienteDTNASC">Data de Nascimento</label>
-                            </div>
-
-                            <!-- SEXO -->
-                            <div class="col-md-6 form-floating">
-                                <select name="sexo" id="editPacienteSEXO" class="form-select" aria-label="Sexo">
-                                    <option value="" selected>Selecione</option>
-                                    <option value="M">Masculino</option>
-                                    <option value="F">Feminino</option>
-                                    <option value="O">Outro</option>
-                                </select>
-                                <label for="editPacienteSEXO">Sexo</label>
-                            </div>
-
-                        </div>
-
-                        <!-- ENDEREÇO -->
-                        <h6 class="mt-4">Endereço</h6>
-                        <hr>
-
-                        <div class="row g-3">
-
-                            <!-- CEP -->
-                            <div class="col-md-4 form-floating">
-                                <input type="text" class="form-control" id="editPacienteCEP" name="cep" placeholder="CEP">
-                                <label for="editPacienteCEP">CEP</label>
-                            </div>
-
-                            <!-- RUA - LOGRADOURO -->
-                            <div class="col-md-8 form-floating">
-                                <input type="text" class="form-control" id="editPacienteENDERECO" name="endereco" placeholder="Rua">
-                                <label for="editPacienteENDERECO">Rua</label>
-                            </div>
-
-                            <!-- NÚMERO -->
-                            <div class="col-md-4 form-floating">
-                                <input type="text" class="form-control" id="editPacienteNUM" name="num" placeholder="Número">
-                                <label for="editPacienteNUM">Número</label>
-                            </div>
-
-                            <!-- COMPLEMENTO -->
-                            <div class="col-md-8 form-floating">
-                                <input type="text" class="form-control" id="editPacienteCOMPLEMENTO" name="complemento" placeholder="Complemento">
-                                <label for="editPacienteCOMPLEMENTO">Complemento</label>
-                            </div>
-
-                            <!-- BAIRRO -->
-                            <div class="col-md-6 form-floating">
-                                <input type="text" class="form-control" id="editPacienteBAIRRO" name="bairro" placeholder="Bairro">
-                                <label for="editPacienteBAIRRO">Bairro</label>
-                            </div>
-
-                            <!-- MUNICÍPIO -->
-                            <div class="col-md-6 form-floating">
-                                <input type="text" id="editPacienteMUNICIPIO" name="municipio" class="form-control" placeholder="Município">
-                                <label for="editPacienteMUNICIPIO">Município</label>
-                            </div>
-
-                            <!-- UNIDADE FEDERATIVA - ESTADO -->
-                            <div class="col-md-2 form-floating">
-                                <input type="text" class="form-control" id="editPacienteUF" name="uf" placeholder="UF">
-                                <label for="editPacienteUF">UF</label>
-                            </div>
-                        </div>
-
-                        <!-- CONTATO -->
-                        <h6 class="mt-4">Contato</h6>
-                        <hr>
-
-                        <div class="row g-3">
-
-                            <!-- CELULAR -->
-                            <div class="col-md-6 form-floating">
-                                <input type="text" id="editPacienteCELULAR" name="celular" class="form-control" placeholder="Celular" />
-                                <label for="editPacienteCELULAR">Celular</label>
-                            </div>
-
-                            <!-- EMAIL -->
-                            <div class="col-md-6 form-floating">
-                                <input type="email" id="editPacienteEMAIL" name="email" class="form-control" placeholder="Email" />
-                                <label for="editPacienteEMAIL">Email</label>
-                            </div>
-
-                        </div>
-
-                        <div class="d-flex justify-content-end mt-4">
-                            <button type="submit" class="btn btn-primary">Salvar Alterações</button>
-                        </div>
-                    </form>
+                        </form>
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- HISTÓRICO DE AGENDAMENTO POR PACIENTE  -->
     <div class="modal fade" id="historicoPacienteModal" tabindex="-1" aria-labelledby="historicoPacienteModalLabel" aria-hidden="true">
         <div class="modal-dialog modal-xxl">
             <div class="modal-content">
-
                 <div class="modal-header">
                     <h5 class="modal-title" id="historicoPacienteModalLabel">Histórico de Agendamentos</h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fechar"></button>
                 </div>
-
                 <div class="modal-body">
                     <p><strong>Paciente:</strong> <span id="nomePacienteHistorico"></span></p>
                     <div id="tabelaHistoricoPaciente" class="table-responsive">
@@ -463,17 +260,14 @@
                                     <th>Status</th>
                                 </tr>
                             </thead>
-                            <tbody id="historicoAgendamentosBody">
-                                <tr><td colspan="5" class="text-center">Nenhum agendamento encontrado.</td></tr>
-                            </tbody>
+                            <tbody id="historicoAgendamentosBody"></tbody>
                         </table>
                     </div>
                 </div>
-
             </div>
         </div>
     </div>
-
+    
     <!-- FLATPICKR -->
     <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
     <script src="https://cdn.jsdelivr.net/npm/flatpickr/dist/l10n/pt.js"></script>
