@@ -178,7 +178,8 @@
 
                 {{-- CAMPO DE PESQUISA POR PACIENTES --}}
                 <div class="mb-3 position-relative">
-                    <input id="search-input" name="search" class="form-control" placeholder="Pesquisar paciente (CPF)" value="{{ old('search') }}">
+                    <label for="search-input" class="form-label">Paciente</label>
+                    <input id="search-input" name="search" class="form-control" placeholder="Pesquisar paciente" value="{{ old('search') }}">
 
                     <div id="pacientes-list" class="list-group position-absolute w-100" style="z-index: 1000; top: 100%"></div>
                 </div>
@@ -475,47 +476,85 @@
 
 <!-- FLATPICKR PARA MELHORAR VISUALIZAÇÃO DE DIAS E HORÁRIOS -->
 <script>
-    // Inicializa o flatpickr para o campo de data
-    document.addEventListener('DOMContentLoaded', function() {
-        flatpickr("#data", {
-            dateFormat: "d-m-Y", 
-            altInput: true,
-            altFormat: "d-m-Y",
-            locale: "pt",
-            minDate: "today",
-            allowInput: true,
-        });
+document.addEventListener('DOMContentLoaded', function() {
+    const dataInput = document.getElementById('data');
+    const hrInicial = document.getElementById('hr_ini');
+    const hrFinal = document.getElementById('hr_fim');
 
-        // Inicializa o flatpickr para os campos de hora (início e fim)
-        flatpickr("#hr_ini", {
-            enableTime: true,
-            noCalendar: true,
-            dateFormat: "H:i",
-            time_24hr: true,
-            minuteIncrement: 15,
-            allowInput: true,
-        });
-
-        // FLATPICKR CAMPO DE HORA FINAL
-        flatpickr("#hr_fim", {
-            enableTime: true,
-            noCalendar: true,
-            dateFormat: "H:i",
-            time_24hr: true,
-            minuteIncrement: 15,
-            allowInput: true,
-        });
-
-        flatpickr("#data_fim_recorrencia", {
-            dateFormat: "d-m-Y",
-            altFormat: "d-m-Y",
-            locale: "pt",
-            minDate: "today",
-            allowInput: true,
-        });
-
-        flatpickr.localize(flatpickr.l10ns.pt);
+    // Inicializa Flatpickr para o campo de data
+    flatpickr(dataInput, {
+        dateFormat: "d-m-Y", 
+        altInput: true,
+        altFormat: "d-m-Y",
+        locale: "pt",
+        minDate: "today",
+        maxDate: new Date(new Date().setDate(new Date().getDate() + 7)),
+        allowInput: true,
+        onChange: function(selectedDates) {
+            atualizarMinHora();
+        }
     });
+
+    // Inicializa Flatpickr para horário inicial
+    flatpickr(hrInicial, {
+        enableTime: true,
+        noCalendar: true,
+        dateFormat: "H:i",
+        time_24hr: true,
+        minuteIncrement: 15,
+        allowInput: true,
+    });
+
+    // Inicializa Flatpickr para horário final
+    flatpickr(hrFinal, {
+        enableTime: true,
+        noCalendar: true,
+        dateFormat: "H:i",
+        time_24hr: true,
+        minuteIncrement: 15,
+        allowInput: true,
+    });
+
+    // Função para atualizar o horário mínimo baseado na data
+    function atualizarMinHora() {
+        const hoje = new Date();
+        const selecionada = dataInput._flatpickr.selectedDates[0];
+
+        let minTime = "00:00"; // padrão para qualquer outro dia
+        if (selecionada) {
+            if (
+                selecionada.getFullYear() === hoje.getFullYear() &&
+                selecionada.getMonth() === hoje.getMonth() &&
+                selecionada.getDate() === hoje.getDate()
+            ) {
+                // Se for hoje, mínimo = agora + 8 horas
+                const agora = new Date();
+                agora.setHours(agora.getHours() + 8);
+                const h = String(agora.getHours()).padStart(2, '0');
+                const m = String(agora.getMinutes()).padStart(2, '0');
+                minTime = `${h}:${m}`;
+            }
+        }
+
+        hrInicial._flatpickr.set('minTime', minTime);
+    }
+
+    // Atualiza minTime ao carregar a página
+    atualizarMinHora();
+
+    // Define horário final automaticamente 1h após o início
+    hrInicial.addEventListener('blur', function() {
+        if(hrInicial.value) {
+            const [hora, minuto] = hrInicial.value.split(':').map(Number);
+            let novaHora = hora + 1;
+            if(novaHora > 23) novaHora = 23;
+            hrFinal.value = String(novaHora).padStart(2,'0') + ':' + String(minuto).padStart(2,'0');
+            hrFinal.disabled = false;
+        }
+    });
+
+    flatpickr.localize(flatpickr.l10ns.pt);
+});
 </script>
 
 <!-- SCRIPT REMOÇÃO DE ANIMAÇÃO DE AGENDAMENTO CRIADO COM SUCESSO OU MENSAGEM DE ERRO -->
