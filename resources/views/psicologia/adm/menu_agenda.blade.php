@@ -32,11 +32,12 @@
             max-width: 900px;
             max-height: 89vh;
             overflow-y: auto;
-            margin: 0 auto;
+            margin: auto;
+            margin-right: 10px; 
         }
 
         #calendar::-webkit-scrollbar {
-            width: 8px;
+            width: 6px;
         }
         #calendar::-webkit-scrollbar-track {
             background: #ecf5f9;
@@ -72,7 +73,7 @@
 
         /* Quando passar o mouse, mostra a barrinha */
         .fc-daygrid-day-events:hover::-webkit-scrollbar {
-            width: 8px; /* largura visível */
+            width: 2px; /* largura visível */
         }
 
         .fc-daygrid-day-events:hover::-webkit-scrollbar-track {
@@ -82,7 +83,7 @@
 
         .fc-daygrid-day-events:hover::-webkit-scrollbar-thumb {
             background: linear-gradient(180deg, #2596be, #7aacce);
-            border-radius: 10px;
+            border-radius: 56px;
             border: 2px solid #ecf5f9;
         }
 
@@ -128,7 +129,7 @@
     
     @include('components.navbar')
 
-    <div class="container ms-3">
+    <div class="container ms-3 mw-100">
         <div class="row">
             <div class="col-12 text-center mb-1">
                 <div class="d-flex flex-row justify-content-between align-items-center">
@@ -136,9 +137,12 @@
                         <i class="bi bi-list" id="btnToggleNavbar" style="cursor: pointer;"></i>
                         <strong>Calendário</strong>
                     </p>
-                    <p class="btn btn-success m-0 me-2" style="font-size: 15px;">
-                        <span>Novo Agendamento</span>
-                    </p>
+                    <div class="me-2">
+                        <p class="btn btn-success p-2 me-3" style="font-size: 15px;">
+                            <span>Novo Agendamento</span>
+                        </p>
+                        <i class="bi bi-person-circle" style="font-size: 40px;"></i>
+                    </div>
                 </div>
             </div>
             <div class="col-12 shadow-lg shadow-dark pt-3 bg-body-tertiary rounded">
@@ -448,14 +452,21 @@
 </script>
 
 <script>
-  document.addEventListener("DOMContentLoaded", function () {
+document.addEventListener("DOMContentLoaded", function () {
     const btnToggle = document.getElementById("btnToggleNavbar");
     const navbar = document.getElementById("mainNavbar");
+    const calendarContainer = document.getElementById("calendar");
 
     btnToggle.addEventListener("click", function () {
-      navbar.classList.toggle("collapsed");
+        navbar.classList.toggle("collapsed");
+
+        // Atualiza o tamanho do calendário depois de 300ms para dar tempo da animação da sidebar
+        setTimeout(() => {
+            renderCalendar() // FullCalendar irá se redimensionar
+        }, 300);
     });
-  });
+});
 </script>
+
 
 </html>

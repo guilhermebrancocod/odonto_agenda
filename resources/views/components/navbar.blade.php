@@ -92,6 +92,33 @@
     display: block;
     }
 
+            /* Navbar normal */
+        #mainNavbar {
+            width: 240px;
+            transition: width 0.3s ease;
+            overflow: hidden;
+        }
+
+        /* Navbar encolhida */
+        #mainNavbar.collapsed {
+            width: 70px;
+        }
+
+        #mainNavbar.collapsed .nav-link span {
+            display: none; /* esconde só os textos, mantém ícones */
+        }
+        #mainNavbar {
+        width: 250px;
+        background-color: var(--blue-color);
+        transition: width 0.3s ease;
+        overflow: hidden;
+        }
+
+        #mainNavbar.collapsed {
+        width: 70px;
+        }
+
+
 </style>
 
 <nav class="navbar navbar-dark bg-primary d-lg-none fixed-top shadow-sm px-3" style="height: 56px">
