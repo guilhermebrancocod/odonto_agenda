@@ -111,7 +111,7 @@ class PacienteController extends Controller
     public function getPaciente(Request $request)
     {
         $filtros = $request->only([
-            'search', 'DT_NASC_PACIENTE', 'STATUS', 'SEXO_PACIENTE', 'FONE_PACIENTE'
+            'search',
         ]);
 
         $pacientes = $this->pacienteService->filtrarPacientes($filtros);
@@ -122,6 +122,13 @@ class PacienteController extends Controller
     public function getPacienteByNameCpf(Request $request)
     {
         $pacientes = $this->pacienteService->filtrarPacientesByNameOrCpf($request->only('search'));
+
+        return response()->json($pacientes);
+    }
+
+    public function getPacienteByNameCPFPsicologo(Request $request)
+    {
+        $pacientes = $this->pacienteService->filtrarPacientesByNameOrCpfPsicologo($request);
 
         return response()->json($pacientes);
     }

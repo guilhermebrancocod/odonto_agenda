@@ -30,7 +30,7 @@
     <style>
         #calendar {
             max-width: 900px;
-            max-height: 89vh;
+            max-height: 86vh;
             overflow-y: auto;
             margin: auto;
             margin-right: 10px; 

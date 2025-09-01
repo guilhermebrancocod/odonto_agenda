@@ -305,7 +305,7 @@
                     button.addEventListener('click', () => {
                         selectedPaciente = {
                             id: button.getAttribute('data-id'),
-                            status: button.getAttribute('data-status'),
+                            status: button.getAttribute('data-status') ?? 'nada',
                             nome: button.getAttribute('data-nome'),
                             cpf: button.getAttribute('data-cpf'),
                             dt_nasc: button.getAttribute('data-dt_nasc'),
@@ -373,7 +373,7 @@
                 const filtros = {
                     search: searchInput ? searchInput.value.trim() : '',
                     DT_NASC_PACIENTE: dt_nasc_paciente_input ? dt_nasc_paciente_input.value : '',
-                    STATUS: statusInput ? statusInput.value : '',
+                    STATUS: statusInput ? statusInput.value : '-',
                     SEXO_PACIENTE: sexoInput ? sexoInput.value : '',
                     FONE_PACIENTE: telefoneInput ? telefoneInput.value : '',
                 };
@@ -430,7 +430,7 @@
                                     <div class="d-flex flex-nowrap gap-1">
                                         <button type="button" class="btn btn-sm btn-warning editar-btn"
                                             data-id="${paciente.ID_PACIENTE}" 
-                                            data-status="${paciente.STATUS}"
+                                            data-status="${paciente.STATUS ?? '-'}"
                                             data-nome="${paciente.NOME_COMPL_PACIENTE ?? 'Paciente'}"
                                             data-cpf="${paciente.CPF_PACIENTE ?? ''}"
                                             data-dt_nasc="${paciente.DT_NASC_PACIENTE ?? ''}"
@@ -511,7 +511,7 @@
                 const dados = {
                     nome: document.getElementById('editPacienteNome').value,
                     cpf: document.getElementById('editPacienteCPF').value,
-                    status: document.getElementById('editPacienteStatus').value, // <--- vírgula corrigida
+                    status: document.getElementById('editPacienteStatus').value ?? '-',
                     dt_nasc: document.getElementById('editPacienteDTNASC').value,
                     sexo: document.getElementById('editPacienteSEXO').value,
                     endereco: document.getElementById('editPacienteENDERECO').value,
@@ -719,7 +719,7 @@
         })
     </script>
 
-        <!-- FORMATADOR DO CAMPO DE CPF -->
+    <!-- FORMATADOR DO CAMPO DE CPF -->
     <script>
         document.getElementById('editPacienteCPF').addEventListener('input', function (e) {
             let value = e.target.value;

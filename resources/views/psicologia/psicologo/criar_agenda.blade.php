@@ -119,7 +119,7 @@
     }
     </style>
 </head>
-<body>
+<body class="bg-body-secondary">
 
 <!-- COMPONENT NAVBAR -->
 @include('components.psicologo_navbar')
@@ -147,15 +147,23 @@
     </div>
 @endif
 
-<div id="content-wrapper" class="bg-light">
+<div id="content-wrapper" class="bg-body-secondary ms-4 me-4 mt-1">
+
+    <div class="d-flex flex-row justify-content-between align-items-center">
+        <div>
+            <p class="m-0 p-0 mb-2 ms-2">
+                <i class="bi bi-calendar-plus"></i>
+                |
+                <strong>Criar Agendamento</strong>
+            </p>
+        </div>
+        <div class="profile-container">
+            <i class="bi bi-person-circle fs-2" id="profile"></i>
+        </div>
+    </div>
+
     <main>
         <div class="bg-white p-4 rounded shadow-sm w-80 w-md-75 w-lg-50">
-
-            <!-- TÍTULO -->
-            <div class="text-center mb-5">
-                <h2 class="fs-4 mb-0">Criação de Agendamento</h2>
-            </div>
-
             <!-- FORM DE AGENDAMENTO -->
             <form action="{{ route('criarAgendamento-Psicologo') }}" method="POST" id="agendamento-form" class="w-100" validate>
                 @csrf
@@ -265,15 +273,14 @@
     const searchInput = document.getElementById('search-input');
     const pacientesList = document.getElementById('pacientes-list');
     const pacienteIdInput = document.getElementById('paciente_id');
+    const psicologoId = document.getElementById('id_psicologo').value;
 
     // PESQUISA PACIENTE - FUNCIONALIDADES
     searchInput.addEventListener('input', function(e) {
         const nome = searchInput.value.trim();
-        fetch(`/psicologo/consultar-paciente/buscar?search=${encodeURIComponent(nome)}`)
+        fetch(`/psicologo/consultar-paciente/buscar?search=${encodeURIComponent(nome)}&psicologo=${encodeURIComponent(psicologoId)}`)
                 .then(response => response.json())
                 .then(pacientes => {
-
-                    console.log(pacientes);
 
                     // AO BUSCAR, OS VALORES ABAIXO SÃO ZERADOS
                     pacientesList.innerHTML = '';
@@ -549,7 +556,7 @@ document.addEventListener('DOMContentLoaded', function() {
             let novaHora = hora + 1;
             if(novaHora > 23) novaHora = 23;
             hrFinal.value = String(novaHora).padStart(2,'0') + ':' + String(minuto).padStart(2,'0');
-            hrFinal.disabled = false;
+            hrFinal.disabled = true;
         }
     });
 
