@@ -559,7 +559,7 @@ class AgendamentoController extends Controller
 
         // VERIFICA SE A DATA NAO CAI EM FERIADO
         if ($this->verificaFeriado($data)) {
-            return redirect('/psicologia/criar-agendamento/')
+            return redirect('/psicologia/agendamento/'.$idAgendamento.'/editar')
                 ->with('error', 'Agendamento não foi criado devido a um feriado');
         }
 
@@ -803,8 +803,8 @@ class AgendamentoController extends Controller
     }
 
     private function verificaFeriado($data)
-    {
-        $data = \Carbon\Carbon::createFromFormat('d-m-Y', $data)->format('Y-m-d');
+    {   
+        $data = Carbon::parse($data)->format('Y-m-d');
         $dataFeriado = DB::table('LYCEUM_BKP_PRODUCAO.dbo.LY_FERIADO')
             ->where('DATA', '=', $data )
             ->get();

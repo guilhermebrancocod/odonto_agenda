@@ -82,6 +82,9 @@
     <div class="container ms-3 mw-100">
         <div class="row">
             <x-page-title>
+                    <p onclick="window.location.href = '/psicologia/criar-agendamento'" class="btn btn-success p-2 me-3" style="font-size: 15px;" >
+                        <span>Novo Agendamento</span>
+                    </p>
             </x-page-title>
 
             <div class="col-12 shadow-lg shadow-dark p-4 bg-body-tertiary rounded">
@@ -158,11 +161,11 @@
                             </div>
                         </div>
 
-                        <div class="col-12 col-sm-6 col-md-3 d-flex gap-2">
-                            <button type="submit" class="btn btn-primary w-50">
+                        <div class="col-12 col-lg-auto d-flex gap-2">
+                            <button type="submit" class="btn btn-primary">
                                 <i class="bi bi-search"></i> Pesquisar
                             </button>
-                            <button type="button" class="btn btn-outline-secondary w-50" id="btnClearFilters">
+                            <button type="button" class="btn btn-outline-secondary" id="btnClearFilters">
                                 Limpar
                             </button>
                         </div>

@@ -128,13 +128,17 @@
         font-size: 1.1rem; /* Ou o tamanho que preferir para os ícones */
         margin: 0;
     }
+
+    #logo-faesa {
+        transition: opacity 0.3s ease-in-out;
+    }
 </style>
 
 <nav class="navbar navbar-dark bg-primary d-lg-none fixed-top shadow-sm px-3" style="height: 56px">
     <button class="btn btn-primary" type="button" data-bs-toggle="offcanvas" data-bs-target="#offcanvasMenu">
         <i class="fas fa-bars"></i>
     </button>
-    <img src="{{ asset('faesa_branco.png') }}" alt="Logo FAESA" class="mx-auto d-block" style="width: 100px;">
+    <img src="{{ asset('img/faesa_logo_expandido.png') }}" alt="Logo FAESA" class="mx-auto d-block" style="width: 100px;" >
 </nav>
 
 
@@ -143,7 +147,7 @@
 <!-- SIDEBAR DESKTOP -->
 <nav class="p-3 d-none d-lg-flex flex-column align-items-center shadow-lg" id="mainNavbar">
     <!-- LOGO DA FAESA - NAVBAR -->
-    <img src="{{ asset('faesa_branco.png') }}" alt="Logo" class="img-fluid mb-2" />
+    <img src="{{ asset('img/faesa_logo_expandido.png') }}" alt="Logo" class="img-fluid mb-2" id="logo-faesa" width="150px" />
 
     <!-- TITULO SIDEBAR -->
     <h5 class="mb-2 mt-3 p-2 rounded-3 text-center"

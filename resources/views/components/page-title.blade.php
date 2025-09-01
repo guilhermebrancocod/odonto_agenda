@@ -1,12 +1,15 @@
+@vite(['resources/css/app.css', 'resources/js/app.js'])
 <div class="col-12 text-center mb-1">
     <div class="d-flex flex-row justify-content-between align-items-center">
         <p class="p-0 mt-2 mb-1 text-start" style="font-size: 25px;">
             <i class="bi bi-list" id="btnToggleNavbar" style="cursor: pointer;"></i>
             <strong id='page-title'></strong>
         </p>
-		<div class="me-2">
-			{{ $slot }}
-            <i class="bi bi-person-circle" style="font-size: 40px;"></i>
+		<div class="me-2 pt-2">
+            {{ $slot }}
+            <div class="profile-container" style="position: relative;">
+                <i class="bi bi-person-circle fs-2" id="profile" style="cursor: pointer;"></i> 
+            </div>
         </div>        
     </div>
 </div>
@@ -28,6 +31,7 @@ document.addEventListener("DOMContentLoaded", function () {
     const savedState = localStorage.getItem(storageKey);
     if (savedState === 'collapsed') {
         navbar.classList.add('collapsed');
+        verificaCollapsed()
         
         // Se a página já carrega com a navbar recolhida,
         // o calendário precisa ser renderizado no tamanho correto.
@@ -42,6 +46,7 @@ document.addEventListener("DOMContentLoaded", function () {
     // 2. AO CLICAR NO BOTÃO: Alterna o estado, salva e atualiza o calendário
     btnToggle.addEventListener("click", function () {
         navbar.classList.toggle("collapsed");
+        verificaCollapsed()
 
         // Salva o novo estado no localStorage
         if (navbar.classList.contains("collapsed")) {
@@ -65,4 +70,52 @@ document.addEventListener("DOMContentLoaded", function () {
         const pageTitle = document.title; // pega o <title> do <head>
         document.getElementById('page-title').textContent = pageTitle;
     });
+</script>
+
+
+<script>
+const navbar = document.getElementById("mainNavbar");
+const logo = document.getElementById("logo-faesa");
+
+// Pré-carregar as duas versões do logo
+const logoExpandido = new Image();
+logoExpandido.src = "{{ asset('img/faesa_logo_expandido.png') }}";
+const logoRecolhido = new Image();
+logoRecolhido.src = "{{ asset('img/faesa_logo_recolhido.png') }}";
+
+function trocaLogo(src) {
+    // Fade out
+    logo.style.opacity = 0;
+    setTimeout(() => {
+        logo.src = src;
+        // Fade in
+        logo.style.opacity = 1;
+    }, 200);
+}
+
+function verificaCollapsed() {
+    if (navbar.classList.contains("collapsed")) {
+        // Navbar está fechada -> usa logo recolhido
+        trocaLogo(logoRecolhido.src);
+    } else {
+        // Navbar aberta -> usa logo expandido
+        trocaLogo(logoExpandido.src);
+    }
+};
+</script>
+
+@php
+    // Pega os dados do usuário da sessão
+    $usuario = session('usuario');
+@endphp
+
+<script>
+    // Converte para objeto JS
+    const usuario = @json($usuario->map(function($u) {
+        return [
+            'id_usuario_clinica' => $u->ID_USUARIO_CLINICA,
+            'id_clinica' => $u->ID_CLINICA,
+            'sit_usuario' => $u->SIT_USUARIO
+        ];
+    }));
 </script>
