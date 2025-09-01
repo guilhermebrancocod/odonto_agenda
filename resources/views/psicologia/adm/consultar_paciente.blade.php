@@ -647,7 +647,7 @@
                                     <div class="d-flex flex-nowrap gap-1">
                                         <button type="button" class="btn btn-sm btn-warning editar-btn"
                                             data-id="${paciente.ID_PACIENTE}" 
-                                            data-status="${paciente.STATUS}"
+                                            data-status="${paciente.STATUS ?? "-"}"
                                             data-nome="${paciente.NOME_COMPL_PACIENTE ?? 'Paciente'}"
                                             data-cpf="${paciente.CPF_PACIENTE ?? ''}"
                                             data-dt_nasc="${paciente.DT_NASC_PACIENTE ?? ''}"
@@ -728,7 +728,7 @@
                 const dados = {
                     nome: document.getElementById('editPacienteNome').value,
                     cpf: document.getElementById('editPacienteCPF').value,
-                    status: document.getElementById('editPacienteStatus').value, // <--- vírgula corrigida
+                    status: document.getElementById('editPacienteStatus').value,
                     dt_nasc: document.getElementById('editPacienteDTNASC').value,
                     sexo: document.getElementById('editPacienteSEXO').value,
                     endereco: document.getElementById('editPacienteENDERECO').value,

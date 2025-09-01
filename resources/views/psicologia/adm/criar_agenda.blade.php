@@ -1058,6 +1058,7 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 </script>
 
+
 @php
     // Pega os dados do usuário da sessão
     $usuario = session('usuario');

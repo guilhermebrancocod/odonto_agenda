@@ -2,6 +2,7 @@
 
 namespace App\Services\Psicologia;
 
+use App\Models\FaesaClinicaAgendamento;
 use App\Models\FaesaClinicaPaciente;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Database\Eloquent\Collection;
@@ -110,6 +111,20 @@ class PacienteService
         }
 
         return $query->orderBy('ID_PACIENTE', 'desc')->get();
+    }
+
+    public function filtrarPacientesByNameOrCpfPsicologo($filtros)
+    {
+        $search = $filtros['search'];
+        $psicologo = $filtros['psicologo'];
+
+        $pacientesDoPsicologo = DB::TABLE('FAESA_CLINICA_PACIENTE as p')
+        ->join('FAESA_CLINICA_AGENDAMENTO as ag', 'ag.ID_PACIENTE', '=', 'p.ID_PACIENTE')
+        ->where('ag.ID_PSICOLOGO', $psicologo)
+        ->where('p.NOME_COMPL_PACIENTE', 'LIKE', "%{$search}%")
+        ->get();
+
+        return $pacientesDoPsicologo;
     }
 
     public function filtrarPacientes(array $filtros): Collection
