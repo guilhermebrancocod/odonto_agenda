@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Cadastro de Serviço</title>
+    <title>Cadastro de Sala</title>
 
     <!-- FAVICON - IMAGEM DA GUIA -->
     <link rel="icon" type="image/png" href="/favicon_faesa.png">
@@ -12,6 +12,8 @@
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700&display=swap" rel="stylesheet" />
     <link href="https://cdnjs.cloudflare.com/ajax/libs/mdb-ui-kit/7.1.0/mdb.min.css" rel="stylesheet" />
     <meta name="csrf-token" content="{{ csrf_token() }}">
+
+    @vite(['resources/css/app.css', 'resources/js/app.js'])
 
     <style>
         html, body {
@@ -22,14 +24,10 @@
         }
 
         #content-wrapper {
-            width: 78vw;
-            height: 100h;
+            width: 100%;
             margin: auto;
-            margin-top: 10px;
-            margin-bottom: 10px;
             display: flex;
             gap: 12px;
-            overflow: hidden;
             align-items: stretch;
             flex-direction: row;
         }
@@ -46,21 +44,22 @@
             border: 1.8px solid #dee2e6;
         }
 
-        /* Para telas menores que 992px */
+        /* Telas menores */
         @media (max-width: 991.98px) {
             #content-wrapper {
-                flex-direction: column; /* empilha os main */
+                flex-direction: column;
             }
-
             main {
-                width: 100%; /* ocupa toda a largura */
-                height: calc(50% - 12px); /* divide igualmente a altura considerando o gap */
+                width: 100%;
+                height: auto;
             }
         }
+
         form {
             flex-grow: 1;
             overflow-y: auto;
         }
+
         h2 {
             font-size: 24px;
             color: #333;
@@ -70,6 +69,7 @@
             margin-bottom: 12px;
             font-weight: 600;
         }
+
         #salvar {
             background-color: #007bff;
             color: #fff;
@@ -84,16 +84,16 @@
             background-color: #0056b3;
             box-shadow: 0 0.5rem 1rem rgba(0,0,0,0.15);
         }
-        #servicos-lista {
+
+        #salas-lista {
             flex-grow: 1;
             overflow-y: auto;
             max-height: 100%;
         }
 
-        /* Estilo atualizado para a tabela ficar com linhas tipo card */
         table {
             border-collapse: separate;
-            border-spacing: 0 12px; /* espaço vertical entre as linhas */
+            border-spacing: 0 12px;
             width: 100%;
         }
         thead tr th:first-child {
@@ -132,6 +132,7 @@
                 width: 100%;
             }
         }
+
         /* ALERT FIXO NO TOPO */
         #alert-container {
             position: fixed;
@@ -146,164 +147,157 @@
     </style>
 </head>
 
-<body>
-@include('components.navbar')
+<body class="bg-body-secondary d-flex flex-column">
+    @include('components.navbar')
 
-<div id="alert-container"></div>
+    <div id="alert-container"></div>
 
-<div id="content-wrapper">
-    <main>
-        <div class="text-center">
-            <h2>Cadastro de Sala</h2>
-        </div>
+    <!-- CONTAINER GERAL -->
+    <div class="container px-4">
 
-        @if ($errors->any())
-        <script>
-            document.addEventListener('DOMContentLoaded', () => {
-                @foreach ($errors->all() as $erro)
-                    showAlert("{{ $erro }}", 'danger');
-                @endforeach
-            });
-        </script>
-    @endif
-
-
-        @if(session('success'))
-            <script>
-                document.addEventListener('DOMContentLoaded', () => {
-                    showAlert("{{ session('success') }}", 'success');
-                });
-            </script>
-        @endif
-
-        <!-- FORMULÁRIO DE CRIAÇÃO DE SALA -->
-        <form class="needs-validation" action="{{ route('criarSala-Psicologia') }}" method="POST" novalidate>
-
-            @csrf
-
-            <!-- ID DA CLINICA - NO CASO PSICOLOGIA -->
-            <input type="hidden" name="ID_CLINICA" value="1">
-
-            <!-- TÍTULO -->
-            <h5 class="mt-3">Dados da Sala</h5>
-
-            <hr>
-
-            <!-- NOME DA SALA -->
-            <div class="mb-3">
-                <label for="nome-sala" class="form-label text-muted" style="font-size: 14px;">
-                    Descrição da Sala
-                </label>
-                <input type="text"
-                       id="nome-sala"
-                       name="DESCRICAO"
-                       class="form-control"
-                       value="{{ old('DESCRICAO', request('nome_local')) }}"
-                       required>
+        <!-- HEADER -->
+        <div class="d-flex flex-row justify-content-between align-items-center">
+            <div>
+                <p class="m-0 ms-2">
+                    <i class="bi bi-building"></i>
+                    |
+                    <strong>Gerenciar Salas</strong>
+                </p>
             </div>
-
-            <!-- DISCIPLINA PRATICADA NA SALA -->
-            <div class="mb-3" id="disciplina-container">
-                <label for="disciplina-sala" class="form-label" style="font-size: 14px;">Disciplina</label>
-                <select name="DISCIPLINA" id="disciplina-sala" class="form-select form-select-sm">
-                    <option value=""></option>
-                    <!-- Outras opções serão inseridas dinamicamente -->
-                </select>
-            </div>
-
-            <!-- BOTÃO DE SALVAR | SUBMIT -->
-            <div class="text-end">
-                <button id="salvar" type="submit">Salvar</button>
-            </div>
-            
-        </form>
-    </main>
-
-    <main style="overflow-y:auto; max-height: 90vh;">
-
-        <!-- TITULO LISTAGEM DE SALAS -->
-        <h2 class="text-center mb-4">Consulta e Edição de Salas</h2>
-
-        <!-- INPUT DE BUSCA -->
-        <input type="text" id="search-sala" class="form-control mb-3" placeholder="Buscar sala por nome..." />
-
-        <!-- LISTAGEM DE SALAS -->
-        <div id="salas-lista" style="max-height: 65vh; overflow-y:auto;">
-            <table class="table table-striped table-hover">
-                <thead>
-                <tr>
-                    <th>Descrição</th>
-                    <th>Disciplina</th>
-                    <th>Status</th>
-                </tr>
-                </thead>
-                <tbody id="salas-tbody">
-                <tr><td colspan="5" class="text-center">Carregando...</td></tr>
-                </tbody>
-            </table>
-        </div>
-
-        <!-- MODAL DE EDIÇÃO DE SALA -->
-        <div class="modal fade" id="editarSalaModal" tabindex="-1" aria-hidden="true">
-        <div class="modal-dialog">
-                <div class="modal-content">
-                    <div id="modal-alert-container"></div>
-                    <form id="form-editar-sala">
-
-                        <!-- HEADER DO MODAL -->
-                        <div class="modal-header">
-                            <h5 class="modal-title">Editar Sala</h5>
-                            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-                        </div>
-
-                        <!-- CORPO DO MODAL -->
-                        <div class="modal-body">
-
-                            <input type="hidden" id="edit-sala-id" name="ID_SALA_CLINICA" />
-
-                            <!-- EDIÇÃO DE DESCRIÇÃO DA SALA -->
-                            <div class="mb-3">
-                                <label class="form-label">Descrição</label>
-                                <input type="text" id="edit-sala-desc" name="DESCRICAO" class="form-control" required />
-                            </div>
-
-                            <div class="mb-3" id="edit-disciplina-container">
-                                <label class="form-label">Disciplina</label>
-                                <select name="DISCIPLINA" id="edit-sala-disc" class="form-select form-select-sm">
-                                    <option id="edit-sala-disc-selected"></option>
-                                    <!-- Outras opções serão inseridas dinamicamente -->
-                                </select>
-                            </div>
-                            
-                            <!-- EDIÇÃO DE STATUS DA SALA -->
-                            <div>
-                                <label class="form-label">Status</label>
-                                <select id="edit-sala-status" name="ATIVO" class="form-select" required>
-                                    <option value="S">Ativo</option>
-                                    <option value="N">Inativo</option>
-                                </select>
-                            </div>
-                        </div>
-
-                        <!-- RODAPÉ DO MODAL -->
-                        <div class="modal-footer d-flex justify-content-between">
-                            <button type="button" class="btn btn-danger" id="btn-deletar-sala">Excluir</button>
-                            <div>
-                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-                                <button type="submit" class="btn btn-primary">Salvar Alterações</button>
-                            </div>
-                        </div>
-
-                    </form>
+            <div>
+                <div class="profile-container">
+                    <i class="bi bi-person-circle fs-2" id="profile"></i>
                 </div>
             </div>
         </div>
-    </main>
-</div>
+        <!-- FIM HEADER -->
 
+        <!-- CONTEÚDO PRINCIPAL -->
+        <div id="content-wrapper" class="bg-body-secondary">
+
+            <!-- FORMULÁRIO -->
+            <main>
+
+                @if ($errors->any())
+                    <script>
+                        document.addEventListener('DOMContentLoaded', () => {
+                            @foreach ($errors->all() as $erro)
+                                showAlert("{{ $erro }}", 'danger');
+                            @endforeach
+                        });
+                    </script>
+                @endif
+
+                @if(session('success'))
+                    <script>
+                        document.addEventListener('DOMContentLoaded', () => {
+                            showAlert("{{ session('success') }}", 'success');
+                        });
+                    </script>
+                @endif
+
+                <form class="needs-validation" action="{{ route('criarSala-Psicologia') }}" method="POST" novalidate>
+                    @csrf
+                    <input type="hidden" name="ID_CLINICA" value="1">
+
+                    <h5 class="">Dados da Sala</h5>
+                    <hr>
+
+                    <div class="mb-3">
+                        <label for="nome-sala" class="form-label text-muted" style="font-size: 14px;">
+                            Descrição da Sala
+                        </label>
+                        <input type="text"
+                               id="nome-sala"
+                               name="DESCRICAO"
+                               class="form-control"
+                               value="{{ old('DESCRICAO', request('nome_local')) }}"
+                               required>
+                    </div>
+
+                    <div class="mb-3" id="disciplina-container">
+                        <label for="disciplina-sala" class="form-label" style="font-size: 14px;">Disciplina</label>
+                        <select name="DISCIPLINA" id="disciplina-sala" class="form-select form-select-sm">
+                            <option value=""></option>
+                        </select>
+                    </div>
+
+                    <div class="text-end">
+                        <button id="salvar" type="submit">Salvar</button>
+                    </div>
+                </form>
+            </main>
+
+            <!-- LISTAGEM -->
+            <main style="overflow-y:auto; max-height: 90vh;">
+                <input type="text" id="search-sala" class="form-control mb-3" placeholder="Buscar sala por nome..." />
+
+                <div id="salas-lista" style="max-height: 65vh; overflow-y:auto;">
+                    <table class="table table-striped table-hover">
+                        <thead>
+                        <tr>
+                            <th>Descrição</th>
+                            <th>Disciplina</th>
+                            <th>Status</th>
+                        </tr>
+                        </thead>
+                        <tbody id="salas-tbody">
+                        <tr><td colspan="5" class="text-center">Carregando...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- MODAL -->
+                <div class="modal fade" id="editarSalaModal" tabindex="-1" aria-hidden="true">
+                    <div class="modal-dialog">
+                        <div class="modal-content">
+                            <div id="modal-alert-container"></div>
+                            <form id="form-editar-sala">
+                                <div class="modal-header">
+                                    <h5 class="modal-title">Editar Sala</h5>
+                                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                                </div>
+                                <div class="modal-body">
+                                    <input type="hidden" id="edit-sala-id" name="ID_SALA_CLINICA" />
+
+                                    <div class="mb-3">
+                                        <label class="form-label">Descrição</label>
+                                        <input type="text" id="edit-sala-desc" name="DESCRICAO" class="form-control" required />
+                                    </div>
+
+                                    <div class="mb-3" id="edit-disciplina-container">
+                                        <label class="form-label">Disciplina</label>
+                                        <select name="DISCIPLINA" id="edit-sala-disc" class="form-select form-select-sm">
+                                            <option id="edit-sala-disc-selected"></option>
+                                        </select>
+                                    </div>
+                                    
+                                    <div>
+                                        <label class="form-label">Status</label>
+                                        <select id="edit-sala-status" name="ATIVO" class="form-select" required>
+                                            <option value="S">Ativo</option>
+                                            <option value="N">Inativo</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="modal-footer d-flex justify-content-between">
+                                    <button type="button" class="btn btn-danger" id="btn-deletar-sala">Excluir</button>
+                                    <div>
+                                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                                        <button type="submit" class="btn btn-primary">Salvar Alterações</button>
+                                    </div>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </main>
+        </div>
+    </div>
+</body>
+</html>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/mdb-ui-kit/7.1.0/mdb.min.js"></script>
-
 
 <script>
 
@@ -593,6 +587,22 @@
     editSelect.addEventListener('change', function() {
         editSelect.size = 1;
     });
+</script>
+
+@php
+    // Pega os dados do usuário da sessão
+    $usuario = session('usuario');
+@endphp
+
+<script>
+    // Converte para objeto JS
+    const usuario = @json($usuario->map(function($u) {
+        return [
+            'id_usuario_clinica' => $u->ID_USUARIO_CLINICA,
+            'id_clinica' => $u->ID_CLINICA,
+            'sit_usuario' => $u->SIT_USUARIO
+        ];
+    }));
 </script>
 
 </body>

@@ -94,6 +94,7 @@
 
 </style>
 
+
 <nav class="navbar navbar-dark bg-primary d-lg-none fixed-top shadow-sm px-3" style="height: 56px">
     <button class="btn btn-primary" type="button" data-bs-toggle="offcanvas" data-bs-target="#offcanvasMenu">
         <i class="fas fa-bars"></i>
@@ -105,7 +106,8 @@
 <div id="main-container" class="d-flex min-vh-100">
 
 <!-- SIDEBAR DESKTOP -->
-<nav class="p-3 d-none d-lg-flex flex-column align-items-center shadow-lg" id="mainNavbar">
+<nav class="p-3 d-none d-lg-flex flex-column align-items-center shadow-lg" style="max-width: 230px; min-width: 230px; background-color: var(--blue-color);">
+
     <!-- LOGO DA FAESA - NAVBAR -->
     <img src="{{ asset('faesa_branco.png') }}" alt="Logo" class="img-fluid mb-2" />
 
@@ -116,17 +118,11 @@
         <p class="p-0 m-0 text-center" style="font-size: 12px;"><em>Administrador</em></p>
     </h5>
 
-    <!-- DADOS DA SESSAO DO USUARIO -->
-    <div classs="">
-        <p style="color:#ecf5f9" class="p-0 m-0 text-center">
-            {{ session('usuario')[0]->ID_USUARIO_CLINICA }}
-        </p>
-        <p class="p-0 m-0 text-center" style="color: white;">
-            {{ request()->ip() }}
-        </p>
+    <div>
+        <p class="text-white text-opacity-75">{{ session('usuario')[0]->ID_USUARIO_CLINICA }}</p>
     </div>
 
-    <ul class="list-group list-group-flush w-100 gap-1 mt-3">
+    <ul class="list-group list-group-flush w-100 gap-1">
         <!-- LINKS -->
 
         <!-- PÁGINA INICIAL - MENU AGENDA -->

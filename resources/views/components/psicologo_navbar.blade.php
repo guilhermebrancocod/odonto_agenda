@@ -110,7 +110,7 @@
     </h5>
 
     <!-- DADOS DA SESSAO DO USUARIO -->
-    <div classs="">
+    <div>
         <p style="color:#ecf5f9" class="p-0 m-0 text-center">
             {{ session('psicologo')[0] }}
         </p>

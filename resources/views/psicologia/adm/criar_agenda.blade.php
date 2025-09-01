@@ -16,6 +16,8 @@
 
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
 
+    @vite(['resources/css/app.css', 'resources/js/app.js'])
+
     <style>
         html, body { height: 100%; margin: 0; }
         #content-wrapper {
@@ -119,7 +121,7 @@
     }
     </style>
 </head>
-<body>
+<body class="bg-body-secondary">
 
 <!-- COMPONENT NAVBAR -->
 @include('components.navbar')
@@ -147,15 +149,23 @@
     </div>
 @endif
 
-<div id="content-wrapper" class="bg-light">
+<div id="content-wrapper" class="bg-body-secondary ms-4 me-4 mt-1">
+
+    <div class="d-flex flex-row justify-content-between align-items-center">
+        <div>
+            <p class="m-0 p-0 mb-2 ms-2">
+                <i class="bi bi-calendar-plus"></i>
+                |
+                <strong>Criar Agendamento</strong>
+            </p>
+        </div>
+        <div class="profile-container">
+            <i class="bi bi-person-circle fs-2" id="profile"></i>
+        </div>
+    </div>
+
     <main>
         <div class="bg-white p-4 rounded shadow-sm w-80 w-md-75 w-lg-50">
-
-            <!-- TÍTULO -->
-            <div class="text-center mb-5">
-                <h2 class="fs-4 mb-0">Criação de Agendamento</h2>
-            </div>
-
 
             <!-- FORM DE AGENDAMENTO -->
             <form action="{{ route('criarAgendamento-Psicologia') }}" method="POST" id="agendamento-form" class="w-100" validate>
@@ -1046,6 +1056,22 @@ document.addEventListener('DOMContentLoaded', function() {
 
         }, 300);
     });
+</script>
+
+@php
+    // Pega os dados do usuário da sessão
+    $usuario = session('usuario');
+@endphp
+
+<script>
+    // Converte para objeto JS
+    const usuario = @json($usuario->map(function($u) {
+        return [
+            'id_usuario_clinica' => $u->ID_USUARIO_CLINICA,
+            'id_clinica' => $u->ID_CLINICA,
+            'sit_usuario' => $u->SIT_USUARIO
+        ];
+    }));
 </script>
 
 </body>

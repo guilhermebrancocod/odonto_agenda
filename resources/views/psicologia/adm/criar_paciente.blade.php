@@ -15,6 +15,8 @@
     <!-- FLATPICKR -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css" />
 
+    @vite(['resources/css/app.css', 'resources/js/app.js'])
+
     <style>
         html, body { height: 100%; margin: 0; }
         #content-wrapper {
@@ -63,16 +65,28 @@
     </style>
 </head>
 
-<body>
+<body class="bg-body-secondary">
     <!-- COMPONENT NAVBAR -->
     @include('components.navbar')
 
-    <div id="content-wrapper">
-        <main>
-            <div class="text-center mb-4">
-                <h2 class="fs-4 mb-0" style="color: #333;">Cadastro de Paciente</h2>
-            </div>
+    <div id="content-wrapper" class="bg-body-secondary ms-4 me-4 mt-1">
 
+    <div class="d-flex flex-row justify-content-between align-items-center">
+        <div>
+            <p class="m-0 p-0 mb-2 ms-2">
+                <i class="bi bi-person-add"></i>
+                |
+                <strong>Criar Paciente</strong>
+            </p>
+        </div>
+        <div>
+            <div class="profile-container">
+            <i class="bi bi-person-circle fs-2" id="profile"></i>
+        </div>
+        </div>
+    </div>
+
+        <main>
             <!-- INFORMA ERROS DE VALIDAÇÃO DO BACKEND EM CASOS DE SUBMISSÃO DE FORMULÁRIO -->
             @if ($errors->any())
                 <div class="alert alert-danger">
@@ -488,5 +502,22 @@
         e.target.value = value;
     });
     </script>
+
+@php
+    // Pega os dados do usuário da sessão
+    $usuario = session('usuario');
+@endphp
+
+<script>
+    // Converte para objeto JS
+    const usuario = @json($usuario->map(function($u) {
+        return [
+            'id_usuario_clinica' => $u->ID_USUARIO_CLINICA,
+            'id_clinica' => $u->ID_CLINICA,
+            'sit_usuario' => $u->SIT_USUARIO
+        ];
+    }));
+</script>
+
 </body>
 </html>

@@ -1,4 +1,4 @@
- <!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="pt-br">
 
 <head>
@@ -13,24 +13,22 @@
     <link href="https://cdnjs.cloudflare.com/ajax/libs/mdb-ui-kit/7.1.0/mdb.min.css" rel="stylesheet" />
     <meta name="csrf-token" content="{{ csrf_token() }}">
 
+    @vite(['resources/css/app.css', 'resources/js/app.js'])
+
     <style>
         html, body {
-            height: 100%;
+            max-height: 100%;
             margin: 0;
             font-family: "Montserrat", sans-serif;
             background-color: #f8f9fa;
         }
         #content-wrapper {
-            width: 78vw;
-            height: 100h;
+            width: 100%;
             margin: auto;
-            margin-top: 10px;
-            margin-bottom: 10px;
             display: flex;
             gap: 12px;
-            overflow: hidden;
             align-items: stretch;
-            flex-direction: row; /* mantém lado a lado em telas grandes */
+            flex-direction: row; /* lado a lado em telas grandes */
         }
         main {
             background-color: #ffffff;
@@ -44,15 +42,14 @@
             border: 1.8px solid #dee2e6;
         }
 
-        /* Para telas menores que 992px */
+        /* Telas menores */
         @media (max-width: 991.98px) {
             #content-wrapper {
-                flex-direction: column; /* empilha os main */
+                flex-direction: column;
             }
-
             main {
-                width: 100%; /* ocupa toda a largura */
-                height: calc(50% - 12px); /* divide igualmente a altura considerando o gap */
+                max-width: 100%;
+                max-height: 90vh;
             }
         }
         form {
@@ -119,16 +116,6 @@
             border-bottom-right-radius: 12px;
         }
 
-        @media (max-width: 768px) {
-            #content-wrapper {
-                flex-direction: column;
-                width: 90vw;
-                height: auto;
-            }
-            main {
-                width: 100%;
-            }
-        }
         /* ALERT FIXO NO TOPO */
         #alert-container {
             position: fixed;
@@ -143,202 +130,202 @@
     </style>
 </head>
 
-<body>
-@include('components.navbar')
+<body class="bg-body-secondary d-flex flex-column">
+    @include('components.navbar')
 
-<div id="alert-container"></div>
+    <div id="alert-container"></div>
 
-<div id="content-wrapper">
-    <main>
-        <div class="text-center">
-            <h2>Cadastro de Serviço</h2>
-        </div>
+    <!-- CONTAINER GERAL -->
+    <div class="container px-4">
 
-        @if ($errors->any())
-            <div class="alert alert-danger">
-                <ul class="mb-0">
-                    @foreach ($errors->all() as $erro)
-                        <li>{{ $erro }}</li>
-                    @endforeach
-                </ul>
+        <!-- HEADER -->
+        <div class="d-flex flex-row justify-content-between align-items-center">
+            <div>
+                <p class="m-0 ms-2">
+                    <i class="bi bi-hammer"></i>
+                    |
+                    <strong>Gerenciar Serviços</strong>
+                </p>
             </div>
-        @endif
-
-        @if(session('success'))
-            <script>
-                document.addEventListener('DOMContentLoaded', () => {
-                    showAlert("{{ session('success') }}", 'success');
-                });
-            </script>
-        @endif
-
-        <!-- FORMULÁRIO DE CRIAÇÃO DE SERVIÇO -->
-        <form class="needs-validation" action="{{ route('criarServico-Psicologia') }}" method="POST" novalidate id="form-criar-servico">
-
-            @csrf
-
-            <!-- ID DA CLINICA - NO CASO PSICOLOGIA -->
-            <input type="hidden" name="ID_CLINICA" value="1">
-
-            <!-- TÍTULO -->
-            <h5 class="mt-3">Dados do Serviço</h5>
-
-            <hr>
-
-            <!-- NOME DO SERVIÇO -->
-            <div class="mb-3">
-                <label for="nome-servico" class="form-label text-muted" style="font-size: 14px;">
-                    Nome do Serviço
-                </label>
-                <input type="text"
-                       id="nome-servico"
-                       name="SERVICO_CLINICA_DESC"
-                       class="form-control"
-                       value="{{ old('SERVICO_CLINICA_DESC', request('nome_servico')) }}"
-                       required>
-            </div>
-
-            <!-- CÓDIGO INTERNO DO SERVIÇO -->
-            <div class="mb-3">
-                <label for="cod-interno-servico" class="form-label text-muted" style="font-size: 14px;">
-                    Código Interno do Serviço
-                </label>
-                <input type="number"
-                       id="cod-interno-servico"
-                       name="COD_INTERNO_SERVICO_CLINICA"
-                       class="form-control"
-                       value="{{ old('COD_INTERNO_SERVICO_CLINICA') }}">
-            </div>
-
-            <!-- DISCIPLINA PARA VINCULAR AO SERVIÇO -->
-            <div class="mb-3" id="disciplina-container">
-                <label for="disciplina-servico" class="form-label" style="font-size: 14px;">Disciplina</label>
-                <select name="DISCIPLINA" id="disciplina-servico" class="form-select form-select-sm">
-                    <option value=""></option>
-                    <!-- Outras opções serão inseridas dinamicamente -->
-                </select>
-            </div>
-
-            <!-- VALOR DO SERVIÇO -->
-            <div class="mb-3">
-                <label for="valor-servico" class="form-label">Valor do Serviço</label>
-                <div class="input-group">
-                    <span class="input-group-text">R$</span>
-                    <input type="text" id="valor-servico" name="VALOR_SERVICO" class="form-control" placeholder="0,00" value="{{ old('VALOR_SERVICO') }}">
-                </div>
-            </div>
-
-            <!-- TEMPO DE RECORRÊNCIA PADRÃO -->
-            <div class="mb-3">
-                <label for="tempo_recorrencia_meses" class="form-label">
-                    Tempo de recorrência padrão (meses)
-                </label>
-                <input type="number" min="0" step="1" name="TEMPO_RECORRENCIA_MESES" id="edit-tempo_recorrencia_meses" class="form-control" placeholder="Ex: 6" value="{{ old('tempo_recorrencia_meses') }}">
-                <small class="text-muted">Deixe em branco ou 0 se o serviço não tiver recorrência padrão.</small>
-            </div>
-
-            <!-- OBSERVACAO DO SERVIÇO -->
-            <div class="mb-3">
-                <label for="observacao-servico" class="form-label">Observações</label>
-                <textarea id="observacao-servico" name="OBSERVACAO" class="form-control" value="{{ old('OBSERVACAO') }}"></textarea>
-            </div>
-
-            <!-- BOTÃO DE SALVAR | SUBMIT -->
-            <div class="text-end">
-                <button id="salvar" type="submit">Salvar</button>
-            </div>
-            
-        </form>
-    </main>
-
-    <main style="overflow-y:auto; max-height: 90vh;">
-
-        <!-- TITULO LISTAGEM DE SERVICOS -->
-        <h2 class="text-center mb-4">Consulta e Edição de Serviços</h2>
-
-        <!-- INPUT DE BUSCA -->
-        <input type="text" id="search-servico" class="form-control mb-3" placeholder="Buscar serviço por nome..." />
-
-        <div id="servicos-lista" style="max-height: 65vh; overflow-y:auto;">
-            <table class="table table-striped table-hover">
-                <thead>
-                <tr>
-                    <th>Descrição</th>
-                    <th>Código Interno</th>
-                    <th>Valor</th>
-                    <th>Ações</th>
-                </tr>
-                </thead>
-                <tbody id="servicos-tbody">
-                <tr><td colspan="5" class="text-center">Carregando...</td></tr>
-                </tbody>
-            </table>
-        </div>
-
-        {{-- MODAL DE EDIÇÃO DE SERVIÇO --}}
-        <div class="modal fade" id="editarServicoModal" tabindex="-1" aria-hidden="true">
-            <div class="modal-dialog">
-                <div class="modal-content">
-                    <div id="modal-alert-container"></div>
-                    <form id="form-editar-servico">
-                        <div class="modal-header">
-                            <h5 class="modal-title">Editar Serviço</h5>
-                            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-                        </div>
-                        <div class="modal-body">
-                            <input type="hidden" id="edit-servico-id" name="ID_SERVICO_CLINICA" />
-                            <div class="mb-3">
-                                <label class="form-label">Descrição</label>
-                                <input type="text" id="edit-servico-desc" name="SERVICO_CLINICA_DESC" class="form-control" required />
-                            </div>
-                            <div class="mb-3">
-                                <label class="form-label">Código Interno</label>
-                                <input type="number" id="edit-servico-cod" name="COD_INTERNO_SERVICO_CLINICA" class="form-control"/>
-                            </div>
-
-                            <div class="mb-3" id="edit-disciplina-container">
-                                <label class="form-label">Disciplina</label>
-                                <select name="DISCIPLINA" id="edit-servico-disc" class="form-select form-select-sm">
-                                    <option id="edit-servico-disc-selected"></option>
-                                    <!-- Outras opções serão inseridas dinamicamente -->
-                                </select>
-                            </div>
-                            
-                            <div class="mb-3">
-                                <label class="form-label">Valor Serviço</label>
-                                <input type="text" id="edit-valor-servico" name="VALOR_SERVICO" class="form-control">
-                            </div>
-                            <div class="mb-3">
-                                <label for="" class="form-label">
-                                    Tempo de recorrência padrão (meses)
-                                </label>
-                                <input type="number" min="0" step="1" id="edit-tempo-recorrencia-meses" class="form-control" placeholder="Ex: 6">
-                            </div>                      
-                            <div class="mb-3">
-                                <label for="observacao-servico" class="form-label">Observações</label>
-                                <textarea id="edit-observacao-servico" name="OBSERVACAO" class="form-control"></textarea>
-                            </div>
-                            <div class="d-none form-check mb-3">
-                                <input class="form-check-input" type="checkbox" id="edit-permite-simultaneo" name="PERMITE_ATENDIMENTO_SIMULTANEO">
-                                <label class="form-check-label" for="edit-permite-simultaneo">
-                                    Permite atendimento simultâneo
-                                </label>
-                            </div>
-                        </div>
-                        <div class="modal-footer d-flex justify-content-between">
-                            <button type="button" class="btn btn-danger" id="btn-deletar-servico">Excluir</button>
-                            <div>
-                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-                                <button type="submit" class="btn btn-primary">Salvar Alterações</button>
-                            </div>
-                        </div>
-                    </form>
+            <div>
+                <div class="profile-container">
+                    <i class="bi bi-person-circle fs-2" id="profile"></i>
                 </div>
             </div>
         </div>
-    </main>
-</div>
+        <!-- FIM HEADER -->
 
+        <!-- CONTEÚDO PRINCIPAL -->
+        <div id="content-wrapper" class="bg-body-secondary">
+
+            <!-- FORMULÁRIO -->
+            <main>
+                @if ($errors->any())
+                    <div class="alert alert-danger">
+                        <ul class="mb-0">
+                            @foreach ($errors->all() as $erro)
+                                <li>{{ $erro }}</li>
+                            @endforeach
+                        </ul>
+                    </div>
+                @endif
+
+                @if(session('success'))
+                    <script>
+                        document.addEventListener('DOMContentLoaded', () => {
+                            showAlert("{{ session('success') }}", 'success');
+                        });
+                    </script>
+                @endif
+
+                <form class="needs-validation" action="{{ route('criarServico-Psicologia') }}" method="POST" novalidate id="form-criar-servico">
+                    @csrf
+                    <input type="hidden" name="ID_CLINICA" value="1">
+
+                    <h5>Dados do Serviço</h5>
+                    <hr>
+
+                    <div class="mb-3">
+                        <label for="nome-servico" class="form-label text-muted" style="font-size: 14px;">
+                            Nome do Serviço
+                        </label>
+                        <input type="text"
+                               id="nome-servico"
+                               name="SERVICO_CLINICA_DESC"
+                               class="form-control"
+                               value="{{ old('SERVICO_CLINICA_DESC', request('nome_servico')) }}"
+                               required>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="cod-interno-servico" class="form-label text-muted" style="font-size: 14px;">
+                            Código Interno do Serviço
+                        </label>
+                        <input type="number"
+                               id="cod-interno-servico"
+                               name="COD_INTERNO_SERVICO_CLINICA"
+                               class="form-control"
+                               value="{{ old('COD_INTERNO_SERVICO_CLINICA') }}">
+                    </div>
+
+                    <div class="mb-3" id="disciplina-container">
+                        <label for="disciplina-servico" class="form-label" style="font-size: 14px;">Disciplina</label>
+                        <select name="DISCIPLINA" id="disciplina-servico" class="form-select form-select-sm">
+                            <option value=""></option>
+                        </select>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="valor-servico" class="form-label">Valor do Serviço</label>
+                        <div class="input-group">
+                            <span class="input-group-text">R$</span>
+                            <input type="text" id="valor-servico" name="VALOR_SERVICO" class="form-control" placeholder="0,00" value="{{ old('VALOR_SERVICO') }}">
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="tempo_recorrencia_meses" class="form-label">
+                            Tempo de recorrência padrão (meses)
+                        </label>
+                        <input type="number" min="0" step="1" name="TEMPO_RECORRENCIA_MESES" id="edit-tempo_recorrencia_meses" class="form-control" placeholder="Ex: 6" value="{{ old('tempo_recorrencia_meses') }}">
+                        <small class="text-muted">Deixe em branco ou 0 se o serviço não tiver recorrência padrão.</small>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="observacao-servico" class="form-label">Observações</label>
+                        <textarea id="observacao-servico" name="OBSERVACAO" class="form-control">{{ old('OBSERVACAO') }}</textarea>
+                    </div>
+
+                    <div class="text-end">
+                        <button id="salvar" type="submit">Salvar</button>
+                    </div>
+                </form>
+            </main>
+
+            <!-- LISTAGEM -->
+            <main style="overflow-y:auto; max-height: 90vh;">
+
+                <h5>Consulta de Serviços</h5>
+                <input type="text" id="search-servico" class="form-control mb-3" placeholder="Buscar serviço por nome..." />
+
+                <div id="servicos-lista" style="max-height: 65vh; overflow-y:auto;">
+                    <table class="table table-striped table-hover">
+                        <thead>
+                        <tr>
+                            <th>Descrição</th>
+                            <th>Código Interno</th>
+                            <th>Valor</th>
+                            <th>Ações</th>
+                        </tr>
+                        </thead>
+                        <tbody id="servicos-tbody">
+                        <tr><td colspan="5" class="text-center">Carregando...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                {{-- Modal de edição --}}
+                <div class="modal fade" id="editarServicoModal" tabindex="-1" aria-hidden="true">
+                    <div class="modal-dialog">
+                        <div class="modal-content">
+                            <div id="modal-alert-container"></div>
+                            <form id="form-editar-servico">
+                                <div class="modal-header">
+                                    <h5 class="modal-title">Editar Serviço</h5>
+                                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                                </div>
+                                <div class="modal-body">
+                                    <input type="hidden" id="edit-servico-id" name="ID_SERVICO_CLINICA" />
+                                    <div class="mb-3">
+                                        <label class="form-label">Descrição</label>
+                                        <input type="text" id="edit-servico-desc" name="SERVICO_CLINICA_DESC" class="form-control" required />
+                                    </div>
+                                    <div class="mb-3">
+                                        <label class="form-label">Código Interno</label>
+                                        <input type="number" id="edit-servico-cod" name="COD_INTERNO_SERVICO_CLINICA" class="form-control"/>
+                                    </div>
+                                    <div class="mb-3" id="edit-disciplina-container">
+                                        <label class="form-label">Disciplina</label>
+                                        <select name="DISCIPLINA" id="edit-servico-disc" class="form-select form-select-sm">
+                                            <option id="edit-servico-disc-selected"></option>
+                                        </select>
+                                    </div>
+                                    <div class="mb-3">
+                                        <label class="form-label">Valor Serviço</label>
+                                        <input type="text" id="edit-valor-servico" name="VALOR_SERVICO" class="form-control">
+                                    </div>
+                                    <div class="mb-3">
+                                        <label class="form-label">Tempo de recorrência padrão (meses)</label>
+                                        <input type="number" min="0" step="1" id="edit-tempo-recorrencia-meses" class="form-control" placeholder="Ex: 6">
+                                    </div>                      
+                                    <div class="mb-3">
+                                        <label for="observacao-servico" class="form-label">Observações</label>
+                                        <textarea id="edit-observacao-servico" name="OBSERVACAO" class="form-control"></textarea>
+                                    </div>
+                                    <div class="d-none form-check mb-3">
+                                        <input class="form-check-input" type="checkbox" id="edit-permite-simultaneo" name="PERMITE_ATENDIMENTO_SIMULTANEO">
+                                        <label class="form-check-label" for="edit-permite-simultaneo">
+                                            Permite atendimento simultâneo
+                                        </label>
+                                    </div>
+                                </div>
+                                <div class="modal-footer d-flex justify-content-between">
+                                    <button type="button" class="btn btn-danger" id="btn-deletar-servico">Excluir</button>
+                                    <div>
+                                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                                        <button type="submit" class="btn btn-primary">Salvar Alterações</button>
+                                    </div>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+
+            </main>
+        </div>
+    </div>
+</body>
+</html>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/mdb-ui-kit/7.1.0/mdb.min.js"></script>
 
@@ -701,6 +688,22 @@
             this.value = parts[0] + ',' + parts[1];
         }
     })
+</script>
+
+@php
+    // Pega os dados do usuário da sessão
+    $usuario = session('usuario');
+@endphp
+
+<script>
+    // Converte para objeto JS
+    const usuario = @json($usuario->map(function($u) {
+        return [
+            'id_usuario_clinica' => $u->ID_USUARIO_CLINICA,
+            'id_clinica' => $u->ID_CLINICA,
+            'sit_usuario' => $u->SIT_USUARIO
+        ];
+    }));
 </script>
 
 </body>

@@ -27,6 +27,8 @@
         crossorigin="anonymous">
     </script>
 
+    @vite(['resources/css/app.css', 'resources/js/app.js'])
+
     <style>
         #calendar {
             max-width: 900px;
@@ -133,12 +135,21 @@
             <div class="col-12 text-center mb-1">
                 <div class="d-flex flex-row justify-content-between align-items-center">
                     <p class="p-0 mt-2 mb-1 text-start" style="font-size: 25px;">
-                        <i class="bi bi-list" id="btnToggleNavbar" style="cursor: pointer;"></i>
+                        <!-- <i class="bi bi-list" id="btnToggleNavbar" style="cursor: pointer;"></i> -->
                         <strong>Calendário</strong>
                     </p>
-                    <p class="btn btn-success m-0 me-2" style="font-size: 15px;">
-                        <span>Novo Agendamento</span>
-                    </p>
+                    <div class="header-menu-right d-flex flex-row justify-content-between align-items-center gap-3">
+
+                        <a href="/psicologia/criar-agendamento" class="btn btn-success m-0 me-2 py-1" style="font-size: 15px;">
+                            <span>
+                                Novo Agendamento
+                            </span>
+                        </a>
+
+                        <div class="profile-container">
+                            <i class="bi bi-person-circle fs-2" id="profile"></i>
+                        </div>
+                    </div>
                 </div>
             </div>
             <div class="col-12 shadow-lg shadow-dark pt-3 bg-body-tertiary rounded">
@@ -447,15 +458,20 @@
     })
 </script>
 
-<script>
-  document.addEventListener("DOMContentLoaded", function () {
-    const btnToggle = document.getElementById("btnToggleNavbar");
-    const navbar = document.getElementById("mainNavbar");
+@php
+    // Pega os dados do usuário da sessão
+    $usuario = session('usuario');
+@endphp
 
-    btnToggle.addEventListener("click", function () {
-      navbar.classList.toggle("collapsed");
-    });
-  });
+<script>
+    // Converte para objeto JS
+    const usuario = @json($usuario->map(function($u) {
+        return [
+            'id_usuario_clinica' => $u->ID_USUARIO_CLINICA,
+            'id_clinica' => $u->ID_CLINICA,
+            'sit_usuario' => $u->SIT_USUARIO
+        ];
+    }));
 </script>
 
 </html>

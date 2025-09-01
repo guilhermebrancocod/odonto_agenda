@@ -19,6 +19,8 @@
 
     <meta name="csrf-token" content="{{ csrf_token() }}">
 
+    @vite(['resources/css/app.css', 'resources/js/app.js'])
+
     <style>
         html, body { height: 100%; margin: 0; }
         #content-wrapper {
@@ -60,11 +62,11 @@
     </style>
 </head>
 
-<body>
+<body class="bg-body-secondary">
     @include('components.navbar')
 
     <!-- CONTEUDO PRINCIPAL -->
-    <div id="content-wrapper">
+    <div id="content-wrapper" class="bg-body-secondary ms-4 me-4 mt-1">
 
         <!-- INFORMA ERROS DE VALIDAÇÃO DO BACKEND EM CASOS DE SUBMISSÃO DE FORMULÁRIO -->
         @if($errors->any())
@@ -84,15 +86,24 @@
             </div>
         @endif
 
+        <div class="d-flex flex-row justify-content-between align-items-center">
+            <div>
+                <p class="m-0 p-0 mb-2 ms-2">
+                    <i class="bi bi-search"></i>
+                    |
+                    <strong>Consultar Paciente</strong>
+                </p>
+            </div>
+            <div>
+                <div class="profile-container">
+                    <i class="bi bi-person-circle fs-2" id="profile"></i>
+                </div>
+            </div>
+        </div>
+
         <main>
 
             <div class="bg-white p-4 rounded shadow-sm w-100">  
-
-                <!-- TÍTULO -->
-                <div class="text-center mb-5">
-                    <h2 class="fs-4 mb-0">Pacientes</h2>
-                </div>
-
                 <!-- FORMULÁIO DE PESQUISA -->
                 <form id="search-form" class="w-100 mb-4">
                     <div class="row g-3">
@@ -946,6 +957,22 @@
             e.target.value = value;
         });
     </script>
+
+@php
+    // Pega os dados do usuário da sessão
+    $usuario = session('usuario');
+@endphp
+
+<script>
+    // Converte para objeto JS
+    const usuario = @json($usuario->map(function($u) {
+        return [
+            'id_usuario_clinica' => $u->ID_USUARIO_CLINICA,
+            'id_clinica' => $u->ID_CLINICA,
+            'sit_usuario' => $u->SIT_USUARIO
+        ];
+    }));
+</script>
 
 </body>
 </html>

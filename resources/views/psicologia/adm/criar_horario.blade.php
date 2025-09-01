@@ -16,6 +16,8 @@
     <!-- FLATPICKR CSS -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
 
+    @vite(['resources/css/app.css', 'resources/js/app.js'])
+
     <style>
         html, body {
             height: 100%;
@@ -24,12 +26,14 @@
             background-color: #f8f9fa;
         }
         
-        #content-wrapper {
+        .page-container {
             width: 78vw;
-            height: 100h;
             margin: auto;
             margin-top: 10px;
             margin-bottom: 10px;
+        }
+
+        #content-wrapper {
             display: flex;
             gap: 12px;
             overflow: hidden;
@@ -49,30 +53,33 @@
             border: 1.8px solid #dee2e6;
         }
 
-        /* Para telas menores que 992px */
+        /* Responsividade */
         @media (max-width: 991.98px) {
             #content-wrapper {
-                flex-direction: column; /* empilha os main */
+                flex-direction: column;
             }
-
             main {
-                width: 100%; /* ocupa toda a largura */
-                height: calc(50% - 12px); /* divide igualmente a altura considerando o gap */
+                width: 100%;
+                height: auto;
             }
         }
+
         form {
             flex-grow: 1;
             overflow-y: auto;
         }
+
         h2 {
             font-size: 24px;
             color: #333;
             margin-bottom: 16px;
         }
+
         h5 {
             margin-bottom: 12px;
             font-weight: 600;
         }
+
         #salvar {
             background-color: #007bff;
             color: #fff;
@@ -86,11 +93,6 @@
         #salvar:hover {
             background-color: #0056b3;
             box-shadow: 0 0.5rem 1rem rgba(0,0,0,0.15);
-        }
-        #servicos-lista {
-            flex-grow: 1;
-            overflow-y: auto;
-            max-height: 100%;
         }
 
         table {
@@ -125,15 +127,17 @@
         }
 
         @media (max-width: 768px) {
+            .page-container {
+                width: 90vw;
+            }
             #content-wrapper {
                 flex-direction: column;
-                width: 90vw;
-                height: auto;
             }
             main {
                 width: 100%;
             }
         }
+
         /* ALERT FIXO NO TOPO */
         #alert-container {
             position: fixed;
@@ -145,6 +149,7 @@
             max-width: 90%;
             pointer-events: none;
         }
+
         .flatpickr-input {
             background-image: none !important;
         }
@@ -154,226 +159,232 @@
     </style>
 </head>
 
-<body>
+<body class="bg-body-secondary">
 @include('components.navbar')
 
 <div id="alert-container"></div>
 
-<div id="content-wrapper">
-    <main>
-        <div class="text-center">
-            <h2>Cadastro de Horários</h2>
+<div class="container px-4">
+
+    <!-- HEADER -->
+    <div class="d-flex flex-row justify-content-between align-items-center">
+        <div>
+            <p class="m-0 ms-2">
+                <i class="bi bi-clock-history"></i>
+                |
+                <strong>Gerenciar Horários</strong>
+            </p>
         </div>
-
-        @if ($errors->any())
-            <div class="alert alert-danger">
-                <ul class="mb-0">
-                    @foreach ($errors->all() as $erro)
-                        <li>{{ $erro }}</li>
-                    @endforeach
-                </ul>
+        <div>
+            <div class="profile-container">
+                <i class="bi bi-person-circle fs-2" id="profile"></i>
             </div>
-        @endif
+        </div>
+    </div>
+    <!-- FIM HEADER -->
 
-        @if(session('success'))
-            <script>
-                document.addEventListener('DOMContentLoaded', () => {
-                    showAlert("{{ session('success') }}", 'success');
-                });
-            </script>
-        @endif
-
-        <div class="alert alert-warning alert-dismissible fade show" role="alert">
-            <strong>
-                <i class="bi bi-exclamation-diamond-fill"></i>
-                Atenção!
-            </strong>
-            <br>
-            Ao criar um bloqueio, os horários que já foram cadastrados no período travado não serão alterados! embre-se de reagendar ou remarcar todos os agendamentos nesse período
-            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-        </div>   
-                
-        <!-- FORMULÁRIO DE CRIAÇÃO DE HORARIO -->
-        <form class="needs-validation" action="{{ route('criarHorario-Psicologia') }}" method="POST" novalidate>
-
-            @csrf
-
-            <!-- ID DA CLINICA - NO CASO PSICOLOGIA -->
-            <input type="hidden" name="ID_CLINICA" value="1">
-
-            <!-- TÍTULO -->
-            <h5 class="mt-3">Informações</h5>
-
-            <hr>
-
-            <!-- SELEÇÃO DE HORARIO PERMISSAO OU HORAIRO BLOQ -->
-            <div class="mt-3 mb-1">
-                <label for="TIPO_HORARIO" class="form-label">Tipo de Horário</label>
-                <select id="TIPO_HORARIO" name="TIPO_HORARIO" class="form-select" required>
-                    <option value="" disabled selected>Selecione o tipo de horário</option>
-                    <option value="N">Horário de Atendimento</option>
-                    <option value="S">Horário Bloqueado</option>
-                </select>
-                <div class="invalid-feedback">
-                    Selecione se o horário é de atendimento ou bloqueado.
+    <div id="content-wrapper">
+        <main>
+            @if ($errors->any())
+                <div class="alert alert-danger">
+                    <ul class="mb-0">
+                        @foreach ($errors->all() as $erro)
+                            <li>{{ $erro }}</li>
+                        @endforeach
+                    </ul>
                 </div>
-            </div>
+            @endif
 
-            <!-- DATA INÍCIO -->
-            <div class="mt-2">
-                <label for="DATA_HORARIO_INICIAL" class="form-label">Data Inicial</label>
-                <input type="text" id="DATA_HORARIO_INICIAL" name="DATA_HORARIO_INICIAL" class="form-control" value="{{ old('DATA_HORARIO_INICIAL') }}">
-            </div>
+            @if(session('success'))
+                <script>
+                    document.addEventListener('DOMContentLoaded', () => {
+                        showAlert("{{ session('success') }}", 'success');
+                    });
+                </script>
+            @endif
 
-            <!-- DATA FINAL -->
-            <div class="mt-2">
-                <label for="DATA_HORARIO_FINAL" class="form-label">Data Final</label>
-            <input type="text" id="DATA_HORARIO_FINAL" name="DATA_HORARIO_FINAL" class="form-control" value="{{ old('DATA_HORARIO_FINAL') }}">
-            </div>
+            <div class="alert alert-warning alert-dismissible fade show" role="alert">
+                <strong>
+                    <i class="bi bi-exclamation-diamond-fill"></i>
+                    Atenção!
+                </strong>
+                <br>
+                Ao criar um bloqueio, os horários que já foram cadastrados no período travado não serão alterados!
+                <br>
+                Lembre-se de reagendar ou remarcar todos os agendamentos nesse período
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>   
+                    
+            <form class="needs-validation" action="{{ route('criarHorario-Psicologia') }}" method="POST" novalidate>
+                @csrf
+                <input type="hidden" name="ID_CLINICA" value="1">
 
-            <!-- HORÁRIO INÍCIO -->
-            <div class="mt-2">
-                <label for="HR_HORARIO_INICIAL" class="form-label">Horário Inicial</label>
-                <input type="text" id="HR_HORARIO_INICIAL" name="HR_HORARIO_INICIAL" class="form-control" value="{{ old('HR_HORARIO_INICIAL') }}">
-            </div>
+                <h5 class="mt-3">Criar Horário</h5>
+                <hr>
 
-             <!-- HORÁRIO FINAL -->
-            <div class="mt-2">
-                <label for="HR_HORARIO_FINAL" class="form-label">Horário Final</label>
-                <input type="text" id="HR_HORARIO_FINAL" name="HR_HORARIO_FINAL" class="form-control" value="{{ old('HR_HORARIO_FINAL') }}">
-            </div>
-
-            <!-- DESCRICAO -->
-            <div class="mt-2">
-                <label for="DESCRICAO_HORARIO" class="form-label">Descrição</label>
-                <input type="text" id="DESCRICAO_HORARIO" name="DESCRICAO_HORARIO" class="form-control" value="{{ old('DESCRICAO_HORARIO') }}" required>
-            </div>
-
-            <!-- OBSERVACAO -->
-                <div class=" mt-2">
-                    <label for="OBSERVACAO" class="form-label">Observações</label>
-                    <textarea name="OBSERVACAO" id="OBSERVACAO" class="form-control" placeholder="Observações..." rows="3">{{ old('OBSERVACAO') }}</textarea>
+                <!-- SELEÇÃO DE HORARIO PERMISSAO OU HORAIRO BLOQ -->
+                <div class="mt-3 mb-1">
+                    <label for="TIPO_HORARIO" class="form-label">Tipo de Horário</label>
+                    <select id="TIPO_HORARIO" name="TIPO_HORARIO" class="form-select" required>
+                        <option value="" disabled selected>Selecione o tipo de horário</option>
+                        <option value="N">Horário de Atendimento</option>
+                        <option value="S">Horário Bloqueado</option>
+                    </select>
+                    <div class="invalid-feedback">
+                        Selecione se o horário é de atendimento ou bloqueado.
+                    </div>
                 </div>
 
-            <!-- BOTÃO DE SALVAR | SUBMIT -->
-            <div class="text-end mt-4">
-                <button id="salvar" type="submit">Salvar</button>
+                <!-- DATA INÍCIO -->
+                <div class="mt-2">
+                    <label for="DATA_HORARIO_INICIAL" class="form-label">Data Inicial</label>
+                    <input type="text" id="DATA_HORARIO_INICIAL" name="DATA_HORARIO_INICIAL" class="form-control" value="{{ old('DATA_HORARIO_INICIAL') }}">
+                </div>
+
+                <!-- DATA FINAL -->
+                <div class="mt-2">
+                    <label for="DATA_HORARIO_FINAL" class="form-label">Data Final</label>
+                <input type="text" id="DATA_HORARIO_FINAL" name="DATA_HORARIO_FINAL" class="form-control" value="{{ old('DATA_HORARIO_FINAL') }}">
+                </div>
+
+                <!-- HORÁRIO INÍCIO -->
+                <div class="mt-2">
+                    <label for="HR_HORARIO_INICIAL" class="form-label">Horário Inicial</label>
+                    <input type="text" id="HR_HORARIO_INICIAL" name="HR_HORARIO_INICIAL" class="form-control" value="{{ old('HR_HORARIO_INICIAL') }}">
+                </div>
+
+                <!-- HORÁRIO FINAL -->
+                <div class="mt-2">
+                    <label for="HR_HORARIO_FINAL" class="form-label">Horário Final</label>
+                    <input type="text" id="HR_HORARIO_FINAL" name="HR_HORARIO_FINAL" class="form-control" value="{{ old('HR_HORARIO_FINAL') }}">
+                </div>
+
+                <!-- DESCRICAO -->
+                <div class="mt-2">
+                    <label for="DESCRICAO_HORARIO" class="form-label">Descrição</label>
+                    <input type="text" id="DESCRICAO_HORARIO" name="DESCRICAO_HORARIO" class="form-control" value="{{ old('DESCRICAO_HORARIO') }}" required>
+                </div>
+
+                <!-- OBSERVACAO -->
+                    <div class=" mt-2">
+                        <label for="OBSERVACAO" class="form-label">Observações</label>
+                        <textarea name="OBSERVACAO" id="OBSERVACAO" class="form-control" placeholder="Observações..." rows="3">{{ old('OBSERVACAO') }}</textarea>
+                    </div>
+
+                <!-- BOTÃO DE SALVAR | SUBMIT -->
+                <div class="text-end mt-4">
+                    <button id="salvar" type="submit">Salvar</button>
+                </div>
+            </form>
+        </main>
+
+        <main>
+            <input type="text" id="search-horario" class="form-control mb-3" placeholder="Buscar horário por descrição..." />
+
+            <div id="horarios-lista" style="max-height: 65vh; overflow-y:auto;">
+                <table class="table table-striped table-hover">
+                    <thead>
+                        <tr>
+                            <th>Descrição</th>
+                            <th>Tipo</th>
+                        </tr>
+                    </thead>
+                    <tbody id="horarios-tbody">
+                        <tr><td colspan="5" class="text-center">Carregando...</td></tr>
+                    </tbody>
+                </table>
             </div>
-            
-        </form>
-    </main>
 
-    <!-- LISTAGEM DE HORÁRIOS  -->
-    <main style="">
+           <!-- MODAL DE EDIÇÃO DE HORÁRIO -->
+            <div class="modal fade" id="editarHorarioModal" tabindex="-1" aria-hidden="true">
+                <div class="modal-dialog">
+                    <div class="modal-content">
+                        <div id="modal-alert-container"></div>
+                            <form id="form-editar-horario" novalidate>
 
-        <!-- TITULO LISTAGEM DE HORARIOS -->
-        <h2 class="text-center mb-4">Consulta e Edição de Horários</h2>
+                                <!-- HEADER DO MODAL -->
+                                <div class="modal-header">
 
-        <!-- INPUT DE BUSCA -->
-        <input type="text" id="search-horario" class="form-control mb-3" placeholder="Buscar horario por descrição..." />
+                                    <div id="form-errors" class="alert alert-danger d-none" role="alert"></div>
 
-        <!-- LISTAGEM DE HORARIOS -->
-        <div id="horarios-lista" style="max-height: 65vh; overflow-y:auto;">
-            <table class="table table-striped table-hover">
-                <thead>
-                <tr>
-                    <th>Descrição</th>
-                    <th>Tipo</th>
-                </tr>
-                </thead>
-                <tbody id="horarios-tbody">
-                <tr><td colspan="5" class="text-center">Carregando...</td></tr>
-                </tbody>
-            </table>
-        </div>
-
-        <!-- MODAL DE EDIÇÃO DE HORÁRIO -->
-        <div class="modal fade" id="editarHorarioModal" tabindex="-1" aria-hidden="true">
-            <div class="modal-dialog">
-                <div class="modal-content">
-                    <div id="modal-alert-container"></div>
-                        <form id="form-editar-horario" novalidate>
-
-                            <!-- HEADER DO MODAL -->
-                            <div class="modal-header">
-
-                                <div id="form-errors" class="alert alert-danger d-none" role="alert"></div>
-
-                                <h5 class="modal-title">Editar Horário</h5>
-                                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-                            </div>
-
-                            <!-- CORPO DO MODAL -->
-                            <div class="modal-body">
-
-                                <input type="hidden" id="edit-horario-id" name="ID_HORARIO" />
-
-                                <!-- EDIÇÃO DE DESCRIÇÃO DO HORÁRIO -->
-                                <div class="mb-3">
-                                    <label class="form-label">Descrição</label>
-                                    <input type="text" id="edit-horario-desc" name="HORARIO" class="form-control" required />
+                                    <h5 class="modal-title">Editar Horário</h5>
+                                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                                 </div>
 
-                                <!-- EDIÇÃO DE TIPO DE HORÁRIO -->
-                                <div class="mb-3">
-                                    <label class="form-label">Tipo de Horário</label>
-                                    <select id="edit-tipo-horario" name="TIPO_HORARIO" class="form-select" required>
-                                        <option value="" disabled selected>Selecione o tipo de horário</option>
-                                        <option value="N">Horário de Atendimento</option>
-                                        <option value="S">Horário Bloqueado</option>
-                                    </select>
-                                    <div class="invalid-feedback">
-                                        Selecione se o horário é de atendimento ou bloqueado.
+                                <!-- CORPO DO MODAL -->
+                                <div class="modal-body">
+
+                                    <input type="hidden" id="edit-horario-id" name="ID_HORARIO" />
+
+                                    <!-- EDIÇÃO DE DESCRIÇÃO DO HORÁRIO -->
+                                    <div class="mb-3">
+                                        <label class="form-label">Descrição</label>
+                                        <input type="text" id="edit-horario-desc" name="HORARIO" class="form-control" required />
+                                    </div>
+
+                                    <!-- EDIÇÃO DE TIPO DE HORÁRIO -->
+                                    <div class="mb-3">
+                                        <label class="form-label">Tipo de Horário</label>
+                                        <select id="edit-tipo-horario" name="TIPO_HORARIO" class="form-select" required>
+                                            <option value="" disabled selected>Selecione o tipo de horário</option>
+                                            <option value="N">Horário de Atendimento</option>
+                                            <option value="S">Horário Bloqueado</option>
+                                        </select>
+                                        <div class="invalid-feedback">
+                                            Selecione se o horário é de atendimento ou bloqueado.
+                                        </div>
+                                    </div>
+
+                                    <!-- EDIÇÃO DE DATA INICIAL -->
+                                    <div class="mb-3">
+                                        <label class="form-label">Data Inicial</label>
+                                        <input type="text" id="edit-data-horario-inicial" name="DATA_HORARIO_INICIAL" class="form-control" required />
+                                    </div>
+
+                                    <!-- EDIÇÃO DE DATA FINAL -->
+                                    <div class="mb-3">
+                                        <label class="form-label">Data Final</label>
+                                        <input type="text" id="edit-data-horario-final" name="DATA_HORARIO_FINAL" class="form-control" required />
+                                    </div>
+
+                                    <!-- EDIÇÃO DE HORÁRIO INICIAL -->
+                                    <div class="mb-3">
+                                        <label class="form-label">Horário Inicial</label>
+                                        <input type="text" id="edit-hr-horario-inicial" name="HR_HORARIO_INICIAL" class="form-control" required />
+                                    </div>
+
+                                    <!-- EDIÇÃO DE HORÁRIO FINAL -->
+                                    <div class="mb-3">
+                                        <label class="form-label">Horário Final</label>
+                                        <input type="text" id="edit-hr-horario-final" name="HR_HORARIO_FINAL" class="form-control" required />
+                                    </div>
+
+                                    <!-- EDIÇÃO DE OBSERVAÇÃO -->
+                                    <div class="mb-3">
+                                        <label class="form-label">Observações</label>
+                                        <textarea id="edit-observacao" name="OBSERVACAO" class="form-control" rows="3">{{ old('OBSERVACAO') }}</textarea>
+                                    </div>
+                                    
+                                <!-- RODAPÉ DO MODAL -->
+                                <div class="modal-footer d-flex justify-content-between">
+                                    <button type="button" class="btn btn-danger" id="btn-deletar-horario">Excluir</button>
+                                    <div>
+                                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                                        <button type="submit" class="btn btn-primary">Salvar Alterações</button>
                                     </div>
                                 </div>
 
-                                <!-- EDIÇÃO DE DATA INICIAL -->
-                                <div class="mb-3">
-                                    <label class="form-label">Data Inicial</label>
-                                    <input type="text" id="edit-data-horario-inicial" name="DATA_HORARIO_INICIAL" class="form-control" required />
-                                </div>
-
-                                <!-- EDIÇÃO DE DATA FINAL -->
-                                <div class="mb-3">
-                                    <label class="form-label">Data Final</label>
-                                    <input type="text" id="edit-data-horario-final" name="DATA_HORARIO_FINAL" class="form-control" required />
-                                </div>
-
-                                <!-- EDIÇÃO DE HORÁRIO INICIAL -->
-                                <div class="mb-3">
-                                    <label class="form-label">Horário Inicial</label>
-                                    <input type="text" id="edit-hr-horario-inicial" name="HR_HORARIO_INICIAL" class="form-control" required />
-                                </div>
-
-                                <!-- EDIÇÃO DE HORÁRIO FINAL -->
-                                <div class="mb-3">
-                                    <label class="form-label">Horário Final</label>
-                                    <input type="text" id="edit-hr-horario-final" name="HR_HORARIO_FINAL" class="form-control" required />
-                                </div>
-
-                                <!-- EDIÇÃO DE OBSERVAÇÃO -->
-                                <div class="mb-3">
-                                    <label class="form-label">Observações</label>
-                                    <textarea id="edit-observacao" name="OBSERVACAO" class="form-control" rows="3">{{ old('OBSERVACAO') }}</textarea>
-                                </div>
-                                
-                            <!-- RODAPÉ DO MODAL -->
-                            <div class="modal-footer d-flex justify-content-between">
-                                <button type="button" class="btn btn-danger" id="btn-deletar-horario">Excluir</button>
-                                <div>
-                                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-                                    <button type="submit" class="btn btn-primary">Salvar Alterações</button>
-                                </div>
-                            </div>
-
-                        </form>
+                            </form>
+                        </div>
                     </div>
                 </div>
             </div>
-        </div>
-    </main>
-
+        </main>
+    </div>
 </div>
+</body>
+</html>
+
 
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/mdb-ui-kit/7.1.0/mdb.min.js"></script>
@@ -689,6 +700,20 @@
         allowInput: true,
     })
 
+</script>
+
+@php
+    // Pega os dados do usuário da sessão
+    $usuario = session('usuario');
+@endphp
+
+<script>
+    const usuario = @json(value: $usuario->map(fn($u) => [
+        'id_usuario_clinica' => $u->ID_USUARIO_CLINICA,
+        'id_clinica' => $u->ID_CLINICA,
+        'sit_usuario' => $u->SIT_USUARIO
+    ])->toArray());
+    console.log(usuario);
 </script>
 
 </body>
