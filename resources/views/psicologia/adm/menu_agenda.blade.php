@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Menu</title>
+    <title>Calendário</title>
 
     <!-- FAVICON - IMAGEM DA GUIA -->
     <link rel="icon" type="image/png" href="/favicon_faesa.png">
@@ -27,18 +27,17 @@
         crossorigin="anonymous">
     </script>
 
-    @vite(['resources/css/app.css', 'resources/js/app.js'])
-
     <style>
         #calendar {
             max-width: 900px;
-            max-height: 89vh;
+            max-height: 86vh;
             overflow-y: auto;
-            margin: 0 auto;
+            margin: auto;
+            margin-right: 10px; 
         }
 
         #calendar::-webkit-scrollbar {
-            width: 8px;
+            width: 6px;
         }
         #calendar::-webkit-scrollbar-track {
             background: #ecf5f9;
@@ -74,7 +73,7 @@
 
         /* Quando passar o mouse, mostra a barrinha */
         .fc-daygrid-day-events:hover::-webkit-scrollbar {
-            width: 8px; /* largura visível */
+            width: 2px; /* largura visível */
         }
 
         .fc-daygrid-day-events:hover::-webkit-scrollbar-track {
@@ -84,7 +83,7 @@
 
         .fc-daygrid-day-events:hover::-webkit-scrollbar-thumb {
             background: linear-gradient(180deg, #2596be, #7aacce);
-            border-radius: 10px;
+            border-radius: 56px;
             border: 2px solid #ecf5f9;
         }
 
@@ -130,28 +129,13 @@
     
     @include('components.navbar')
 
-    <div class="container ms-3">
+    <div class="container ms-3 mw-100">
         <div class="row">
-            <div class="col-12 text-center mb-1">
-                <div class="d-flex flex-row justify-content-between align-items-center">
-                    <p class="p-0 mt-2 mb-1 text-start" style="font-size: 25px;">
-                        <!-- <i class="bi bi-list" id="btnToggleNavbar" style="cursor: pointer;"></i> -->
-                        <strong>Calendário</strong>
+            <x-page-title>
+                    <p class="btn btn-success p-2 me-3" style="font-size: 15px;">
+                        <span>Novo Agendamento</span>
                     </p>
-                    <div class="header-menu-right d-flex flex-row justify-content-between align-items-center gap-3">
-
-                        <a href="/psicologia/criar-agendamento" class="btn btn-success m-0 me-2 py-1" style="font-size: 15px;">
-                            <span>
-                                Novo Agendamento
-                            </span>
-                        </a>
-
-                        <div class="profile-container">
-                            <i class="bi bi-person-circle fs-2" id="profile"></i>
-                        </div>
-                    </div>
-                </div>
-            </div>
+            </x-page-title>
             <div class="col-12 shadow-lg shadow-dark pt-3 bg-body-tertiary rounded">
                 <!-- CALENDÁRIO -->
                 <div id="calendar" style="max-width: 100%;" class="bg-light-subtle pe-4"></div>
@@ -458,20 +442,7 @@
     })
 </script>
 
-@php
-    // Pega os dados do usuário da sessão
-    $usuario = session('usuario');
-@endphp
 
-<script>
-    // Converte para objeto JS
-    const usuario = @json($usuario->map(function($u) {
-        return [
-            'id_usuario_clinica' => $u->ID_USUARIO_CLINICA,
-            'id_clinica' => $u->ID_CLINICA,
-            'sit_usuario' => $u->SIT_USUARIO
-        ];
-    }));
-</script>
+
 
 </html>

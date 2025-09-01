@@ -91,9 +91,44 @@
     .collapse-custom.show {
     display: block;
     }
+    
+    /* --- ESTILOS DA NAVBAR E TRANSIÇÃO --- */
+    #mainNavbar {
+        width: 250px;
+        background-color: var(--blue-color);
+        transition: width 0.3s ease;
+        overflow-x: hidden; /* Previne conteúdo de vazar durante a transição */
+    }
 
+    /* --- ESTILOS PARA NAVBAR RECOLHIDA (CLASSE .collapsed) --- */
+    
+    /* 1. Reduz a largura da navbar */
+    #mainNavbar.collapsed {
+        width: 80px;
+    }
+
+    /* 2. Esconde os elementos que não são ícones */
+
+    #mainNavbar.collapsed h5,
+    #mainNavbar.collapsed div[classs=""] { /* OBS: Há um typo 'classs' no seu HTML original */
+        opacity: 0;
+    }
+
+    /* 3. Esconde o texto dos links e centraliza os ícones */
+    #mainNavbar.collapsed .link-agendar,
+    #mainNavbar.collapsed .link-logout {
+        font-size: 0; /* Truque para esconder o nó de texto */
+        justify-content: center;
+        padding: 0.75rem;
+    }
+
+    /* 4. Restaura o tamanho do ícone, que foi afetado pelo font-size: 0 */
+    #mainNavbar.collapsed .link-agendar i,
+    #mainNavbar.collapsed .link-logout i {
+        font-size: 1.1rem; /* Ou o tamanho que preferir para os ícones */
+        margin: 0;
+    }
 </style>
-
 
 <nav class="navbar navbar-dark bg-primary d-lg-none fixed-top shadow-sm px-3" style="height: 56px">
     <button class="btn btn-primary" type="button" data-bs-toggle="offcanvas" data-bs-target="#offcanvasMenu">
@@ -106,8 +141,7 @@
 <div id="main-container" class="d-flex min-vh-100">
 
 <!-- SIDEBAR DESKTOP -->
-<nav class="p-3 d-none d-lg-flex flex-column align-items-center shadow-lg" style="max-width: 230px; min-width: 230px; background-color: var(--blue-color);">
-
+<nav class="p-3 d-none d-lg-flex flex-column align-items-center shadow-lg" id="mainNavbar">
     <!-- LOGO DA FAESA - NAVBAR -->
     <img src="{{ asset('faesa_branco.png') }}" alt="Logo" class="img-fluid mb-2" />
 
@@ -118,11 +152,17 @@
         <p class="p-0 m-0 text-center" style="font-size: 12px;"><em>Administrador</em></p>
     </h5>
 
-    <div>
-        <p class="text-white text-opacity-75">{{ session('usuario')[0]->ID_USUARIO_CLINICA }}</p>
+    <!-- DADOS DA SESSAO DO USUARIO -->
+    <div classs="">
+        <p style="color:#ecf5f9" class="p-0 m-0 text-center">
+            {{ session('usuario')[0]->ID_USUARIO_CLINICA }}
+        </p>
+        <p class="p-0 m-0 text-center" style="color: white;">
+            {{ request()->ip() }}
+        </p>
     </div>
 
-    <ul class="list-group list-group-flush w-100 gap-1">
+    <ul class="list-group list-group-flush w-100 gap-1 mt-3">
         <!-- LINKS -->
 
         <!-- PÁGINA INICIAL - MENU AGENDA -->

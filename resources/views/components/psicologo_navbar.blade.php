@@ -173,7 +173,5 @@
                     <i class="fas fa-calendar-plus"></i> Incluir Agendamento
                 </a>
             </li>
-            
-            
     </div>
 </div>
