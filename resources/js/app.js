@@ -20,8 +20,6 @@ profileIcon.addEventListener('click', function(event) {
     const u = usuario[0]; // ou itere se quiser todos
     profileModal.innerHTML = `
         <p><strong>Usuário:</strong> ${u.id_usuario_clinica}</p>
-        <p><strong>Clínica:</strong> ${u.id_clinica}</p>
-        <p><strong>Status:</strong> ${u.sit_usuario}</p>
         <p><a href="/logout">Sair</a></p>
     `;
 

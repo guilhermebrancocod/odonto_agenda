@@ -158,11 +158,11 @@
                             </div>
                         </div>
 
-                        <div class="col-12 col-sm-6 col-md-3 d-flex gap-2">
-                            <button type="submit" class="btn btn-primary w-50">
+                        <div class="col-12 col-lg-auto d-flex gap-2">
+                            <button type="submit" class="btn btn-primary">
                                 <i class="bi bi-search"></i> Pesquisar
                             </button>
-                            <button type="button" class="btn btn-outline-secondary w-50" id="btnClearFilters">
+                            <button type="button" class="btn btn-outline-secondary" id="btnClearFilters">
                                 Limpar
                             </button>
                         </div>
