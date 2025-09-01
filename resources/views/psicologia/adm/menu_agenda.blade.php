@@ -132,7 +132,7 @@
     <div class="container ms-3 mw-100">
         <div class="row">
             <x-page-title>
-                    <p class="btn btn-success p-2 me-3" style="font-size: 15px;">
+                    <p onclick="window.location.href = '/psicologia/criar-agendamento'" class="btn btn-success p-2 me-3" style="font-size: 15px;" >
                         <span>Novo Agendamento</span>
                     </p>
             </x-page-title>

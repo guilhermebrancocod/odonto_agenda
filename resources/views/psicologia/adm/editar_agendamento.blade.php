@@ -26,6 +26,26 @@
             overflow-y: auto;
         }
     </style>
+
+    <style>
+        .shadow-dark {
+            box-shadow: 0 0.75rem 1.25rem rgba(0,0,0,0.4) !important;
+        }
+        /* Animação para alertas */
+        @keyframes slideDownFadeOut {
+            0%   { transform: translate(-50%, -100%); opacity: 0; }
+            10%  { transform: translate(-50%, 0); opacity: 1; }
+            90%  { transform: translate(-50%, 0); opacity: 1; }
+            100% { transform: translate(-50%, -100%); opacity: 0; }
+        }
+        .animate-alert {
+            animation: slideDownFadeOut 5s ease forwards;
+            z-index: 1050;
+        }
+        .required-field {
+            color: #dc3545; /* Cor de perigo do Bootstrap */
+        }
+    </style>
 </head>
 <body>
 
@@ -50,6 +70,12 @@
                                 <li>{{ $error }}</li>
                             @endforeach
                         </ul>
+                    </div>
+                @endif
+
+                @if (session('error'))
+                    <div class="alert alert-danger text-center shadow position-fixed top-0 start-50 translate-middle-x mt-3 animate-alert">
+                        {{ session('error') }}
                     </div>
                 @endif
 

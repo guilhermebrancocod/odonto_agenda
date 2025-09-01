@@ -28,6 +28,7 @@ document.addEventListener("DOMContentLoaded", function () {
     const savedState = localStorage.getItem(storageKey);
     if (savedState === 'collapsed') {
         navbar.classList.add('collapsed');
+        verificaCollapsed()
         
         // Se a página já carrega com a navbar recolhida,
         // o calendário precisa ser renderizado no tamanho correto.
@@ -42,6 +43,7 @@ document.addEventListener("DOMContentLoaded", function () {
     // 2. AO CLICAR NO BOTÃO: Alterna o estado, salva e atualiza o calendário
     btnToggle.addEventListener("click", function () {
         navbar.classList.toggle("collapsed");
+        verificaCollapsed()
 
         // Salva o novo estado no localStorage
         if (navbar.classList.contains("collapsed")) {
@@ -65,4 +67,40 @@ document.addEventListener("DOMContentLoaded", function () {
         const pageTitle = document.title; // pega o <title> do <head>
         document.getElementById('page-title').textContent = pageTitle;
     });
+</script>
+
+
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+    const navbar = document.getElementById("mainNavbar");
+    const logo = document.getElementById("logo-faesa");
+
+    // Pré-carregar as duas versões do logo
+    const logoExpandido = new Image();
+    logoExpandido.src = "{{ asset('img/faesa_logo_expandido.png') }}";
+
+    const logoRecolhido = new Image();
+    logoRecolhido.src = "{{ asset('img/faesa_logo_recolhido.png') }}";
+
+    function trocaLogo(src) {
+        // Fade out
+        logo.style.opacity = 0;
+
+        setTimeout(() => {
+            logo.src = src;
+            // Fade in
+            logo.style.opacity = 1;
+        }, 200);
+    }
+
+    window.verificaCollapsed = function () {
+        if (navbar.classList.contains("collapsed")) {
+            // Navbar está fechada -> usa logo recolhido
+            trocaLogo(logoRecolhido.src);
+        } else {
+            // Navbar aberta -> usa logo expandido
+            trocaLogo(logoExpandido.src);
+        }
+    };
+});
 </script>
