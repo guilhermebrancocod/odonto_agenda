@@ -111,7 +111,7 @@ class PacienteController extends Controller
     public function getPaciente(Request $request)
     {
         $filtros = $request->only([
-            'search',
+            'search', 'DT_NASC_PACIENTE', 'STATUS', 'SEXO_PACIENTE', 'FONE_PACIENTE'
         ]);
 
         $pacientes = $this->pacienteService->filtrarPacientes($filtros);

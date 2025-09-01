@@ -234,7 +234,123 @@
                 </div>
                 <div class="modal-body">
                     <form id="editPacienteForm">
-                        </form>
+
+                        <!-- INFORMAÇÕES PESSOAIS -->
+                        <h6>Informações Pessoais</h6>
+                        <hr>
+
+                        <div class="row g-3">
+
+                            <!-- NOME -->
+                            <div class="col-md-6 form-floating">
+                                <input type="text" class="form-control" id="editPacienteNome" name="nome" placeholder="Nome">
+                                <label for="editPacienteNome">Nome</label>
+                            </div>
+
+                            <!-- STATUS -->
+                            <div class="col-md-6 form-floating">
+                                <input type="text" class="form-control" id="editPacienteStatus" name="status" readonly>
+                                <label for="editPacienteStatus">Status</label>
+                            </div>
+
+                            <!-- CPF -->
+                            <div class="col-md-6 form-floating">
+                                <input type="text" class="form-control" id="editPacienteCPF" name="cpf" placeholder="CPF">
+                                <label for="editPacienteCPF">CPF</label>
+                            </div>
+
+                            <!-- DATA DE NASCIMENTO -->
+                            <div class="col-md-6 form-floating">
+                                <input type="date" class="form-control" id="editPacienteDTNASC" name="dt_nasc" placeholder="Data de Nascimento">
+                                <label for="editPacienteDTNASC">Data de Nascimento</label>
+                            </div>
+
+                            <!-- SEXO -->
+                            <div class="col-md-6 form-floating">
+                                <select name="sexo" id="editPacienteSEXO" class="form-select" aria-label="Sexo">
+                                    <option value="" selected>Selecione</option>
+                                    <option value="M">Masculino</option>
+                                    <option value="F">Feminino</option>
+                                    <option value="O">Outro</option>
+                                </select>
+                                <label for="editPacienteSEXO">Sexo</label>
+                            </div>
+
+                        </div>
+
+                        <!-- ENDEREÇO -->
+                        <h6 class="mt-4">Endereço</h6>
+                        <hr>
+
+                        <div class="row g-3">
+
+                            <!-- CEP -->
+                            <div class="col-md-4 form-floating">
+                                <input type="text" class="form-control" id="editPacienteCEP" name="cep" placeholder="CEP">
+                                <label for="editPacienteCEP">CEP</label>
+                            </div>
+
+                            <!-- RUA - LOGRADOURO -->
+                            <div class="col-md-8 form-floating">
+                                <input type="text" class="form-control" id="editPacienteENDERECO" name="endereco" placeholder="Rua">
+                                <label for="editPacienteENDERECO">Rua</label>
+                            </div>
+
+                            <!-- NÚMERO -->
+                            <div class="col-md-4 form-floating">
+                                <input type="text" class="form-control" id="editPacienteNUM" name="num" placeholder="Número">
+                                <label for="editPacienteNUM">Número</label>
+                            </div>
+
+                            <!-- COMPLEMENTO -->
+                            <div class="col-md-8 form-floating">
+                                <input type="text" class="form-control" id="editPacienteCOMPLEMENTO" name="complemento" placeholder="Complemento">
+                                <label for="editPacienteCOMPLEMENTO">Complemento</label>
+                            </div>
+
+                            <!-- BAIRRO -->
+                            <div class="col-md-6 form-floating">
+                                <input type="text" class="form-control" id="editPacienteBAIRRO" name="bairro" placeholder="Bairro">
+                                <label for="editPacienteBAIRRO">Bairro</label>
+                            </div>
+
+                            <!-- MUNICÍPIO -->
+                            <div class="col-md-6 form-floating">
+                                <input type="text" id="editPacienteMUNICIPIO" name="municipio" class="form-control" placeholder="Município">
+                                <label for="editPacienteMUNICIPIO">Município</label>
+                            </div>
+
+                            <!-- UNIDADE FEDERATIVA - ESTADO -->
+                            <div class="col-md-2 form-floating">
+                                <input type="text" class="form-control" id="editPacienteUF" name="uf" placeholder="UF">
+                                <label for="editPacienteUF">UF</label>
+                            </div>
+                        </div>
+
+                        <!-- CONTATO -->
+                        <h6 class="mt-4">Contato</h6>
+                        <hr>
+
+                        <div class="row g-3">
+
+                            <!-- CELULAR -->
+                            <div class="col-md-6 form-floating">
+                                <input type="text" id="editPacienteCELULAR" name="celular" class="form-control" placeholder="Celular" />
+                                <label for="editPacienteCELULAR">Celular</label>
+                            </div>
+
+                            <!-- EMAIL -->
+                            <div class="col-md-6 form-floating">
+                                <input type="email" id="editPacienteEMAIL" name="email" class="form-control" placeholder="Email" />
+                                <label for="editPacienteEMAIL">Email</label>
+                            </div>
+
+                        </div>
+
+                        <div class="d-flex justify-content-end mt-4">
+                            <button type="submit" class="btn btn-primary">Salvar Alterações</button>
+                        </div>
+                    </form>
                 </div>
             </div>
         </div>
