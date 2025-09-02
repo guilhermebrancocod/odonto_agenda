@@ -12,6 +12,9 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" crossorigin="anonymous">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
 
+    <!-- TOM SELECT -->
+    <link href="https://cdn.jsdelivr.net/npm/tom-select@2.3.1/dist/css/tom-select.bootstrap5.min.css" rel="stylesheet">
+
     <meta name="csrf-token" content="{{ csrf_token() }}">
 
     <style>
@@ -39,6 +42,8 @@
 </head>
 
 <body class="bg-body-secondary">
+
+    <!-- NAVBAR COMPONENT -->
     @include('components.navbar')
 
     @if($errors->any())
@@ -62,7 +67,7 @@
 
     <div class="container ms-3 mw-100">
         <div class="row">
-             <x-page-title>
+            <x-page-title>
             </x-page-title>
             <div class="col-12 shadow-lg shadow-dark p-4 bg-body-tertiary rounded">
                 
@@ -71,20 +76,28 @@
                     <input type="hidden" name="ID_CLINICA" value="1">
                     
                     <div class="row g-3">
+
+                        <!-- NOME DO SERVIÇO -->
                         <div class="col-md-6">
                             <label for="nome-servico" class="form-label">Nome do Serviço</label>
                             <input type="text" id="nome-servico" name="SERVICO_CLINICA_DESC" class="form-control" value="{{ old('SERVICO_CLINICA_DESC') }}" required>
                         </div>
+                        
+                        <!-- CÓDIGO INTERNO DO SERVIÇO -->
                         <div class="col-md-6">
                             <label for="cod-interno-servico" class="form-label">Código Interno</label>
                             <input type="number" id="cod-interno-servico" name="COD_INTERNO_SERVICO_CLINICA" class="form-control" value="{{ old('COD_INTERNO_SERVICO_CLINICA') }}">
                         </div>
+
+                        <!-- DISCIPLINA DO SERVIÇO -->
                         <div class="col-md-6">
                             <label for="disciplina-servico" class="form-label">Disciplina</label>
                             <select name="DISCIPLINA" id="disciplina-servico" class="form-select">
                                 <option value="" selected>Carregando...</option>
                             </select>
                         </div>
+
+                        <!-- VALOR DO SERVIÇO -->
                         <div class="col-md-3">
                             <label for="valor-servico" class="form-label">Valor do Serviço</label>
                             <div class="input-group">
@@ -92,14 +105,19 @@
                                 <input type="text" id="valor-servico" name="VALOR_SERVICO" class="form-control" placeholder="0,00" value="{{ old('VALOR_SERVICO') }}">
                             </div>
                         </div>
+
+                        <!-- RECORRÊNCIA DO SERVIÇO -->
                         <div class="col-md-3">
                             <label for="tempo_recorrencia_meses" class="form-label">Recorrência (meses)</label>
                             <input type="number" min="0" step="1" name="TEMPO_RECORRENCIA_MESES" id="tempo_recorrencia_meses" class="form-control" placeholder="Ex: 6" value="{{ old('TEMPO_RECORRENCIA_MESES') }}">
                         </div>
+
+                        <!-- OBSERVAÇÕES DO SERVIÇO -->
                         <div class="col-12">
                             <label for="observacao-servico" class="form-label">Observações</label>
                             <textarea id="observacao-servico" name="OBSERVACAO" class="form-control">{{ old('OBSERVACAO') }}</textarea>
                         </div>
+
                         <div class="col-12 text-end">
                             <button class="btn btn-primary" type="submit"><i class="bi bi-check-circle me-2"></i>Salvar Serviço</button>
                         </div>
@@ -130,6 +148,7 @@
                     </table>
                 </div>
             </div>
+
         </div>
     </div>
     
@@ -180,10 +199,13 @@
         </div>
     </div>
 
-
+    <!-- TOM SELECT -->
+    <script src="https://cdn.jsdelivr.net/npm/tom-select@2.3.1/dist/js/tom-select.complete.min.js"></script>
+    
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/mdb-ui-kit/7.1.0/mdb.min.js"></script>
 
+    <!-- FUNÇÕES JAVASCRIPT -->
     <script>
         // === FUNÇÕES ===
         function showModalAlert(message, type = 'danger') {
@@ -212,8 +234,14 @@
             const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
             let disciplinasCache = null;
 
+            // === INSTANCIA DO TOM SELECT ===
+            let tomSelectInstances = {};
+
             // === FUNÇÕES AUXILIARES ===
             async function carregarDisciplinas(selectElement, valorSelecionado = null) {
+                // Pega o ID do elemento para usar como chave da instância
+                const selectId = selectElement.id;
+
                 if (!disciplinasCache) {
                     try {
                         const response = await fetch('/psicologia/disciplinas-psicologia');
@@ -225,13 +253,42 @@
                         return;
                     }
                 }
-                selectElement.innerHTML = '<option value="">Selecione...</option>';
-                disciplinasCache.forEach(d => {
-                    const option = new Option(`${d.DISCIPLINA} - ${d.NOME}`, d.DISCIPLINA);
-                    selectElement.add(option);
-                });
+                
+                // Verifica se já existe uma instância do Tom Select para este elemento
+                let tomSelect = tomSelectInstances[selectId];
+
+                if (tomSelect) {
+                    // Se já existe, limpa as opções e o valor atual
+                    tomSelect.clear();
+                    tomSelect.clearOptions();
+                }
+
+                // Adiciona as opções formatadas para o Tom Select
+                const options = disciplinasCache.map(d => ({
+                    value: d.DISCIPLINA,
+                    text: `${d.DISCIPLINA} - ${d.NOME}`
+                }));
+                
+                if (!tomSelect) {
+                    // Se não existe, cria uma nova instância do Tom Select
+                    tomSelect = new TomSelect(selectElement, {
+                        options: options,
+                        placeholder: 'Selecione ou pesquise...',
+                        create: false,
+                        sortField: {
+                            field: "text",
+                            direction: "asc"
+                        }
+                    });
+                    tomSelectInstances[selectId] = tomSelect;
+                } else {
+                    // Se a instância já existia, apenas adiciona as novas opções
+                    tomSelect.addOptions(options);
+                }
+                
+                // Define o valor selecionado, se houver
                 if (valorSelecionado) {
-                    selectElement.value = valorSelecionado;
+                    tomSelect.setValue(valorSelecionado);
                 }
             }
 
@@ -248,7 +305,8 @@
                         formEditarServico.querySelector('#edit-tempo-recorrencia-meses').value = servico.TEMPO_RECORRENCIA_MESES || '';
                         formEditarServico.querySelector('#edit-observacao-servico').value = servico.OBSERVACAO || '';
 
-                        const selectDisc = formEditarServico.querySelector('#edit-servico-disc');
+                        // O ID aqui precisa ser o do select DENTRO do modal
+                        const selectDisc = formEditarServico.querySelector('#edit-servico-disc'); 
                         await carregarDisciplinas(selectDisc, servico.DISCIPLINA);
                         
                         editarServicoModal.show();
@@ -258,20 +316,23 @@
 
             function carregarServicos(search = '') {
                 servicosTbody.innerHTML = `<tr><td colspan="4" class="text-center">Carregando...</td></tr>`;
+
                 fetch(`/psicologia/servicos?search=${encodeURIComponent(search)}`)
                     .then(res => res.json())
                     .then(servicos => {
                         servicosTbody.innerHTML = '';
+
                         if (servicos.length === 0) {
                             servicosTbody.innerHTML = `<tr><td colspan="4" class="text-center">Nenhum serviço encontrado.</td></tr>`;
                             return;
                         }
+
                         servicos.forEach(s => {
                             const tr = document.createElement('tr');
                             tr.innerHTML = `
                                 <td>${s.SERVICO_CLINICA_DESC}</td>
                                 <td>${s.COD_INTERNO_SERVICO_CLINICA || '-'}</td>
-                                <td>${formatarValor(s.VALOR_SERVICO)}</td>
+                                <td>${formatarValor(s.VALOR_SERVICO) || '-'}</td>
                                 <td>
                                     <button class="btn btn-sm btn-warning btn-editar" title="Editar" data-servico='${JSON.stringify(s)}'>
                                         <i class="bi bi-pencil"></i> <span class="d-none d-sm-inline">Editar</span>
@@ -296,7 +357,6 @@
                 const formData = new FormData(formEditarServico);
                 const data = Object.fromEntries(formData.entries());
                 
-                // Formata o valor para o padrão do backend
                 if (data.VALOR_SERVICO) {
                     data.VALOR_SERVICO = data.VALOR_SERVICO.replace(',', '.');
                 }
@@ -310,7 +370,7 @@
                 .then(({ ok, body }) => {
                     if (!ok) throw new Error(body.message || 'Erro ao salvar.');
                     editarServicoModal.hide();
-                    window.location.reload(); // Recarrega a página para exibir a mensagem de sucesso do controller
+                    window.location.reload();
                 })
                 .catch(err => showModalAlert(err.message));
             });
@@ -327,7 +387,7 @@
                 .then(({ ok, body }) => {
                     if (!ok) throw new Error(body.message || 'Erro ao excluir.');
                     editarServicoModal.hide();
-                    window.location.reload(); // Recarrega a página para exibir a mensagem de sucesso do controller
+                    window.location.reload();
                 })
                 .catch(err => showModalAlert(err.message));
             });
@@ -336,8 +396,24 @@
             carregarServicos();
             carregarDisciplinas(document.getElementById('disciplina-servico'));
         });
+
+        function showModalAlert(message, type = 'danger') {const container = document.getElementById('modal-alert-container');
+            const alert = document.createElement('div');
+            alert.className = `alert alert-${type} alert-dismissible fade show m-3`;
+            alert.innerHTML = `${message} <button type="button" class="btn-close" data-bs-dismiss="alert"></button>`;
+            container.innerHTML = '';
+            container.appendChild(alert);
+            setTimeout(() => alert.classList.remove('show'), 4000);
+        }
+
+        function formatarValor(valor) {
+            const valorNumerico = parseFloat(valor || 0);
+            return valorNumerico.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+        }
+
     </script>
     
+    <!-- FUNÇÃO DE FORMATAÇÃO DE INPUT -->
     <script>
         function formatarInputValor(inputElement) {
             inputElement.addEventListener('input', function (e) {
@@ -350,5 +426,6 @@
         formatarInputValor(document.getElementById('valor-servico'));
         formatarInputValor(document.getElementById('edit-valor-servico'));
     </script>
+
 </body>
 </html>

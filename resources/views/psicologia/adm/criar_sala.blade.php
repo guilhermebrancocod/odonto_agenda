@@ -15,6 +15,9 @@
     
     <meta name="csrf-token" content="{{ csrf_token() }}">
 
+    <!-- TOM SELECT -->
+    <link href="https://cdn.jsdelivr.net/npm/tom-select@2.3.1/dist/css/tom-select.bootstrap5.min.css" rel="stylesheet">
+
     <style>
         body {
             font-family: "Montserrat", sans-serif;
@@ -40,6 +43,8 @@
 </head>
 
 <body class="bg-body-secondary">
+
+    <!-- NAVBAR COMPONENT -->
     @include('components.navbar')
 
     @if($errors->any())
@@ -153,6 +158,8 @@
         </div>
     </div>
 
+    <!-- TOM SELECT -->
+    <script src="https://cdn.jsdelivr.net/npm/tom-select@2.3.1/dist/js/tom-select.complete.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/mdb-ui-kit/7.1.0/mdb.min.js"></script>
 
@@ -178,8 +185,14 @@
             const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
             let disciplinasCache = null;
 
+            // === INSTANCIA DO TOM SELECT ===
+            let tomSelectInstances = {};
+
             // === FUNÇÕES AUXILIARES ===
             async function carregarDisciplinas(selectElement, valorSelecionado = null) {
+                // Pega o ID do elemento para usar como chave da instância
+                const selectId = selectElement.id;
+
                 if (!disciplinasCache) {
                     try {
                         const response = await fetch('/psicologia/disciplinas-psicologia');
@@ -191,13 +204,42 @@
                         return;
                     }
                 }
-                selectElement.innerHTML = '<option value="">Selecione...</option>';
-                disciplinasCache.forEach(d => {
-                    const option = new Option(`${d.DISCIPLINA} - ${d.NOME}`, d.DISCIPLINA);
-                    selectElement.add(option);
-                });
+                
+                // Verifica se já existe uma instância do Tom Select para este elemento
+                let tomSelect = tomSelectInstances[selectId];
+
+                if (tomSelect) {
+                    // Se já existe, limpa as opções e o valor atual
+                    tomSelect.clear();
+                    tomSelect.clearOptions();
+                }
+
+                // Adiciona as opções formatadas para o Tom Select
+                const options = disciplinasCache.map(d => ({
+                    value: d.DISCIPLINA,
+                    text: `${d.DISCIPLINA} - ${d.NOME}`
+                }));
+                
+                if (!tomSelect) {
+                    // Se não existe, cria uma nova instância do Tom Select
+                    tomSelect = new TomSelect(selectElement, {
+                        options: options,
+                        placeholder: 'Selecione ou pesquise...',
+                        create: false,
+                        sortField: {
+                            field: "text",
+                            direction: "asc"
+                        }
+                    });
+                    tomSelectInstances[selectId] = tomSelect;
+                } else {
+                    // Se a instância já existia, apenas adiciona as novas opções
+                    tomSelect.addOptions(options);
+                }
+                
+                // Define o valor selecionado, se houver
                 if (valorSelecionado) {
-                    selectElement.value = valorSelecionado;
+                    tomSelect.setValue(valorSelecionado);
                 }
             }
 
@@ -218,39 +260,63 @@
                 });
             }
 
-            function carregarSalas(search = '') {
+           async function carregarSalas(search = '') {
                 salasTbody.innerHTML = `<tr><td colspan="4" class="text-center">Carregando...</td></tr>`;
-                fetch(`/psicologia/salas/listar?search=${encodeURIComponent(search)}`)
-                    .then(res => res.json())
-                    .then(salas => {
-                        salasTbody.innerHTML = '';
-                        if (salas.length === 0) {
-                            salasTbody.innerHTML = `<tr><td colspan="4" class="text-center">Nenhuma sala encontrada.</td></tr>`;
-                            return;
-                        }
-                        salas.forEach(s => {
-                            const statusBadge = s.ATIVO === 'S' 
-                                ? `<span class="badge bg-success">Ativo</span>` 
-                                : `<span class="badge bg-danger">Inativo</span>`;
 
-                            const tr = document.createElement('tr');
-                            tr.innerHTML = `
-                                <td>${s.DESCRICAO}</td>
-                                <td>${s.DISCIPLINA || '-'}</td>
-                                <td>${statusBadge}</td>
-                                <td>
-                                    <button class="btn btn-sm btn-warning btn-editar" title="Editar" data-sala='${JSON.stringify(s)}'>
-                                        <i class="bi bi-pencil"></i> <span class="d-none d-sm-inline">Editar</span>
-                                    </button>
-                                </td>
-                            `;
-                            salasTbody.appendChild(tr);
-                        });
-                        ativarEventosTabela();
-                    })
-                    .catch(() => {
-                        salasTbody.innerHTML = `<tr><td colspan="4" class="text-center text-danger">Erro ao carregar salas.</td></tr>`;
+                try {
+                    const response = await fetch(`/psicologia/salas/listar?search=${encodeURIComponent(search)}`);
+                    const salas = await response.json();
+
+                    if (salas.length === 0) {
+                        salasTbody.innerHTML = `<tr><td colspan="4" class="text-center">Nenhuma sala encontrada.</td></tr>`;
+                        return;
+                    }
+
+                    const promises = salas.map(sala => {
+                        if (!sala.DISCIPLINA) {
+                            return Promise.resolve({ NOME: '-' });
+                        }
+                        // AQUI ESTÁ A MUDANÇA!
+                        // Chamamos a nova rota que você criou, passando o código da disciplina da sala
+                        return fetch(`/psicologia/disciplina/${sala.DISCIPLINA}`) // ✨ URL ajustada para a nova rota
+                            .then(res => {
+                                if (!res.ok) { // Tratamento de erro caso a disciplina não seja encontrada (erro 404)
+                                    return { NOME: 'Inválida' };
+                                }
+                                return res.json();
+                            });
                     });
+
+                    const disciplinas = await Promise.all(promises);
+
+                    salasTbody.innerHTML = '';
+                    salas.forEach((s, index) => {
+                        const nomeDisciplina = disciplinas[index].NOME;
+
+                        const statusBadge = s.ATIVO === 'S' 
+                            ? `<span class="badge bg-success">Ativo</span>` 
+                            : `<span class="badge bg-danger">Inativo</span>`;
+
+                        const tr = document.createElement('tr');
+                        tr.innerHTML = `
+                            <td>${s.DESCRICAO}</td>
+                            <td>${s.DISCIPLINA || ''} - ${nomeDisciplina}</td>
+                            <td>${statusBadge}</td>
+                            <td>
+                                <button class="btn btn-sm btn-warning btn-editar" title="Editar" data-sala='${JSON.stringify(s)}'>
+                                    <i class="bi bi-pencil"></i> <span class="d-none d-sm-inline">Editar</span>
+                                </button>
+                            </td>
+                        `;
+                        salasTbody.appendChild(tr);
+                    });
+
+                    ativarEventosTabela();
+
+                } catch (error) {
+                    console.error("Erro ao carregar salas ou disciplinas:", error);
+                    salasTbody.innerHTML = `<tr><td colspan="4" class="text-center text-danger">Erro ao carregar salas.</td></tr>`;
+                }
             }
 
             // === EVENTOS ===
@@ -278,19 +344,42 @@
             
             document.getElementById('btn-deletar-sala').addEventListener('click', () => {
                 if (!confirm('Tem certeza que deseja excluir esta sala? Esta ação não pode ser desfeita.')) return;
+
                 const id = formEditarSala.querySelector('#edit-sala-id').value;
                 
                 fetch(`/psicologia/salas/${id}`, {
                     method: 'DELETE',
                     headers: { 'X-CSRF-TOKEN': csrfToken }
                 })
-                .then(res => res.json().then(body => ({ ok: res.ok, body })))
-                .then(({ ok, body }) => {
-                    if (!ok) throw new Error(body.message || 'Erro ao excluir.');
-                    editarSalaModal.hide();
-                    window.location.reload();
+                .then(res => {
+                    // Este bloco agora pode lidar com JSON em qualquer resposta, seja erro ou sucesso
+                    return res.json().then(body => ({ ok: res.ok, status: res.status, body }));
                 })
-                .catch(err => showModalAlert(err.message));
+                .then(({ ok, body }) => {
+                    // Se a resposta NÃO for OK (status 4xx, 5xx), o erro será lançado
+                    if (!ok) {
+                        // O `body.message` agora contém a mensagem de erro correta do seu controller
+                        throw new Error(body.message || 'Ocorreu um erro ao processar a solicitação.');
+                    }
+
+                    // Se a resposta for OK (sucesso)
+                    editarSalaModal.hide();
+
+                    // ✨ A MÁGICA ACONTECE AQUI:
+                    // Em vez de recarregar, mostramos a mensagem de sucesso que veio do backend.
+                    // Supondo que sua função showModalAlert possa ter um tipo 'success'.
+                    showModalAlert(body.message, 'success'); 
+
+                    // Depois de mostrar a mensagem, você pode recarregar a página após um tempo
+                    // para o usuário ver a mensagem, ou remover a linha da tabela dinamicamente.
+                    setTimeout(() => {
+                        window.location.reload();
+                    }, 2000); // Recarrega após 2 segundos
+                })
+                .catch(err => {
+                    // Este .catch agora vai pegar todos os erros e exibir a mensagem no modal
+                    showModalAlert(err.message, 'danger'); // Passando o tipo 'danger'
+                });
             });
 
             // === INICIALIZAÇÃO ===
@@ -298,5 +387,6 @@
             carregarDisciplinas(document.getElementById('disciplina-sala'));
         });
     </script>
+
 </body>
 </html>

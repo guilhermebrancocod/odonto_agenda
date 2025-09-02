@@ -4,8 +4,10 @@ namespace app\Http\Controllers\Psicologia;
 
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
+use App\Models\FaesaClinicaAgendamento;
 use App\Models\FaesaClinicaSala;
 use Illuminate\Validation\Rule;
+use Illuminate\Http\JsonResponse;
 
 class SalaController extends Controller
 {
@@ -74,9 +76,25 @@ class SalaController extends Controller
         return response()->json(['message' => 'Sala atualizada com sucesso!']);
     }
 
-    public function deleteSala($id)
+    public function deleteSala($id): JsonResponse
     {
+        $sala = FaesaClinicaSala::find($id);
+        if(!$sala) {
+            return response()->json(['message' => 'Sala não foi encontrada'], 404);
+        } else if ($sala->ATIVO === 'S') {
+            return response()->json(['message' => 'Sala não pôde ser excluída pois ainda está ativa. Desative-a antes de prosseguir com exclusão.'], 422);
+        }
 
+        $agendamentos = FaesaClinicaAgendamento::where('ID_SALA', $id)->exists();
+
+        if($agendamentos) {
+            return response()->json(['message' => 'Sala possui agendamento(s) vinculados e por isso não pode ser excluída'], 422);
+        } else {
+            // Nao exclui diretamente, mas muda situacao para excluido, caso seja necessario reverter
+            $sala->SIT_SALA = 'Excluido';
+            $sala->save();
+            return response()->json(['message' => 'Sala excluída com sucesso.'], 200);
+        }
     }
 
     // LISTAGEM DE SALAS

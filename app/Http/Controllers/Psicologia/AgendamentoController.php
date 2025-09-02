@@ -156,6 +156,8 @@ class AgendamentoController extends Controller
             ]);
         }
 
+        dd($request->all());
+
         $validated = $request->validate([
             'paciente_id' => 'required|integer',
             'id_servico' => 'required|integer',

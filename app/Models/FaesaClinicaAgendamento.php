@@ -31,7 +31,8 @@ class FaesaClinicaAgendamento extends Model
         'CREATED_AT',
         'UPDATED_AT',
         'STATUS_PAG',
-        'ID_PSICOLOGO'
+        'ID_PSICOLOGO',
+        'ID_SALA',
     ];
 
     protected $casts = [
@@ -77,6 +78,11 @@ class FaesaClinicaAgendamento extends Model
     public function servico(): BelongsTo
     {
         return $this->belongsTo(FaesaClinicaServico::class, 'ID_SERVICO', 'ID_SERVICO_CLINICA');
+    }
+
+    public function sala(): BelongsTo
+    {
+        return $this->belongsTo(FaesaClinicaSala::class, 'ID_SALA', 'ID_SALA_CLINICA');
     }
 
     /**

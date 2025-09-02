@@ -269,7 +269,7 @@
                             const data = ag.DT_AGEND ? new Date(ag.DT_AGEND).toLocaleDateString('pt-BR', {timeZone: 'UTC'}) : '-';
                             const horaIni = ag.HR_AGEND_INI ? ag.HR_AGEND_INI.substring(0, 5) : '-';
                             const horaFim = ag.HR_AGEND_FIN ? ag.HR_AGEND_FIN.substring(0, 5) : '-';
-                            const local = ag.sala_clinica ? ag.sala_clinica.DESCRICAO : '-';
+                            const local = ag.LOCAL ?? '-';
                             const status = ag.STATUS_AGEND || '-';
                             const valor = ag.VALOR_AGEND ? parseFloat(ag.VALOR_AGEND).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' }) : '-';
                             const checkPagamento = ag.STATUS_PAG === 'S' ? '<span class="badge bg-success">Sim</span>' : '<span class="badge bg-danger">Não</span>';

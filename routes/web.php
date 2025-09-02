@@ -303,6 +303,7 @@ Route::middleware([AuthMiddleware::class, CheckClinicaMiddleware::class])
     Route::get('/salas/listar', [SalaController::class, 'listSalas'])->name('listarSalas-Psicologia');
     Route::put('/salas/{id}', [SalaController::class, 'updateSala'])->name('atualizarSala-Psicologia');
     Route::get('/pesquisar-local', [SalaController::class, 'getSala'])->name('pesquisarLocal-Psicologia');
+    Route::delete('salas/{id}', [SalaController::class, 'deleteSala'])->name('deleteSala-Psicologia');
 
     // HORÁRIOS
     Route::get('/criar-horario', function () {
@@ -315,6 +316,7 @@ Route::middleware([AuthMiddleware::class, CheckClinicaMiddleware::class])
 
     // BUSCA DE DISCIPLINAS PARA VINCULAR AO SERVIÇO
     Route::get('/disciplinas-psicologia', [DisciplinaController::class, 'getDisciplina']);
+    Route::get('/disciplina/{codigo}', [DisciplinaController::class, 'getDisciplinaByCodigo'])->name('getDisciplinaByCodigo');
 
     Route::get('/listar-psicologos', [PsicologoController::class, 'listAlunos']);
 });
