@@ -756,18 +756,20 @@
                 const inputEdit = document.querySelector("#editPacienteDTNASC");
                 if (inputEdit._flatpickr) inputEdit._flatpickr.destroy();
                 flatpickr(inputEdit, {
-                    altFormat: "d-m-Y",
-                    // allowInput: true,
                     dateFormat: "Y-m-d",
+                    altInput: true,
+                    altFormat: "d/m/Y",
+                    allowInput: true,
                     maxDate: "today",
                     locale: "pt",
                 });
                 const inputSearch = document.querySelector("#DT_NASC_PACIENTE-input");
                 if (inputSearch._flatpickr) inputSearch._flatpickr.destroy();
                 flatpickr(inputSearch, {
-                    altFormat: "d-m-Y",
-                    // allowInput: true,
                     dateFormat: "Y-m-d",
+                    altInput: true,
+                    altFormat: "d/m/Y",
+                    allowInput: true,
                     maxDate: "today",
                     locale: "pt",
                 });
