@@ -39,7 +39,7 @@ class PacienteController extends Controller
             'STATUS' => 'required|string|max:50|in:Em espera',
             'NOME_RESPONSAVEL' => 'nullable|string|max:255',
             'CPF_RESPONSAVEL' => 'nullable|string|max:14|regex:/^\d{3}\.?\d{3}\.?\d{3}-?\d{2}$/',
-            'COD_SUS' => 'nullable|string|max:15',
+            'COD_SUS' => 'nullable|string',
         ], [
             'NOME_COMPL_PACIENTE.required' => 'O nome completo do paciente é obrigatório.',
             'NOME_COMPL_PACIENTE.max' => 'O nome completo não pode passar de 255 caracteres.',
@@ -84,8 +84,6 @@ class PacienteController extends Controller
             'NOME_RESPONSAVEL.max' => 'O nome do responsável não pode ter mais que 255 caracteres.',
 
             'CPF_RESPONSAVEL.regex' => 'O CPF do responsável não está em um formato válido.',
-
-            'COD_SUS.max' => 'O código SUS não pode ter mais que 15 caracteres.',
         ]);
 
         $validatedData['CPF_PACIENTE'] = str_replace(['-', '.'], '', $validatedData['CPF_PACIENTE']);

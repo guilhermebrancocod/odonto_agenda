@@ -83,6 +83,7 @@ class AgendamentoController extends Controller
         return response()->json($events);
     }
 
+    // RETORNA AGENDAMENTOS PARA O CALENDÁRIO DO PSICÓLOGO EM ESPECÍFICO
     public function getAgendamentosForCalendarPsicologo()
     {        
         $psicologo = session('psicologo');
@@ -156,8 +157,6 @@ class AgendamentoController extends Controller
             ]);
         }
 
-        dd($request->all());
-
         $validated = $request->validate([
             'paciente_id' => 'required|integer',
             'id_servico' => 'required|integer',
@@ -204,7 +203,7 @@ class AgendamentoController extends Controller
                 ->with('error', 'Agendamento não foi criado devido a um feriado');
         }
 
-        // Tratamento de recorrência customizada
+        // TRATAMENTO DE RECORRÊNCIA CUSTOMIZADA
         if ($request->input('tem_recorrencia') === "1") {
             $recorrencia = $request->input('recorrencia');
             $diasSemana = $request->input('dias_semana', []);
@@ -222,7 +221,7 @@ class AgendamentoController extends Controller
             if (empty($diasSemana)) {
                 for ($data = $dataInicio->copy(); $data->lte($dataFim); $data->addWeek()) {
                     $dataFormatada = $data->format('Y-m-d');
-                    if ($this->existeConflitoAgendamento($idClinica, $request->local_agend ?? null, $dataFormatada, $request->hr_ini, $request->hr_fim, $request->paciente_id)) {
+                    if ($this->existeConflitoAgendamento($idClinica, $request->id_sala_clinica ?? null, $dataFormatada, $request->hr_ini, $request->hr_fim, $request->paciente_id)) {
                         $diasComConflito[] = $dataFormatada;
                         continue;
                     }
@@ -241,8 +240,8 @@ class AgendamentoController extends Controller
                         'RECORRENCIA' => $recorrencia,
                         'VALOR_AGEND' => $valorAgend,
                         'OBSERVACOES' => $request->observacoes,
-                        'ID_SALA_CLINICA' => $request->id_sala_clinica ?? null,
                         'LOCAL' => $request->local_agend ?? null,
+                        'ID_SALA' => $request->id_sala_clinica ?? null,
                         'ID_PSICOLOGO' => $request->id_psicologo ?? null,
                     ]);
                 }
@@ -250,7 +249,7 @@ class AgendamentoController extends Controller
                 for ($data = $dataInicio->copy(); $data->lte($dataFim); $data->addDay()) {
                     if (in_array($data->dayOfWeek, $diasSemana)) {
                         $dataFormatada = $data->format('Y-m-d');
-                        if ($this->existeConflitoAgendamento($idClinica, $request->local_agend ?? null, $dataFormatada, $request->hr_ini, $request->hr_fim, $request->paciente_id)) {
+                        if ($this->existeConflitoAgendamento($idClinica, $request->id_sala_clinica ?? null, $dataFormatada, $request->hr_ini, $request->hr_fim, $request->paciente_id)) {
                             $diasComConflito[] = $dataFormatada;
                             continue;
                         }
@@ -269,8 +268,8 @@ class AgendamentoController extends Controller
                             'RECORRENCIA' => $recorrencia,
                             'VALOR_AGEND' => $valorAgend,
                             'OBSERVACOES' => $request->observacoes,
-                            'ID_SALA_CLINICA' => $request->id_sala_clinica ?? null,
                             'LOCAL' => $request->local_agend ?? null,
+                            'ID_SALA' => $request->id_sala_clinica ?? null,
                             'ID_PSICOLOGO' => $request->id_psicologo ?? null,
                         ]);
                     }
@@ -292,7 +291,7 @@ class AgendamentoController extends Controller
                 ->with('success', 'Agendamentos recorrentes criados conforme os dias e duração definidos!');
         }
 
-        // Para serviços como triagem, plantão, etc.
+        // PARA SERVIÇOS COMO TRIAGEM, PLANTAO E ETC
         $dataInicio = Carbon::parse($request->dia_agend);
         if ($servico && in_array(strtolower($servico->SERVICO_CLINICA_DESC), ['triagem', 'plantão'])) {
             $dataFim = $dataInicio->copy()->addWeeks(2);
@@ -310,7 +309,7 @@ class AgendamentoController extends Controller
 
             for ($data = $dataInicio->copy(); $data->lte($dataFim); $data->addWeek()) {
                 $dataFormatada = $data->format('Y-m-d');
-                if ($this->existeConflitoAgendamento($idClinica, $request->local_agend, $dataFormatada, $request->hr_ini, $request->hr_fim, $request->paciente_id)) {
+                if ($this->existeConflitoAgendamento($idClinica, $request->id_sala_clinica, $dataFormatada, $request->hr_ini, $request->hr_fim, $request->paciente_id)) {
                     $diasComConflito[] = $dataFormatada;
                     continue;
                 }
@@ -353,8 +352,8 @@ class AgendamentoController extends Controller
                 ->with('success', 'Todos os agendamentos foram criados com sucesso.');
         }
 
-        // Agendamento simples
-        if ($this->existeConflitoAgendamento($idClinica, $request->local_agend, $request->dia_agend, $request->hr_ini, $request->hr_fim, $request->paciente_id)) {
+        // AGENDAMENTO SIMPLES
+        if ($this->existeConflitoAgendamento($idClinica, $request->id_sala_clinica, $request->dia_agend, $request->hr_ini, $request->hr_fim, $request->paciente_id)) {
             return redirect()->back()
                 ->withInput()
                 ->withErrors(['conflito' => 'Já existe um agendamento neste horário para o paciente ou no local selecionado.']);
@@ -371,12 +370,12 @@ class AgendamentoController extends Controller
             'RECORRENCIA' => null,
             'VALOR_AGEND' => $valorAgend,
             'OBSERVACOES' => $request->observacoes,
-            'ID_SALA_CLINICA' => $request->id_sala_clinica ?? null,
+            'ID_SALA' => $request->id_sala_clinica ?? null,
             'LOCAL' => $request->local_agend ?? null,
             'ID_PSICOLOGO' => $request->id_psicologo ?? null,
         ];
 
-        if (!$this->salaEstaAtiva($request->local_agend)) {
+        if (!$this->salaEstaAtiva($request->id_sala_clinica)) {
             return redirect()->back()
                 ->withInput()
                 ->withErrors(['sala_indisponivel' => 'Sala não está ativa.']);
@@ -443,7 +442,7 @@ class AgendamentoController extends Controller
         }
 
         // AGENDAMENTO SIMPLES
-        if ($this->existeConflitoAgendamento($idClinica, $request->local_agend, $request->dia_agend, $request->hr_ini, $request->hr_fim, $request->paciente_id, idPsicologo: $request->id_psicologo)) {
+        if ($this->existeConflitoAgendamento($idClinica, $request->id_sala_clinica, $request->dia_agend, $request->hr_ini, $request->hr_fim, $request->paciente_id, idPsicologo: $request->id_psicologo)) {
             return redirect()->back()
                 ->withInput()
                 ->withErrors(['conflito' => 'Conflito de Agendamento identificado']);
@@ -463,7 +462,7 @@ class AgendamentoController extends Controller
             'ID_PSICOLOGO' => $request->id_psicologo,
         ];
 
-        if (!$this->salaEstaAtiva($request->local_agend)) {
+        if (!$this->salaEstaAtiva($request->id_sala_clinica)) {
             return redirect()->back()
                 ->withInput()
                 ->withErrors(['sala_indisponivel' => 'Sala não está ativa.']);
@@ -523,7 +522,7 @@ class AgendamentoController extends Controller
             ]);
         }
         
-        // VALODATED DATA É UM ARRAY
+        // VALIDATED DATA É UM ARRAY
         $validatedData = $request->validate([
             'id_agendamento' => 'required|integer',
             'id_servico' => 'required|integer',
@@ -566,7 +565,7 @@ class AgendamentoController extends Controller
         }
 
         //Verifica se a sala está ativa
-        if (!$this->salaEstaAtiva($request->local)) 
+        if (!$this->salaEstaAtiva($request->id_sala_clinica)) 
         {
             return redirect()->back()
                 ->withInput()
@@ -691,7 +690,7 @@ class AgendamentoController extends Controller
                 ->where('HR_AGEND_FIN', '>', $hrIni);
             })
             ->where(function ($q) use ($local, $idPaciente) {
-                $q->where('LOCAL', $local)
+                $q->where('ID_SALA', $local)
                 ->orWhere('ID_PACIENTE', $idPaciente);
             })
            ->where(function($q) use ($hrIni, $hrFim, $idPsicologo) {
@@ -739,6 +738,7 @@ class AgendamentoController extends Controller
         return $query->exists();
     }
 
+    // VERIFICA SE SALA ESTÁ ATIVA
     private function salaEstaAtiva($salaAgendamento)
     {
         if ($salaAgendamento == null) {
@@ -750,12 +750,14 @@ class AgendamentoController extends Controller
 
         // Verifica se alguma dessas salas tem a descrição igual à sala do agendamento
         foreach ($salasInativas as $sala) {
-            if ($sala->DESCRICAO === $salaAgendamento) {
+            if ($sala->ID_SALA_CLINICA == $salaAgendamento) {
                 return false;
             }
         }
         return true;
     }
+
+    // VERIFICA HORÁRIOS DISPONÍVEIS
     private function horarioEstaDisponivel($idClinica, $dataAgendamento, $horaInicio, $horaFim)
     {
         $data = Carbon::parse($dataAgendamento)->format('Y-m-d');
@@ -804,6 +806,7 @@ class AgendamentoController extends Controller
         ]);
     }
 
+    // VERIFICA FERIADO PARA NÃO PERMITIR AGENDA
     private function verificaFeriado($data)
     {   
         $data = Carbon::parse($data)->format('Y-m-d');
