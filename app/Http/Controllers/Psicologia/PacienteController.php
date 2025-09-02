@@ -86,7 +86,9 @@ class PacienteController extends Controller
             'CPF_RESPONSAVEL.regex' => 'O CPF do responsável não está em um formato válido.',
         ]);
 
+        // FORMATA CPF PARA ENVIAR APENAS NÚMEROS PARA SEREM SALVOS NO BANCO
         $validatedData['CPF_PACIENTE'] = str_replace(['-', '.'], '', $validatedData['CPF_PACIENTE']);
+        $validatedData['FONE_PACIENTE'] = str_replace(['(', ')', '-', ' '], '', $validatedData['FONE_PACIENTE']);
 
         $created = $this->pacienteService->createPaciente($validatedData);
 
