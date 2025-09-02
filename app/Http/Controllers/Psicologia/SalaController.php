@@ -101,11 +101,16 @@ class SalaController extends Controller
     public function listSalas(Request $request)
     {
         $search = trim($request->input('search', ''));
-        $query = FaesaClinicaSala::where('DESCRICAO', 'like', '%' . $search . '%');
+        $query = FaesaClinicaSala::query();
 
-        if($search) {
-            $query->where('DESCRICAO', 'like', '%' . $search . '%');
-        }
+        $query->where(function ($q) {
+            $q->where('SIT_SALA', '<>', 'Excluido')
+            ->orWhereNull('SIT_SALA');
+        });
+
+        $query->when($search, function ($query, $search) {
+            return $query->where('DESCRICAO', 'like', '%' . $search . '%');
+        });
 
         $salas = $query->orderBy('DESCRICAO', 'desc')->get();
 

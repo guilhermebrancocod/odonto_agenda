@@ -260,7 +260,7 @@
                 });
             }
 
-           async function carregarSalas(search = '') {
+            async function carregarSalas(search = ''){
                 salasTbody.innerHTML = `<tr><td colspan="4" class="text-center">Carregando...</td></tr>`;
 
                 try {
@@ -276,11 +276,9 @@
                         if (!sala.DISCIPLINA) {
                             return Promise.resolve({ NOME: '-' });
                         }
-                        // AQUI ESTÁ A MUDANÇA!
-                        // Chamamos a nova rota que você criou, passando o código da disciplina da sala
-                        return fetch(`/psicologia/disciplina/${sala.DISCIPLINA}`) // ✨ URL ajustada para a nova rota
+                        return fetch(`/psicologia/disciplina/${sala.DISCIPLINA}`)
                             .then(res => {
-                                if (!res.ok) { // Tratamento de erro caso a disciplina não seja encontrada (erro 404)
+                                if (!res.ok) {
                                     return { NOME: 'Inválida' };
                                 }
                                 return res.json();

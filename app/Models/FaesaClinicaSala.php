@@ -18,5 +18,6 @@ class FaesaClinicaSala extends Model
         'DISCIPLINA',
         'CREATED_AT',
         'UPDATED_AT',
+        'SIT_SALA'
     ];
 }
