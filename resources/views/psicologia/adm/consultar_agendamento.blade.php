@@ -337,26 +337,32 @@
     </script>
     
     <script>
-        // Inicialização do Flatpickr
-        const flatpickrInstances = flatpickr.localize(flatpickr.l10ns.pt) && [
-            flatpickr("#date-input", {
-                dateFormat: "Y-m-d", 
-                altInput: true,
-                altFormat: "d/m/Y"
-            }),
-            flatpickr("#start-time-input", {
-                enableTime: true,
-                noCalendar: true,
-                dateFormat: "H:i",
-                time_24hr: true
-            }),
-            flatpickr("#end-time-input", {
-                enableTime: true,
-                noCalendar: true,
-                dateFormat: "H:i",
-                time_24hr: true
-            })
-        ];
+        flatpickr.localize(flatpickr.l10ns.pt);
+
+        const datePicker = flatpickr("#date-input", {
+            dateFormat: "Y-m-d",
+            altInput: true,
+            altFormat: "d/m/Y",
+            allowInput: true,
+            defaultDate: "today"
+        });
+
+        const startTimePicker = flatpickr("#start-time-input", {
+            enableTime: true,
+            noCalendar: true,
+            dateFormat: "H:i",
+            time_24hr: true
+        });
+
+        const endTimePicker = flatpickr("#end-time-input", {
+            enableTime: true,
+            noCalendar: true,
+            dateFormat: "H:i",
+            time_24hr: true
+        });
+
+        // Se você realmente precisa de um array com todas as instâncias, pode criá-lo assim:
+        const flatpickrInstances = [datePicker, startTimePicker, endTimePicker];
     </script>
 </body>
 </html>
