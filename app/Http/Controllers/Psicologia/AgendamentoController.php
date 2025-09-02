@@ -147,8 +147,11 @@ class AgendamentoController extends Controller
     }
 
     // CRIAR AGENDAMENTO - ADM | RECEPÇÃO
-    public function criarAgendamento(Request $request)
+   public function criarAgendamento(Request $request)
     {
+        // ETAPA 1: VALIDAÇÃO E PREPARAÇÃO INICIAL
+        // =================================================================
+
         $idClinica = 1;
 
         if ($request->has('valor_agend')) {
@@ -157,7 +160,7 @@ class AgendamentoController extends Controller
             ]);
         }
 
-        $validated = $request->validate([
+        $request->validate([
             'paciente_id' => 'required|integer',
             'id_servico' => 'required|integer',
             'dia_agend' => 'required|date',
@@ -177,228 +180,128 @@ class AgendamentoController extends Controller
             'id_sala_clinica' => 'nullable|integer|exists:faesa_clinica_sala,ID_SALA_CLINICA',
             'id_psicologo' => 'nullable|integer',
         ], [
+            // ... suas mensagens de validação personalizadas ...
             'paciente_id.required' => 'A seleção de paciente é obrigatória.',
             'id_servico.required' => 'A seleção de serviço obrigatória.',
             'dia_agend.required' => 'A data do agendamento é obrigatória.',
-            'data_fim_recorrencia.after' => 'A data final da recorrência deve ser igual ou posterior à data inicial.',
             'hr_ini.required' => 'A hora de início é obrigatória.',
             'hr_fim.required' => 'A hora de término é obrigatória.',
             'hr_fim.after' => 'A hora de término deve ser posterior à hora de início.',
             'id_sala_clinica.exists' => 'A sala selecionada não existe.',
-            'recorrencia.max' => 'A recorrência não pode ter mais de 64 caracteres.',
-            'valor_agend.numeric' => 'O valor do agendamento deve ser um número.',
-            'valor_agend.string' => 'O valor do agendamento deve ser numérico.',
-            'observacoes.string' => 'As observações devem ser um texto.',
-            'status_agend.required' => 'O status do agendamento é obrigatório.',
-            'id_agend_remarcado.integer' => 'A identificação do agendamento remarcado deve ser um número inteiro.',
-            'id_psicologo.integer' => 'A identificação do Psicólogo deve ser o número de matrícula',
         ]);
 
-        $valorAgend = $request->valor_agend ? str_replace(',', '.', $request->valor_agend) : null;
-        $duracaoMesesRecorrencia = (int) $request->input('duracao_meses_recorrencia');
         $servico = FaesaClinicaServico::find($request->id_servico);
+        $valorAgend = $request->valor_agend ? str_replace(',', '.', $request->valor_agend) : null;
 
-        if ($this->verificaFeriado($validated['dia_agend'])) {
-            return redirect('/psicologia/criar-agendamento/')
-                ->with('error', 'Agendamento não foi criado devido a um feriado');
+        if ($this->verificaFeriado($request->dia_agend)) {
+            return redirect('/psicologia/criar-agendamento/')->with('error', 'Agendamento não foi criado devido a um feriado');
         }
 
-        // TRATAMENTO DE RECORRÊNCIA CUSTOMIZADA
+        // ETAPA 2: GERAR A LISTA DE DATAS A SEREM AGENDADAS
+        // =================================================================
+
+        $datasParaAgendar = [];
+        $dataInicio = Carbon::parse($request->dia_agend);
+
         if ($request->input('tem_recorrencia') === "1") {
-            $recorrencia = $request->input('recorrencia');
+            // Cenário 1: Recorrência Personalizada (marcada pelo usuário)
             $diasSemana = $request->input('dias_semana', []);
-            $dataInicio = Carbon::parse($request->dia_agend);
+            $duracaoMesesRecorrencia = (int) $request->input('duracao_meses_recorrencia');
             $dataFim = $duracaoMesesRecorrencia
                 ? $dataInicio->copy()->addMonths($duracaoMesesRecorrencia)
                 : ($request->filled('data_fim_recorrencia')
                     ? Carbon::parse($request->data_fim_recorrencia)
-                    : $dataInicio->copy()->addMonths(1)
-                );
+                    : $dataInicio->copy()->addMonths(1));
 
-            $agendamentosCriados = [];
-            $diasComConflito = [];
+            for ($data = $dataInicio->copy(); $data->lte($dataFim); $data->addDay()) {
+                if (empty($diasSemana) || in_array($data->dayOfWeek, $diasSemana)) {
+                    $datasParaAgendar[] = $data->copy();
+                    if (empty($diasSemana)) $data->addDays(6); // Se nenhum dia específico foi marcado, pula 1 semana
+                }
+            }
+        } elseif ($servico) {
+            // Cenário 2: Recorrência Automática (baseada no tipo de serviço)
+            $dataFim = null;
+            if (in_array(strtolower($servico->SERVICO_CLINICA_DESC), ['triagem', 'plantão'])) {
+                $dataFim = $dataInicio->copy()->addWeeks(2);
+            } elseif (strtolower($servico->SERVICO_CLINICA_DESC) === 'psicodiagnóstico') {
+                $dataFim = $dataInicio->copy()->addMonths(6);
+            } elseif (in_array(strtolower($servico->SERVICO_CLINICA_DESC), ['psicoterapia', 'educação'])) {
+                $dataFim = $dataInicio->copy()->addYear();
+            } elseif ($servico->TEMPO_RECORRENCIA_MESES > 0) {
+                $dataFim = $dataInicio->copy()->addMonths((int) $servico->TEMPO_RECORRENCIA_MESES);
+            }
 
-            if (empty($diasSemana)) {
+            if ($dataFim) {
                 for ($data = $dataInicio->copy(); $data->lte($dataFim); $data->addWeek()) {
-                    $dataFormatada = $data->format('Y-m-d');
-                    if ($this->existeConflitoAgendamento($idClinica, $request->id_sala_clinica ?? null, $dataFormatada, $request->hr_ini, $request->hr_fim, $request->paciente_id)) {
-                        $diasComConflito[] = $dataFormatada;
-                        continue;
-                    }
-                    if (!$this->horarioEstaDisponivel($idClinica, $dataFormatada, $request->hr_ini, $request->hr_fim)) {
-                        $diasComConflito[] = $dataFormatada;
-                        continue;
-                    }
-                    $agendamentosCriados[] = FaesaClinicaAgendamento::create([
-                        'ID_CLINICA' => $idClinica,
-                        'ID_PACIENTE' => $request->paciente_id,
-                        'ID_SERVICO' => $request->id_servico,
-                        'DT_AGEND' => $dataFormatada,
-                        'HR_AGEND_INI' => $request->hr_ini,
-                        'HR_AGEND_FIN' => $request->hr_fim,
-                        'STATUS_AGEND' => 'Agendado',
-                        'RECORRENCIA' => $recorrencia,
-                        'VALOR_AGEND' => $valorAgend,
-                        'OBSERVACOES' => $request->observacoes,
-                        'LOCAL' => $request->local_agend ?? null,
-                        'ID_SALA' => $request->id_sala_clinica ?? null,
-                        'ID_PSICOLOGO' => $request->id_psicologo ?? null,
-                    ]);
+                    $datasParaAgendar[] = $data->copy();
                 }
+            }
+        }
+
+        // Cenário 3: Agendamento Simples
+        if (empty($datasParaAgendar)) {
+            $datasParaAgendar[] = $dataInicio;
+        }
+
+        // ETAPA 3: PROCESSAR CADA DATA COM A LÓGICA CENTRALIZADA
+        // =================================================================
+
+        $agendamentosCriados = 0;
+        $diasComErro = [];
+
+        foreach ($datasParaAgendar as $data) {
+            $dados = [
+                'ID_CLINICA'    => $idClinica,
+                'ID_PACIENTE'   => $request->paciente_id,
+                'ID_SERVICO'    => $request->id_servico,
+                'DT_AGEND'      => $data->format('Y-m-d'),
+                'HR_AGEND_INI'  => $request->hr_ini,
+                'HR_AGEND_FIN'  => $request->hr_fim,
+                'STATUS_AGEND'  => 'Agendado',
+                'RECORRENCIA'   => $request->recorrencia,
+                'VALOR_AGEND'   => $valorAgend,
+                'OBSERVACOES'   => $request->observacoes,
+                'ID_SALA'       => $request->id_sala_clinica,
+                'LOCAL'         => $request->local_agend,
+                'ID_PSICOLOGO'  => $request->id_psicologo,
+            ];
+
+            $motivoFalha = $this->validarECriarAgendamentoUnico($dados);
+
+            if ($motivoFalha === null) {
+                $agendamentosCriados++;
             } else {
-                for ($data = $dataInicio->copy(); $data->lte($dataFim); $data->addDay()) {
-                    if (in_array($data->dayOfWeek, $diasSemana)) {
-                        $dataFormatada = $data->format('Y-m-d');
-                        if ($this->existeConflitoAgendamento($idClinica, $request->id_sala_clinica ?? null, $dataFormatada, $request->hr_ini, $request->hr_fim, $request->paciente_id)) {
-                            $diasComConflito[] = $dataFormatada;
-                            continue;
-                        }
-                        if (!$this->horarioEstaDisponivel($idClinica, $dataFormatada, $request->hr_ini, $request->hr_fim)) {
-                            $diasComConflito[] = $dataFormatada;
-                            continue;
-                        }
-                        $agendamentosCriados[] = FaesaClinicaAgendamento::create([
-                            'ID_CLINICA' => $idClinica,
-                            'ID_PACIENTE' => $request->paciente_id,
-                            'ID_SERVICO' => $request->id_servico,
-                            'DT_AGEND' => $dataFormatada,
-                            'HR_AGEND_INI' => $request->hr_ini,
-                            'HR_AGEND_FIN' => $request->hr_fim,
-                            'STATUS_AGEND' => 'Agendado',
-                            'RECORRENCIA' => $recorrencia,
-                            'VALOR_AGEND' => $valorAgend,
-                            'OBSERVACOES' => $request->observacoes,
-                            'LOCAL' => $request->local_agend ?? null,
-                            'ID_SALA' => $request->id_sala_clinica ?? null,
-                            'ID_PSICOLOGO' => $request->id_psicologo ?? null,
-                        ]);
-                    }
-                }
+                $diasComErro[$data->format('d/m/Y')] = $motivoFalha;
             }
+        }
 
-            if (!empty($diasComConflito) && empty($agendamentosCriados)) {
-                return redirect('/psicologia/criar-agendamento/')
-                    ->with('error', 'Nenhum agendamento foi criado devido a conflitos em todos os dias selecionados.');
-            }
-            if (!empty($diasComConflito)) {
-                $diasFormatados = array_map(fn($dia) => Carbon::parse($dia)->format('d-m-Y'), $diasComConflito);
-                $this->pacienteService->setEmAtendimento($request->paciente_id);
-                return redirect('/psicologia/criar-agendamento/')
-                    ->with('success', 'Agendamentos criados, exceto para os dias com conflito: ' . implode(', ', $diasFormatados));
-            }
+        // ETAPA 4: RETORNAR A RESPOSTA CORRETA PARA O USUÁRIO
+        // =================================================================
+
+        if ($agendamentosCriados > 0) {
+            // Se pelo menos um agendamento foi criado, atualiza o status do paciente.
             $this->pacienteService->setEmAtendimento($request->paciente_id);
+        }
+
+        if ($agendamentosCriados === 0 && !empty($diasComErro)) {
+            // Se NENHUM agendamento foi criado, mostra o erro detalhado do primeiro dia.
+            $primeiraDataComErro = key($diasComErro);
+            $primeiroMotivoErro = reset($diasComErro);
+            return redirect()->back()->withInput()
+                ->with('error', "Nenhum agendamento criado. Erro no dia $primeiraDataComErro: $primeiroMotivoErro");
+        }
+
+        if (!empty($diasComErro)) {
+            // Se ALGUNS foram criados, mostra uma mensagem de sucesso parcial.
+            $diasProblematicos = implode(', ', array_keys($diasComErro));
             return redirect('/psicologia/criar-agendamento/')
-                ->with('success', 'Agendamentos recorrentes criados conforme os dias e duração definidos!');
+                ->with('success', "Agendamentos criados, exceto para os dias: $diasProblematicos.");
         }
 
-        // PARA SERVIÇOS COMO TRIAGEM, PLANTAO E ETC
-        $dataInicio = Carbon::parse($request->dia_agend);
-        if ($servico && in_array(strtolower($servico->SERVICO_CLINICA_DESC), ['triagem', 'plantão'])) {
-            $dataFim = $dataInicio->copy()->addWeeks(2);
-        } elseif ($servico && strtolower($servico->SERVICO_CLINICA_DESC) === 'psicodiagnóstico') {
-            $dataFim = $dataInicio->copy()->addMonths(6);
-        } elseif ($servico && in_array(strtolower($servico->SERVICO_CLINICA_DESC), ['psicoterapia', 'educação'])) {
-            $dataFim = $dataInicio->copy()->addYear();
-        } elseif ($servico && $servico->TEMPO_RECORRENCIA_MESES && $servico->TEMPO_RECORRENCIA_MESES > 0) {
-            $dataFim = $dataInicio->copy()->addMonths((int) $servico->TEMPO_RECORRENCIA_MESES);
-        }
-
-        if (isset($dataFim)) {
-            $agendamentosCriados = [];
-            $diasComConflito = [];
-
-            for ($data = $dataInicio->copy(); $data->lte($dataFim); $data->addWeek()) {
-                $dataFormatada = $data->format('Y-m-d');
-                if ($this->existeConflitoAgendamento($idClinica, $request->id_sala_clinica, $dataFormatada, $request->hr_ini, $request->hr_fim, $request->paciente_id)) {
-                    $diasComConflito[] = $dataFormatada;
-                    continue;
-                }
-                if (!$this->horarioEstaDisponivel($idClinica, $dataFormatada, $request->hr_ini, $request->hr_fim)) {
-                    $diasComConflito[] = $dataFormatada;
-                    continue;
-                }
-                $agendamentosCriados[] = FaesaClinicaAgendamento::create([
-                    'ID_CLINICA' => $idClinica,
-                    'ID_PACIENTE' => $request->paciente_id,
-                    'ID_SERVICO' => $request->id_servico,
-                    'DT_AGEND' => $dataFormatada,
-                    'HR_AGEND_INI' => $request->hr_ini,
-                    'HR_AGEND_FIN' => $request->hr_fim,
-                    'STATUS_AGEND' => 'Agendado',
-                    'RECORRENCIA' => null,
-                    'VALOR_AGEND' => $valorAgend,
-                    'OBSERVACOES' => $request->observacoes,
-                    'ID_SALA_CLINICA' => $request->id_sala_clinica ?? null,
-                    'LOCAL' => $request->local_agend ?? null,
-                    'ID_PSICOLOGO' => $request->id_psicologo ?? null,
-                ]);
-            }
-
-            if (!empty($diasComConflito) && empty($agendamentosCriados)) {
-                return redirect('/psicologia/criar-agendamento/')
-                    ->with('error', 'Nenhum agendamento foi criado devido a conflitos em todos os dias.');
-            }
-
-            if (!empty($agendamentosCriados)) {
-                $this->pacienteService->setEmAtendimento($request->paciente_id);
-            }
-
-            if (!empty($diasComConflito)) {
-                $diasFormatados = array_map(fn($dia) => Carbon::parse($dia)->format('d-m-Y'), $diasComConflito);
-                return redirect('/psicologia/criar-agendamento/')
-                    ->with('success', 'Agendamentos criados, exceto para os dias com conflito: ' . implode(', ', $diasFormatados));
-            }
-            return redirect('/psicologia/criar-agendamento/')
-                ->with('success', 'Todos os agendamentos foram criados com sucesso.');
-        }
-
-        // AGENDAMENTO SIMPLES
-        if ($this->existeConflitoAgendamento($idClinica, $request->id_sala_clinica, $request->dia_agend, $request->hr_ini, $request->hr_fim, $request->paciente_id)) {
-            return redirect()->back()
-                ->withInput()
-                ->withErrors(['conflito' => 'Já existe um agendamento neste horário para o paciente ou no local selecionado.']);
-        }
-
-        $dados = [
-            'ID_CLINICA' => $idClinica,
-            'ID_PACIENTE' => $request->paciente_id,
-            'ID_SERVICO' => $request->id_servico,
-            'DT_AGEND' => $request->dia_agend,
-            'HR_AGEND_INI' => $request->hr_ini,
-            'HR_AGEND_FIN' => $request->hr_fim,
-            'STATUS_AGEND' => 'Agendado',
-            'RECORRENCIA' => null,
-            'VALOR_AGEND' => $valorAgend,
-            'OBSERVACOES' => $request->observacoes,
-            'ID_SALA' => $request->id_sala_clinica ?? null,
-            'LOCAL' => $request->local_agend ?? null,
-            'ID_PSICOLOGO' => $request->id_psicologo ?? null,
-        ];
-
-        if (!$this->salaEstaAtiva($request->id_sala_clinica)) {
-            return redirect()->back()
-                ->withInput()
-                ->withErrors(['sala_indisponivel' => 'Sala não está ativa.']);
-        }
-
-        if (!$this->horarioEstaDisponivel($idClinica, $request->dia_agend, $request->hr_ini, $request->hr_fim)) {
-            return redirect()->back()
-                ->withInput()
-                ->withErrors(['horario_indisponivel' => 'O horário solicitado não está disponível.']);
-        }
-
-        FaesaClinicaAgendamento::create($dados);
-
-        try {
-            $this->pacienteService->setEmAtendimento($request->paciente_id);
-        } catch (\Illuminate\Database\Eloquent\ModelNotFoundException $e) {
-            return redirect()->back()->with('error', 'Paciente não encontrado.');
-        } catch (\Exception $e) {
-            return redirect()->back()->with('error', 'Erro ao atualizar o status do paciente.');
-        }
-
+        // Se TODOS foram criados com sucesso.
         return redirect('/psicologia/criar-agendamento/')
-            ->with('success', 'Agendamento criado com sucesso!');
+            ->with('success', 'Todos os agendamentos foram criados com sucesso!');
     }
 
     // CRIAR AGENDAMENTO - PSICOLOGO
@@ -676,40 +579,48 @@ class AgendamentoController extends Controller
                         ->with('success', 'Agendamento excluído com sucesso!');
     }
 
-    // VERIFICA CONFLITO DE AGENDAMENTO
-    private function existeConflitoAgendamento($idClinica, $local, $dataAgend, $hrIni, $hrFim, $idPaciente, $idAgendamentoAtual = null, $idPsicologo = null)
+    /**
+     * Verifica se já existe um agendamento conflitante.
+     * Um conflito existe se, no mesmo horário, houver um agendamento para:
+     * 1. O mesmo paciente (em qualquer lugar).
+     * 2. A mesma sala (com qualquer pessoa).
+     * 3. O mesmo psicólogo (com qualquer pessoa).
+     *
+     * @param int $idClinica
+     * @param int|null $idSala
+     * @param string $data
+     * @param string $horaInicio
+     * @param string $horaFim
+     * @param int $idPaciente
+     * @param int|null $idPsicologo
+     * @return bool
+     */
+    private function existeConflitoAgendamento(int $idClinica, ?int $idSala, string $data, string $horaInicio, string $horaFim, int $idPaciente, ?int $idPsicologo): bool
     {
-        $dataAgend = Carbon::parse($dataAgend)->format('Y-m-d');
-        $hrIni = Carbon::parse($hrIni)->format('H:i:s');
-        $hrFim = Carbon::parse($hrFim)->format('H:i:s');
+        // Inicia a consulta com os filtros de data e hora, que são sempre necessários.
+        $conflitoQuery = FaesaClinicaAgendamento::where('ID_CLINICA', $idClinica)
+            ->where('DT_AGEND', $data)
+            ->where('HR_AGEND_INI', '<', $horaFim)
+            ->where('HR_AGEND_FIN', '>', $horaInicio);
 
-        $query = FaesaClinicaAgendamento::where('ID_CLINICA', $idClinica)
-            ->where('DT_AGEND', $dataAgend)
-            ->where(function ($q) use ($hrIni, $hrFim) {
-                $q->where('HR_AGEND_INI', '<', $hrFim)
-                ->where('HR_AGEND_FIN', '>', $hrIni);
-            })
-            ->where(function ($q) use ($local, $idPaciente) {
-                $q->where('ID_SALA', $local)
-                ->orWhere('ID_PACIENTE', $idPaciente);
-            })
-           ->where(function($q) use ($hrIni, $hrFim, $idPsicologo) {
-                if ($idPsicologo) {
-                    $q->where('HR_AGEND_INI', '<', $hrFim)
-                    ->where('HR_AGEND_FIN', '>', $hrIni)
-                    ->where('ID_PSICOLOGO', $idPsicologo);
-                }
-            })
-            ->where('STATUS_AGEND', '<>', 'Excluido')
-            ->where('STATUS_AGEND', '<>', 'Remarcado');
-            
+        // Agora, agrupa as condições de conflito (paciente, sala, psicólogo)
+        $conflitoQuery->where(function ($query) use ($idPaciente, $idSala, $idPsicologo) {
+            // Conflito 1: O paciente já está ocupado.
+            $query->where('ID_PACIENTE', $idPaciente);
 
-        if ($idAgendamentoAtual) {
-            $query->where('ID_AGENDAMENTO', '<>', $idAgendamentoAtual);
-        }
+            // Conflito 2: A sala já está ocupada (SÓ SE uma sala for informada)
+            $query->when($idSala, function ($q) use ($idSala) {
+                return $q->orWhere('ID_SALA', $idSala);
+            });
 
-        return $query->exists();
-    }
+            // Conflito 3: O psicólogo já está ocupado (SÓ SE um psicólogo for informado)
+            $query->when($idPsicologo, function ($q) use ($idPsicologo) {
+                return $q->orWhere('ID_PSICOLOGO', $idPsicologo);
+            });
+        });
+
+        return $conflitoQuery->exists();
+    }   
 
     // VERIFICA CONFLITO EXCLUSIVO DO PACIENTE
     private function existeConflitoPaciente($idClinica, $idPaciente, $dataAgend, $hrIni, $hrFim, $idAgendamentoAtual = null)
@@ -819,5 +730,40 @@ class AgendamentoController extends Controller
         }
 
         return false;
+    }
+
+    /**
+     * Valida e cria um único agendamento.
+     * Retorna uma string com a razão da falha, ou null em caso de sucesso.
+     */
+    private function validarECriarAgendamentoUnico(array $dadosAgendamento): ?string
+    {
+        // 1. Verifica a disponibilidade GERAL do horário primeiro.
+        if (!$this->horarioEstaDisponivel($dadosAgendamento['ID_CLINICA'], $dadosAgendamento['DT_AGEND'], $dadosAgendamento['HR_AGEND_INI'], $dadosAgendamento['HR_AGEND_FIN'])) {
+            return "Horário indisponível"; // Mensagem específica
+        }
+
+        // 2. Verifica se a sala está ativa (se houver sala).
+        if (isset($dadosAgendamento['ID_SALA']) && !$this->salaEstaAtiva($dadosAgendamento['ID_SALA'])) {
+            return "Sala inativa"; // Mensagem específica
+        }
+
+        // 3. Por último, verifica conflitos ESPECÍFICOS com outros agendamentos.
+        if ($this->existeConflitoAgendamento(
+            $dadosAgendamento['ID_CLINICA'],
+            $dadosAgendamento['ID_SALA'],
+            $dadosAgendamento['DT_AGEND'],
+            $dadosAgendamento['HR_AGEND_INI'],
+            $dadosAgendamento['HR_AGEND_FIN'],
+            $dadosAgendamento['ID_PACIENTE'],
+            $dadosAgendamento['ID_PSICOLOGO']
+        )) {
+            return "Conflito de agendamento"; // Mensagem específica
+        }
+
+        // Se tudo estiver OK, cria o agendamento.
+        FaesaClinicaAgendamento::create($dadosAgendamento);
+
+        return null; // Sucesso
     }
 }
