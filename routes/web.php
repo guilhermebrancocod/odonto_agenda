@@ -351,7 +351,7 @@ Route::middleware([AuthPsicologoMiddleware::class])->group(function () {
 
     Route::get('/psicologo/consultar-paciente/buscar', [PacienteController::class, 'getPacienteByNameCPFPsicologo'])->name('psicologoGetPaciente');
 
-    Route::get('/psicologo/consultar-agendamento', [AgendamentoController::class, 'getAgendamentosForPsicologo'])->name('getAgendamentosForPsicologo');
+    Route::get('/psicologo/consultar-agendamento/buscar', [AgendamentoController::class, 'getAgendamentosForPsicologo'])->name('getAgendamentosForPsicologo');
 
     Route::get('/psicologo/pesquisar-disciplina', [ServicoController::class, 'getDisciplinaServico'])->name('psicologoGetDisciplina');
 

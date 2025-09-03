@@ -243,7 +243,7 @@
 
             function carregarAgendamentos() {
                 const params = getFilters();
-                const url = `/psicologo/consultar-agendamento?${params.toString()}`;
+                const url = `/psicologo/consultar-agendamento/buscar?${params.toString()}`;
 
                 // Adiciona um feedback visual de carregamento
                 agendamentosTbody.innerHTML = `<tr><td colspan="13" class="text-center"><div class="spinner-border spinner-border-sm" role="status"><span class="visually-hidden">Loading...</span></div> Carregando...</td></tr>`;
