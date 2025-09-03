@@ -113,7 +113,7 @@ class AgendamentoService
             'remarcacoes'
         ])
         ->where('ID_CLINICA', 1)
-        ->where('ID_PSICOLOGO', $request->input('id_psicologo')) // Retorna apenas agendamentos vinculados ao psicólogo em questão
+        ->where('ID_PSICOLOGO', session('psicologo')[1]) // Retorna apenas agendamentos vinculados ao psicólogo em questão
         ->where('STATUS_AGEND', '<>', 'Excluido');
 
         // Filtro por nome ou CPF do paciente
