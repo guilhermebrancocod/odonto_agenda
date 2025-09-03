@@ -269,7 +269,7 @@ Route::middleware([AuthMiddleware::class, CheckClinicaMiddleware::class])
     Route::get('/agendamento/{id}', [AgendamentoController::class, 'showAgendamento'])->name('agendamento.show');
     Route::get('/agendamentos-calendar/adm', [AgendamentoController::class, 'getAgendamentosForCalendar']);
     Route::get('/agendamento/{id}/editar', [AgendamentoController::class, 'editAgendamento'])->name('agendamento.edit');
-    Route::put('/agendamento/{id}', [AgendamentoController::class, 'updateAgendamento'])->name('agendamento.update');
+    Route::put('/agendamento', [AgendamentoController::class, 'updateAgendamento'])->name('agendamento.update');
     Route::delete('/agendamento/{id}', [AgendamentoController::class, 'deleteAgendamento'])->name('psicologia.agendamento.delete');
 
     Route::get('buscar-aluno/{matricula}', [PsicologoController::class, 'listAlunos'])->name('listAlunos-Psicologia');
@@ -350,6 +350,8 @@ Route::middleware([AuthPsicologoMiddleware::class])->group(function () {
     Route::get('/psicologo/agendamentos-calendar', [AgendamentoController::class, 'getAgendamentosForCalendarPsicologo']);
 
     Route::get('/psicologo/consultar-paciente/buscar', [PacienteController::class, 'getPacienteByNameCPFPsicologo'])->name('psicologoGetPaciente');
+
+    Route::get('/psicologo/consultar-agendamento', [AgendamentoController::class, 'getAgendamentosForPsicologo'])->name('getAgendamentosForPsicologo');
 
     Route::get('/psicologo/pesquisar-disciplina', [ServicoController::class, 'getDisciplinaServico'])->name('psicologoGetDisciplina');
 

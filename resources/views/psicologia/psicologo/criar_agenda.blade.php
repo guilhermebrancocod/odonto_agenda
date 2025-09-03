@@ -222,7 +222,7 @@
             if (query.length < 2) return callback();
             const url = `/psicologo/consultar-paciente/buscar?search=${encodeURIComponent(query)}`;
             fetch(url)
-                .then(response => response.json())
+            .then(response => response.json())
                 .then(json => callback(json))
                 .catch(() => callback());
         },

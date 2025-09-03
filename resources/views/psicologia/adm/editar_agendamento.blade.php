@@ -1,433 +1,342 @@
 <!DOCTYPE html>
-<html lang="pt-br">
+<html lang="pt-BR">
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Editar Agendamento</title>
-
-    <!-- FAVICON - IMAGEM DA GUIA -->
     <link rel="icon" type="image/png" href="/favicon_faesa.png">
-
+    <title>Detalhes do Agendamento #{{ $agendamento->ID_AGENDAMENTO }}</title>
+    
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700&display=swap" rel="stylesheet" />
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" />
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css" />
-    <style>
-        body {
-            font-family: 'Montserrat', sans-serif;
-            background-color: #f8f9fa;
-        }
-        .form-label {
-            font-weight: 600;
-        }
-        .flatpickr-input {
-            background-image: none !important;
-        }
-        .container {
-            overflow-y: auto;
-        }
-    </style>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/mdb-ui-kit/7.1.0/mdb.min.css" rel="stylesheet" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    
+    <link href="https://cdn.jsdelivr.net/npm/tom-select@2.3.1/dist/css/tom-select.bootstrap5.css" rel="stylesheet">
 
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+    
     <style>
-        .shadow-dark {
-            box-shadow: 0 0.75rem 1.25rem rgba(0,0,0,0.4) !important;
-        }
-        /* Animação para alertas */
-        @keyframes slideDownFadeOut {
-            0%   { transform: translate(-50%, -100%); opacity: 0; }
-            10%  { transform: translate(-50%, 0); opacity: 1; }
-            90%  { transform: translate(-50%, 0); opacity: 1; }
-            100% { transform: translate(-50%, -100%); opacity: 0; }
-        }
-        .animate-alert {
-            animation: slideDownFadeOut 5s ease forwards;
-            z-index: 1050;
-        }
-        .required-field {
-            color: #dc3545; /* Cor de perigo do Bootstrap */
-        }
+        .card-header h5 { margin-bottom: 0; font-size: 1.1rem; font-weight: 600; }
+        .details-grid { display: grid; grid-template-columns: 150px 1fr; gap: 1rem; align-items: center;}
+        .details-grid dt { font-weight: 700; color: #555; }
+        .details-grid dd { margin-bottom: 0; }
+        .card-footer { font-size: 0.8rem; color: #6c757d; }
+        /* Esconde o select original do TomSelect até ser inicializado */
+        .ts-hidden-accessible { display: none; }
     </style>
 </head>
 <body>
-
     @include('components.navbar')
 
-    <div class="container mt-4" style="max-width: 600px;">
-        <div class="card shadow-sm">
-            <div class="card-body p-4">
-                <h2 class="card-title text-center mb-4">Editar Agendamento</h2>
+    <div class="container my-5">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h2 class="mb-0">Detalhes do Agendamento</h2>
+            <span class="badge bg-primary rounded-pill fs-6">#{{ $agendamento->ID_AGENDAMENTO }}</span>
+        </div>
 
-                @if(session('success'))
-                    <div class="alert alert-success alert-dismissible fade show" role="alert">
-                        {{ session('success') }}
-                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Fechar"></button>
-                    </div>
-                @endif
+        <form method="POST" action="{{ route('agendamento.update') }}">
+            @csrf
+            @method('PUT')
 
-                @if($errors->any())
-                    <div class="alert alert-danger">
-                        <ul class="mb-0">
-                            @foreach ($errors->all() as $error)
-                                <li>{{ $error }}</li>
-                            @endforeach
-                        </ul>
-                    </div>
-                @endif
+            <input type="hidden" id="id_agendamento" name="ID_AGENDAMENTO" value="{{ $agendamento->ID_AGENDAMENTO }}">
 
-                @if (session('error'))
-                    <div class="alert alert-danger text-center shadow position-fixed top-0 start-50 translate-middle-x mt-3 animate-alert">
-                        {{ session('error') }}
-                    </div>
-                @endif
-
-                <form action="{{ route('agendamento.update', $agendamento->ID_AGENDAMENTO) }}" method="POST" novalidate>
-                    @csrf
-                    @method('PUT')
-
-                    <input type="hidden" name="id_agendamento" value="{{ old('id_agendamento', $agendamento->ID_AGENDAMENTO) }}">
-
-                    <input type="hidden" id="id_clinica" name="id_clinica" value="{{ old('id_clinica', $agendamento->ID_CLINICA) }}">
-
-                    <input type="hidden" name="id_paciente" value="{{ old('id_paciente', $agendamento->ID_PACIENTE) }}">
-                    
-                    <!-- PACIENTE -->
-                    <div class="mb-3">
-                        <label for="paciente" class="form-label">Paciente</label>
-                        <input type="text" id="paciente" class="form-control" value="{{ $agendamento->paciente->NOME_COMPL_PACIENTE ?? '-' }}" disabled>
-                    </div>
-
-                    <!-- SERVIÇO -->
-                    <div class="mb-3">
-                        <label for="servico" class="form-label">Serviço</label>
-                        <input type="text" id="servico" class="form-control" value="{{ old('servico', $agendamento->servico->SERVICO_CLINICA_DESC ?? '-') }}">
-
-                        <!-- LISTAGEM DE SERVIÇOS PÓS PESQUISA PARA SELEÇÃO -->
-                        <input type="hidden" name="id_servico" id="id_servico" value="{{ old('id_servico', $agendamento->ID_SERVICO) }}">
-                        <div id="servicos-list" class="list-group position-absolute w-75" style="z-index: 100"></div>
-                    </div>
-
-                    <!-- LOCAL - SALA -->
-                    <div class="mb-3">
-                        <label for="local" class="form-label">Local <span class="text-danger">*</span></label>
-                        <input type="text" id="local" name="local" class="form-control @error('local') is-invalid @enderror" 
-                               value="{{ old('local', $agendamento->LOCAL) }}" placeholder="Digite o local" required>
-                        @error('local')
-                            <div class="invalid-feedback">{{ $message }}</div>
-                        @enderror
-
-                        <!-- LISTAGEM DE SALAS PÓS PESQUISA PARA SELEÇÃO -->
-                        <div id="locais-list" class="list-group position-absolute w-75" style="z-index: 100"></div>
-                    </div>
-
-                    <!-- DATA -->
-                    <div class="mb-3">
-                        <label for="date" class="form-label">Data <span class="text-danger">*</span></label>
-                        <div class="input-group">
-                            <input type="text" id="date" name="date" class="form-control @error('date') is-invalid @enderror" 
-                                   value="{{ old('date', $agendamento->DT_AGEND) }}" placeholder="Escolha a data" required>
-                            <span class="input-group-text"><i class="bi bi-calendar-event"></i></span>
-                            @error('date')
-                                <div class="invalid-feedback d-block">{{ $message }}</div>
-                            @enderror
+            <div class="row">
+                <div class="col-lg-8">
+                    <div class="card mb-4">
+                        <div class="card-header">
+                            <h5><i class="bi bi-calendar-check me-2"></i>Detalhes do Atendimento</h5>
                         </div>
-                    </div>
+                        <div class="card-body">
+                            <dl class="details-grid">
+                                <dt>Serviço</dt>
 
-                    <!-- HORA INÍCIO -->
-                    <div class="mb-3">
-                        <label for="start_time" class="form-label">Hora Início <span class="text-danger">*</span></label>
-                        <div class="input-group">
-                            <input type="text" id="start_time" name="start_time" class="form-control @error('start_time') is-invalid @enderror" 
-                                   value="{{ old('start_time', $agendamento->HR_AGEND_INI) }}" placeholder="HH:mm" required>
-                            <span class="input-group-text"><i class="bi bi-clock"></i></span>
-                            @error('start_time')
-                                <div class="invalid-feedback d-block">{{ $message }}</div>
-                            @enderror
-                        </div>
-                    </div>
+                                <!-- SERVICO DA CLINICA - DISCIPLINA -->
+                                <dd>
+                                    <input type="text" class="form-control view-mode" 
+                                           value="{{ $agendamento->servico->SERVICO_CLINICA_DESC ?? '' }}" disabled>
+                                    <div class="edit-mode d-none">
+                                        <select id="select-servico" name="ID_SERVICO" placeholder="Selecione ou busque um serviço...">
+                                            @if($agendamento->servico)
+                                                <option value="{{ $agendamento->servico->ID_SERVICO_CLINICA }}" selected>
+                                                    {{ $agendamento->servico->SERVICO_CLINICA_DESC }}
+                                                </option>
+                                            @endif
+                                        </select>
+                                    </div>
+                                </dd>
+                                
+                                <dt>Data</dt>
 
-                    <!-- HORA FIM -->
-                    <div class="mb-3">
-                        <label for="end_time" class="form-label">Hora Fim <span class="text-danger">*</span></label>
-                        <div class="input-group">
-                            <input type="text" id="end_time" name="end_time" class="form-control @error('end_time') is-invalid @enderror" 
-                                   value="{{ old('end_time', $agendamento->HR_AGEND_FIN) }}" placeholder="HH:mm" required>
-                            <span class="input-group-text"><i class="bi bi-clock"></i></span>
-                            @error('end_time')
-                                <div class="invalid-feedback d-block">{{ $message }}</div>
-                            @enderror
-                        </div>
-                    </div>
+                                    <!-- DATA DO AGENDAMENTO -->
+                                    <dd>
+                                        <input type="date" id="DT_AGEND" class="form-control editable-field" name="DT_AGEND" 
+                                            value="{{ $agendamento->DT_AGEND->format('Y-m-d') }}" disabled>
+                                    </dd>
 
-                    <!-- STATUS -->
-                    <div class="mb-4">
-                        <label for="status" class="form-label">Status <span class="text-danger">*</span></label>
-                        <select id="status" name="status" class="form-select @error('status') is-invalid @enderror" required>
-                            <option value="Agendado" {{ old('status', $agendamento->STATUS_AGEND) == 'Agendado' ? 'selected' : '' }}>Agendado</option>
-                            <option value="Em atendimento" {{ old('status', $agendamento->STATUS_AGEND) == 'Em atendimento' ? 'selected' : '' }}>Em atendimento</option>
-                            <option value="Cancelado" {{ old('status', $agendamento->STATUS_AGEND) == 'Cancelado' ? 'selected' : '' }}>Cancelado</option>
-                            <option value="Finalizado" {{ old('status', $agendamento->STATUS_AGEND) == 'Finalizado' ? 'selected' : '' }}>Finalizado</option>
-                        </select>
-                        @error('status')
-                            <div class="invalid-feedback">{{ $message }}</div>
-                        @enderror
-                    </div>
+                                    <!-- HORÁRIO INICIAL -->
+                                    <dt>Horário Início</dt>
+                                    <dd>
+                                        <input type="time" id="HR_AGEND_INI" class="form-control editable-field" name="HR_AGEND_INI" 
+                                            value="{{ \Carbon\Carbon::parse($agendamento->HR_AGEND_INI)->format('H:i') }}" disabled>
+                                    </dd>
 
-                    <!-- VALOR DO AGENDAMENTO -->
-                    <div class="mb-4">
-                        <label for="" class="form-label">Valor</label>
-                        <div class="input-group">
-                            <span class="input-group-text">R$</span>
-                            <input type="text" class="form-control" name="valor_agend" id="valor_agend" value="{{ old('valor_agend', $agendamento->VALOR_AGEND) }}">
+                                    <!-- HORÁRIO FINAL -->
+                                    <dt>Horário Fim</dt>
+                                    <dd>
+                                        <input type="time" id="HR_AGEND_FIN" class="form-control editable-field" name="HR_AGEND_FIN" 
+                                            value="{{ \Carbon\Carbon::parse($agendamento->HR_AGEND_FIN)->format('H:i') }}" disabled>
+                                    </dd>
+                                
+                                <dt>Status</dt>
+
+                                <!-- STATUS DA AGENDA -->
+                                <dd>
+                                    <select class="form-select editable-field" name="STATUS_AGEND" disabled>
+                                        <option value="Agendado" {{ $agendamento->STATUS_AGEND == 'Agendado' ? 'selected' : '' }}>Agendado</option>
+                                        <option value="Confirmado" {{ $agendamento->STATUS_AGEND == 'Confirmado' ? 'selected' : '' }}>Confirmado</option>
+                                        <option value="Cancelado" {{ $agendamento->STATUS_AGEND == 'Cancelado' ? 'selected' : '' }}>Cancelado</option>
+                                        <option value="Remarcado" {{ $agendamento->STATUS_AGEND == 'Remarcado' ? 'selected' : '' }}>Remarcado</option>
+                                        <option value="Finalizado" {{ $agendamento->STATUS_AGEND == 'Finalizado' ? 'selected' : '' }}>Finalizado</option>
+                                    </select>
+                                </dd>
+
+                            </dl>
                         </div>
                     </div>
 
                     <!-- OBSERVAÇÕES -->
-                    <div class="mb-4">
-                        <label for="OBSERVACOES" class="form-label">Observações</label>
-                        <textarea name="observacoes" id="observacoes" class="form-control" placeholder="">{{ old('observacoes', $agendamento->OBSERVACOES) }}</textarea>
+                    <div class="card mb-4">
+                        <div class="card-header"><h5><i class="bi bi-card-text me-2"></i>Observações</h5></div>
+                        <div class="card-body">
+                            <textarea class="form-control editable-field" name="OBSERVACOES" rows="4" disabled>{{ $agendamento->OBSERVACOES }}</textarea>
+                        </div>
                     </div>
 
-                    <input type="hidden" id="motivo_cancelamento" name="mensagem">
+                </div>
 
-                    <!-- BOTÕES -->
-                    <div class="d-flex gap-2 mt-3">
-                        <button type="submit" class="btn btn-success flex-grow-1 fw-bold" id="btnSalvarAlteracoes">
-                            <i class="bi bi-save me-2"></i> Salvar Alterações
-                        </button>
-                        <button 
-                            type="button" 
-                            class="btn btn-outline-secondary flex-grow-1 fw-bold" 
-                            onclick="window.history.back();"
-                        >
-                            <i class="bi bi-x-circle me-2"></i> Cancelar
-                        </button>
+                <div class="col-lg-4">
+                    <div class="card mb-4">
+                        <div class="card-header"><h5><i class="bi bi-people me-2"></i>Envolvidos e Localização</h5></div>
+                        <div class="card-body">
+                            <dl class="details-grid">
+
+                                <!-- PACIENTE -->
+                                <dt>Paciente</dt>
+                                <dd>
+                                     <input type="text" class="form-control view-mode" 
+                                           value="{{ $agendamento->paciente->NOME_COMPL_PACIENTE ?? '' }}" disabled>
+                                    <div class="edit-mode d-none">
+                                        <select id="select-paciente" name="ID_PACIENTE" placeholder="Selecione ou busque um paciente...">
+                                            @if($agendamento->paciente)
+                                                <option value="{{ $agendamento->paciente->ID_PACIENTE }}" selected>
+                                                    {{ $agendamento->paciente->NOME_COMPL_PACIENTE }}
+                                                </option>
+                                            @endif
+                                        </select>
+                                    </div>
+                                </dd>
+                                
+                                <!-- PSICOLOGO -->
+                                <dt>Psicólogo(a)</dt>
+                                <dd>
+                                     <input type="text" class="form-control view-mode" 
+                                           value="{{ $agendamento->ID_PSICOLOGO }}" disabled>
+                                    <div class="edit-mode d-none">
+                                        <select id="select-psicologo" name="ID_PSICOLOGO" placeholder="Selecione ou busque um psicólogo...">
+                                            @if($agendamento->ID_PSICOLOGO)
+                                                <option value="{{ $agendamento->ID_PSICOLOGO}}" selected>
+                                                    {{ $agendamento->ID_PSICOLOGO }}
+                                                </option>
+                                            @endif
+                                        </select>
+                                    </div>
+                                </dd>
+
+                                <!-- CLÍNICA -->
+                                <dt>Clínica</dt>
+                                <dd>
+                                    <input type="text" class="form-control" value="Psicologia" disabled>
+                                </dd>
+                                
+                                <!-- SALA - LOCAL DA AGENDA -->
+                                <dt>Sala</dt>
+                                <dd>
+                                    <input type="text" class="form-control view-mode" 
+                                           value="{{ $agendamento->LOCAL ?? '' }}" disabled>
+                                    <div class="edit-mode d-none">
+                                        <select id="select-local" name="ID_SALA" placeholder="Selecione ou busque uma sala...">
+                                           @if($agendamento->sala)
+                                                <option value="{{ $agendamento->ID_SALA }}" selected>
+                                                    {{ $agendamento->LOCAL }}
+                                                </option>
+                                            @else
+                                                <option value="{{$agendamento->ID_SALA}}" selected>{{$agendamento->ID_SALA}}</option>
+                                            @endif
+                                        </select>
+                                    </div>
+                                </dd>
+
+                            </dl>
+                        </div>
                     </div>
-                </form>
-            </div>
-        </div>
-    </div>
 
-    <!-- MODAL DE MENSAGEM DE CANCELAMENTO -->
-    <div class="modal fade" id="motivoCancelamento" tabindex="-1">
-        <div class="modal-dialog">
-
-            <div class="modal-content">
-                
-                <div class="modal-header">
-                    <h5 class="modal-title">Motivo do Cancelamento</h5>
+                    <div class="card mb-4">
+                        <div class="card-header"><h5><i class="bi bi-currency-dollar me-2"></i>Detalhes Financeiros</h5></div>
+                        <div class="card-body">
+                            <dl class="details-grid">
+                                <dt>Valor</dt>
+                                <dd>
+                                    <input type="text" class="form-control editable-field" name="VALOR_AGEND" 
+                                           value="{{ $agendamento->VALOR_AGEND ? number_format($agendamento->VALOR_AGEND, 2, ',', '.') : '' }}" disabled>
+                                </dd>
+                            </dl>
+                        </div>
+                    </div>
                 </div>
-
-                <div class="modal-body">
-
-                <div class="mb-3">
-                    <label for="text-cancelamento" class="form-label">Motivo: </label>
-                    <input type="text" class="form-control" id="text-cancelamento">
-                </div>
-
-                <div class="modal-footer">
-                    <button class="btn btn-primary" id="btnMensagemCancelamento">Salvar</button>
-                </div>
-                
             </div>
-            </div>
-        </div>
-    </div>
-    
-</body>
-
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
-    <!-- Bootstrap Icons -->
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" />
-    <!-- Flatpickr JS -->
-    <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
-    <!-- Flatpickr pt-br -->
-    <script src="https://cdn.jsdelivr.net/npm/flatpickr/dist/l10n/pt.js"></script>
-
-    <!-- SCRIPT FLATPICKR -->
-    <script>
-        flatpickr("#date", {
-            dateFormat: "Y-m-d",
-            altInput: true,
-            altFormat: "d/m/Y",
-            locale: "pt",
-            minDate: "today",
-        });
-
-        flatpickr("#start_time", {
-            enableTime: true,
-            noCalendar: true,
-            dateFormat: "H:i",
-            time_24hr: true,
-            minuteIncrement: 15,
-            altInput: true,
-            altFormat: "H:i",
-        });
-
-        flatpickr("#end_time", {
-            enableTime: true,
-            noCalendar: true,
-            dateFormat: "H:i",
-            time_24hr: true,
-            minuteIncrement: 15,
-            altInput: true,
-            altFormat: "H:i",
-        });
-    </script>
-
-    <!-- SCRIPT DE BUSCA DE SERVIÇOS -->
-    <script>
-        const servicoInput = document.getElementById('servico');
-        const servicosList = document.getElementById('servicos-list');
-
-        let timeout = null;
-
-        servicoInput.addEventListener('input', () => {
-            clearTimeout(timeout);
-
-            timeout = setTimeout(() => {
-            const query = servicoInput.value.trim();
-
-            // SEM VALORES PASSADOS PARA A QUERY
-            if (!query) {
-                servicosList.innerHTML = '';
-                document.getElementById('id_servico').value = '';
-                return;
-            }
-
-            fetch(`/psicologia/pesquisar-servico?search=${encodeURIComponent(query)}`)
-                .then(response => response.json())
-                .then(servicos => {
-
-                    // ZERA VALOR DA LISTA DE SERVIÇOS PARA INCLUSÃO
-                    servicosList.innerHTML = '';
-
-                    // CASO NENHUM SERVIÇO ENCONTRADO
-                    if (servicos.length === 0) {
-                        servicosList.innerHTML = `<button type="button" class="list-group-item list-group-item-action disabled">Nenhum serviço encontrado</button>`;
-                        document.getElementById('id_servico').value = '';
-                        return;
-                    }
-
-                    const servicoExato = servicos.find(s => s.SERVICO_CLINICA_DESC.toLowerCase() === query.toLowerCase());
-
-                    // CASO O SERVIÇO EXATO SEJA DIGITADO
-                    if (servicoExato) {
-                        aoSelecionarServico(servicoExato);
-                        servicosList.innerHTML = '';
-                        return;
-                    }
-
-                    document.getElementById('id_servico').value = '';
-
-                    servicos.forEach(servico => {
-                        const item = document.createElement('button');
-                        item.type = 'button';
-                        item.classList.add('list-group-item', 'list-group-item-action');
-                        item.textContent = servico.SERVICO_CLINICA_DESC;
-                        item.addEventListener('click', () => {
-                            aoSelecionarServico(servico);
-                            servicosList.innerHTML = '';
-                        });
-                        servicosList.appendChild(item);
-                    });
-                })
-                .catch(error => {
-                    console.error(error);
-                    servicosList.innerHTML = `<button type="button" class="list-group-item list-group-item-action disabled text-danger">Erro ao buscar serviços</button>`;
-                });
-        }, 300);
-        })
-
-        // FECHA A LISTA DE SERVIÇOS AO CLICAR FORA
-        document.addEventListener('click', (e) => {
-            if (!servicoInput.contains(e.target) && !servicosList.contains(e.target)) {
-                servicosList.innerHTML = '';
-            }
-        });
-
-        // FUNÇÃO CHAMADA AO SELECIONAR SERVIÇO
-        function aoSelecionarServico(servico) {
-            document.getElementById('servico').value = servico.SERVICO_CLINICA_DESC;
-            document.getElementById('id_servico').value = servico.ID_SERVICO_CLINICA;
-        }
-
-    </script>
-
-    <!-- SCRIPT BUSCA DE SALAS -->
-    <script>
-        const localInput = document.getElementById('local');
-        const localList = document.getElementById('locais-list');
-
-        localInput.addEventListener('input', (event) => {
-            timeout = setTimeout(() => {
-                const query = localInput.value.trim();
-
-                if(!query) {
-                    localList.innerHTML = '';
-                    document.getElementById('id_servico').value = '';
-                    return;
-                }
             
-                fetch(`/psicologia/pesquisar-local?search=${encodeURIComponent(query)}`)
-                    .then(response => response.json())
-                    .then(locais => {
-                        localList.innerHTML = '';
+            <div class="mt-4 d-flex justify-content-between">
+                <button type="button" class="btn btn-secondary" onclick="history.back()">
+                    <i class="bi bi-arrow-left me-2"></i>Voltar
+                </button>
+                <div>
+                    <button type="button" class="btn btn-primary" id="btn-editar">
+                        <i class="bi bi-pencil-square me-2"></i>Editar
+                    </button>
+                    <button type="submit" class="btn btn-success d-none" id="btn-salvar">
+                        <i class="bi bi-check2-square me-2"></i>Salvar
+                    </button>
+                </div>
+            </div>
+        </form>
+    </div>
 
-                        if (locais.length === 0) {
-                            localList.innerHTML = `<button type="button" class="list-group-item list-group-item-action disabled">Nenhum local encontrado</button>`;
-                            return;
-                        }
-                        
-                    const localExato = locais.find(l => l.DESCRICAO.toLowerCase() === query.toLowerCase());
+    <!-- FLATPICKR -->
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+    <script src="https://npmcdn.com/flatpickr/dist/l10n/pt.js"></script>
 
-                    if (localExato) {
-                        aoSelecionarLocal(localExato);
-                        localList.innerHTML = '';
-                        return;
-                    }
+    <script src="https://cdn.jsdelivr.net/npm/tom-select@2.3.1/dist/js/tom-select.complete.min.js"></script>
 
-                    locais.forEach(local => {
-                        const item = document.createElement('button');
-                        item.type = 'button';
-                        item.classList.add('list-group-item', 'list-local-option', 'list-group-item-action');
-                        item.textContent = local.DESCRICAO;
-                        item.addEventListener('click', () => {
-                            aoSelecionarLocal(local);
-                            localList.innerHTML = '';
-                        });
-                        localList.appendChild(item);
-                    });
-                    })
-                    .catch(error => {
-                    console.error(error);
-                    localList.innerHTML = `<button type="button" class="list-group-item list-group-item-action disabled text-danger">Erro ao buscar locais</button>`;
-                });
-            }, 300)
-
-
-        });
-
-        function aoSelecionarLocal(local) {
-            document.getElementById('local').value = local.DESCRICAO;
-        }
-    </script>
-
-    <!-- SCRIPT CONFIRMAÇÃO DE ALTERAÇÕES -->
     <script>
-        document.getElementById('btnSalvarAlteracoes').addEventListener('click', function (event) {
-            const novoStatus = document.getElementById('status').value;
+    document.addEventListener('DOMContentLoaded', function() {
+    const btnEditar = document.getElementById('btn-editar');
+    const btnSalvar = document.getElementById('btn-salvar');
 
-            if (novoStatus == "Cancelado") {
-            event.preventDefault(); // Impede o envio imediato do form
-                const modalCancelamento = new bootstrap.Modal(document.getElementById('motivoCancelamento'));
-                modalCancelamento.show();
+    // Flag para garantir que a inicialização ocorra apenas uma vez
+    let editModeInicializado = false;
+
+    // Traduz o Flatpickr para português assim que a página carrega
+    flatpickr.localize(flatpickr.l10ns.pt);
+
+    btnEditar.addEventListener('click', function () {
+        // Habilita campos simples
+        document.querySelectorAll('.editable-field').forEach(el => el.removeAttribute('disabled'));
+
+        // Alterna a visibilidade dos campos
+        document.querySelectorAll('.view-mode').forEach(el => el.classList.add('d-none'));
+        document.querySelectorAll('.edit-mode').forEach(el => el.classList.remove('d-none'));
+        
+        // Troca os botões
+        btnSalvar.classList.remove('d-none');
+        this.classList.add('d-none');
+
+        // Inicializa os plugins (apenas na primeira vez)
+        if (!editModeInicializado) {
+            inicializarTomSelects();
+            inicializarFlatpickr(); // <--- CHAMADA DA NOVA FUNÇÃO
+            editModeInicializado = true;
+        }
+    });
+
+    /**
+     * NOVA FUNÇÃO PARA INICIALIZAR O FLATPICKR
+     */
+    function inicializarFlatpickr() {
+        const commonDateConfig = {
+            altInput: true,       
+            altFormat: "d/m/Y",  
+            dateFormat: "Y-m-d", 
+            allowInput: true,
+            minDate: "today"
+        };
+
+        const commonTimeConfig = {
+            enableTime: true,
+            noCalendar: true,
+            dateFormat: "H:i",
+            time_24hr: true,
+            minuteIncrement: 15,
+            allowInput: true
+        };
+
+        // Aplica a configuração aos campos pelos seus IDs
+        flatpickr("#DT_AGEND", commonDateConfig);
+        flatpickr("#HR_AGEND_INI", commonTimeConfig);
+        flatpickr("#HR_AGEND_FIN", commonTimeConfig);
+    }
+
+
+    /**
+     * FUNÇÃO PARA INICIALIZAR OS TOMSELECTS (já existente)
+     */
+    function inicializarTomSelects() {
+        // --- SELECT PACIENTE ---
+        new TomSelect('#select-paciente', {
+            valueField: 'ID_PACIENTE',
+            labelField: 'NOME_COMPL_PACIENTE',
+            searchField: ['NOME_COMPL_PACIENTE', 'CPF_PACIENTE'],
+            create: false,
+            load: (query, callback) => {
+                if (query.length < 2) return callback();
+                const url = `/psicologia/consultar-paciente/buscar-nome-cpf?search=${encodeURIComponent(query)}`;
+                fetch(url).then(response => response.json()).then(json => callback(json)).catch(() => callback());
+            },
+            render: {
+                option: (data, escape) => `<div><strong>${escape(data.NOME_COMPL_PACIENTE)}</strong><small class="d-block text-muted">${escape(data.CPF_PACIENTE || '')}</small></div>`,
+                item: (data, escape) => `<div>${escape(data.NOME_COMPL_PACIENTE)}</div>`
             }
         });
 
-        document.getElementById('btnMensagemCancelamento').addEventListener('click', function() {
-            const motivoCancelamento = document.getElementById('motivo_cancelamento').value = document.getElementById('text-cancelamento').value;
-            document.querySelector('form').submit();
-        })
+        // --- SELECT SERVIÇO ---
+        new TomSelect('#select-servico', {
+            valueField: 'ID_SERVICO_CLINICA',
+            labelField: 'SERVICO_CLINICA_DESC',
+            searchField: ['SERVICO_CLINICA_DESC'],
+            create: false,
+            load: (query, callback) => {
+                const url = `/psicologia/pesquisar-servico?search=${encodeURIComponent(query)}`;
+                fetch(url).then(r => r.json()).then(j => callback(j)).catch(() => callback());
+            }
+        });
 
-    </script>
+        // --- SELECT PSICÓLOGO ---
+        new TomSelect('#select-psicologo', {
+            valueField: 'ID_PSICOLOGO',
+            labelField: 'NOME_COMPL',
+            searchField: ['NOME_COMPL', 'ALUNO'],
+            create: false,
+            load: (query, callback) => {
+                const url = `/psicologia/listar-psicologos?search=${encodeURIComponent(query)}`;
+                fetch(url).then(r => r.json()).then(j => callback(j)).catch(() => callback());
+            },
+            render: {
+                option: (data, escape) => `<div>${escape(data.NOME_COMPL)} - ${escape(data.ALUNO)}</div>`,
+                item: (data, escape) => `<div>${escape(data.NOME_COMPL)}</div>`
+            }
+        });
 
+        // --- SELECT LOCAL ---
+        new TomSelect('#select-local', {
+            valueField: 'ID_SALA',
+            labelField: 'DESCRICAO',
+            searchField: ['DESCRICAO'],
+            create: false,
+            load: (query, callback) => {
+                const url = `/psicologia/pesquisar-local?search=${encodeURIComponent(query)}`;
+                fetch(url).then(r => r.json()).then(j => callback(j)).catch(() => callback());
+            }
+        });
+    }
+});
+</script>
+</body>
 </html>

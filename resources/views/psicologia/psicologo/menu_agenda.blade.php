@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Calendário - Agendamento Clínica</title>
+    <title>Calendário - Agendamentos Clínica - Aluno</title>
 
     <!-- FAVICON - IMAGEM DA GUIA -->
     <link rel="icon" type="image/png" href="/favicon_faesa.png">
