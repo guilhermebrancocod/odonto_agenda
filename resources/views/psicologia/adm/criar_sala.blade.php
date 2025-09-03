@@ -272,25 +272,8 @@
                         return;
                     }
 
-                    const promises = salas.map(sala => {
-                        if (!sala.DISCIPLINA) {
-                            return Promise.resolve({ NOME: '-' });
-                        }
-                        return fetch(`/psicologia/disciplina/${sala.DISCIPLINA}`)
-                            .then(res => {
-                                if (!res.ok) {
-                                    return { NOME: 'Inválida' };
-                                }
-                                return res.json();
-                            });
-                    });
-
-                    const disciplinas = await Promise.all(promises);
-
                     salasTbody.innerHTML = '';
                     salas.forEach((s, index) => {
-                        const nomeDisciplina = disciplinas[index].NOME;
-
                         const statusBadge = s.ATIVO === 'S' 
                             ? `<span class="badge bg-success">Ativo</span>` 
                             : `<span class="badge bg-danger">Inativo</span>`;
@@ -298,7 +281,7 @@
                         const tr = document.createElement('tr');
                         tr.innerHTML = `
                             <td>${s.DESCRICAO}</td>
-                            <td>${s.DISCIPLINA || ''} - ${nomeDisciplina}</td>
+                            <td>${s.DISCIPLINA || ''}</td>
                             <td>${statusBadge}</td>
                             <td>
                                 <button class="btn btn-sm btn-warning btn-editar" title="Editar" data-sala='${JSON.stringify(s)}'>
@@ -321,7 +304,9 @@
             searchInput.addEventListener('input', () => carregarSalas(searchInput.value));
 
             formEditarSala.addEventListener('submit', e => {
+                
                 e.preventDefault();
+
                 const id = formEditarSala.querySelector('#edit-sala-id').value;
                 const formData = new FormData(formEditarSala);
                 const data = Object.fromEntries(formData.entries());
