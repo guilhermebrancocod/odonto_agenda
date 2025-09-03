@@ -103,19 +103,3 @@ function verificaCollapsed() {
     }
 };
 </script>
-
-@php
-    // Pega os dados do usuário da sessão
-    $usuario = session('usuario');
-@endphp
-
-<script>
-    // Converte para objeto JS
-    const usuario = @json($usuario->map(function($u) {
-        return [
-            'id_usuario_clinica' => $u->ID_USUARIO_CLINICA,
-            'id_clinica' => $u->ID_CLINICA,
-            'sit_usuario' => $u->SIT_USUARIO
-        ];
-    }));
-</script>

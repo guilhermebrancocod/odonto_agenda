@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Menu</title>
+    <title>Calendário - Agendamento Clínica</title>
 
     <!-- FAVICON - IMAGEM DA GUIA -->
     <link rel="icon" type="image/png" href="/favicon_faesa.png">
@@ -130,32 +130,21 @@
     
     @include('components.psicologo_navbar')
 
-    <div class="container ms-3">
+    <div class="container ms-3 mw-100">
+
         <div class="row">
-            <div class="col-12 text-center mb-1">
-                <div class="d-flex flex-row justify-content-between align-items-center">
-                    <p class="p-0 mt-2 mb-1 text-start" style="font-size: 25px;">
-                        <!-- <i class="bi bi-list" id="btnToggleNavbar" style="cursor: pointer;"></i> -->
-                        <strong>Calendário</strong>
+
+            <x-page-title>
+                    <p onclick="window.location.href = '/psicologo/criar-agendamento'" class="btn btn-success p-2 me-3" style="font-size: 15px;" >
+                        <span>Novo Agendamento</span>
                     </p>
-                    <div class="header-menu-right d-flex flex-row justify-content-between align-items-center gap-3">
+            </x-page-title>
 
-                        <a href="/psicologo/criar-agendamento" class="btn btn-success m-0 me-2 py-1" style="font-size: 15px;">
-                            <span>
-                                Novo Agendamento
-                            </span>
-                        </a>
-
-                        <div class="profile-container">
-                            <i class="bi bi-person-circle fs-2" id="profile"></i>
-                        </div>
-                    </div>
-                </div>
-            </div>
             <div class="col-12 shadow-lg shadow-dark pt-3 bg-body-tertiary rounded">
                 <!-- CALENDÁRIO -->
                 <div id="calendar" style="max-width: 100%;" class="bg-light-subtle pe-4"></div>
             </div>
+
         </div>
     </div>
 

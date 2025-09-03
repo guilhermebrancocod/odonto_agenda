@@ -1,23 +1,18 @@
 <!DOCTYPE html>
 <html lang="pt-br">
+
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>Agendamento</title>
-
     <link rel="icon" type="image/png" href="/favicon_faesa.png">
-    
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700&display=swap" rel="stylesheet" />
     <link href="https://cdnjs.cloudflare.com/ajax/libs/mdb-ui-kit/7.1.0/mdb.min.css" rel="stylesheet" />
-    
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" crossorigin="anonymous">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
-    
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css" />
-
     <!-- TOM SELECT -->
     <link href="https://cdn.jsdelivr.net/npm/tom-select@2.3.1/dist/css/tom-select.bootstrap5.css" rel="stylesheet">
-
     <style>
         /* Estilos mantidos do arquivo original e adaptados */
         #servicos-list button {
@@ -61,8 +56,10 @@
         }
     </style>
 </head>
+
 <body class="bg-body-secondary">
 
+<!-- COMPONENT NAVBAR -->
 @include('components.navbar')
 
 @if ($errors->any())
@@ -89,12 +86,16 @@
 @endif
 
 <div class="container ms-3 mw-100">
+
     <div class="row">
+        
+        <!-- COMPONENT DE HEADER DE CADA PÁGINA DAS VIEWS -->
         <x-page-title>
         </x-page-title>
         
         <div class="col-12 shadow-lg shadow-dark p-4 bg-body-tertiary rounded">
 
+            <!-- FORM DE AGENDAMENTO -->
             <form action="{{ route('criarAgendamento-Psicologia') }}" method="POST" id="agendamento-form" class="w-100" validate>
                 @csrf
 
@@ -233,10 +234,8 @@
                             <i class="bi bi-check-circle-fill me-1"></i> Agendar
                         </button>
                     </div>
-
                 </div>
             </form>
-
         </div>
     </div>
 </div>
@@ -310,7 +309,7 @@
 
         // Permite "criar" um item para acionar o evento de adicionar novo
         create: true,
-        createFilter: (input) => input.length >= 2, // Só permite "criar" se houver texto
+        createFilter: (input) => input.length >= 2,
 
         // Carrega dados da sua API
         load: (query, callback) => {
@@ -328,7 +327,6 @@
             window.location.href = `${rotas.novoPaciente}?nome_compl_paciente=${encodeURIComponent(value)}`;
         },
     });
-
 
     // --- SELECT DE SERVIÇO ---
     const servicoSelect = new TomSelect('#select-servico', {

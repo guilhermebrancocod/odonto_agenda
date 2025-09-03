@@ -4,29 +4,18 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>Agendamento</title>
-
     <!-- FAVICON - IMAGEM DA GUIA -->
     <link rel="icon" type="image/png" href="/favicon_faesa.png">
     
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700&display=swap" rel="stylesheet" />
     <link href="https://cdnjs.cloudflare.com/ajax/libs/mdb-ui-kit/7.1.0/mdb.min.css" rel="stylesheet" />
-
     <!-- Flatpickr CSS -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css" />
-
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
-
+    <!-- TOM SELECT -->
+    <link href="https://cdn.jsdelivr.net/npm/tom-select@2.3.1/dist/css/tom-select.bootstrap5.css" rel="stylesheet">
     <style>
-        html, body { height: 100%; margin: 0; }
-        #content-wrapper {
-            width: 85vw;
-            height: 100vh;
-            margin: auto;
-            display: column;
-            gap: 24px;
-            overflow-y: auto;
-            align-items: stretch;
-        }
+        /* Estilos mantidos do arquivo original e adaptados */
         #servicos-list button {
             cursor: pointer;
         }
@@ -37,88 +26,38 @@
         }
 
         @keyframes fadeInSlide {
-            from {
-                opacity: 0;
-                transform: translateY(-5px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
+            from { opacity: 0; transform: translateY(-5px); }
+            to { opacity: 1; transform: translateY(0); }
         }
 
-        #alert-success {
-        animation: slideDownFadeOut 4s ease forwards;
-        max-width: 90%;
-    }
+        #alert-success, #alert-error {
+            animation: slideDownFadeOut 5s ease forwards;
+            max-width: 90%;
+        }
 
-    @keyframes slideDownFadeOut {
-        0% {
-            transform: translate(-50%, -100%);
-            opacity: 0;
+        @keyframes slideDownFadeOut {
+            0% { transform: translate(-50%, -100%); opacity: 0; }
+            10% { transform: translate(-50%, 0); opacity: 1; }
+            90% { transform: translate(-50%, 0); opacity: 1; }
+            100% { transform: translate(-50%, -100%); opacity: 0; }
         }
-        10% {
-            transform: translate(-50%, 0);
-            opacity: 1;
-        }
-        90% {
-            transform: translate(-50%, 0);
-            opacity: 1;
-        }
-        100% {
-            transform: translate(-50%, -100%);
-            opacity: 0;
-        }
-    }
 
-    #alert-error {
-        animation: slideDownFadeOut 6s ease forwards;
-    }
+        #info-observacao:hover {
+            color: #0a58ca;
+        }
 
-    @keyframes slideDownFadeOut {
-        0% {
-            transform: translate(-50%, -100%);
-            opacity: 0;
+        /* Estilos para limitar a altura das listas de busca */
+        .list-local-option, .list-psicologo-option, #pacientes-list .list-group {
+            max-height: 200px;
+            overflow-y: auto;
         }
-        10% {
-            transform: translate(-50%, 0);
-            opacity: 1;
+        
+        .shadow-dark {
+            box-shadow: 0 0.75rem 1.25rem rgba(0,0,0,0.4) !important;
         }
-        85% {
-            transform: translate(-50%, 0);
-            opacity: 1;
-        }
-        100% {
-            transform: translate(-50%, -100%);
-            opacity: 0;
-        }
-    }
-    #info-observacao:hover {
-        color: #0a58ca;
-    }
-    main {
-        background-color: #ffffff;
-        padding: 18px;
-        border-radius: 10px;
-        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
-        flex-direction: column;
-        overflow-y: auto;
-        border: 1.8px solid #dee2e6;
-    }
-
-    .list-local-option {
-        max-width: 350px;
-        max-height: 50px;
-        overflow-y: auto;
-    }
-
-    .list-psicologo-option {
-        max-width: 700px;
-        max-height: 50px;
-        overflow-y: auto;
-    }
     </style>
 </head>
+
 <body class="bg-body-secondary">
 
 <!-- COMPONENT NAVBAR -->
@@ -147,23 +86,14 @@
     </div>
 @endif
 
-<div id="content-wrapper" class="bg-body-secondary ms-4 me-4 mt-1">
+<div class="container ms-3 mw-100">
 
-    <div class="d-flex flex-row justify-content-between align-items-center">
-        <div>
-            <p class="m-0 p-0 mb-2 ms-2">
-                <i class="bi bi-calendar-plus"></i>
-                |
-                <strong>Criar Agendamento</strong>
-            </p>
-        </div>
-        <div class="profile-container">
-            <i class="bi bi-person-circle fs-2" id="profile"></i>
-        </div>
-    </div>
+    <!-- COMPONENT DE HEADER DE CADA PÁGINA DAS VIEWS -->
+    <x-page-title>
+    </x-page-title>
 
-    <main>
-        <div class="bg-white p-4 rounded shadow-sm w-80 w-md-75 w-lg-50">
+        <div class="col-12 shadow-lg shadow-dark p-4 bg-body-tertiary rounded">
+
             <!-- FORM DE AGENDAMENTO -->
             <form action="{{ route('criarAgendamento-Psicologo') }}" method="POST" id="agendamento-form" class="w-100" validate>
                 @csrf
@@ -185,11 +115,9 @@
                 ></div>
 
                 {{-- CAMPO DE PESQUISA POR PACIENTES --}}
-                <div class="mb-3 position-relative">
+                 <div class="mb-3 position-relative">
                     <label for="search-input" class="form-label">Paciente</label>
-                    <input id="search-input" name="search" class="form-control" placeholder="Pesquisar paciente" value="{{ old('search') }}">
-
-                    <div id="pacientes-list" class="list-group position-absolute w-100" style="z-index: 1000; top: 100%"></div>
+                    <select id="search-input" name="paciente_id" placeholder="Pesquisar paciente por nome ou CPF..." autocomplete="off"></select>
                 </div>
 
                 <!-- SUBTÍTULO -->
@@ -205,27 +133,23 @@
                         <label for="disciplina" class="form-label">
                             Disciplina
                         </label>
-                        <input type="text" id="disciplina" name="disciplina" class="form-control" autocomplete="off" value="{{ old('disciplina') }}" placeholder="Disciplina do Atendimento">
-                        
-                        <div id="disciplinas-list" class="list-group position-absolute w-100" style="z-index: 1000;"></div>
+                        <label for="disciplina" class="form-label"></label>
+                        <select name="disciplina" id="disciplina" placeholder="Disciplina do Atendimento" autocomplete="off"></select>
                     </div>
 
-                    <!-- DIA -->
                     <div class="col-sm-6 col-md-3">
                         <label for="data" class="form-label">Dia</label>
-                        <input type="date" id="data" name="dia_agend" class="form-control" value="{{ old('dia_agend') }}" placeholder="Dia do Atendimento">
+                        <input type="text" id="data" name="dia_agend" class="form-control" value="{{ old('dia_agend') }}" placeholder="Selecione o Dia">
                     </div>
 
-                    <!-- HORÁRIO INÍCIO -->
                     <div class="col-sm-6 col-md-3">
                         <label for="hr_ini" class="form-label">Horário Início</label>
-                        <input type="time" id="hr_ini" name="hr_ini" class="form-control" value="{{ old('hr_ini') }}">
+                        <input type="text" id="hr_ini" name="hr_ini" class="form-control" value="{{ old('hr_ini') }}" disabled>
                     </div>
 
-                    <!-- HORÁRIO FIM -->
                     <div class="col-sm-6 col-md-3">
                         <label for="hr_fim" class="form-label">Horário Fim</label>
-                        <input type="time" id="hr_fim" name="hr_fim" class="form-control" value="{{ old('hr_fim') }}">
+                        <input type="text" id="hr_fim" name="hr_fim" class="form-control" value="{{ old('hr_fim') }}" disabled>
                     </div>
 
                     <!-- Mensagem que aparece quando ativa recorrência -->
@@ -237,9 +161,8 @@
                     <input type="hidden" name="id_sala_clinica" id="id_sala_clinica">
                     <div class="col-sm-6 col-md-3 mt-2 position-relative">
                         <label for="local_agend" class="form-label">Local</label>
-                        <input type="text" name="local_agend" id="local_agend" class="form-control" placeholder="Local do atendimento" value="{{ old('local_agend') }}">
-
-                        <div id="local-list" class="list-group position-absolute w-100" style="z-index: 1000; top: 100%"></div>
+                        <label for="local_agend" class="form-label"></label>
+                        <select name="local_agend" id="local_agend" placeholder="Selecione uma sala"></select>
                     </div>
 
                     <!-- OBSERVAÇÕES -->
@@ -258,7 +181,6 @@
                 </div>
             </form>
         </div>
-    </main>
 </div>
 
 <!-- Scripts -->
@@ -267,302 +189,167 @@
 <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
 <!-- Flatpckr pt-br -->
 <script src="https://cdn.jsdelivr.net/npm/flatpickr/dist/l10n/pt.js"></script>
+<!-- TOM SELECT -->
+<script src="https://cdn.jsdelivr.net/npm/tom-select@2.3.1/dist/js/tom-select.complete.min.js"></script>
 
-<!-- BUSCA DE PACIENTES -->
+<!-- TOM SELECT PARA CAMPOS DE BUSCA -->
 <script>
-    const searchInput = document.getElementById('search-input');
-    const pacientesList = document.getElementById('pacientes-list');
-    const pacienteIdInput = document.getElementById('paciente_id');
-    const psicologoId = document.getElementById('id_psicologo').value;
 
-    // PESQUISA PACIENTE - FUNCIONALIDADES
-    searchInput.addEventListener('input', function(e) {
-        const nome = searchInput.value.trim();
-        fetch(`/psicologo/consultar-paciente/buscar?search=${encodeURIComponent(nome)}&psicologo=${encodeURIComponent(psicologoId)}`)
+    // BUSCA DE PACIENTE
+    const pacienteSelect = new TomSelect('#search-input', {
+        valueField: 'ID_PACIENTE',
+        labelField: 'NOME_COMPL_PACIENTE',
+        searchField: ['NOME_COMPL_PACIENTE', 'CPF_PACIENTE'],
+
+        render: {
+            option: (data, escape) => {
+                const cpf = data.CPF_PACIENTE || 'CPF não informado';
+                return `<div>
+                            <strong>${escape(data.NOME_COMPL_PACIENTE)}</strong>
+                            <small class="d-block text-muted">${escape(cpf)}</small>
+                        </div>`;
+            },
+            item: (data, escape) => {
+                return `<div>${escape(data.NOME_COMPL_PACIENTE)}</div>`;
+            },
+            // Mensagem quando não há resultados
+            no_results: (data, escape) => {
+                return `<div class="no-results">Nenhum paciente encontrado para "<strong>${escape(data.input)}</strong>".</div>`;
+            },
+        },
+        // Carrega dados da sua API
+        load: (query, callback) => {
+            if (query.length < 2) return callback();
+            const url = `/psicologo/consultar-paciente/buscar?search=${encodeURIComponent(query)}`;
+            fetch(url)
                 .then(response => response.json())
-                .then(pacientes => {
-
-                    // AO BUSCAR, OS VALORES ABAIXO SÃO ZERADOS
-                    pacientesList.innerHTML = '';
-                    pacienteIdInput.value = '';
-
-                    // CASO NENHUM PACIENTE SEJA ENCONTRADO - MOSTRA MENSAGEM
-                    if (pacientes.length === 0) {
-                        pacientesList.innerHTML = `<div class="alert alert-warning">Nenhum paciente encontrado.</div>`;
-                        return;
-                    }
-
-                    // CRIA ELEMENTO HTML
-                    const listGroup = document.createElement('div');
-                    listGroup.classList.add('list-group');
-
-                    // SE QUANTIDADE DE PACIENTES É MAIOR QUE 5
-                    if(pacientes.length > 5) {
-                        listGroup.style.maxHeight = '200px';
-                        listGroup.style.overflowY = 'auto';
-                    }
-
-                    pacientes.forEach(paciente => {
-                        const item = document.createElement('button');
-                        item.type = 'button';
-                        item.classList.add('list-group-item', 'list-group-item-action', 'border');
-                        item.textContent = `${paciente.NOME_COMPL_PACIENTE}`;
-                        item.addEventListener('click', () => {
-                            searchInput.value = `${paciente.NOME_COMPL_PACIENTE}` + ' - ' + `${paciente.CPF_PACIENTE}`;                            
-                            pacienteIdInput.value = paciente.ID_PACIENTE;
-                            pacientesList.innerHTML = '';
-                        });
-                        listGroup.appendChild(item);
-                    });
-
-                    pacientesList.appendChild(listGroup);
-                })
-                .catch(error => {
-                    pacientesList.innerHTML = `<div class="alert alert-danger">Erro ao buscar pacientes.</div>`;
-                    console.error(error);
-                });
-
-            function formatarDataBR(dateStr) {
-                if (!dateStr) return '-';
-                const cleanedDate = dateStr.split('T')[0];
-                const [year, month, day] = cleanedDate.split('-');
-                return `${day}/${month}/${year}`;
-            }
-        });
-</script>
-
-<!-- BUSCA DE DISCIPLINAS -->
-<script>
-    const disciplinaInput = document.getElementById("disciplina");
-    const disciplinasList = document.getElementById("disciplinas-list");
-
-    const localInput = document.getElementById("local_agend");
-    const localList = document.getElementById("local-list");
-
-    let timeout = null;
-
-    // =========================
-    // BUSCA DE DISCIPLINA
-    // =========================
-    disciplinaInput.addEventListener('input', () => {
-        clearTimeout(timeout);
-
-        timeout = setTimeout(() => {
-            const query = disciplinaInput.value.trim();
-
-            if (!query) {
-                disciplinasList.innerHTML = '';
-                document.getElementById('id_servico').value = '';
-                return;
-            }
-
-            fetch(`/psicologo/pesquisar-disciplina?search=${encodeURIComponent(query)}`)
-                .then(response => response.json())
-                .then(disciplinas => {
-
-                    disciplinasList.innerHTML = '';
-
-                    if (disciplinas.length === 0) {
-                        disciplinasList.innerHTML = `<button type="button" class="list-group-item list-group-item-action disabled">Nenhuma disciplina encontrado</button>`;
-                        document.getElementById('id_servico').value = '';
-                        return;
-                    }
-
-                    const disciplinaExata = disciplinas.find(s => s.DISCIPLINA.toLowerCase() === query.toLowerCase());
-
-                    if (disciplinaExata) {
-                        aoSelecionarDisciplina(disciplinaExata);
-                        disciplinasList.innerHTML = '';
-                        return;
-                    }
-
-                    document.getElementById('id_servico').value = '';
-
-                    disciplinas.forEach(disciplina => {
-                        const item = document.createElement('button');
-                        item.type = 'button';
-                        item.classList.add('list-group-item', 'list-group-item-action');
-                        item.textContent = disciplina.DISCIPLINA + '-' + disciplina.SERVICO_CLINICA_DESC;
-                        item.addEventListener('click', () => {
-                            aoSelecionarDisciplina(disciplina);
-                            disciplinasList.innerHTML = '';
-                        });
-                        disciplinasList.appendChild(item);
-                    });
-                })
-                .catch(error => {
-                    console.error(error);
-                    disciplinasList.innerHTML = `<button type="button" class="list-group-item list-group-item-action disabled text-danger">Erro ao buscar Disciplinas</button>`;
-                });
-        }, 300);
+                .then(json => callback(json))
+                .catch(() => callback());
+        },
     });
 
-    // Fecha a lista de serviços ao clicar fora
-    document.addEventListener('click', (e) => {
-        if (!disciplinaInput.contains(e.target) && !disciplinasList.contains(e.target)) {
-            disciplinasList.innerHTML = '';
-        }
+    // BUSCA DE DISCIPLINAS
+    const disciplinaSelect = new TomSelect('#disciplina', {
+        valueField: 'ID_SERVICO_CLINICA',
+        labelField: 'SERVICO_CLINICA_DESC',
+        searchField: ['SERVICO_CLINICA_DESC'],
+        createFilter: (input) => input.length > 0,
+        load: (query, callback) => {
+            const url = `/psicologo/pesquisar-disciplina?search=${encodeURIComponent(query)}`;
+            fetch(url)
+                .then(r => r.json())
+                .then(j => callback(j))
+                .catch(() => callback());
+        },
     });
 
-    // =========================
     // BUSCA DE LOCAL
-    // =========================
-    localInput.addEventListener('input', () => {
-        clearTimeout(timeout);
-
-        timeout = setTimeout(() => {
-            const query = localInput.value.trim();
-
-            if (!query) {
-                localList.innerHTML = '';
-                return;
-            }
-
-            fetch(`/psicologia/pesquisar-local?search=${encodeURIComponent(query)}`)
-                .then(response => response.json())
-                .then(locais => {
-                    localList.innerHTML = '';
-
-                    if (locais.length === 0) {
-                        localList.innerHTML = `<button type="button" class="list-group-item list-group-item-action disabled">Nenhum local encontrado</button>`;
-                        return;
-                    }
-
-                    const localExato = locais.find(l => l.DESCRICAO.toLowerCase() === query.toLowerCase());
-
-                    if (localExato) {
-                        aoSelecionarLocal(localExato);
-                        localList.innerHTML = '';
-                        return;
-                    }
-
-                    locais.forEach(local => {
-                        const item = document.createElement('button');
-                        item.type = 'button';
-                        item.classList.add('list-group-item', 'list-local-option', 'list-group-item-action');
-                        item.textContent = local.DESCRICAO;
-                        item.addEventListener('click', () => {
-                            aoSelecionarLocal(local);
-                            localList.innerHTML = '';
-                        });
-                        localList.appendChild(item);
-                    });
-                })
-                .catch(error => {
-                    console.error(error);
-                    localList.innerHTML = `<button type="button" class="list-group-item list-group-item-action disabled text-danger">Erro ao buscar locais</button>`;
-                });
-        }, 300);
+    const localSelect = new TomSelect('#local_agend', {
+        valueField: 'ID_SALA_CLINICA',
+        labelField: 'DESCRICAO',
+        searchField: ['DESCRICAO'],
+        createFilter: (input) => input.length > 0,
+        load: (query, callback) => {
+            const url = `/psicologia/pesquisar-local?search=${encodeURIComponent(query)}`;
+            fetch(url)
+                .then(r => r.json())
+                .then(j => callback(j))
+                .catch(() => callback());
+        },
     });
-
-    // Fecha a lista de locais ao clicar fora
-    document.addEventListener('click', (e) => {
-        if (!localInput.contains(e.target) && !localList.contains(e.target)) {
-            localList.innerHTML = '';
-        }
-    });
-
-    // =========================
-    // FUNÇÕES DE SELEÇÃO
-    // =========================
-    function aoSelecionarDisciplina(disciplina) {
-        document.getElementById('disciplina').value = disciplina.DISCIPLINA;
-        document.getElementById('id_servico').value = disciplina.ID_SERVICO_CLINICA;
-    }
-
-    function aoSelecionarLocal(local) {
-        document.getElementById('local_agend').value = local.DESCRICAO;
-        document.getElementById('id_sala_clinica').value = local.ID_SALA_CLINICA;
-    }
-
-    function aoSelecionarPsicologo(psicologo) {
-        document.getElementById('psicologo_agend').value = psicologo.NOME_COMPL;
-        document.getElementById('id_psicologo').value = psicologo.ALUNO;
-    }
 </script>
 
 <!-- FLATPICKR PARA MELHORAR VISUALIZAÇÃO DE DIAS E HORÁRIOS -->
 <script>
-document.addEventListener('DOMContentLoaded', function() {
+    document.addEventListener('DOMContentLoaded', function() {
+    flatpickr.localize(flatpickr.l10ns.pt);
+
     const dataInput = document.getElementById('data');
-    const hrInicial = document.getElementById('hr_ini');
-    const hrFinal = document.getElementById('hr_fim');
+    const hrInicialInput = document.getElementById('hr_ini');
+    const hrFinalInput = document.getElementById('hr_fim');
 
-    // Inicializa Flatpickr para o campo de data
-    flatpickr(dataInput, {
-        dateFormat: "d-m-Y", 
-        altInput: true,
-        altFormat: "d-m-Y",
-        locale: "pt",
-        minDate: "today",
-        maxDate: new Date(new Date().setDate(new Date().getDate() + 7)),
-        allowInput: true,
+    // --- REGRA DE NEGÓCIO PRINCIPAL ---
+    // Calcula a data e hora mínimas permitidas para o agendamento (agora + 8 horas).
+    const dataMinimaAgendamento = new Date();
+    dataMinimaAgendamento.setHours(dataMinimaAgendamento.getHours() + 8);
+
+    // Para consistência com minuteIncrement, arredondamos os minutos para o próximo incremento de 15.
+    const minutos = dataMinimaAgendamento.getMinutes();
+    const minutosArredondados = Math.ceil(minutos / 15) * 15;
+    dataMinimaAgendamento.setMinutes(minutosArredondados);
+    dataMinimaAgendamento.setSeconds(0);
+    // ------------------------------------
+
+
+    // --- Instâncias do Flatpickr ---
+
+    const hrFinalFP = flatpickr(hrFinalInput, {
+        enableTime: true,
+        noCalendar: true,
+        dateFormat: "H:i",
+        time_24hr: true,
+    });
+
+    const hrInicialFP = flatpickr(hrInicialInput, {
+        enableTime: true,
+        noCalendar: true,
+        dateFormat: "H:i",
+        time_24hr: true,
+        minuteIncrement: 15,
         onChange: function(selectedDates) {
-            atualizarMinHora();
-        }
-    });
-
-    // Inicializa Flatpickr para horário inicial
-    flatpickr(hrInicial, {
-        enableTime: true,
-        noCalendar: true,
-        dateFormat: "H:i",
-        time_24hr: true,
-        minuteIncrement: 15,
-        allowInput: true,
-    });
-
-    // Inicializa Flatpickr para horário final
-    flatpickr(hrFinal, {
-        enableTime: true,
-        noCalendar: true,
-        dateFormat: "H:i",
-        time_24hr: true,
-        minuteIncrement: 15,
-        allowInput: true,
-    });
-
-    // Função para atualizar o horário mínimo baseado na data
-    function atualizarMinHora() {
-        const hoje = new Date();
-        const selecionada = dataInput._flatpickr.selectedDates[0];
-
-        let minTime = "00:00"; // padrão para qualquer outro dia
-        if (selecionada) {
-            if (
-                selecionada.getFullYear() === hoje.getFullYear() &&
-                selecionada.getMonth() === hoje.getMonth() &&
-                selecionada.getDate() === hoje.getDate()
-            ) {
-                // Se for hoje, mínimo = agora + 8 horas
-                const agora = new Date();
-                agora.setHours(agora.getHours() + 8);
-                const h = String(agora.getHours()).padStart(2, '0');
-                const m = String(agora.getMinutes()).padStart(2, '0');
-                minTime = `${h}:${m}`;
+            if (selectedDates.length > 0) {
+                const dataInicio = selectedDates[0];
+                const dataFim = new Date(dataInicio.getTime());
+                dataFim.setHours(dataFim.getHours() + 1);
+                hrFinalFP.setDate(dataFim, true);
             }
         }
+    });
 
-        hrInicial._flatpickr.set('minTime', minTime);
-    }
-
-    // Atualiza minTime ao carregar a página
-    atualizarMinHora();
-
-    // Define horário final automaticamente 1h após o início
-    hrInicial.addEventListener('blur', function() {
-        if(hrInicial.value) {
-            const [hora, minuto] = hrInicial.value.split(':').map(Number);
-            let novaHora = hora + 1;
-            if(novaHora > 23) novaHora = 23;
-            hrFinal.value = String(novaHora).padStart(2,'0') + ':' + String(minuto).padStart(2,'0');
-            hrFinal.disabled = true;
+    const dataFP = flatpickr(dataInput, {
+        dateFormat: "Y-m-d",
+        altInput: true,
+        altFormat: "d/m/Y",
+        locale: "pt",
+        // A data mínima agora é a data calculada com 8 horas a mais.
+        // O Flatpickr vai desabilitar hoje se a hora mínima já passou para o dia seguinte.
+        minDate: dataMinimaAgendamento,
+        maxDate: new Date().fp_incr(7),
+        onChange: function(selectedDates) {
+            if (selectedDates.length > 0) {
+                hrInicialFP.clear();
+                hrFinalFP.clear();
+                hrInicialInput.removeAttribute('disabled');
+                
+                // A função agora usa a data mínima global para se guiar.
+                atualizarMinHora(selectedDates[0]);
+            } else {
+                hrInicialInput.setAttribute('disabled', 'disabled');
+            }
         }
     });
 
-    flatpickr.localize(flatpickr.l10ns.pt);
+    // --- Funções Auxiliares ---
+    function atualizarMinHora(dataSelecionada) {
+        let minTime = "00:00";
+        
+        // Normalizamos as datas para comparar apenas o dia (ignorando horas/minutos).
+        const diaMinimoPermitido = new Date(dataMinimaAgendamento).setHours(0, 0, 0, 0);
+        const diaSelecionado = new Date(dataSelecionada).setHours(0, 0, 0, 0);
+
+        // Se o usuário selecionou o primeiro dia disponível...
+        if (diaSelecionado === diaMinimoPermitido) {
+            // ... a hora mínima é a hora da nossa data mínima calculada.
+            const h = String(dataMinimaAgendamento.getHours()).padStart(2, '0');
+            const m = String(dataMinimaAgendamento.getMinutes()).padStart(2, '0');
+            minTime = `${h}:${m}`;
+        }
+        // Se for qualquer outro dia no futuro, a hora mínima é 00:00.
+        
+        hrInicialFP.set('minTime', minTime);
+    }
 });
-</script>
+</script>   
 
 <!-- SCRIPT REMOÇÃO DE ANIMAÇÃO DE AGENDAMENTO CRIADO COM SUCESSO OU MENSAGEM DE ERRO -->
 <script>

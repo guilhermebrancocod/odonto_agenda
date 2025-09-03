@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Calendário</title>
+    <title>Calendário - Agendamento Clínica</title>
 
     <!-- FAVICON - IMAGEM DA GUIA -->
     <link rel="icon" type="image/png" href="/favicon_faesa.png">
@@ -130,12 +130,15 @@
     @include('components.navbar')
 
     <div class="container ms-3 mw-100">
+
         <div class="row">
+
             <x-page-title>
                     <p onclick="window.location.href = '/psicologia/criar-agendamento'" class="btn btn-success p-2 me-3" style="font-size: 15px;" >
                         <span>Novo Agendamento</span>
                     </p>
             </x-page-title>
+
             <div class="col-12 shadow-lg shadow-dark pt-3 bg-body-tertiary rounded">
                 <!-- CALENDÁRIO -->
                 <div id="calendar" style="max-width: 100%;" class="bg-light-subtle pe-4"></div>
