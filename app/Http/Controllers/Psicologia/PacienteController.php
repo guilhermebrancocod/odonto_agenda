@@ -31,7 +31,7 @@ class PacienteController extends Controller
             'END_NUM' => 'required|string',
             'COMPLEMENTO' => 'nullable|string|max:255',
             'BAIRRO' => 'required|string',
-            'municipio' => 'required|string|max:255',
+            'MUNICIPIO' => 'required|string|max:255',
             'UF' => 'required|string|max:2',
             'E_MAIL_PACIENTE' => 'nullable|email|max:255',
             'FONE_PACIENTE' => 'required|string|max:20|regex:/^\(?\d{2}\)?\s?\d{4,5}-?\d{4}$/',
@@ -64,8 +64,8 @@ class PacienteController extends Controller
 
             'BAIRRO.required' => 'O bairro é obrigatório.',
 
-            'municipio.required' => 'O município é obrigatório.',
-            'municipio.max' => 'O município não pode ter mais que 255 caracteres.',
+            'MUNICIPIO.required' => 'O município é obrigatório.',
+            'MUNICIPIO.max' => 'O município não pode ter mais que 255 caracteres.',
 
             'UF.required' => 'O estado (UF) é obrigatório.',
             'UF.max' => 'A UF deve conter 2 caracteres.',
@@ -150,7 +150,7 @@ class PacienteController extends Controller
             'cep'        => 'nullable|string|max:20',
             'celular'    => 'nullable|string|max:20',
             'email'      => 'nullable|email|max:255',
-            'municipio'  => 'nullable|string|max:255',
+            'MUNICIPIO'  => 'nullable|string|max:255',
         ]);
 
         try {
@@ -168,7 +168,7 @@ class PacienteController extends Controller
             $paciente->CEP = $validatedData['cep'] ?? $paciente->CEP;
             $paciente->FONE_PACIENTE = $validatedData['celular'] ?? $paciente->FONE_PACIENTE;
             $paciente->E_MAIL_PACIENTE = $validatedData['email'] ?? $paciente->E_MAIL_PACIENTE;
-            $paciente->MUNICIPIO = $validatedData['municipio'] ?? $paciente->MUNICIPIO;
+            $paciente->MUNICIPIO = $validatedData['MUNICIPIO'] ?? $paciente->MUNICIPIO;
 
             $paciente->save();
 

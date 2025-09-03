@@ -140,8 +140,8 @@
                             <input type="text" id="bairro" name="BAIRRO" class="form-control" value="{{ old('BAIRRO') }}" required />
                         </div>
                         <div class="col-md-4">
-                            <label for="municipio" class="form-label">Município <span class="required-field">*</span></label>
-                            <input type="text" id="municipio" name="municipio" class="form-control" value="{{ old('municipio') }}" required />
+                            <label for="MUNICIPIO" class="form-label">Município <span class="required-field">*</span></label>
+                            <input type="text" id="MUNICIPIO" name="MUNICIPIO" class="form-control" value="{{ old('MUNICIPIO') }}" required />
                         </div>
                         <div class="col-md-4">
                             <label for="estado" class="form-label">Estado <span class="required-field">*</span></label>
@@ -239,7 +239,7 @@
             const fields = {
                 rua: document.getElementById('rua'),
                 bairro: document.getElementById('bairro'),
-                municipio: document.getElementById('municipio'),
+                MUNICIPIO: document.getElementById('MUNICIPIO'),
                 estado: document.getElementById('estado'),
                 numero: document.getElementById('numero')
             };
@@ -256,7 +256,7 @@
                     } else {
                         fields.rua.value = data.logradouro || '';
                         fields.bairro.value = data.bairro || '';
-                        fields.municipio.value = data.localidade || '';
+                        fields.MUNICIPIO.value = data.localidade || '';
                         fields.estado.value = data.uf || '';
                         fields.numero.focus();
                     }
