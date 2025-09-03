@@ -8,6 +8,7 @@ use Carbon\Carbon;
 
 class AgendamentoService
 {
+    // RETORNA AGENDAMENTOS PARA ADM
     public function getAgendamento(Request $request)
     {
         $query = FaesaClinicaAgendamento::with([
@@ -103,6 +104,7 @@ class AgendamentoService
         return response()->json($agendamentos);
     }
 
+    // RETORNA AGENDAMENTOS PARA PICOLOGO
     public function getAgendamentosForPsicologo(Request $request)
     {
         $query = FaesaClinicaAgendamento::with([

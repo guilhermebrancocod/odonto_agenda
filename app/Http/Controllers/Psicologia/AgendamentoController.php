@@ -155,21 +155,19 @@ class AgendamentoController extends Controller
     // CRIAR AGENDAMENTO - ADM | RECEPÇÃO
    public function criarAgendamento(Request $request)
     {
+        // CLINICA FIXO
         $idClinica = 1;
-
+        // LIMPA DADOS DE PREENCHIMENTO DE VALOR
         if ($request->has('valor_agend')) {
             $request->merge([
                 'valor_agend' => str_replace(',', '.', $request->valor_agend),
             ]);
         }
-
-        if($request->has('id_sala_clinica')) {
-
-            // Busca nome da sala pelo ID
-            $descricaoSala = FaesaClinicaSala::where('ID_SALA_CLINICA', $request->id_sala_clinica)
+        // CASO TENHA ID_SALA., PREENCHE COLUNA 'LOCAL'
+        if($request->has('ID_SALA')) {
+            $descricaoSala = FaesaClinicaSala::where('id_sala_clinica', $request->id_sala_clinica)
             ->select('DESCRICAO')
             ->first();
-
             $request->merge([
                 'local_agend' => $descricaoSala->DESCRICAO
             ]);
@@ -204,15 +202,14 @@ class AgendamentoController extends Controller
             'id_sala_clinica.exists' => 'A sala selecionada não existe.',
         ]);
 
+        // FORMATA VALORES
         $servico = FaesaClinicaServico::find($request->id_servico);
         $valorAgend = $request->valor_agend ? str_replace(',', '.', $request->valor_agend) : null;
 
+        // VERIFICA FERIADO
         if ($this->verificaFeriado($request->dia_agend)) {
             return redirect('/psicologia/criar-agendamento/')->with('error', 'Agendamento não foi criado devido a um feriado');
         }
-
-        // ETAPA 2: GERAR A LISTA DE DATAS A SEREM AGENDADAS
-        // =================================================================
 
         $datasParaAgendar = [];
         $dataInicio = Carbon::parse($request->dia_agend);
@@ -234,7 +231,6 @@ class AgendamentoController extends Controller
                 }
             }
         } elseif ($servico) {
-            // Cenário 2: Recorrência Automática (baseada no tipo de serviço)
             $dataFim = null;
             if (in_array(strtolower($servico->SERVICO_CLINICA_DESC), ['triagem', 'plantão'])) {
                 $dataFim = $dataInicio->copy()->addWeeks(2);
@@ -253,13 +249,9 @@ class AgendamentoController extends Controller
             }
         }
 
-        // Cenário 3: Agendamento Simples
         if (empty($datasParaAgendar)) {
             $datasParaAgendar[] = $dataInicio;
         }
-
-        // ETAPA 3: PROCESSAR CADA DATA COM A LÓGICA CENTRALIZADA
-        // =================================================================
 
         $agendamentosCriados = 0;
         $diasComErro = [];
@@ -290,11 +282,7 @@ class AgendamentoController extends Controller
             }
         }
 
-        // ETAPA 4: RETORNAR A RESPOSTA CORRETA PARA O USUÁRIO
-        // =================================================================
-
         if ($agendamentosCriados > 0) {
-            // Se pelo menos um agendamento foi criado, atualiza o status do paciente.
             $this->pacienteService->setEmAtendimento($request->paciente_id);
         }
 
@@ -445,44 +433,27 @@ class AgendamentoController extends Controller
             }
         }
 
-        // Merge de dados principais
-        $request->merge([
-            'ID_AGENDAMENTO' => $request->ID_AGENDAMENTO,
-            'ID_SERVICO'     => $request->ID_SERVICO,
-            'ID_PACIENTE'    => $request->ID_PACIENTE,
-            'ID_PSICOLOGO'   => $request->ID_PSICOLOGO ?? null,
-            'ID_SALA'        => $request->ID_SALA ?? null,
-            'ID_CLINICA'     => $request->ID_CLINICA ?? null,
-            'DT_AGEND'       => $request->DT_AGEND,
-            'HR_AGEND_INI'   => $request->HR_AGEND_INI,
-            'HR_AGEND_FIN'   => $request->HR_AGEND_FIN,
-            'STATUS_AGEND'   => $request->STATUS_AGEND,
-            'VALOR_AGEND'    => $request->VALOR_AGEND,
-            'OBSERVACOES'    => $request->OBSERVACOES ?? null,
-            'LOCAL'          => $request->LOCAL ?? null,
-        ]);
-
         // Validação
         $validatedData = $request->validate([
             'ID_AGENDAMENTO' => 'required|integer',
             'ID_SERVICO'     => 'required|integer',
-            'ID_CLINICA'     => 'nullable|integer',
+            'ID_CLINICA'     => 'required|integer',
             'ID_PACIENTE'    => 'required|integer',
             'ID_PSICOLOGO'   => 'nullable|integer',
             'ID_SALA'        => 'nullable|integer',
             'LOCAL'          => 'nullable|string',
-            'DT_AGEND'       => 'required|date',
+            'DT_AGEND'       => 'required|string',
             'HR_AGEND_INI'   => 'required',
             'HR_AGEND_FIN'   => 'required|after:HR_AGEND_INI',
             'STATUS_AGEND'   => 'required|string',
             'VALOR_AGEND'    => 'nullable|numeric',
             'OBSERVACOES'    => 'nullable|string',
-            'MENSAGEM'       => 'nullable|string',
         ], [
             'ID_SERVICO.required' => 'Informe o Serviço do Agendamento antes de prosseguir',
             'HR_AGEND_FIN.after'  => 'O horário final deve ser igual ou posterior ao horário inicial',
         ]);
 
+        // ARMAZENA ID DO AGENDAMENTO ORIGINAL
         $agendamentoOriginal = FaesaClinicaAgendamento::findOrFail($validatedData['ID_AGENDAMENTO']);
 
         $novaData    = $validatedData['DT_AGEND'];
@@ -491,26 +462,27 @@ class AgendamentoController extends Controller
         $houveAlteracaoDeDataHora = $novaData != $agendamentoOriginal->DT_AGEND->format('Y-m-d') ||
                                     $novaHoraIni != \Carbon\Carbon::parse($agendamentoOriginal->HR_AGEND_INI)->format('H:i');
 
-        // Verificações de negócio
+        // VERIFICAÇÃO DE FERIADO
         if ($this->verificaFeriado($novaData)) {
             return back()->withInput()->with('error', 'A data selecionada é um feriado.');
         }
 
+        // VERIFICA SE SALA ESTÁ ATIVA
         if (!$this->salaEstaAtiva($request->ID_SALA)) {
             return back()->withInput()->withErrors(['sala_indisponivel' => 'Sala não está disponível.']);
         }
 
         if ($this->existeConflitoAgendamento(
             $validatedData['ID_CLINICA'] ?? $agendamentoOriginal->ID_CLINICA,
-            $request->ID_SALA,
+            $validatedData['ID_SALA'],
             $novaData,
             $novaHoraIni,
             $validatedData['HR_AGEND_FIN'],
             $validatedData['ID_PACIENTE'],
-            null,
+            $validatedData['ID_PSICOLOGO'],
             $agendamentoOriginal->ID_AGENDAMENTO
         )) {
-            return back()->withInput()->withErrors(['conflito' => 'Conflito detectado: outro agendamento no mesmo horário/local ou para o mesmo paciente.']);
+            return back()->withErrors(['conflito' => 'Conflito detectado: outro agendamento no mesmo horário/local ou para o mesmo paciente.']);
         }
 
         // Se houve alteração de data/hora -> cria novo agendamento (remarcação)
@@ -530,7 +502,6 @@ class AgendamentoController extends Controller
             $novoAgendamento->VALOR_AGEND  = $validatedData['VALOR_AGEND'] ?? null;
             $novoAgendamento->OBSERVACOES  = $validatedData['OBSERVACOES'] ?? null;
             $novoAgendamento->STATUS_AGEND = $validatedData['STATUS_AGEND'];
-            $novoAgendamento->MENSAGEM     = $validatedData['MENSAGEM'] ?? null;
             $novoAgendamento->LOCAL        = $validatedData['LOCAL'] ?? null;
             $novoAgendamento->ID_AGEND_REMARCADO = $agendamentoOriginal->ID_AGENDAMENTO;
 
@@ -549,7 +520,6 @@ class AgendamentoController extends Controller
         $agendamentoOriginal->VALOR_AGEND  = $validatedData['VALOR_AGEND'] ?? null;
         $agendamentoOriginal->OBSERVACOES  = $validatedData['OBSERVACOES'] ?? null;
         $agendamentoOriginal->STATUS_AGEND = $validatedData['STATUS_AGEND'];
-        $agendamentoOriginal->MENSAGEM     = $validatedData['MENSAGEM'] ?? null;
         $agendamentoOriginal->LOCAL        = $validatedData['LOCAL'] ?? null;
 
         $agendamentoOriginal->save();
@@ -592,10 +562,6 @@ class AgendamentoController extends Controller
         $agendamento->STATUS_AGEND = $request->status;
         $agendamento->STATUS_PAG = $request->checkPagamento;
         $agendamento->VALOR_PAG = $request->valorPagamento;
-
-        if ($request->status != "Cancelado") {
-            $agendamento->MENSAGEM = null;
-        }
 
         $agendamento->save();
 
@@ -648,18 +614,15 @@ class AgendamentoController extends Controller
             ->where('HR_AGEND_FIN', '>', $horaInicio)
             ->where('STATUS_AGEND', '<>', 'Excluido');
 
-        // Se estivermos editando um agendamento, devemos ignorá-lo na busca por conflitos.
+        // EVITA AGENDAMENTO QUE ESTÁ SENDO ATUALIZADO, SE FOR O CASO
         if ($idAgendamentoParaIgnorar) {
             $conflitoQuery->where('ID_AGENDAMENTO', '!=', $idAgendamentoParaIgnorar);
         }
 
-        // Verifica se, no horário conflitante, alguma das seguintes condições é verdadeira:
-        // (O paciente é o mesmo) OU (A sala é a mesma) OU (O psicólogo é o mesmo)
         $conflitoQuery->where(function ($query) use ($idPaciente, $idSala, $idPsicologo) {
             $query->where('ID_PACIENTE', $idPaciente);
 
             if ($idSala) {
-                // Nota: Verifique se o nome da coluna é ID_SALA ou ID_SALA no seu banco
                 $query->orWhere('ID_SALA', $idSala);
             }
             

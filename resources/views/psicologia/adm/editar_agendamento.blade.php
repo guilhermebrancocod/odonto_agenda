@@ -1,17 +1,15 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
+
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <link rel="icon" type="image/png" href="/favicon_faesa.png">
     <title>Detalhes do Agendamento #{{ $agendamento->ID_AGENDAMENTO }}</title>
-    
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700&display=swap" rel="stylesheet" />
     <link href="https://cdnjs.cloudflare.com/ajax/libs/mdb-ui-kit/7.1.0/mdb.min.css" rel="stylesheet" />
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
-    
     <link href="https://cdn.jsdelivr.net/npm/tom-select@2.3.1/dist/css/tom-select.bootstrap5.css" rel="stylesheet">
-
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
     
     <style>
@@ -23,9 +21,25 @@
         /* Esconde o select original do TomSelect até ser inicializado */
         .ts-hidden-accessible { display: none; }
     </style>
+
 </head>
+
 <body>
+
+<!-- COMPONENT NAVBAR -->
     @include('components.navbar')
+
+    <!-- EM CASO DE ERROS -->
+    @if ($errors->any())
+        <div id="alert-error" class="alert alert-danger shadow text-center position-fixed top-0 start-50 translate-middle-x mt-3" style="z-index: 1050; max-width: 90%;">
+            <strong>Ops!</strong> Corrija os itens abaixo:
+            <ul class="mb-0 mt-1 list-unstyled">
+                @foreach ($errors->all() as $error)
+                    <li><i class="bi bi-exclamation-circle-fill me-1"></i> {{ $error }}</li>
+                @endforeach
+            </ul>
+        </div>
+    @endif
 
     <div class="container my-5">
         <div class="d-flex justify-content-between align-items-center mb-4">
@@ -38,6 +52,7 @@
             @method('PUT')
 
             <input type="hidden" id="id_agendamento" name="ID_AGENDAMENTO" value="{{ $agendamento->ID_AGENDAMENTO }}">
+            <input type="hidden" id="id_clinica" name="ID_CLINICA" value="{{ $agendamento->ID_CLINICA }}">
 
             <div class="row">
                 <div class="col-lg-8">

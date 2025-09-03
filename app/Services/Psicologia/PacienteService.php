@@ -58,7 +58,7 @@ class PacienteService
      *  CRIA NOVO PACIENTE
      */
     public function createPaciente(array $dados): bool
-    {
+    {        
         $exists = DB::table('FAESA_CLINICA_PACIENTE')
                 ->where('CPF_PACIENTE', $dados['CPF_PACIENTE'])
                 ->exists();

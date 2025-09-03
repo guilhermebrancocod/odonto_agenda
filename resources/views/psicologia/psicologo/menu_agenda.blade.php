@@ -168,24 +168,12 @@
                     <!-- STATUS AGENDAMENTO -->
                     <div class="mb-3">
                         <label for="modalStatusSelect" class="form-label"><strong>Status:</strong></label>
-                        <select class="form-select" id="modalStatusSelect">
+                        <select class="form-select" id="modalStatusSelect" disabled>
                             <option value="Agendado">Agendado</option>
                             <option value="Presente">Presente</option>
                             <option value="Cancelado">Cancelado</option>
                             <option value="Finalizado">Finalizado</option>
                         </select>
-                    </div>
-
-                    <!-- CHECK PAGAMENTO -->
-                    <div class="form-check mb-3" id="checkPagamentoAgendamento">
-                        <input type="checkbox" class="form-check-input" id="modalCheckPagamento" name="STATUS_PAG" value="S">
-                        <label for="modalCheckPagamento" class="form-check-label">Pago?</label>
-                    </div>
-
-                    <!-- VALOR PAGO -->
-                    <div class="input-group mb-3 d-none" id="valorPagoAgendamento">
-                        <span class="input-group-text" for="modalValorPagamento">$</span>
-                        <input type="number" class="form-control" id="modalValorPagamento">
                     </div>
 
                     <!-- LOCAL -->
@@ -292,21 +280,6 @@
                 document.getElementById('modalLocal').textContent = event.extendedProps.local || 'Não informado';
                 document.getElementById('modalServico').textContent = event.extendedProps.servico || 'Não informado';
 
-                const checkPagamento = event.extendedProps.checkPagamento || 'N';
-                const checkPagamentoEl = document.getElementById('modalCheckPagamento');
-                checkPagamentoEl.checked = checkPagamento === 'S';
-                checkPagamentoEl.value = checkPagamento;
-
-                // Exibe campo de valor se estiver pago
-                const valorPagamentoSection = document.getElementById('valorPagoAgendamento');
-                if (checkPagamento === 'S') {
-                    valorPagamentoSection.classList.remove('d-none');
-                } else {
-                    valorPagamentoSection.classList.add('d-none');
-                }
-
-                document.getElementById('modalValorPagamento').value = event.extendedProps.valorPagamento || '';
-
                 const modal = new bootstrap.Modal(document.getElementById('agendamentoModal'));
                 document.getElementById('btnSalvarStatus').setAttribute('data-event-id', event.id);
                 document.getElementById('btnMensagemCancelamento').setAttribute('data-event-id', event.id);
@@ -354,97 +327,6 @@
             renderCalendar();
         }, 300); // espera 300ms após parar de redimensionar
     });
-
-    // SCRIPT PARA MUDANÇA DE STATUS DE AGENDAMENTO
-    document.getElementById('btnSalvarStatus').addEventListener('click', function () {
-        const eventId = this.getAttribute('data-event-id');
-        // PEGA VALOR DO STATUS ATUALIZADO
-        const novoStatus = document.getElementById('modalStatusSelect').value;
-        // PEGA STATUS DO PAGAMENTO ATUALIZADO
-        const checkPagamento = document.getElementById('modalCheckPagamento').checked ? 'S' : 'N' ;
-        // PEGA VALOR DO PAGAMENTO ATUALIZADO
-        const valorPagamento = document.getElementById('modalValorPagamento').value;
-
-        if (novoStatus === "Cancelado") {
-            bootstrap.Modal.getInstance(document.getElementById('agendamentoModal')).hide();
-            const modal = new bootstrap.Modal((document.getElementById('motivoCancelamentoModal')));
-            modal.show();
-        } else {
-            fetch(`/psicologia/agendamentos/${eventId}/status`, {
-                method: 'PUT',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
-                },
-                body: JSON.stringify({ status: novoStatus, checkPagamento: checkPagamento, valorPagamento: valorPagamento })
-            })
-            .then(response => {
-                if (!response.ok) throw new Error('Erro ao atualizar status.');
-                return response.json();
-            })
-            .then(data => {
-                calendar.refetchEvents();
-                bootstrap.Modal.getInstance(document.getElementById('agendamentoModal')).hide();
-            })
-            .catch(error => {
-                alert('Erro: ' + error.message);
-            });
-        }
-    });
-
-</script>
-
-<!-- MODAL DE CANCELAMENTO -->
-<script>
-    document.getElementById("btnMensagemCancelamento").addEventListener('click', function() {
-
-        const content = document.getElementById('text-cancelamento').value;
-        const eventId = this.getAttribute('data-event-id');
-        const checkPagamento = document.getElementById('modalCheckPagamento');
-        const valorPagamento = document.getElementById('modalValorPagamento');
-
-        // CAOS NÃO INSIRA MOTIVO
-        if (!content) {
-            alert("Insira um motivo para poder continuar")
-        } else {
-            fetch(`/psicologo/agendamentos/${eventId}/mensagem-cancelamento`, {
-                method: 'PUT',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
-                },
-                body: JSON.stringify({ mensagem : content, id : eventId, checkPagamento : checkPagamento, valorPagamento: valorPagamento })
-            })
-            .then(response => {
-                if (!response.ok) {
-                    throw new Error('Erro ao atualizar agendamento.');
-                }
-                return response.json();
-            })
-            .then(data => {
-                document.getElementById('text-cancelamento').value = '';
-                calendar.refetchEvents();
-                bootstrap.Modal.getInstance(document.getElementById('motivoCancelamentoModal')).hide();
-            })
-            .catch(error => {
-                alert('Erro: ' + error.message);
-            });
-        }
-    })
-</script>
-
-<!-- SCRIPT PARA INPUT DE VALOR PAGO EM AGENDAMENTO | MODAL AGENDAMENTO -->
-<script>
-    const valorPagamentoSection = document.getElementById('valorPagoAgendamento');
-    const checkPagamentoSection = document.getElementById('modalCheckPagamento');
-
-    checkPagamentoSection.addEventListener('change', function() {
-        if(this.checked) {
-            valorPagamentoSection.classList.remove('d-none');
-        } else {
-            valorPagamentoSection.classList.add('d-none');
-        }
-    })
 </script>
 
 @php

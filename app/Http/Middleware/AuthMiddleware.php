@@ -70,11 +70,11 @@ class AuthMiddleware
                     return $next($request);
                 } else {
                     $validacao = $this->validarADM($credentials);
+
                     if (!$validacao) {
                         return redirect()->back()->with('error', 'Credenciais inválidas');
                     }
                     session(['usuario' => $validacao]);
-                    // dd(session('usuario'));
                     return $next($request);
                 }                
             } else {
@@ -127,7 +127,7 @@ class AuthMiddleware
     {
         $apiUrl = config('services.faesa.api_url');
         $apiKey = config('services.faesa.api_key');
-        
+
         try {
             $response = Http::withHeaders([
                 'Accept'        => "application/json",

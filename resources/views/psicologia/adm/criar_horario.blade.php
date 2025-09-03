@@ -81,8 +81,8 @@
                     
                     <div class="row g-3">
                         <div class="col-md-6 col-lg-4">
-                            <label for="TIPO_HORARIO" class="form-label">Tipo de Horário</label>
-                            <select id="TIPO_HORARIO" name="TIPO_HORARIO" class="form-select" required>
+                            <label for="BLOQUEADO" class="form-label">Tipo de Horário</label>
+                            <select id="BLOQUEADO" name="BLOQUEADO" class="form-select" required>
                                 <option value="" disabled selected>Selecione...</option>
                                 <option value="N">Horário de Atendimento</option>
                                 <option value="S">Horário Bloqueado</option>
@@ -299,7 +299,7 @@
                 .then(({ ok, body }) => {
                     if (!ok) throw new Error(body.message || 'Erro ao salvar.');
                     editarHorarioModal.hide();
-                    window.location.reload(); 
+                    showModalAlert(body.message, 'success'); 
                 })
                 .catch(err => showModalAlert(err.message));
             });
