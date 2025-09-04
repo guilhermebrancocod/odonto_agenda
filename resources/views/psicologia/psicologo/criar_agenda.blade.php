@@ -195,6 +195,7 @@
 <!-- TOM SELECT PARA CAMPOS DE BUSCA -->
 <script>
 
+
     // BUSCA DE PACIENTE
     const pacienteSelect = new TomSelect('#search-input', {
         valueField: 'ID_PACIENTE',
@@ -219,7 +220,7 @@
         },
         // Carrega dados da sua API
         load: (query, callback) => {
-            if (query.length < 2) return callback();
+            if (query.length < 0) return callback();
             const url = `/psicologo/consultar-paciente/buscar?search=${encodeURIComponent(query)}`;
             fetch(url)
             .then(response => response.json())

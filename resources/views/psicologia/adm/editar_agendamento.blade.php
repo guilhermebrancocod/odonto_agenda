@@ -26,7 +26,7 @@
 
 <body>
 
-<!-- COMPONENT NAVBAR -->
+    <!-- COMPONENT NAVBAR -->
     @include('components.navbar')
 
     <!-- EM CASO DE ERROS -->
@@ -38,6 +38,12 @@
                     <li><i class="bi bi-exclamation-circle-fill me-1"></i> {{ $error }}</li>
                 @endforeach
             </ul>
+        </div>
+    @endif
+
+    @if (session('error'))
+        <div id="alert-session-error" class="alert alert-danger shadow text-center position-fixed top-0 start-50 translate-middle-x mt-3" style="z-index: 1050; max-width: 90%;">
+            <strong>Atenção:</strong> {{ session('error') }}
         </div>
     @endif
 
@@ -112,6 +118,17 @@
                                         <option value="Remarcado" {{ $agendamento->STATUS_AGEND == 'Remarcado' ? 'selected' : '' }}>Remarcado</option>
                                         <option value="Finalizado" {{ $agendamento->STATUS_AGEND == 'Finalizado' ? 'selected' : '' }}>Finalizado</option>
                                     </select>
+
+                                    @if ($agendamento->ID_AGEND_REMARCADO)
+                                        <a href="{{ url('/psicologia/agendamento/' . $agendamento->ID_AGEND_REMARCADO . '/editar') }}" 
+                                        class="btn btn-secondary btn-sm mt-2 w-100" 
+                                        target="_blank" 
+                                        title="Ir para agendamento anterior">
+                                            <i class="bi bi-box-arrow-up-right me-2"></i>
+                                            Ver Agendamento da Remarcação
+                                        </a>
+                                    @endif
+                                    
                                 </dd>
 
                             </dl>
@@ -138,7 +155,7 @@
                                 <dt>Paciente</dt>
                                 <dd>
                                      <input type="text" class="form-control view-mode" 
-                                           value="{{ $agendamento->paciente->NOME_COMPL_PACIENTE ?? '' }}" disabled>
+                                           value="{{ $agendamento->paciente->NOME_COMPL_PACIENTE ?? '' }}" readonly>
                                     <div class="edit-mode d-none">
                                         <select id="select-paciente" name="ID_PACIENTE" placeholder="Selecione ou busque um paciente...">
                                             @if($agendamento->paciente)
@@ -153,8 +170,8 @@
                                 <!-- PSICOLOGO -->
                                 <dt>Psicólogo(a)</dt>
                                 <dd>
-                                     <input type="text" class="form-control view-mode" 
-                                           value="{{ $agendamento->ID_PSICOLOGO }}" disabled>
+                                     <input type="text" class="form-control view-mode" value="{{ $agendamento->ID_PSICOLOGO }}" readonly>
+
                                     <div class="edit-mode d-none">
                                         <select id="select-psicologo" name="ID_PSICOLOGO" placeholder="Selecione ou busque um psicólogo...">
                                             @if($agendamento->ID_PSICOLOGO)
@@ -210,7 +227,7 @@
             </div>
             
             <div class="mt-4 d-flex justify-content-between">
-                <button type="button" class="btn btn-secondary" onclick="history.back()">
+                <button type="button" class="btn btn-secondary" onclick="window.history.go(-1)">
                     <i class="bi bi-arrow-left me-2"></i>Voltar
                 </button>
                 <div>
@@ -334,14 +351,14 @@
                 fetch(url).then(r => r.json()).then(j => callback(j)).catch(() => callback());
             },
             render: {
-                option: (data, escape) => `<div>${escape(data.NOME_COMPL)} - ${escape(data.ALUNO)}</div>`,
+                option: (data, escape) => `<div>${escape(data.NOME_COMPL)} - ${escape(data.ID_PSICOLOGO)}</div>`,
                 item: (data, escape) => `<div>${escape(data.NOME_COMPL)}</div>`
             }
         });
 
         // --- SELECT LOCAL ---
         new TomSelect('#select-local', {
-            valueField: 'ID_SALA',
+            valueField: 'ID_SALA_CLINICA',
             labelField: 'DESCRICAO',
             searchField: ['DESCRICAO'],
             create: false,
