@@ -23,8 +23,6 @@ class DisciplinaController extends Controller
             ->select('d.DISCIPLINA', 'd.NOME')
             ->distinct()
             ->get();
-
-
         return response()->json($disciplinas);
     }
 

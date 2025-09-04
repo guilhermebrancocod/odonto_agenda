@@ -135,7 +135,6 @@
                                 <i class="bi bi-info-circle-fill"></i>
                             </span>
                         </label>
-                        <label for="select-servico" class="form-label">Serviço...</label>
                         <select id="select-servico" name="id_servico" placeholder="Serviço do Atendimento..." autocomplete="off"></select>
                     </div>
 
@@ -211,7 +210,6 @@
                     <!-- SELEÇÃO DE LOCAL -->
                     <div class="col-sm-6 col-md-3 position-relative">
                         <input type="hidden" name="id_sala_clinica" id="id_sala_clinica">
-                        <label for="local_agend" class="form-label">Local</label>
                         <label for="select-local" class="form-label">Local</label>
                         <select id="select-local" name="id_sala_clinica" placeholder="Local do atendimento..." autocomplete="off"></select>
                     </div>
@@ -219,7 +217,6 @@
                     <!-- SELEÇAO DE PSICÓLOGO -->
                     <div class="col-md-6 position-relative">
                          <input type="hidden" name="id_psicologo" id="id_psicologo">
-                        <label for="psicologo_agend" class="form-label">Psicólogo</label>
                         <label for="select-psicologo" class="form-label">Psicólogo</label>
                         <select id="select-psicologo" name="id_psicologo" placeholder="Psicólogo do Atendimento..." autocomplete="off"></select>
                     </div>
@@ -313,7 +310,7 @@
 
         // Carrega dados da sua API
         load: (query, callback) => {
-            if (query.length < 2) return callback();
+            if (query.length < 0) return callback();
             const url = `/psicologia/consultar-paciente/buscar-nome-cpf?search=${encodeURIComponent(query)}`;
             fetch(url)
                 .then(response => response.json())
