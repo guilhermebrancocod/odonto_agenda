@@ -81,6 +81,10 @@ class ServicoController extends Controller
 
         if ($search) {
             $query->where('SERVICO_CLINICA_DESC', 'LIKE', "%{$search}%");
+
+            if (is_numeric($search)) {
+                $query->orWhere('ID_SERVICO_CLINICA', $search);
+            }
         }
 
         $servicos = $query->orderBy('ID_SERVICO_CLINICA', 'desc')->get();
