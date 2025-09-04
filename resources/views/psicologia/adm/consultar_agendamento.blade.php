@@ -18,11 +18,10 @@
     <meta name="csrf-token" content="{{ csrf_token() }}">
 
     <style>
-        /* Estilos mantidos e adaptados */
         #limit-container {
             margin-top: 12px;
             display: flex;
-            justify-content: space-between; /* Ajustado para alinhar contador e seletor */
+            justify-content: space-between;
             align-items: center;
             gap: 8px;
         }
@@ -32,7 +31,7 @@
             gap: 8px;
         }
         .flatpickr-input {
-            background-color: #fff; /* Garante fundo branco com Bootstrap 5 */
+            background-color: #fff;
         }
         .shadow-dark {
             box-shadow: 0 0.75rem 1.25rem rgba(0,0,0,0.4) !important;
@@ -50,10 +49,9 @@
             z-index: 1050;
         }
 
-        /* Botões de ação na listagem de agendamentos */
         .agendamento-actions .btn:hover {
-            filter: brightness(85%); /* deixa 15% mais escuro */
-            transition: filter 0.2s ease-in-out; /* animação suave */
+            filter: brightness(85%);
+            transition: filter 0.2s ease-in-out;
         }
 
     </style>

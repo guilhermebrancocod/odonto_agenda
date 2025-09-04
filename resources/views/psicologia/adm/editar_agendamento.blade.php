@@ -118,6 +118,17 @@
                                         <option value="Remarcado" {{ $agendamento->STATUS_AGEND == 'Remarcado' ? 'selected' : '' }}>Remarcado</option>
                                         <option value="Finalizado" {{ $agendamento->STATUS_AGEND == 'Finalizado' ? 'selected' : '' }}>Finalizado</option>
                                     </select>
+
+                                    @if ($agendamento->ID_AGEND_REMARCADO)
+                                        <a href="{{ url('/psicologia/agendamento/' . $agendamento->ID_AGEND_REMARCADO . '/editar') }}" 
+                                        class="btn btn-secondary btn-sm mt-2 w-100" 
+                                        target="_blank" 
+                                        title="Ir para agendamento anterior">
+                                            <i class="bi bi-box-arrow-up-right me-2"></i>
+                                            Ver Agendamento da Remarcação
+                                        </a>
+                                    @endif
+                                    
                                 </dd>
 
                             </dl>
@@ -216,7 +227,7 @@
             </div>
             
             <div class="mt-4 d-flex justify-content-between">
-                <button type="button" class="btn btn-secondary" onclick="history.back()">
+                <button type="button" class="btn btn-secondary" onclick="window.history.go(-1)">
                     <i class="bi bi-arrow-left me-2"></i>Voltar
                 </button>
                 <div>
