@@ -20,14 +20,16 @@ class AuthPsicologoMiddleware
             return $next($request);
         }
 
-        // SE A ROTA FOR DE POST, ARMAZENA CREDENCIAIS
+        // SE A ROTA FOR DE POST
         if ($routeName === 'psicologoLoginPost') {
+
+            // ARMAZENA CREDENCIAIS
             $credentials = [
                 'username' => $request->input('login'),
                 'password' => $request->input('senha'),
             ];
 
-            // ARMAZENA RESPOSTTA DA API
+            // ARMAZENA RESPOSTA DA API
             $response = $this->getApiData($credentials);
 
             if ($response['success']) {
@@ -49,7 +51,7 @@ class AuthPsicologoMiddleware
 
         if (!in_array($routeName, $rotasLiberadas)) {
             if (!session()->has('psicologo')) {
-                return redirect()->route('loginPsicologoGET');
+                return redirect()->route('psicologoLoginGet');
             }
         }
 
