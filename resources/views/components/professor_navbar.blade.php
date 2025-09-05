@@ -184,6 +184,13 @@
             </a>
         </li>
 
+        <!-- CONSULTAR PSICOLOGOS E PACIENTES DOS PSICOLOGOS -->
+        <li class="list-group-item rounded-1 p-0 overflow-hidden ">
+            <a href="/professor/psicologo" class="link-agendar d-flex align-items-center gap-2 p-1">
+                <i class="bi bi-people-fill"></i> Psicologos
+            </a>
+        </li>
+
         <!-- LOGOUT -->
         <li class="list-group-item mt-auto rounded-1 p-0 overflow-hidden ">
             <a href="/logout" class="link-logout d-flex align-items-center gap-2 p-1">
@@ -213,12 +220,6 @@
             <li class="list-group-item p-0 overflow-hidden ">
                 <a href="/psicologia/consultar-agendamento" class="link-agendar d-flex align-items-center gap-2 p-2">
                     <i class="fas fa-edit"></i> Agendas
-                </a>
-            </li>
-            <!-- CONSULTAR PACIENTE -->
-            <li class="list-group-item p-0 overflow-hidden ">
-                <a href="/psicologia/consultar-paciente" class="link-agendar d-flex align-items-center gap-2 p-2">
-                    <i class="bi bi-people"></i> Pacientes
                 </a>
             </li>
             <!-- LOGOUT -->

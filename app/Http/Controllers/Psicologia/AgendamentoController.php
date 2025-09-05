@@ -13,6 +13,7 @@ use App\Models\FaesaClinicaSala;
 use App\Services\Psicologia\PacienteService;
 use App\Services\Psicologia\AgendamentoService;
 use Carbon\Carbon;
+use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\DB;
 
 class AgendamentoController extends Controller
@@ -414,7 +415,13 @@ class AgendamentoController extends Controller
                 ? 'Agendamento remarcado com sucesso! Um novo agendamento foi criado.'
                 : 'Agendamento atualizado com sucesso!';
 
-            return redirect()->route('psicologoConsultarAgendamentos-GET')->with('success', $mensagem);
+            if (Route::current()->uri() == 'psicologia/agendamento') {
+                return redirect()->route('listagem-agendamentos')->with('success', $mensagem);
+            } else if (Route::current()->uri() == 'psicologo/agendamento') {
+                return redirect()->route('psicologoConsultarAgendamentos-GET')->with('success', $mensagem);
+            } else {
+                return redirect()->route('professorConsultarAgendamentos-GET')->with('success', $mensagem);
+            }
 
         } catch (\Exception $e) {
             return redirect()->back()->withInput()->with('error', $e->getMessage());
