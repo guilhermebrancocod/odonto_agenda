@@ -161,9 +161,6 @@
         <p style="color:#ecf5f9" class="p-0 m-0 text-center">
             {{ session('usuario')[0]->ID_USUARIO_CLINICA }}
         </p>
-        <p class="p-0 m-0 text-center" style="color: white;">
-            {{ request()->ip() }}
-        </p>
     </div>
 
     <ul class="list-group list-group-flush w-100 gap-1 mt-3">

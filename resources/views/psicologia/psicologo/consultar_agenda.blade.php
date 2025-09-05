@@ -300,7 +300,7 @@
                                 <td class="text-center">${checkPagamento}</td>
                                 <td>${valorPagamento}</td>
                                 <td class="d-flex flex-nowrap gap-1 agendamento-actions">
-                                    <a href="/psicologia/agendamento/${ag.ID_AGENDAMENTO}/editar" class="btn btn-warning flex-grow-1" title="Editar"><i class="bi bi-pencil"></i></a>
+                                    <a href="/psicologo/agendamento/${ag.ID_AGENDAMENTO}/editar" class="btn btn-warning flex-grow-1" title="Editar"><i class="bi bi-pencil"></i></a>
                                     <form action="/psicologia/agendamento/${ag.ID_AGENDAMENTO}" method="POST" onsubmit="return confirm('Confirma a exclusão deste agendamento?');">
                                         @csrf
                                         @method('DELETE')

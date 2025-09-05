@@ -27,7 +27,7 @@
 <body class="bg-body-secondary">
 
     <!-- COMPONENT NAVBAR -->
-    @include('components.navbar')
+    @include('components.psicologo_navbar')
 
     <!-- EM CASO DE ERROS -->
     @if ($errors->any())
@@ -120,7 +120,7 @@
                                         </select>
 
                                         @if ($agendamento->ID_AGEND_REMARCADO)
-                                            <a href="{{ url('/psicologia/agendamento/' . $agendamento->ID_AGEND_REMARCADO . '/editar') }}" 
+                                            <a href="{{ url('/psicologo/agendamento/' . $agendamento->ID_AGEND_REMARCADO . '/editar') }}" 
                                             class="btn btn-secondary btn-sm mt-2 w-100" 
                                             target="_blank" 
                                             title="Ir para agendamento anterior">
