@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Relatório - Pacientes por Psicólogo</title>
+    <title>Pacientes por Psicólogo</title>
 
     <link rel="icon" type="image/png" href="/favicon_faesa.png">
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700&display=swap" rel="stylesheet" />
