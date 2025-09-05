@@ -73,7 +73,7 @@ class FaesaClinicaAgendamento extends Model
      * Define um relacionamento BelongsTo com a tabela FAESA_CLINICA_SERVICO
      * Um agendamento pertence a um SERVICO_CLINICA
      * 
-     * @return Illuminate\Database\Eloquent\Relations\BelongsTo
+     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
      */
     public function servico(): BelongsTo
     {

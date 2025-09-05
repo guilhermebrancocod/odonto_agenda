@@ -42,6 +42,12 @@ class AgendamentoController extends Controller
         return $agendamentos;
     }
 
+    public function getAgendamentosForProfessor(Request $request)
+    {
+        $agendamentos = $this->agendamentoService->getAgendamentosForProfessor($request);
+        return $agendamentos;
+    }
+
     // RETORNA AGENDAMENTOS PARA O CALENDÁRIO
     public function getAgendamentosForCalendar()
     {
@@ -101,6 +107,64 @@ class AgendamentoController extends Controller
         ->where('ID_PSICOLOGO', $psicologo[1] ?? null)
         ->get();
         
+        $events = $agendamentos
+        ->map(function($agendamento) {
+            $dateOnly = substr($agendamento->DT_AGEND, 0, 10);
+            $horaInicio = substr($agendamento->HR_AGEND_INI, 0, 8);
+            $horaFim = substr($agendamento->HR_AGEND_FIN, 0, 8);
+            $status = $agendamento->STATUS_AGEND;
+            $checkPagamento = $agendamento->STATUS_PAG;
+            $valorPagamento = $agendamento->VALOR_PAG;
+
+            $start = Carbon::parse("{$dateOnly} {$horaInicio}", 'America/Sao_Paulo')->toIso8601String();
+            $end = Carbon::parse("{$dateOnly} {$horaFim}", 'America/Sao_Paulo')->toIso8601String();
+
+            $cor = match($status) {
+                'Agendado' => '#0d6efd',
+                'Presente' => '#28a745',
+                'Cancelado' => '#dc3545',
+                default => '#6c757d',
+            };
+
+            return [
+                'id' => $agendamento->ID_AGENDAMENTO,
+                'title' => $agendamento->paciente 
+                    ? $agendamento->paciente->NOME_COMPL_PACIENTE 
+                    : 'Agendamento',
+                'start' => $start,
+                'end' => $end,
+                'status' => $status,
+                'checkPagamento' => $checkPagamento,
+                'valorPagamento' => $valorPagamento,
+                'servico' => $agendamento->servico->SERVICO_CLINICA_DESC ?? 'Serviço não informado',
+                'description' => $agendamento->OBSERVACOES ?? '',
+                'color' => $cor,
+                'local' => $agendamento->LOCAL ?? 'Não informado',
+            ];
+        });
+        return response()->json($events);
+    }
+
+    
+    // RETORNA AGENDAMENTOS PARA O CALENDÁRIO DE PROFESSOR DE ACORDO COM TURMA
+    public function getAgendamentosForCalendarProfessor()
+    {
+        $professor = session('professor');
+        $turmas = array_column($professor[4], 'TURMA');
+
+        $psicologos = DB::table('LYCEUM_BKP_PRODUCAO.dbo.LY_MATRICULA as mat')
+        ->join('FAESA_CLINICA_AGENDAMENTO as ag', 'ag.ALUNO', 'mat.ALUNO')
+        ->whereIn('mat.TURMA', $turmas)
+        ->select('ag.ID_PSICOLOGO')
+        ->get()->toArray();
+
+        $agendamentos = FaesaClinicaAgendamento::with('paciente', 'servico')
+        ->where('ID_CLINICA', 1)
+        ->where('STATUS_AGEND', '<>', 'Excluido')
+        ->where('STATUS_AGEND', '<>', 'Remarcado')
+        ->whereIn('ID_PSICOLOGO', $psicologos ?? null)
+        ->get();
+
         $events = $agendamentos
         ->map(function($agendamento) {
             $dateOnly = substr($agendamento->DT_AGEND, 0, 10);

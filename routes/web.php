@@ -401,6 +401,12 @@ Route::middleware([AuthProfessorMiddleware::class])->group( function() {
         return view('psicologia.professor.menu_agenda');
     })->name('professorLoginPost');
 
+    Route::get('/professor/consultar-agendamento', function() {
+        return view('psicologia.professor.consultar_agenda');
+    })->name('professorConsultarAgendamentos-GET');
+
+    Route::get('/professor/consultar-agendamento/buscar', [AgendamentoController::class, 'getAgendamentosForProfessor'])->name('getAgendamentosForProfessor');
+
     Route::get('/professor/logout', function() {
         session()->forget('professor');
         return redirect()->route('professorLoginGet');

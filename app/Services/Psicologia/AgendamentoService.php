@@ -209,6 +209,11 @@ class AgendamentoService
         return response()->json($agendamentos);
     }
 
+    public function getAgendamentosForProfessor(Request $request)
+    {
+        
+    }
+
     public function atualizarAgendamento(array $dados): FaesaClinicaAgendamento
     {
         $agendamentoOriginal = FaesaClinicaAgendamento::findOrFail($dados['ID_AGENDAMENTO']);

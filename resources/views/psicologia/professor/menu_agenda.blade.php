@@ -160,7 +160,7 @@
                 info.el.style.borderColor = info.event.backgroundColor;
                 info.el.style.color = 'white';
             },
-            events: '/psicologia/agendamentos-calendar',
+            events: '/professor/agendamentos-calendar',
 
             // EXECUTADO QUANDO O USUÁRIO CLICA EM UM EVENTO DO CALENDÁRIO
             eventClick: function(info) {

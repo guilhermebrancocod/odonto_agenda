@@ -41,7 +41,6 @@ class AuthProfessorMiddleware
 
                 // RETORNA A SESSAO DO PROFESSOR
                 session(['professor' => $validacao]);
-
                 return $next($request);
             }
 
