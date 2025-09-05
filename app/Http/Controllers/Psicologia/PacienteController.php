@@ -122,7 +122,6 @@ class PacienteController extends Controller
     public function getPacienteByNameCpf(Request $request)
     {
         $pacientes = $this->pacienteService->filtrarPacientesByNameOrCpf($request->only('search'));
-
         return response()->json($pacientes);
     }
 

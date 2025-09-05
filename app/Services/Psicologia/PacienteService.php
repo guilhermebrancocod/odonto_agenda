@@ -115,7 +115,7 @@ class PacienteService
             });
         }
 
-        return $query->orderBy('ID_PACIENTE', 'desc')->get();
+        return $query->orderBy('ID_PACIENTE', 'desc')->get()->toArray();
     }
 
     public function filtrarPacientesByNameOrCpfPsicologo($filtros)
@@ -128,7 +128,7 @@ class PacienteService
         ->where('ag.ID_PSICOLOGO', $psicologo)
         ->where('p.NOME_COMPL_PACIENTE', 'LIKE', "%{$search}%")
         ->where('ag.STATUS_AGEND', '<>', 'Excluido')
-        ->get();
+        ->get()->toArray();
 
         return $pacientesDoPsicologo;
     }
