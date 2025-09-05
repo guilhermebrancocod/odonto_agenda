@@ -173,7 +173,7 @@
                                         <input type="text" class="form-control view-mode" value="{{ $agendamento->ID_PSICOLOGO }}" readonly>
 
                                         <div class="edit-mode d-none">
-                                            <select id="select-psicologo" name="ID_PSICOLOGO" placeholder="Selecione ou busque um psicólogo...">
+                                            <select id="select-psicologo" name="ID_PSICOLOGO" placeholder="" disabled>
                                                 @if($agendamento->ID_PSICOLOGO)
                                                     <option value="{{ $agendamento->ID_PSICOLOGO}}" selected>
                                                         {{ $agendamento->ID_PSICOLOGO }}
@@ -210,19 +210,6 @@
                                 </dl>
                             </div>
                         </div>
-
-                        <div class="card mb-4">
-                            <div class="card-header"><h5><i class="bi bi-currency-dollar me-2"></i>Detalhes Financeiros</h5></div>
-                            <div class="card-body">
-                                <dl class="details-grid">
-                                    <dt>Valor</dt>
-                                    <dd>
-                                        <input type="text" class="form-control editable-field" name="VALOR_AGEND" 
-                                            value="{{ $agendamento->VALOR_AGEND ? number_format($agendamento->VALOR_AGEND, 2, ',', '.') : '' }}" disabled>
-                                    </dd>
-                                </dl>
-                            </div>
-                        </div>
                     </div>
                 </div>
                 
@@ -239,6 +226,7 @@
                         </button>
                     </div>
                 </div>
+
             </form>
         </div>
     </div>
@@ -320,7 +308,7 @@
             create: false,
             load: (query, callback) => {
                 if (query.length < 2) return callback();
-                const url = `/psicologia/consultar-paciente/buscar-nome-cpf?search=${encodeURIComponent(query)}`;
+                const url = `/psicologo/consultar-paciente/buscar-nome-cpf?search=${encodeURIComponent(query)}`;
                 fetch(url).then(response => response.json()).then(json => callback(json)).catch(() => callback());
             },
             render: {
