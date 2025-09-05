@@ -199,7 +199,10 @@ Route::middleware([AuthMiddleware::class])->group(function () {
 
     Route::post('/login', [LoginController::class, 'login'])->name('loginPOST');
 
-    Route::get('/logout', [LoginController::class, 'logout'])->name('logout');
+    Route::get('/logout', function() {
+        session()->forget('usuario');
+        return redirect()->route('loginGET');
+    })->name('logout');
 
     Route::post('/selecionar-clinica', [ClinicaController::class, 'selecionarClinica'])->name('selecionar-clinica-post');
 });
@@ -390,7 +393,6 @@ Route::post('/professor/login', function() {
 })->name('professorLoginPost');
 
 Route::middleware([AuthProfessorMiddleware::class])->group( function() {
-
     Route::match(['get', 'post'], '/professor', function() {
         return view('psicologia.professor.menu_agenda');
     })->name('professorMenu');
@@ -399,8 +401,14 @@ Route::middleware([AuthProfessorMiddleware::class])->group( function() {
         return view('psicologia.professor.menu_agenda');
     })->name('professorLoginPost');
 
+    Route::get('/professor/consultar-agendamento', function() {
+        return view('psicologia.professor.consultar_agenda');
+    })->name('professorConsultarAgendamentos-GET');
+
+    Route::get('/professor/consultar-agendamento/buscar', [AgendamentoController::class, 'getAgendamentosForProfessor'])->name('getAgendamentosForProfessor');
+
     Route::get('/professor/logout', function() {
-        session()->flush();
+        session()->forget('professor');
         return redirect()->route('professorLoginGet');
     })->name('professorLogout');
 });

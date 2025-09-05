@@ -37,10 +37,8 @@ class LoginController extends Controller
 
     public function logout(Request $request)
     {
-        // LIMPA OS DADOS DA SESSÃO
-        session()->flush();
-        $request->session()->invalidate();
-        $request->session()->regenerateToken();
+        // LIMPA OS DADOS DA SESSÃO DE USUÁRIO
+        session()->forget('usuario');
 
         // REDIRECIONA PARA TELA DE LOGIN NOVAMENTE
         return view('login');

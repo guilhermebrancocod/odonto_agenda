@@ -130,7 +130,6 @@
     @include('components.navbar')
 
     <div class="container ms-3 mw-100">
-
         <div class="row">
 
             <x-page-title>

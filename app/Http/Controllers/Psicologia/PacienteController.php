@@ -127,7 +127,7 @@ class PacienteController extends Controller
     }
 
     public function getPacienteByNameCPFPsicologo(Request $request)
-    {
+    {        
         $pacientes = $this->pacienteService->filtrarPacientesByNameOrCpfPsicologo($request);
 
         return response()->json($pacientes);
