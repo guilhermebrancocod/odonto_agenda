@@ -24,7 +24,8 @@ class AgendamentoService
             'servico',
             'clinica',
             'agendamentoOriginal',
-            'remarcacoes'
+            'remarcacoes',
+            'psicologo'
         ])
         ->where('ID_CLINICA', 1)
         ->where('STATUS_AGEND', '<>', 'Excluido');
@@ -121,7 +122,8 @@ class AgendamentoService
             'servico',
             'clinica',
             'agendamentoOriginal',
-            'remarcacoes'
+            'remarcacoes',
+            'psicologo'
         ])
         ->where('ID_CLINICA', 1)
         ->where('ID_PSICOLOGO', session('psicologo')[1])
