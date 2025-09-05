@@ -112,13 +112,13 @@
     <!-- DADOS DA SESSAO DO USUARIO -->
     <div classs="">
         <p style="color:#ecf5f9" class="p-0 m-0 text-center">
-            {{ session('psicologo')[0] }}
+            {{ session('professor')[0] }}
         </p>
         <p style="color:#ecf5f9" class="p-0 m-0 text-center">
-            {{ session('psicologo')[1] }}
+            {{ session('professor')[1] }}
         </p>
         <p style="color:#ecf5f9" class="p-0 m-0 text-center">
-            {{ session('psicologo')[2] }}
+            {{ session('professor')[2] }}
         </p>
         <p class="p-0 m-0 text-center" style="color: white;">
             {{ request()->ip() }}
@@ -130,15 +130,15 @@
 
         <!-- PÁGINA INICIAL - MENU AGENDA -->
         <li class="list-group-item rounded-1 p-0 overflow-hidden ">
-            <a href="/psicologo" class="link-agendar d-flex align-items-center gap-2 p-2">
+            <a href="/professor" class="link-agendar d-flex align-items-center gap-2 p-2">
                 <i class="fas fa-home"></i> Início
             </a>
         </li>
 
-        <!-- INCLUIR AGENDAMENTO -->
+        <!-- CONSULTAR AGENDA -->
         <li class="list-group-item rounded-1 p-0 overflow-hidden ">
-            <a href="/psicologo/criar-agendamento" class="link-agendar d-flex align-items-center gap-2 p-2">
-                <i class="fas fa-calendar-plus"></i> Criar Agenda
+            <a href="/professor/consultar-agendamento" class="link-agendar d-flex align-items-center gap-2 p-1">
+                <i class="fas fa-edit"></i> Agendas
             </a>
         </li>
 

@@ -109,8 +109,8 @@ class AuthPsicologoMiddleware
         ->first();
 
         if($aluno) {
-            $disciplinas = ['D009373', 'D009376', 'D009381', 'D009385', 'D009393', 'D009403', 'D009402', 'D009406', 'D009404'];
             // $disciplinas = $this->buscarDisciplinasClinica();
+            $disciplinas = ['D009373', 'D009376', 'D009381', 'D009385', 'D009393', 'D009403', 'D009402', 'D009406', 'D009404'];
             $matricula = DB::table('LYCEUM_BKP_PRODUCAO.dbo.LY_MATRICULA as m')
             ->where('m.ALUNO', $aluno->ALUNO)
             ->whereIn('m.DISCIPLINA', $disciplinas)
@@ -137,5 +137,14 @@ class AuthPsicologoMiddleware
         } else {
             return null;
         }
+    }
+
+    public function buscarDisciplinasClinica()
+    {
+        $anoSemestre = DB::table('LYCEUM_BKP_PRODUCAO.dbo.LY_OPCOES op')->where('op.CHAVE', 4)->select('op.ANO_LETIVO', 'op.SEM_LETIVO')->first();
+
+        $disciplinas = DB::table('LYCEUM_BKP_PRODUCAO.dbo.LY_TURMA as t')
+        ->where('t.FL_FIELD_17', 'CLINICA')->where('t.ANO', $anoSemestre->ANO_LETIVO)->where('op.SEM_LETIVO', $anoSemestre->SEM_LETIVO)->get();
+        return $disciplinas->toArray();
     }
 }
