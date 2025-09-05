@@ -107,6 +107,11 @@ class PacienteService
             $query->where(function ($q) use ($filtros) {
                 $q->where('NOME_COMPL_PACIENTE', 'LIKE', '%' . $filtros['search'] . '%')
                 ->orWhere('CPF_PACIENTE', 'LIKE', '%' . $filtros['search'] . '%');
+                
+                // IMPORTANTE: Adiciona a busca por ID APENAS se o termo for numérico
+                if (is_numeric($filtros['search'])) {
+                    $q->orWhere('ID_PACIENTE', $filtros['search']);
+                }
             });
         }
 
