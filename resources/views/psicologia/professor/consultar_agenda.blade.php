@@ -60,7 +60,7 @@
 </head>
 
 <body class="bg-body-secondary">
-    @include('components.psicologo_navbar')
+    @include('components.professor_navbar')
 
     @if($errors->any())
         <div class="alert alert-danger shadow text-center position-fixed top-0 start-50 translate-middle-x mt-3 animate-alert" style="max-width: 90%;">
@@ -300,7 +300,7 @@
                                 <td class="text-center">${checkPagamento}</td>
                                 <td>${valorPagamento}</td>
                                 <td class="d-flex flex-nowrap gap-1 agendamento-actions">
-                                    <a href="/psicologia/agendamento/${ag.ID_AGENDAMENTO}/editar" class="btn btn-warning flex-grow-1" title="Editar"><i class="bi bi-pencil"></i></a>
+                                    <a href="/professor/agendamento/${ag.ID_AGENDAMENTO}/editar" class="btn btn-warning flex-grow-1" title="Editar"><i class="bi bi-pencil"></i></a>
                                     <form action="/psicologia/agendamento/${ag.ID_AGENDAMENTO}" method="POST" onsubmit="return confirm('Confirma a exclusão deste agendamento?');">
                                         @csrf
                                         @method('DELETE')

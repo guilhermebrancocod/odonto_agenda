@@ -397,7 +397,7 @@ Route::middleware([AuthProfessorMiddleware::class])->group( function() {
         return view('psicologia.professor.menu_agenda');
     })->name('professorMenu');
 
-    Route::get('/professor/agendamentos-calendar', [AgendamentoController::class, 'getAgendamentosForCalendarProfessor']);
+    Route::get('/professor/agendamentos-calendar', [AgendamentoController::class, 'getAgendamentosForCalendarProfessor'])->name('getAgendamentosForCalendarProfessor');
 
     Route::post('/professor/login', function() {
         return view('psicologia.professor.menu_agenda');
