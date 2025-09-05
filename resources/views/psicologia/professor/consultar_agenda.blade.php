@@ -60,7 +60,7 @@
 </head>
 
 <body class="bg-body-secondary">
-    @include('components.psicologo_navbar')
+    @include('components.professor_navbar')
 
     @if($errors->any())
         <div class="alert alert-danger shadow text-center position-fixed top-0 start-50 translate-middle-x mt-3 animate-alert" style="max-width: 90%;">
@@ -82,9 +82,6 @@
     <div class="container ms-3 mw-100">
         <div class="row">
             <x-page-title>
-                    <p onclick="window.location.href = '/psicologia/criar-agendamento'" class="btn btn-success p-2 me-3" style="font-size: 15px;" >
-                        <span>Novo Agendamento</span>
-                    </p>
             </x-page-title>
 
             <div class="col-12 shadow-lg shadow-dark p-4 bg-body-tertiary rounded">

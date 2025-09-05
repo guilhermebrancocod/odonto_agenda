@@ -138,6 +138,7 @@
                             <tr>
                                 <th>Descrição</th>
                                 <th>Código Interno</th>
+                                <th>Disciplina</th>
                                 <th>Valor</th>
                                 <th>Ações</th>
                             </tr>
@@ -332,6 +333,7 @@
                             tr.innerHTML = `
                                 <td>${s.SERVICO_CLINICA_DESC}</td>
                                 <td>${s.COD_INTERNO_SERVICO_CLINICA || '-'}</td>
+                                <td>${s.DISCIPLINA || '-'}</td>
                                 <td>${formatarValor(s.VALOR_SERVICO) || '-'}</td>
                                 <td>
                                     <button class="btn btn-sm btn-warning btn-editar" title="Editar" data-servico='${JSON.stringify(s)}'>
