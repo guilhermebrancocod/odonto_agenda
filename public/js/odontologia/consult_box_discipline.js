@@ -128,10 +128,11 @@ $('#selectBoxDiscipline').on('select2:select', function (e) {
         },
         success: function (disciplines) {
             const html = `
-                    <tr>
+                                        <tr>
                         <td>${disciplines.DISCIPLINA}</td>
                         <td>${disciplines.DESCRICAO}</td>
-                        <td>${disciplines.DIA_SEMANA}</td>
+                        <td>${disciplines.TURMA}</td>
+                        <td>${diaSemana(disciplines.DIA_SEMANA)}</td>
                         <td>${maskTime(disciplines.HR_INICIO)}</td>
                         <td>${maskTime(disciplines.HR_FIM)}</td>
                         <td>
@@ -142,6 +143,7 @@ $('#selectBoxDiscipline').on('select2:select', function (e) {
                                 data-id="${disciplines.ID_BOX_DISCIPLINA}">
                                 <i class="fa fa-pencil-alt"></i>
                             </button>
+                        </td>
                         <td>
                             <button 
                                 type="button" 
@@ -150,7 +152,6 @@ $('#selectBoxDiscipline').on('select2:select', function (e) {
                                 data-id="${disciplines.ID_BOX_DISCIPLINA}">
                                 <i class="fas fa-trash-alt"></i>
                             </button>
-                        </td>
                         </td>
                     </tr>
                 `;

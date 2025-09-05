@@ -46,6 +46,24 @@ $(document).ready(function () {
     });
 });
 
+const cbV1 = document.querySelector('input[name="recorrencia"][value="1"]');
+const cbV2 = document.querySelector('input[name="recorrencia"][value="2"]');
+const diasBox = document.getElementsByName('dia_recorrencia');
+
+if (cbV1 && cbV2) {
+    // quando marcar o 2, desmarca o 1
+    cbV2.addEventListener('change', () => {
+        if (cbV2.checked) cbV1.checked = false;
+    });
+
+    // quando marcar o 1, desmarca o 2 (opcional, para ficar mutuamente exclusivo)
+    cbV1.addEventListener('change', () => {
+        if (cbV1.checked) cbV2.checked = false;
+    });
+
+    // regra inicial: se ambos vierem marcados por algum motivo, prioriza o 2 (ou ajuste como preferir)
+    if (cbV1.checked && cbV2.checked) cbV1.checked = false;
+}
 
 $(document).ready(function () {
     // Inicializa os dois timepickers
@@ -136,6 +154,7 @@ $(document).ready(function () {
 $(document).ready(function () {
     $.fn.select2.defaults.set("language", "pt-BR");
     let disciplinaSelecionada = null;
+    let boxSelecionado = null;
 
     const $disciplineSelect = $('#form-select-discipline');
     const $boxSelect = $('#form-select-box');
@@ -157,7 +176,8 @@ $(document).ready(function () {
                 return {
                     results: list.map(p => ({
                         id: p.DISCIPLINA,
-                        text: p.DISCIPLINA + '-' + p.NOME
+                        text: p.DISCIPLINA + '-' + p.NOME,
+                        box: p.ID_BOX
                     }))
                 };
             },
@@ -167,32 +187,16 @@ $(document).ready(function () {
 
     $disciplineSelect.on('select2:select', (e) => {
         disciplinaSelecionada = e.params.data.id;
+        boxSelecionado = null;
         $boxSelect.prop('disabled', false).val(null).trigger('change');
         $turmaSelect.prop('disabled', false).val(null).trigger('change'); // limpa boxes e habilita
     });
 
     $disciplineSelect.on('select2:clear select2:unselect', () => {
         disciplinaSelecionada = null;
+        boxSelecionado = null;
         $boxSelect.val(null).trigger('change').prop('disabled', true);
         $turmaSelect.val(null).trigger('change').prop('disabled', true);
-    });
-
-    $turmaSelect.select2({
-        allowClear: true,
-        minimumInputLength: 0,
-        ajax: {
-            url: () => `/odontologia/turmas?disciplina=${encodeURIComponent(disciplinaSelecionada || '')}`,
-            dataType: 'json',
-            delay: 250,
-            data: params => ({
-                query: params.term || '',
-                disciplina: disciplinaSelecionada || ''   // <<< envia a disciplina
-            }),
-            processResults: data => ({
-                results: (Array.isArray(data) ? data : []).map(t => ({ id: t, text: t }))
-            }),
-            cache: true
-        }
     });
 
     // Inicializa o segundo select (boxes)
@@ -217,7 +221,34 @@ $(document).ready(function () {
             },
             cache: true
         }
+    })
+        .on('select2:select', (e) => {
+            boxSelecionado = String(e.params.data.id || '');
+            const ready = !!(disciplinaSelecionada && boxSelecionado);
+            $turmaSelect.prop('disabled', !ready).val(null).trigger('change.select2');
+        })
+
+    $turmaSelect.select2({
+        allowClear: true,
+        placeholder: 'Selecione a turma',
+        minimumInputLength: 0,
+        ajax: {
+            url: '/odontologia/turmas',     
+            type: 'GET',
+            dataType: 'json',
+            delay: 250,
+            cache: true,                    
+            data: params => ({
+                term: params.term || '',                          // busca digitada
+                disciplina: $disciplineSelect.val() || '',        // pega direto do DOM
+                box: $boxSelect.val() || ''                       // idem
+            }),
+            processResults: data => ({
+                results: (Array.isArray(data) ? data : []).map(t => ({ id: t, text: t }))
+            })
+        }
     });
+
 
     // utilitário para pré-selecionar programaticamente no Select2
     function hydrateSelect2($el, id, text) {
@@ -243,18 +274,6 @@ $(document).ready(function () {
     if (boxInitId && boxInitText) {
         hydrateSelect2($boxSelect, boxInitId, boxInitText);
     }
-
-    // 2) Só limpa o BOX se o usuário realmente TROCAR a disciplina
-    $disc.on('select2:select select2:clear select2:unselect', function (e) {
-        // se veio de hydrate inicial, ignore
-        if (e?.params?.silentInit) return;
-
-        // disciplina mudou => limpar box
-        $box.val(null).trigger('change');
-    });
-
-    // 3) garanta que o BOX não fique disabled no edit
-    $box.prop('disabled', false);
 
     // Foco automático na busca quando abrir
     $disciplineSelect.on('select2:open', function () {

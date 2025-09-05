@@ -48,9 +48,9 @@ document.addEventListener('DOMContentLoaded', function () {
                 root.style.flexDirection = 'column';
                 root.style.gap = '2px';
                 root.innerHTML = `
-                <div><strong>${e.title || ''}</strong></div>
-                <div style="font-size:9px;opacity:.85;margin-left:2px">
-                    ${local}${turma ? ' • Turma ' + turma : ''}${status ? ' • ' + status : ''}
+                <div style="font-size: 10px"><strong>${e.title || ''}</strong></div>
+                <div style="font-size:9px;opacity:.85;">
+                    ${local}${turma ? ' • Turma ' + turma : ''}
                 </div>`;
                 return { domNodes: [root] };
             }

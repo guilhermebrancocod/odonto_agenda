@@ -8,6 +8,7 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
+use App\Services\Odontologia\AuditLogger;
 
 class OdontoCreateController extends Controller
 {
@@ -19,6 +20,7 @@ class OdontoCreateController extends Controller
 
     public function fCreatePatient(Request $request)
     {
+
         $input = $request->all();
         $input['cpf']              = preg_replace('/\D/', '', $input['cpf'] ?? '');
         $input['cpf_responsavel']  = preg_replace('/\D/', '', $input['cpf_responsavel'] ?? '');
@@ -31,7 +33,7 @@ class OdontoCreateController extends Controller
         $rules = [
             'nome'            => ['required', 'string', 'max:255'],
             'cpf'             => ['required', 'regex:/^\d{11}$/'],   // 11 dígitos
-            'dt_nasc'         => ['required', 'date_format:d/m/Y', 'before:today', ''],
+            'dt_nasc'         => ['required', 'date_format:d/m/Y', 'before:today'],
             'nome_responsavel' => [
                 Rule::requiredIf(function () use ($request) {
                     try {
@@ -56,7 +58,6 @@ class OdontoCreateController extends Controller
             'email'           => ['required', 'email:rfc', 'max:100'],
             'celular'         => ['required', 'regex:/^\d{10,11}$/'], // 10 ou 11 dígitos
             'cod_sus'         => ['nullable', 'regex:/^\d{15}$/'],   // SUS geralmente 15 dígitos
-            'nome_resposavel' => ['nullable', 'string', 'max:100'],
             'cpf_responsavel' => ['nullable', 'regex:/^\d{11}$/'],
             'obs_laudo'       => ['nullable', 'string', 'max:255'],
         ];
@@ -110,7 +111,7 @@ class OdontoCreateController extends Controller
         }
 
         // Cadastro do paciente
-        $idPaciente = DB::table('FAESA_CLINICA_PACIENTE')->insertGetId([
+        $row = [
             'NOME_COMPL_PACIENTE' => $request->input('nome'),
             'CPF_PACIENTE'        => $request->input('cpf'),
             'COD_SUS'             => $request->input('cod_sus'),
@@ -125,11 +126,23 @@ class OdontoCreateController extends Controller
             'UF'                  => $request->input('estado'),
             'E_MAIL_PACIENTE'     => $request->input('email'),
             'FONE_PACIENTE'       => $request->input('celular'),
-            'NOME_RESPONSAVEL'    => $request->input('nome_resposavel'),
+            'NOME_RESPONSAVEL'    => $request->input('nome_responsavel'),
             'CPF_RESPONSAVEL'     => $request->input('cpf_responsavel'),
             'OBSERVACAO'          => $request->input('obs_laudo'),
-        ]);
+        ];
 
+        // INSERT
+        $idPaciente = DB::table('FAESA_CLINICA_PACIENTE')
+            ->insertGetId($row, 'ID_PACIENTE'); // informe a PK no SQL Server
+
+        // AUDITORIA
+        AuditLogger::created(
+            'FAESA_CLINICA_PACIENTE',
+            $idPaciente,
+            $row + ['ID_PACIENTE' => $idPaciente]
+        );
+
+        // Redirect PRG
         return back()->with('success', 'Paciente criado com sucesso!');
     }
 
@@ -140,6 +153,71 @@ class OdontoCreateController extends Controller
 
     public function fCreateAgenda(Request $request)
     {
+
+        $rules = [
+            'ID_PACIENTE'     => ['required'],
+            'status'          => ['required'],   // 11 dígitos
+            'date'            => ['bail', 'required', 'date_format:d/m/Y'],
+            'date_end'        => ['bail', 'required', 'date_format:d/m/Y'],
+            'date'        => ['bail', 'required', 'date_format:d/m/Y'],
+            'date_end'    => ['bail', 'required', 'date_format:d/m/Y'],
+
+            'disciplina'  => ['required'],
+            'ID_BOX'      => ['required'],
+            'turma'       => ['required'],
+            'procedimento' => ['required'],
+
+            'recorrencia' => ['required', 'integer', 'in:1,2'],
+            'dia_recorrencia' => [
+                Rule::requiredIf(fn() => (int) request('recorrencia') !== 1),
+                'nullable',
+                'between:0,7',
+            ],
+        ];
+
+        $messages = [
+            'ID_PACIENTE.required'  => 'O paciente é obrigatório.',
+            'status.required'       => 'O status é obrigatório.',
+
+            'date.required'         => 'Informe a data inicial.',
+            'date.date_format'      => 'Data inicial deve estar no formato dd/mm/aaaa.',
+            'date_end.required'     => 'Informe a data final.',
+            'date_end.date_format'  => 'Data final deve estar no formato dd/mm/aaaa.',
+
+            'disciplina.required'   => 'A disciplina é obrigatória.',
+            'ID_BOX.required'       => 'O box é obrigatório.',
+            'turma.required'        => 'A turma é obrigatória.',
+            'procedimento.required' => 'O procedimento é obrigatório.',
+            'recorrencia.required'  => 'A recorrência é obrigatória.',
+            'dia_recorrencia.required' => 'Escolha ao menos um dia da recorrência.',
+        ];
+
+        $validator = Validator::make($request->all(), $rules, $messages);
+
+        $validator->after(function ($v) use ($request) {
+            if ($v->errors()->has('date') || $v->errors()->has('date_end')) {
+                return; // já falhou formato/required; não compara agora
+            }
+            if (!$request->filled('date') || !$request->filled('date_end')) {
+                return; // alguma está vazia; deixa o 'required' atuar
+            }
+
+            try {
+                $ini = Carbon::createFromFormat('d/m/Y', $request->input('date'))->startOfDay();
+                $fim = Carbon::createFromFormat('d/m/Y', $request->input('date_end'))->startOfDay();
+            } catch (\Throwable $e) {
+                // se quebrar aqui, as mensagens de date_format já cobrem
+                return;
+            }
+
+            if ($fim->lt($ini)) {
+                $v->errors()->add('date_end', 'A data final deve ser igual ou posterior à data inicial.');
+            }
+        });
+
+        if ($validator->fails()) {
+            return back()->withErrors($validator)->withInput();
+        }
 
         $idClinica = 2;
         $idBox     = (int) $request->input('ID_BOX');
@@ -172,8 +250,8 @@ class OdontoCreateController extends Controller
             $fimExclusivo = $fim->copy()->addDay()->startOfDay();
 
             $temFeriado = DB::table('LYCEUM_BKP_PRODUCAO.dbo.LY_FERIADO')
-                ->where('DATA', '>=', $ini)           // 2025-09-08 00:00:00
-                ->where('DATA', '<',  $fimExclusivo)  // até antes de 2025-09-09 00:00:00
+                ->where('DATA', '=', $ini)
+                ->where('DATA', '=',  $fimExclusivo)
                 ->exists();
 
             if ($temFeriado) {
@@ -399,6 +477,17 @@ class OdontoCreateController extends Controller
         return view('odontologia/create_patient', compact('paciente'));
     }
 
+    public function editUser($userId)
+    {
+        $user = DB::table('FAESA_CLINICA_USUARIO_GERAL')->where('ID', $userId)->first();
+
+        if (!$user) {
+            abort(404);
+        }
+
+        return view('odontologia/create_user', compact('user'));
+    }
+
     public function editAgenda($agendaId)
     {
 
@@ -483,6 +572,19 @@ class OdontoCreateController extends Controller
         return redirect()->back()->with('success', 'Box cadastrado com sucesso!');
     }
 
+    public function createUsuario(Request $request)
+    {
+        DB::table('FAESA_CLINICA_USUARIO_GERAL')->insertGetId([
+            'ID_CLINICA' => 2,
+            'USUARIO' => $request->input('winusuario'),
+            'NOME' => $request->input('nome'),
+            'TIPO' => $request->input('tipo'),
+            'PESSOA' => $request->input('pessoa'),
+            'STATUS' => $request->input('status'),
+        ]);
+        return redirect()->back()->with('success', 'Usuário cadastrado com sucesso!');
+    }
+
     public function editBox($idBox)
     {
         $box = DB::table('FAESA_CLINICA_BOXES')->where('ID_BOX_CLINICA', $idBox)->first();
@@ -496,89 +598,48 @@ class OdontoCreateController extends Controller
 
     public function createBoxDiscipline(Request $request)
     {
-        // 1) Coletas básicas
-        $boxes       = (array) $request->input('boxes', []);
-        $diaSemana   = $request->input('dia_semana');     // 1..7 (domingo..sábado)
-        $selecionados = (array) $request->input('dias_semana', []); // 1..16 (slots)
+        $data = $request->validate([
+            'disciplina'   => 'required|string',
+            'turma'        => 'required|string',
+            'data'         => 'required|integer|between:1,7',
+            'boxes'        => 'required|array|min:1',
+            'boxes.*'      => 'integer',
+            'horarios'     => 'required|array|min:1',
+            'horarios.*'   => 'regex:/^\d{1,2}:\d{2}$/', // HH:mm
+        ], [
+            'required' => 'Campo obrigatório.',
+            'between'  => 'Valor inválido.',
+            'regex'    => 'Horário inválido (HH:mm).',
+        ]);
 
-        if (empty($boxes)) {
-            return redirect()->back()->with('error', 'Nenhum box foi selecionado.');
-        }
+        $hrIni = $request->input('hr_ini');
+        $hrFim = $request->input('hr_fim');
 
-        if (empty($selecionados)) {
-            return redirect()->back()->with('error', 'Selecione pelo menos um horário.');
-        }
+        DB::transaction(function () use ($data, $hrIni, $hrFim) {
+            foreach ($data['boxes'] as $boxId) {
+                DB::table('FAESA_CLINICA_BOX_DISCIPLINA')->updateOrInsert(
+                    [
+                        'ID_CLINICA' => 2,
+                        'ID_BOX'     => (int)$boxId,
+                        'DISCIPLINA' => $data['disciplina'],
+                        'TURMA'      => $data['turma'],
+                        'DIA_SEMANA' => (int)$data['data'],
+                        'HR_INICIO'  => $hrIni,
+                        'HR_FIM'     => $hrFim,
+                    ],
+                    ['DT_CADASTRO' => DB::raw('SYSDATETIME()')]
+                );
+            }
+        });
 
-        // 2) Mapa de slots -> horário
-        $horarios = [
-            '1'  => '7:30',
-            '2'  => '8:15',
-            '3'  => '9:00',
-            '4'  => '9:45',
-            '5'  => '10:15',
-            '6'  => '11:00',
-            '7'  => '11:45',
-            '8'  => '12:30',
-            '9'  => '13:15',
-            '10' => '14:00',
-            '11' => '14:45',
-            '12' => '15:30',
-            '13' => '16:15',
-            '14' => '17:00',
-            '15' => '17:45',
-            '16' => '18:30',
-        ];
-
-        // 3) Normaliza, filtra válidos e ordena
-        $selecionados = collect($selecionados)
-            ->map(fn($v) => (int) $v)
-            ->filter(fn($i) => isset($horarios[(string)$i]))
-            ->unique()
-            ->sort()
-            ->values();
-
-        if ($selecionados->isEmpty()) {
-            return redirect()->back()->with('error', 'Horários inválidos.');
-        }
-
-        // 4) Define hr_inicio (menor) e hr_fim (maior)
-        $minKey   = (string) $selecionados->first();
-        $maxKey   = (string) $selecionados->last();
-        $hr_inicio = $horarios[$minKey]; // ex.: "7:30"
-        $hr_fim    = $horarios[$maxKey]; // ex.: "9:00"
-
-        $data = $request->input('data');
-
-
-        // (opcional) padronizar para HH:mm
-        $pad = function (string $hm) {
-            [$h, $m] = array_pad(explode(':', $hm), 2, '00');
-            return str_pad($h, 2, '0', STR_PAD_LEFT) . ':' . $m;
-        };
-        $hr_inicio = $pad($hr_inicio); // "07:30"
-        $hr_fim    = $pad($hr_fim);    // "09:00"
-
-        // 5) Insert por box
-        foreach ($boxes as $boxId) {
-            DB::table('FAESA_CLINICA_BOX_DISCIPLINA')->insertGetId([
-                'ID_CLINICA'  => 2,
-                'ID_BOX'      => $boxId,
-                'DISCIPLINA'  => $request->input('disciplina'),
-                'TURMA' => $request->input('turma'),
-                'DIA_SEMANA'  => $data,       // <- código 1..7
-                'HR_INICIO'   => $hr_inicio,       // "HH:mm"
-                'HR_FIM'      => $hr_fim,          // "HH:mm"
-                'DT_CADASTRO' => now(),
-            ]);
-        }
-
-        return redirect()->back()->with('success', 'Disciplina e dia da semana vinculados ao(s) box(es) com sucesso!');
+        return back()->with('success', 'Horários vinculados com sucesso!');
     }
 
 
     public function editBoxDiscipline(Request $request, $idBoxDiscipline)
     {
-        $BoxDiscipline = DB::table('FAESA_CLINICA_BOX_DISCIPLINA')->where('ID_BOX_DISCIPLINA', $idBoxDiscipline)->first();
+        $BoxDiscipline = DB::table('FAESA_CLINICA_BOX_DISCIPLINA')
+        ->where('ID_BOX_DISCIPLINA', $idBoxDiscipline)->first();
 
         if (!$BoxDiscipline) {
             return redirect('odontologia/criarboxdisciplina')->with('error', 'Serviço não encontrado.');
@@ -593,5 +654,17 @@ class OdontoCreateController extends Controller
             'ID_AGENDAMENTO' => $agendaId,
             'ID_BOX' => $boxId
         ]);
+    }
+
+    public function historyPaciente($id)
+    {
+        $rows = DB::table('FAESA_CLINICA_ODONTOLOGIA_AUDITORIA')
+            ->where('AUDITABLE_ID', $id)
+            ->where('EVENT', '=', 'created')
+            ->select('AUDITABLE_ID', 'OLD_VALUES', 'NEW_VALUES', 'created_at', 'updated_at')
+            ->orderByDesc('created_at')
+            ->get();
+
+        return response()->json($rows);
     }
 }

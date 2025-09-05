@@ -16,7 +16,7 @@
     @include('components.sidebar')
     <div style="margin-left:220px; padding: 30px; border-radius: 10px; background-color: #fff; box-shadow: 0 4px 12px rgba(0,0,0,0.05); width: 100%;">
         <fieldset class="border p-3 rounded mb-3">
-            <legend class="w-auto px-2">Vinculo de box com disciplina</legend>
+            <legend class="w-auto px-2">Disciplinas por box</legend>
         </fieldset>
         <form id="form" class="row g-3 needs-validation"
             action="{{ isset($BoxDiscipline) ? route('updateBoxDiscipline', $BoxDiscipline->ID_BOX_DISCIPLINA) : route('createBoxDiscipline') }}"
@@ -30,11 +30,6 @@
             <div class="linha-com-titulo">
                 <h5>Detalhes</h5>
                 <div class="linha-flex"></div>
-                <div style="text-align: right;flex:0.2">
-                    <button class="btn btn-primary btn-lg" id="btn-agendar" type="submit" style="background-color: #007bff; color: #fff; border: none; padding: 10px 20px; font-size: 10px; border-radius: 6px; cursor: pointer;">
-                        <i class="bi bi-calendar-plus"></i> Histórico de Alterações
-                    </button>
-                </div>
             </div>
             <style>
                 /* Layout das duas colunas */
@@ -54,7 +49,6 @@
                     font-size: 14px;
                     color: #666;
                     margin-bottom: 6px;
-                    /*display: block;*/
                 }
 
                 .field .form-select {
@@ -65,26 +59,28 @@
                     font-size: 14px;
                 }
 
-                /* Grade de horários como botões */
+                /* Grade de horários como "cards" */
                 .horarios-grid {
                     display: grid;
                     grid-template-columns: repeat(4, minmax(0, 1fr));
-                    /* 4 por linha; ajuste se quiser 3 */
+                    /* 4 por linha */
                     gap: 6px;
-                    /* espaçamento menor entre botões */
                 }
 
-                .time-check {
+                /* Item */
+                .time-item {
                     position: relative;
                 }
 
-                .time-check input[type="checkbox"] {
+                /* Input escondido (usa a label como botão) */
+                .time-input {
                     position: absolute;
                     opacity: 0;
                     pointer-events: none;
                 }
 
-                .time-check label {
+                /* Card do horário */
+                .time-card {
                     display: inline-block;
                     width: 100%;
                     padding: 8px 10px;
@@ -99,32 +95,45 @@
                     transition: all .15s ease;
                 }
 
-                .time-check label:hover {
+                /* Hover / foco */
+                .time-card:hover {
                     border-color: #bbb;
                     transform: translateY(-1px);
                 }
 
-                .time-check input[type="checkbox"]:checked+label {
+                .time-input:focus+.time-card,
+                .time-input:focus-visible+.time-card {
+                    outline: 2px solid #8dbbfd;
+                    outline-offset: 2px;
+                }
+
+                /* Selecionado */
+                .time-input:checked+.time-card {
                     background: #e8f3ff;
                     border-color: #8dbbfd;
                     box-shadow: inset 0 0 0 1px #8dbbfd;
                     font-weight: 600;
                 }
 
-                /* Box selector (lado direito) */
-                .boxes-wrapper {
-                    border: 1px solid #ddd;
-                    border-radius: 6px;
-                    padding: 10px;
-                    max-height: 260px;
-                    overflow-y: auto;
-                    background-color: #f9f9f9;
+                /* Desabilitado (se usar disabled no input) */
+                .time-input:disabled+.time-card {
+                    background: #f8f9fa;
+                    color: #adb5bd;
+                    border-color: #e9ecef;
+                    cursor: not-allowed;
+                    transform: none;
                 }
 
-                /* Responsivo */
+                /* Responsivo opcional */
                 @media (max-width: 992px) {
-                    .agendamento-grid {
-                        grid-template-columns: 1fr;
+                    .horarios-grid {
+                        grid-template-columns: repeat(3, minmax(0, 1fr));
+                    }
+                }
+
+                @media (max-width: 576px) {
+                    .horarios-grid {
+                        grid-template-columns: repeat(2, minmax(0, 1fr));
                     }
                 }
             </style>
@@ -135,6 +144,7 @@
                         <div class="field" style="flex: 1;">
                             <label for="disciplina">Disciplina</label>
                             <select id="disciplina" name="disciplina" class="form-select">
+                                <option value="" {{ old('DISCIPLINA', $agenda->DISCIPLINA ?? '') == '' ? 'selected' : '' }}></option>
                                 @if(isset($BoxDiscipline))
                                 <option value="{{ $BoxDiscipline->DISCIPLINA }}" selected>
                                     {{ $BoxDiscipline->DISCIPLINA ?? 'Selecionado' }}
@@ -145,6 +155,9 @@
                         <div class="field" style="flex: 1;">
                             <label for="turma">Turma</label>
                             <select id="turma" name="turma" class="form-select">
+                                <option value="" {{ old('TURMA', $agenda->TURMA ?? '') == '' ? 'selected' : '' }}>
+                                    Turma
+                                </option>
                                 @if(isset($BoxDiscipline))
                                 <option value="{{ $BoxDiscipline->TURMA }}" selected>
                                     {{ $BoxDiscipline->TURMA ?? 'Selecionado' }}
@@ -164,104 +177,49 @@
                     '6' => 'Sexta-feira',
                     '7' => 'Sábado',
                     ];
-                    $valueSel = old('data', $BoxDiscipline->DIA_SEMANA ?? '');
+
+                    // prioridade: old('data') -> BoxDiscipline->DIA_SEMANA -> agenda->DIA_SEMANA
+                    $diaSelecionado = (string) old('data', $BoxDiscipline->DIA_SEMANA ?? ($agenda->DIA_SEMANA ?? ''));
                     @endphp
 
-                    <div style="display: flex; gap: 15px; margin-bottom: 15px;">
-                        <div class="field" style="flex: 0.5;">
-                            <label for="data">Dia de semana</label>
-                            <select id="data" name="data" class="form-select">
-                                @if($valueSel !== '')
-                                <option value="{{ $valueSel }}" selected>
-                                    {{ $dias[$valueSel] ?? 'Selecionado' }}
-                                </option>
-                                @endif
+                    <div style="display:flex; gap:15px; margin-bottom:15px;">
+                        <div class="field" style="flex:0.5;">
+                            <label for="data">Dia da semana</label>
+                            <select id="data" name="data" class="form-select @error('data') is-invalid @enderror">
+                                <option value="">Dia da semana</option>
+                                @foreach ($dias as $val => $lbl)
+                                <option value="{{ $val }}" @selected($diaSelecionado===(string) $val)>{{ $lbl }}</option>
+                                @endforeach
                             </select>
+                            @error('data') <div class="invalid-feedback">{{ $message }}</div> @enderror
                         </div>
                     </div>
+
                     @php
-                    // Seus horários (label) por chave
-                    $dias = [
-                    '1' => '7:30','2' => '8:15','3' => '9:00','4' => '9:45',
-                    '5' => '10:15','6' => '11:00','7' => '11:45','8' => '12:30',
-                    '9' => '13:15','10' => '14:00','11' => '14:45','12' => '15:30',
-                    '13' => '16:15','14' => '17:00','15' => '17:45','16' => '18:30',
-                    ];
-
-                    // Converte "H:i" p/ minutos
-                    $toMin = function (string $hi) {
-                    [$h,$m] = array_map('intval', explode(':', $hi));
-                    return $h * 60 + $m;
-                    };
-
-                    // Normaliza "07:30:00.0000000" -> "07:30"
-                    $fmtDB = function ($t) {
-                    if (!$t) return null;
-                    try { return \Carbon\Carbon::parse($t)->format('H:i'); }
-                    catch (\Exception $e) { return null; }
-                    };
-
-                    // Lista vinda do POST anterior (se houver erro de validação)
-                    $oldDias = collect(old('dias_semana', []))->map(fn($v) => (string)$v)->all();
-
-                    // Pré-seleção baseada no banco (só se não houver old)
-                    $prechecked = [];
-                    if (isset($BoxDiscipline) && empty($oldDias)) {
-                    $ini = $fmtDB($BoxDiscipline->HR_INICIO); // ex: "07:30"
-                    $fim = $fmtDB($BoxDiscipline->HR_FIM); // ex: "09:00"
-                    if ($ini && $fim) {
-                    $mi = $toMin($ini);
-                    $mf = $toMin($fim);
-
-                    foreach ($dias as $k => $lbl) {
-                    // normaliza "7:30" -> "07:30" e compara
-                    [$h,$m] = array_map('intval', explode(':', $lbl));
-                    $tm = $h * 60 + $m;
-
-                    // Inclui limites (07:30 e 09:00 também marcam)
-                    if ($tm >= $mi && $tm <= $mf) {
-                        $prechecked[]=(string)$k;
-                        }
-                        }
-                        }
-                        }
-                        @endphp
-                        <fieldset class="border rounded p-3" style="margin-top: 10px;">
+                    $hrIni = isset($BoxDiscipline) ? substr($BoxDiscipline->HR_INICIO, 0, 5) : old('hr_ini', '');
+                    $hrFim = isset($BoxDiscipline) ? substr($BoxDiscipline->HR_FIM, 0, 5) : old('hr_fim', '');
+                    @endphp
+                    <fieldset class="border rounded p-3" style="margin-top:10px;">
                         <legend class="float-none w-auto px-2 fs-6 mb-2">Horários</legend>
 
-                        @php
-                        $dias = [
-                        '1' => '7:30','2' => '8:15','3' => '9:00','4' => '9:45',
-                        '5' => '10:15','6' => '11:00','7' => '11:45','8' => '12:30',
-                        '9' => '13:15','10' => '14:00','11' => '14:45','12' => '15:30',
-                        '13' => '16:15','14' => '17:00','15' => '17:45','16' => '18:30',
-                        ];
-                        @endphp
-
-                        <div class="horarios-grid">
-                            @foreach($dias as $val => $lbl)
-                            @php
-                            // Se existir old(), usa old; senão, usa a pré-seleção do banco
-                            $checked = !empty($oldDias)
-                            ? in_array((string)$val, $oldDias, true)
-                            : in_array((string)$val, $prechecked, true);
-                            @endphp
-                            <div class="time-check">
-                                <input
-                                    class="form-check-input"
-                                    type="checkbox"
-                                    id="dia_{{ $val }}"
-                                    name="dias_semana[]"
-                                    value="{{ $val }}"
-                                    {{ $checked ? 'checked' : '' }}>
-                                {{-- data-time sem zero à esquerda para casar com o JS (ex.: "07:30" -> "7:30") --}}
-                                <label class="form-check-label" for="dia_{{ $val }}" data-time="{{ ltrim($lbl, '0') }}">
-                                    {{ $lbl }}
-                                </label>
-                            </div>
-                            @endforeach
+                        <div id="horarios-grid"
+                            class="horarios-grid"
+                            data-disciplina="{{ $BoxDiscipline->DISCIPLINA ?? '' }}"
+                            data-turma="{{ $BoxDiscipline->TURMA ?? '' }}"
+                            data-dia="{{ $BoxDiscipline->DIA_SEMANA ?? '' }}"
+                            data-hr-ini="{{ $hrIni }}"
+                            data-hr-fim="{{ $hrFim }}"
+                            {{-- se você salvar horários individuais, pode enviar também --}}
+                            data-selected='@json($horariosSelecionados ?? [])'>
                         </div>
-                        </fieldset>
+
+                        <input type="hidden" name="hr_ini" id="hr_ini" value="{{ $hrIni }}">
+                        <input type="hidden" name="hr_fim" id="hr_fim" value="{{ $hrFim }}">
+
+                        @isset($BoxDiscipline)
+                        <div class="text-muted small mt-2">Intervalo atual: {{ $hrIni }} – {{ $hrFim }}</div>
+                        @endisset
+                    </fieldset>
                 </div>
                 <!-- COLUNA DIREITA: seleção de box -->
                 <div>
@@ -273,9 +231,11 @@
             </div>
 
             <div style="display: flex; justify-content: space-between; gap: 10px;">
-                <button id="voltar" name="voltar" type="submit" style="background-color: #007bff; color: #fff; border: none; padding: 10px 20px; font-size: 14px; border-radius: 6px; cursor: pointer;">
+                <a href="{{ url('odontologia/consultardisciplinabox') }}"
+                    class="btn btn-primary"
+                    id="voltar">
                     Voltar
-                </button>
+                </a>
                 <button style="background-color: #007bff; color: #fff; border: none; padding: 10px 20px; font-size: 14px; border-radius: 6px; cursor: pointer;">
                     Salvar
                 </button>

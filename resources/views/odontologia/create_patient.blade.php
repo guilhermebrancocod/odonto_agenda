@@ -8,12 +8,14 @@
     <link rel="icon" type="image/png" href="/img/faesa_favicon.png">
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700&display=swap" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datepicker/1.10.0/css/bootstrap-datepicker.min.css" rel="stylesheet" />
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/mdb-ui-kit/7.1.0/mdb.min.css" rel="stylesheet" />
     <link href="/css/style.css" rel="stylesheet">
 </head>
 
 <body>
     @include('components.sidebar')
+    @include('odontologia.modal.log')
     <div style="margin-left:220px; padding: 30px; border-radius: 10px; background-color: #fff; box-shadow: 0 4px 12px rgba(0,0,0,0.05);width: 100%;">
         <fieldset class="border p-3 rounded mb-3">
             <legend class="w-auto px-2">Cadastro Paciente</legend>
@@ -25,15 +27,27 @@
             @if(isset($paciente))
             @method('PUT')
             @endif
+            @php
+            $isEdit = isset($paciente);
+            @endphp
+            @if($isEdit)
             <div class="linha-com-titulo">
                 <h5>Dados Pessoais</h5>
                 <div class="linha-flex"></div>
                 <div style="text-align: right;flex:0.2,5">
-                    <button class="btn btn-primary btn-lg" id="btn-agendar" type="submit" style="background-color: #007bff; color: #fff; border: none; padding: 10px 20px; font-size: 10px; border-radius: 6px; cursor: pointer;">
-                        <i class="bi bi-calendar-plus"></i> Histórico de Alterações
+                    <button
+                        class="btn btn-primary btn-lg btn-log"
+                        type="button"
+                        data-bs-toggle="modal"
+                        data-bs-target="#auditModal"
+                        data-paciente-id="{{ $paciente->ID_PACIENTE }}"
+                        data-url="{{ route('pacientes.audit', $paciente->ID_PACIENTE) }}"
+                        style="background-color:#007bff;color:#fff;border:none;padding:10px 20px;font-size:10px;border-radius:6px;cursor:pointer;">
+                        <i class="bi bi-calendar-plus"></i> Log
                     </button>
                 </div>
             </div>
+            @endif
             @php
             $isEdit = isset($paciente);
             @endphp

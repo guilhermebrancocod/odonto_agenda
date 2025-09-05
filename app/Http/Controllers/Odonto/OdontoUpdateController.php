@@ -295,9 +295,8 @@ class OdontoUpdateController extends Controller
     public function updateBoxDiscipline(Request $request, $idBoxDiscipline)
     {
         $disciplina = $request->input('disciplina');
-        $diaSemana = $request->input('dia_semana');
-        $hrInicio = $request->input('hr_inicio');
-        $hrFim = $request->input('hr_fim');
+        $turma = $request->input('turma');
+        $diaSemana = $request->input('data');
         $boxesSelecionados = $request->input('boxes', []);
 
         // Busca boxes já cadastrados no banco para essa disciplina
@@ -320,14 +319,54 @@ class OdontoUpdateController extends Controller
                 ->delete();
         }
 
+        $dias = [
+            '1' =>  '7:30',
+            '2' =>  '8:15',
+            '3' =>  '9:00',
+            '4' =>  '9:45',
+            '5' =>  '10:15',
+            '6' =>  '11:00',
+            '7' =>  '11:45',
+            '8' =>  '12:30',
+            '9' =>  '13:15',
+            '10' => '14:00',
+            '11' => '14:45',
+            '12' => '15:30',
+            '13' => '16:15',
+            '14' => '17:00',
+            '15' => '17:45',
+            '16' => '18:30',
+        ];
+
+        $horarios = collect((array) $request->input('dias_semana', []))
+            ->map(fn($v) => (string) $v)                     // normaliza p/ string
+            ->filter(fn($v) => array_key_exists($v, $dias))  // só os válidos no mapa
+            ->map(fn($v) => (int) $v)                        // para ordenar numericamente
+            ->sort()
+            ->values();
+
+        if ($horarios->isNotEmpty()) {
+            $minKey = (string) $horarios->first();
+            $maxKey = (string) $horarios->last();
+
+            // Usa 'G:i' porque suas horas podem vir sem zero à esquerda (ex.: "7:30")
+            $hrIni = Carbon::createFromFormat('G:i', $dias[$minKey])->format('H:i:s');
+            $hrFim = Carbon::createFromFormat('G:i', $dias[$maxKey])->format('H:i:s');
+        } else {
+            // fallback: se nada foi enviado em dias_semana, usa os campos do formulário
+            $hrIni = Carbon::createFromFormat('H:i', $request->input('hr_ini'))->format('H:i:s');
+            $hrFim = Carbon::createFromFormat('H:i', $request->input('hr_fim'))->format('H:i:s');
+        }
+
         // Adiciona os novos
         foreach ($boxesParaAdicionar as $boxId) {
             DB::table('FAESA_CLINICA_BOX_DISCIPLINA')->insert([
                 'ID_CLINICA' => 2,
                 'ID_BOX' => $boxId,
                 'DISCIPLINA' => $disciplina,
+                'TURMA' => $turma,
                 'DIA_SEMANA' => $diaSemana,
-                'HR_INICIO' => $hrInicio,
+                'HR_INICIO' => $hrIni,
                 'HR_FIM' => $hrFim,
                 'DT_CADASTRO' => now()
             ]);
@@ -339,11 +378,48 @@ class OdontoUpdateController extends Controller
             ->update([
                 'DISCIPLINA' => $disciplina,
                 'DIA_SEMANA' => $diaSemana,
-                'HR_INICIO' => $hrInicio,
+                'HR_INICIO' => $hrIni,
                 'HR_FIM' => $hrFim,
                 'DT_CADASTRO' => now()
             ]);
 
         return redirect()->back()->with('success', 'Disciplinas e boxes atualizados com sucesso!');
+    }
+
+    public function updateUser(Request $request, $userId)
+    {
+
+        $rules = [
+            'nome'            => ['required', 'string', 'max:255', 'regex:/^[A-Za-zÀ-ÿ0-9\s]+$/'],
+            'winusuario'      => ['nullable', 'string', 'max:50'],
+            'tipo'            => ['nullable'],
+        ];
+
+        $messages = [
+            'nome.required'          => 'O nome é obrigatório.',
+            'winusuario.required'    => 'O usuario é obrigatório.',
+            'tipo.required'          => 'O tipo é obrigatório.',
+        ];
+
+        $validator = Validator::make($rules, $messages);
+        
+        if ($validator->fails()) {
+            return back()
+                ->withErrors($validator)
+                ->withInput()
+                ->with('alert', 'Verifique os campos informados.');
+        }
+
+        DB::table('FAESA_CLINICA_USUARIO_GERAL')
+            ->where('ID', $userId)
+            ->update([
+                'NOME'      => $request->input('nome'),
+                'USUARIO'   => $request->input('winusuario'),
+                'PESSOA'    => $request->input('pessoa'),
+                'TIPO'      => $request->input('tipo'),
+                'STATUS'    => $request->input('status'),
+            ]);
+
+        return redirect()->back()->with('success', 'Usuário atualizado com sucesso!');
     }
 }

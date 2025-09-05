@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Consultar Disciplinas por Box</title>
+    <title>Cadastro</title>
     <link rel="icon" type="image/png" href="/img/faesa_favicon.png">
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700&display=swap" rel="stylesheet">
 
@@ -17,9 +17,9 @@
     @include('components.sidebar')
     <div style="margin-left:220px; padding: 30px; border-radius: 10px; background-color: #fff; box-shadow: 0 4px 12px rgba(0,0,0,0.05);width: 100%;">
         <fieldset class="border p-3 rounded mb-3">
-            <legend class="w-auto px-2">Buscando disciplinas por box</legend>
+            <legend class="w-auto px-2">Buscando usuários</legend>
         </fieldset>
-        <form id="form-search-box-discipline" class="row g-3 needs-validation">
+        <form id="form-search-boxes" class="row g-3 needs-validation">
             <div class="linha-com-titulo">
                 <h5>Pesquisar</h5>
                 <div class="linha-flex"></div>
@@ -27,7 +27,7 @@
             <div style="display: flex; gap: 20px; align-items: flex-end; flex-wrap: wrap; margin: 20px 0;">
                 <div class="input-group" style="flex: 1; flex-direction: column;">
                     <div class="form-outline">
-                        <select id="selectBoxDiscipline" name="selectBoxDiscipline" style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 6px; font-size: 14px;">
+                        <select id="selectUser" name="selectUser" style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 6px; font-size: 14px;">
                             <option></option>
                         </select>
                     </div>
@@ -38,7 +38,7 @@
                     </button>
                 </div>
                 <div style="flex-shrink: 0;">
-                    <button type="submit" id='add' style="background-color: #007bff; color: #fff; border: none; padding: 10px 15px; font-size: 14px; border-radius: 6px; cursor: pointer;" title="Adicionar serviço">
+                    <button type="submit" id='add' style="background-color: #007bff; color: #fff; border: none; padding: 10px 15px; font-size: 14px; border-radius: 6px; cursor: pointer;" title="Adicionar usuario">
                         <iconify-icon icon="ix:add-circle-filled"></iconify-icon>
                     </button>
                 </div>
@@ -48,17 +48,15 @@
                 <div class="linha-flex"></div>
             </div>
             <div class="datatable" style="margin-top:15px">
-                <table class="table datatable-table" id="box-discipline">
+                <table class="table datatable-table" id="table-user">
                     <thead class="datatable-header">
                         <tr style="padding-left: 1rem;">
-                            <th>Disciplina</th>
-                            <th>Box</th>
-                            <th>Turma</th>
-                            <th>Dia</th>
-                            <th>Hora inicio</th>
-                            <th>Hora Fim</th>
-                            <th>Editar</th>
-                            <th>Delete</th>
+                            <th style="width: 30%;">Nome</th>
+                            <th style="width: 30%;">Usuario</th>
+                            <th style="width: 30%;">Cod Pessoa</th>
+                            <th style="width: 30%;">Tipo</th>
+                            <th style="width: 10%;">Status</th>
+                            <th style="width: 10%;">Editar</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -67,46 +65,6 @@
             </div>
         </form>
     </div>
-    @if (session('success'))
-    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-    <script>
-        Swal.fire({
-            icon: 'success',
-            title: 'Sucesso!',
-            text: "{{ session('success') }}",
-        }).then(() => {
-            window.location.href = "{{ url('odontologia/consultardisciplinabox') }}";
-        });
-    </script>
-    @endif
-
-    @if (session('error'))
-    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-    <script>
-        Swal.fire({
-            icon: 'error',
-            title: 'Não foi possível excluir',
-            text: "{{ session('error') }}",
-        });
-    </script>
-    @endif
-
-    @if ($errors->any())
-    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-    <script>
-        Swal.fire({
-            icon: 'error',
-            title: 'Erro ao validar dados',
-            html: `
-        <ul style="text-align:left;">
-            @foreach ($errors->all() as $error)
-                <li>{{ $error }}</li>
-            @endforeach
-        </ul>
-    `,
-        });
-    </script>
-    @endif
     <!-- jQuery primeiro -->
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 
@@ -120,7 +78,7 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.mask/1.14.16/jquery.mask.min.js"></script>
     <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mdb-ui-kit/7.1.0/mdb.min.js"></script>
     <script src="https://code.iconify.design/iconify-icon/1.0.7/iconify-icon.min.js"></script>
-    <script type="module" src="/js/odontologia/consult_box_discipline.js"></script>
+    <script type="module" src="/js/odontologia/consult_user.js"></script>
 </body>
 
 </html>

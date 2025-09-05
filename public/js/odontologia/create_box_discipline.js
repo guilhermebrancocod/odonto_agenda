@@ -138,46 +138,95 @@ document.addEventListener('DOMContentLoaded', function () {
 
             if (!disc || !tur || !dt) return;
 
+
+            const grid = document.getElementById('horarios-grid');
+            const hrIni = document.getElementById('hr_ini');
+            const hrFim = document.getElementById('hr_fim');
+
+            // utilidades
+            const pad2 = n => String(n).padStart(2, '0');
+            const norm = hhmm => {
+                if (!hhmm) return '';
+                const [h, m] = String(hhmm).split(':').map(Number);
+                return `${pad2(h)}:${pad2(m)}`;
+            };
+            const toMin = hhmm => { const [h, m] = hhmm.split(':').map(Number); return h * 60 + m; };
+
+            // limpa e mostra placeholder
+            function clearHorarios(msg = 'Selecione disciplina, turma e dia para ver horários.') {
+                grid.innerHTML = `<div class="text-muted small">${msg}</div>`;
+                if (hrIni) hrIni.value = '';
+                if (hrFim) hrFim.value = '';
+            }
+
+            // desenha apenas o que veio do backend
+            function renderHorarios(items) {
+                grid.innerHTML = '';
+
+                // 1) Achata {inicio,fim} -> [horarios únicos]
+                const set = new Set();
+                (items || []).forEach(it => {
+                    const i = norm(it.inicio);
+                    const f = norm(it.fim);
+                    if (i) set.add(i);
+                    if (f) set.add(f);
+                });
+                const horarios = Array.from(set).sort((a, b) => toMin(a) - toMin(b));
+
+                if (!horarios.length) {
+                    grid.innerHTML = `<div class="text-muted small">Sem horários disponíveis.</div>`;
+                    if (hrIni) hrIni.value = '';
+                    if (hrFim) hrFim.value = '';
+                    return;
+                }
+
+                // 2) Renderiza UM checkbox por horário
+                horarios.forEach((h, idx) => {
+                    const id = `hor_${h.replace(':', '')}_${idx}`;
+                    const html = `
+                    <div class="time-item">
+                    <input class="time-input" type="checkbox" id="${id}" name="horarios[]" value="${h}" checked>
+                    <label class="time-card" for="${id}">${h}</label>
+                    </div>`;
+                    grid.insertAdjacentHTML('beforeend', html);
+                });
+
+                // 3) Atualiza hr_ini / hr_fim conforme seleção (opcional)
+                grid.addEventListener('change', onSelectChange, { once: true });
+                // também define valores iniciais vazios
+                if (hrIni) hrIni.value = '';
+                if (hrFim) hrFim.value = '';
+            }
+
+            function onSelectChange(e) {
+                // reatacha para próximas mudanças
+                grid.addEventListener('change', onSelectChange, { once: true });
+
+                const checked = Array
+                    .from(grid.querySelectorAll('input[name="horarios[]"]:checked'))
+                    .map(i => i.value)
+                    .sort((a, b) => toMin(a) - toMin(b));
+
+                if (hrIni) hrIni.value = checked[0] || '';
+                if (hrFim) hrFim.value = checked[checked.length - 1] || '';
+            }
+
+            // exemplo de uso: depois que usuário escolher disciplina/turma/dia:
+            // fetch(`/odontologia/horarios/${disc}/${tur}/${dia}`)
+            //   .then(r => r.json())
+            //   .then(renderHorarios)
+            //   .catch(() => clearHorarios('Erro ao carregar horários.'));
+
+            // estado inicial
+            clearHorarios();
+
+
             fetch(`/odontologia/horarios/${encodeURIComponent(disc)}/${encodeURIComponent(tur)}/${encodeURIComponent(dt)}`)
                 .then(r => r.json())
                 .then(items => {
-                    // items = [{inicio: "07:30", fim: "08:15"}, ...]
-                    const toMinutes = hm => { const [h, m] = String(hm).split(':').map(Number); return h * 60 + m; };
-                    const padHHMM = hm => { const [h, m] = String(hm).split(':'); return `${String(h).padStart(2, '0')}:${m}`; };
-
-                    const slotEndByStart = new Map(items.map(it => [normalize(it.inicio), it.fim]));
-                    const allowed = [...slotEndByStart.keys()];
-
-                    // reset: desmarca e desabilita todos
-                    all.forEach(({ input, label, base }) => {
-                        input.checked = false;
-                        input.disabled = true;      // sem opção de marcar manualmente
-                        label.innerHTML = base;
-                    });
-
-                    // marca e mostra "até fim" nos retornados
-                    all.forEach(({ input, label, base, norm }) => {
-                        if (slotEndByStart.has(norm)) {
-                            input.checked = true;
-                            input.disabled = false;    // mantém bloqueado
-                            const fim = slotEndByStart.get(norm);
-                            if (fim) label.innerHTML = `${base}`;
-                        }
-                    });
-
-                    // define hr_ini (primeiro) e hr_fim (fim do último)
-                    if (allowed.length) {
-                        allowed.sort((a, b) => toMinutes(a) - toMinutes(b));
-                        const first = allowed[0];
-                        const last = allowed[allowed.length - 1];
-                        if (typeof hrIni !== 'undefined' && hrIni) hrIni.value = padHHMM(first);
-                        if (typeof hrFim !== 'undefined' && hrFim) hrFim.value = padHHMM(slotEndByStart.get(last) || last);
-                    } else {
-                        if (typeof hrIni !== 'undefined' && hrIni) hrIni.value = '';
-                        if (typeof hrFim !== 'undefined' && hrFim) hrFim.value = '';
-                    }
+                    renderHorarios(items);      // <-- só isso
                 })
-                .catch(err => console.error('Erro ao carregar horários:', err));
+                .catch(() => clearHorarios('Erro ao carregar horários.'));
         });
     });
 

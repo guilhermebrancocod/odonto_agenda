@@ -114,6 +114,65 @@ class OdontoConsultController extends Controller
         return response()->json($boxes);
     }
 
+    public function buscarUsuarios(Request $request)
+    {
+        $usuarioId = $request->input('userId');
+
+        $query = DB::table('FAESA_CLINICA_USUARIO_GERAL')
+            ->select(
+                'ID',
+                'NOME',
+                'USUARIO',
+                'PESSOA',
+                'TIPO',
+                'STATUS',
+                'TIPO'
+            )
+            ->where('ID_CLINICA', '=', 2);
+
+        if ($usuarioId) {
+            $query->where('ID', $usuarioId);
+        }
+
+        $user = $query->get();
+
+        return response()->json($user);
+    }
+
+    public function buscarUsuariosLyceum(Request $request)
+    {
+        $search = $request->input('query'); // termo digitado no select2
+
+        $query = DB::table('LYCEUM_BKP_PRODUCAO.dbo.LY_PESSOA')
+            ->select(
+                'PESSOA',
+                'NOME_COMPL',
+                'WINUSUARIO'
+            );
+
+        if (!empty($search)) {
+            $query->where('NOME_COMPL', 'like', '%' . $search . '%');
+        }
+
+        $users = $query->limit(20)->get(); // limit pra não sobrecarregar
+
+        return response()->json($users);
+    }
+
+    public function buscarPessoaLyceum(Request $requet, $pessoa)
+    {
+        $pessoa = DB::table('LYCEUM_BKP_PRODUCAO.dbo.LY_PESSOA')
+            ->where('PESSOA', $pessoa)
+            ->select('NOME_COMPL', 'PESSOA', 'WINUSUARIO')
+            ->first();
+
+        if (!$pessoa) {
+            return response()->json([], 404); // não encontrou
+        }
+
+        return response()->json($pessoa);
+    }
+
     public function buscarBoxeDisciplinas(Request $request)
     {
         $disciplines = DB::table('FAESA_CLINICA_BOX_DISCIPLINA as bd')
@@ -376,6 +435,19 @@ class OdontoConsultController extends Controller
         return view('odontologia/consult_box', compact('selectBox', 'query_box'));
     }
 
+    public function selectUser(Request $request)
+    {
+        $query = $request->input('search-input');
+
+        $selectUser = DB::table('FAESA_CLINICA_USUARIO_GERAL')
+            ->select('NOME', 'USUARIO')
+            ->where('ID_CLINICA', 2)
+            ->where('NOME', 'like', '%' . $query . '%')
+            ->get();
+
+        return view('odontologia/consult_user', compact('selectUser', 'query'));
+    }
+
     public function disciplinascombox(Request $request)
     {
         $disciplina = DB::table('FAESA_CLINICA_BOX_DISCIPLINA as A')
@@ -399,6 +471,7 @@ class OdontoConsultController extends Controller
             ->where('A.ANO', 2025)
             ->where('A.SEMESTRE', 2)
             ->where('T.CURSO', 2009)
+            ->where('D.TIPO', '=', 'TEOPRA')
             ->select('D.DISCIPLINA', 'D.NOME')
             ->distinct()
             ->get();
@@ -415,17 +488,23 @@ class OdontoConsultController extends Controller
         return response()->json($turma);
     }
 
-    public function getTurmas($disciplina)
+    public function getTurmas(Request $request)
     {
-        $turmas = DB::table('LYCEUM_BKP_PRODUCAO.dbo.LY_AGENDA as A')
-            ->where('A.ANO', 2025)
-            ->where('A.SEMESTRE', 2)
-            ->where('A.DISCIPLINA', $disciplina)
+
+        $disciplina = $request->query('disciplina');
+        $box  = (int) $request->query('box');
+
+        $turmas = DB::table('FAESA_CLINICA_BOX_DISCIPLINA')
+            ->where('DISCIPLINA', $disciplina)
+            ->where('ID_BOX', (int) $box)
+            ->select('TURMA')
             ->distinct()
-            ->orderBy('A.TURMA')
-            ->pluck('A.TURMA'); // array de strings
+            ->orderBy('TURMA')
+            ->pluck('TURMA');
+
         return response()->json($turmas);
     }
+
 
     public function getDatasTurmaDisciplina($disciplina, $turma)
     {
@@ -492,6 +571,27 @@ class OdontoConsultController extends Controller
         $boxeId = $query->first();
 
         return response()->json($boxeId);
+    }
+
+    public function getUserId($userId, Request $request)
+    {
+        if (!is_numeric($userId)) {
+            return response()->json(['error' => 'ID inválido'], 400);
+        }
+
+        $query = DB::table('FAESA_CLINICA_USUARIO_GERAL')
+            ->select('NOME', 'ID', 'STATUS')
+            ->where('STATUS', '=', 'S')
+            ->where('ID', '=', $userId);
+
+        if ($request->has('query')) {
+            $search = $request->query('query');
+            $query->where('NOME', 'like', "%{$search}%");
+        }
+
+        $userId = $query->first();
+
+        return response()->json($userId);
     }
 
     public function consultaboxdisciplina(Request $request, $idBoxDiscipline)

@@ -44,11 +44,6 @@
                         </option>
                     </select>
                 </div>
-                <div style="text-align: right;flex:0.2">
-                    <button class="btn btn-primary btn-lg" id="btn-agendar" type="submit" style="background-color: #007bff; color: #fff; border: none; padding: 10px 20px; font-size: 10px; border-radius: 6px; cursor: pointer;">
-                        <i class="bi bi-calendar-plus"></i> Histórico de Alterações
-                    </button>
-                </div>
             </div>
             <div class="linha-com-titulo">
                 <h5>Datalhes</h5>
@@ -501,6 +496,18 @@
     </script>
     @endif
 
+    @if (session('success'))
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script>
+        Swal.fire({
+            icon: 'success',
+            title: 'Sucesso!',
+            text: "{{ session('success') }}",
+        }).then(() => {
+            window.location.href = "{{ url('odontologia/consultaragenda') }}";
+        });
+    </script>
+    @endif
     <!-- jQuery (PRIMEIRO e APENAS UMA VEZ) -->
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 
