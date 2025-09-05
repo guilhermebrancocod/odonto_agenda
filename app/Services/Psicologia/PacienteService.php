@@ -116,12 +116,13 @@ class PacienteService
     public function filtrarPacientesByNameOrCpfPsicologo($filtros)
     {
         $search = $filtros['search'];
-        $psicologo = $filtros['psicologo'];
+        $psicologo = session('psicologo')[1];
 
         $pacientesDoPsicologo = DB::TABLE('FAESA_CLINICA_PACIENTE as p')
         ->join('FAESA_CLINICA_AGENDAMENTO as ag', 'ag.ID_PACIENTE', '=', 'p.ID_PACIENTE')
         ->where('ag.ID_PSICOLOGO', $psicologo)
         ->where('p.NOME_COMPL_PACIENTE', 'LIKE', "%{$search}%")
+        ->where('ag.STATUS_AGEND', '<>', 'Excluido')
         ->get();
 
         return $pacientesDoPsicologo;

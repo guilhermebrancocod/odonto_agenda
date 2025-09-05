@@ -114,7 +114,7 @@
                    data-psicologo='@json(session('psicologo'))'
                 ></div>
 
-                {{-- CAMPO DE PESQUISA POR PACIENTES --}}
+                <!-- PESQUISA DE PACIENTE POR NOME OU CPF -->
                  <div class="mb-3 position-relative">
                     <label for="search-input" class="form-label">Paciente</label>
                     <select id="search-input" name="paciente_id" placeholder="Pesquisar paciente por nome ou CPF..." autocomplete="off"></select>
