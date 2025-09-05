@@ -153,16 +153,15 @@ class AgendamentoController extends Controller
         $turmas = array_column($professor[4], 'TURMA');
 
         $psicologos = DB::table('LYCEUM_BKP_PRODUCAO.dbo.LY_MATRICULA as mat')
-        ->join('FAESA_CLINICA_AGENDAMENTO as ag', 'ag.ALUNO', 'mat.ALUNO')
+        ->join('FAESA_CLINICA_AGENDAMENTO as ag', 'ag.ID_PSICOLOGO', 'mat.ALUNO')
         ->whereIn('mat.TURMA', $turmas)
-        ->select('ag.ID_PSICOLOGO')
-        ->get()->toArray();
+        ->pluck('ag.ID_PSICOLOGO');
 
         $agendamentos = FaesaClinicaAgendamento::with('paciente', 'servico')
         ->where('ID_CLINICA', 1)
         ->where('STATUS_AGEND', '<>', 'Excluido')
         ->where('STATUS_AGEND', '<>', 'Remarcado')
-        ->whereIn('ID_PSICOLOGO', $psicologos ?? null)
+        ->whereIn('ID_PSICOLOGO', $psicologos)
         ->get();
 
         $events = $agendamentos
