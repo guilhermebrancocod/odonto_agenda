@@ -17,7 +17,7 @@ class HorarioController extends Controller
     public function createHorario(Request $request)
     {
         $request->validate([
-            'TIPO_HORARIO' => 'required|string|max:1|in:S,N',
+            'BLOQUEADO' => 'required|string|max:1|in:S,N',
             'DATA_HORARIO_INICIAL' => 'required|date',
             'DATA_HORARIO_FINAL' => 'required|date|after_or_equal:DATA_HORARIO_INICIAL',
             'HR_HORARIO_INICIAL' => 'required|date_format:H:i',
@@ -31,8 +31,8 @@ class HorarioController extends Controller
 
         $horario = new FaesaClinicaHorario();
         $horario->USUARIO = session('usuario')[0]['ID_USUARIO_CLINICA'];
-        $horario->ID_CLINICA = 1; // ajuste aqui conforme seu contexto
-        $horario->BLOQUEADO = $request->TIPO_HORARIO;
+        $horario->ID_CLINICA = 1;
+        $horario->BLOQUEADO = $request->BLOQUEADO;
         $horario->DATA_HORARIO_INICIAL = $request->DATA_HORARIO_INICIAL;
         $horario->DATA_HORARIO_FINAL = $request->DATA_HORARIO_FINAL;
         $horario->HR_HORARIO_INICIAL = $request->HR_HORARIO_INICIAL;
@@ -42,7 +42,7 @@ class HorarioController extends Controller
 
         // Verifica se o horário já existe para mesma clínica
         $existingHorario = FaesaClinicaHorario::where('ID_CLINICA', $horario->ID_CLINICA)
-            ->where('BLOQUEADO', $request->TIPO_HORARIO)
+            ->where('BLOQUEADO', $request->BLOQUEADO)
             ->where('DATA_HORARIO_INICIAL', $request->DATA_HORARIO_INICIAL)
             ->where('DATA_HORARIO_FINAL', $request->DATA_HORARIO_FINAL)
             ->where('HR_HORARIO_INICIAL', $request->HR_HORARIO_INICIAL)
@@ -59,7 +59,7 @@ class HorarioController extends Controller
     }
 
     public function updateHorario(Request $request, $id, FaesaClinicaHorario $horarioModel)
-    {
+    {   
         $horario = $horarioModel->find($id);
 
         if (!$horario) {
@@ -67,7 +67,7 @@ class HorarioController extends Controller
         }
 
         $validatedData = $request->validate([
-            'TIPO_HORARIO' => 'required|string|max:1|in:S,N',
+            'BLOQUEADO' => 'required|string|max:1|in:S,N',
             'DATA_HORARIO_INICIAL' => 'required|date',
             'DATA_HORARIO_FINAL' => 'required|date|after_or_equal:DATA_HORARIO_INICIAL',
             'HR_HORARIO_INICIAL' => 'required|date_format:H:i',
@@ -75,7 +75,7 @@ class HorarioController extends Controller
             'DESCRICAO_HORARIO' => 'required|string|max:255',
             'OBSERVACAO' => 'nullable|string|max:500',
         ], [
-            'TIPO_HORARIO.required' => 'O tipo de horário é obrigatório.',
+            'BLOQUEADO.required' => 'O tipo de horário é obrigatório.',
             'DATA_HORARIO_INICIAL.required' => 'A data inicial do horário é obrigatória.',
             'DATA_HORARIO_FINAL.required' => 'A data final do horário é obrigatória.',
             'DATA_HORARIO_FINAL.after_or_equal' => 'A data final deve ser igual ou posterior à data inicial.',
@@ -87,7 +87,7 @@ class HorarioController extends Controller
         ]);
 
         // Verifica se o horário já existe com os mesmos dados (exceto o próprio)
-        $existingHorario = FaesaClinicaHorario::where('BLOQUEADO', $validatedData['TIPO_HORARIO'])
+        $existingHorario = FaesaClinicaHorario::where('BLOQUEADO', $validatedData['BLOQUEADO'])
             ->where('DATA_HORARIO_INICIAL', $validatedData['DATA_HORARIO_INICIAL'])
             ->where('DATA_HORARIO_FINAL', $validatedData['DATA_HORARIO_FINAL'])
             ->where('HR_HORARIO_INICIAL', $validatedData['HR_HORARIO_INICIAL'])
@@ -99,8 +99,8 @@ class HorarioController extends Controller
             return response()->json(['message' => 'Horário já existe!'], 409);
         }
 
-        // Atualiza os campos do horário
-        $horario->BLOQUEADO = $validatedData['TIPO_HORARIO'];
+        // ATUALIZA HORÁRIO
+        $horario->BLOQUEADO = $validatedData['BLOQUEADO'];
         $horario->DATA_HORARIO_INICIAL = $validatedData['DATA_HORARIO_INICIAL'];
         $horario->DATA_HORARIO_FINAL = $validatedData['DATA_HORARIO_FINAL'];
         $horario->HR_HORARIO_INICIAL = $validatedData['HR_HORARIO_INICIAL'];
@@ -110,7 +110,7 @@ class HorarioController extends Controller
 
         $horario->save();
 
-        return response()->json(['message' => 'Horário atualizado com sucesso!'], 200);
+        return response()->json(['success' => true, 'message' => 'Horário atualizado com sucesso!'], 200);
     }
 
     // DELETAR HORÁRIO

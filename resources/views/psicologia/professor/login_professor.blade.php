@@ -198,6 +198,11 @@
             box-shadow: 0 3px 6px rgba(0, 0, 0, 0.1);
         }
 
+        h5 {
+            text-align: center;
+            font-size: 16px;
+        }
+
 
 
     </style>
@@ -213,7 +218,7 @@
 
         <h5 class="text-center">Acesso Professor</h5>
         
-        <form action="{{ route('professorMenu') }}" method="POST">
+        <form action="{{ route('professorLoginPost') }}" method="POST">
             @csrf
 
             <!-- USUARIO -->

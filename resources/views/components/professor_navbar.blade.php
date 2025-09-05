@@ -134,9 +134,7 @@
     }
 </style>
 
-<nav class="navbar navbar-dark bg-primary d-lg-none fixed-top shadow-sm px-3" style="height: 56px">
-    <button class="btn btn-primary" type="button" data-bs-toggle="offcanvas" data-bs-target="#offcanvasMenu">
-        <i class="fas fa-bars"></i>
+<nav class="navbar navbar-dark bg-primary d-lg-none fixed-top shadow-sm px-3" style="height: 56px">        <i class="fas fa-bars"></i>
     </button>
     <img src="{{ asset('img/faesa_logo_expandido.png') }}" alt="Logo FAESA" class="mx-auto d-block" style="width: 100px;" >
 </nav>
@@ -153,19 +151,19 @@
     <h5 class="mb-2 mt-3 p-2 rounded-3 text-center"
         style="color: white; font-size: 18px;">
         <strong>Clínica de Psicologia</strong>
-        <p class="p-0 m-0 text-center" style="font-size: 12px;"><em>Aluno</em></p>
+        <p class="p-0 m-0 text-center" style="font-size: 12px;"><em>Docente</em></p>
     </h5>
 
-    <!-- DADOS DA SESSAO DO USUARIO -->
+    <!-- DADOS DA SESSAO DO DOCENTE -->
     <div classs="">
         <p style="color:#ecf5f9" class="p-0 m-0 text-center">
-            {{ session('psicologo')[0] }}
+            {{ session('professor')[0] }}
         </p>
         <p style="color:#ecf5f9" class="p-0 m-0 text-center">
-            {{ session('psicologo')[1] }}
+            {{ session('professor')[1] }}
         </p>
         <p style="color:#ecf5f9" class="p-0 m-0 text-center">
-            {{ session('psicologo')[2] }}
+            {{ session('professor')[2] }}
         </p>
     </div>
 
@@ -174,21 +172,14 @@
 
         <!-- PÁGINA INICIAL - MENU AGENDA -->
         <li class="list-group-item rounded-1 p-0 overflow-hidden ">
-            <a href="/psicologo" class="link-agendar d-flex align-items-center gap-2 p-1">
+            <a href="/professor" class="link-agendar d-flex align-items-center gap-2 p-1">
                 <i class="fas fa-home"></i> Início
-            </a>
-        </li>
-
-        <!-- INCLUIR AGENDAMENTO -->
-        <li class="list-group-item rounded-1 p-0 overflow-hidden ">
-            <a href="/psicologo/criar-agendamento" class="link-agendar d-flex align-items-center gap-2 p-1">
-                <i class="fas fa-calendar-plus"></i> Criar Agenda
             </a>
         </li>
 
         <!-- CONSULTAR AGENDA -->
         <li class="list-group-item rounded-1 p-0 overflow-hidden ">
-            <a href="/psicologo/consultar-agendamento" class="link-agendar d-flex align-items-center gap-2 p-1">
+            <a href="/professor/consultar-agendamento" class="link-agendar d-flex align-items-center gap-2 p-1">
                 <i class="fas fa-edit"></i> Agendas
             </a>
         </li>
@@ -218,52 +209,16 @@
                     <i class="fas fa-home"></i> Início
                 </a>
             </li>
-            <!-- INCLUIR AGENDAMENTO -->
-            <li class="list-group-item p-0 overflow-hidden ">
-                <a href="/psicologia/criar-agendamento" class="link-agendar d-flex align-items-center gap-2 p-2">
-                    <i class="fas fa-calendar-plus"></i> Incluir Agendamento
-                </a>
-            </li>
             <!-- CONSULTAR AGENDAMENTO -->
             <li class="list-group-item p-0 overflow-hidden ">
                 <a href="/psicologia/consultar-agendamento" class="link-agendar d-flex align-items-center gap-2 p-2">
                     <i class="fas fa-edit"></i> Agendas
                 </a>
             </li>
-            <!-- CADASTRAR PACIENTE -->
-            <li class="list-group-item p-0 overflow-hidden ">
-                <a href="/psicologia/criar-paciente" class="link-agendar d-flex align-items-center gap-2 p-2">
-                    <i class="bi bi-person-add"></i> Cadastrar Paciente
-                </a>
-            </li>
             <!-- CONSULTAR PACIENTE -->
             <li class="list-group-item p-0 overflow-hidden ">
                 <a href="/psicologia/consultar-paciente" class="link-agendar d-flex align-items-center gap-2 p-2">
                     <i class="bi bi-people"></i> Pacientes
-                </a>
-            </li>
-            <!-- CADASTRAR SERVIÇO -->
-            <li class="list-group-item p-0 overflow-hidden ">
-                <a href="/psicologia/criar-servico" class="link-agendar d-flex align-items-center gap-2 p-2">
-                    <i class="bi bi-gear"></i> Serviços
-                </a>
-            </li>
-            <!-- CADASTRAR SALA -->
-            <li class="list-group-item rounded-1 p-0 overflow-hidden ">
-                <a href="/psicologia/criar-sala" class="link-agendar d-flex align-items-center gap-2 p-2">
-                    <i class="bi bi-door-open"></i> Salas
-                </a>
-            </li>
-            <!-- HORÁRIOS -->
-            <li class="list-group-item rounded-1 p-0 overflow-hidden ">
-                <a href="/psicologia/criar-horario" class="link-agendar d-flex align-items-center gap-2 p-2">
-                    <i class="bi bi-alarm"></i> Horários
-                </a>
-            </li>
-            <!-- RELATÓRIO -->
-            <li class="list-group-item p-0 overflow-hidden ">
-                <a href="/psicologia/relatorios-agendamento" class="link-agendar d-flex align-items-center gap-2 p-2">
-                    <i class="fas fa-chart-bar"></i> Relatório
                 </a>
             </li>
             <!-- LOGOUT -->

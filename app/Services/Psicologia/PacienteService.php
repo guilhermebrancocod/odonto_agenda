@@ -2,6 +2,7 @@
 
 namespace App\Services\Psicologia;
 
+use App\Models\FaesaClinicaAgendamento;
 use App\Models\FaesaClinicaPaciente;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Database\Eloquent\Collection;
@@ -47,7 +48,7 @@ class PacienteService
     {
         return DB::table('FAESA_CLINICA_AGENDAMENTO')
             ->where('ID_PACIENTE', $id)
-            ->where('STATUS_AGEND', '<>', 'Inativo')
+            ->where('STATUS_AGEND', '<>', 'Excluido')
             ->where('STATUS_AGEND', '<>', 'Remarcado')
             ->exists();
 
@@ -57,7 +58,7 @@ class PacienteService
      *  CRIA NOVO PACIENTE
      */
     public function createPaciente(array $dados): bool
-    {
+    {        
         $exists = DB::table('FAESA_CLINICA_PACIENTE')
                 ->where('CPF_PACIENTE', $dados['CPF_PACIENTE'])
                 ->exists();
@@ -94,6 +95,44 @@ class PacienteService
     /**
      * Retorna uma lista de pacientes com filtros simples.
      */
+
+    public function filtrarPacientesByNameOrCpf($filtros)
+    {
+        $query = FaesaClinicaPaciente::query();
+
+        $query->where('STATUS', '<>', 'Inativo');
+
+        // Filtro por nome ou CPF
+        if (!empty($filtros['search'])) {
+            $query->where(function ($q) use ($filtros) {
+                $q->where('NOME_COMPL_PACIENTE', 'LIKE', '%' . $filtros['search'] . '%')
+                ->orWhere('CPF_PACIENTE', 'LIKE', '%' . $filtros['search'] . '%');
+                
+                // IMPORTANTE: Adiciona a busca por ID APENAS se o termo for numérico
+                if (is_numeric($filtros['search'])) {
+                    $q->orWhere('ID_PACIENTE', $filtros['search']);
+                }
+            });
+        }
+
+        return $query->orderBy('ID_PACIENTE', 'desc')->get()->toArray();
+    }
+
+    public function filtrarPacientesByNameOrCpfPsicologo($filtros)
+    {
+        $search = $filtros['search'];
+        $psicologo = session('psicologo')[1];
+
+        $pacientesDoPsicologo = DB::TABLE('FAESA_CLINICA_PACIENTE as p')
+        ->join('FAESA_CLINICA_AGENDAMENTO as ag', 'ag.ID_PACIENTE', '=', 'p.ID_PACIENTE')
+        ->where('ag.ID_PSICOLOGO', $psicologo)
+        ->where('p.NOME_COMPL_PACIENTE', 'LIKE', "%{$search}%")
+        ->where('ag.STATUS_AGEND', '<>', 'Excluido')
+        ->get()->toArray();
+
+        return $pacientesDoPsicologo;
+    }
+
     public function filtrarPacientes(array $filtros): Collection
     {
         $query = FaesaClinicaPaciente::query();

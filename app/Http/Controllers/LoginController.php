@@ -12,13 +12,10 @@ class LoginController extends Controller
         $usuario = session('usuario');
 
         if ($usuario) {
-            $clinicas = collect($usuario)->pluck('ID_CLINICA')->toArray();
-        } else {
-            
+            $clinicas = $usuario->pluck('ID_CLINICA')->toArray();
+        } else {          
             return redirect()->route('loginGET');
         } 
-
-        $clinicas = $usuario->pluck('ID_CLINICA')->toArray();
 
         // VERIFICA CLINICAS QUE USUÁRIO TEM ACESSO
         if(in_array(1, $clinicas) && in_array(2, $clinicas)) {
@@ -40,10 +37,8 @@ class LoginController extends Controller
 
     public function logout(Request $request)
     {
-        // LIMPA OS DADOS DA SESSÃO
-        session()->flush();
-        $request->session()->invalidate();
-        $request->session()->regenerateToken();
+        // LIMPA OS DADOS DA SESSÃO DE USUÁRIO
+        session()->forget('usuario');
 
         // REDIRECIONA PARA TELA DE LOGIN NOVAMENTE
         return view('login');

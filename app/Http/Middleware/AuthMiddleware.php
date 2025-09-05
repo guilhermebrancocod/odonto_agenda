@@ -5,195 +5,170 @@ namespace App\Http\Middleware;
 use Closure;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Http;
-use App\Models\FaesaClinicaUsuario;
-use App\Models\FaesaClinicaUsuarioGeral;
+use App\Models\FaesaClinicaUsuarioGeral; // ajuste conforme seu modelo real
+use App\Models\FaesaClinicaUsuario;      // usado no validarADM
 
 class AuthMiddleware
 {
     public function handle(Request $request, Closure $next)
     {
-        // ARMAZENA ROTA QUE USUARIO QUER ACESSAR
-        $routeName = $request->route()->getName();
+        // Nome da rota atual
+        $routeName = optional($request->route())->getName();
 
+        // Se a rota não tiver nome, deixa passar
         if (!$routeName) {
             return $next($request);
         }
 
-        // CASO A ROTA QUE O USUÁRIO TENTA ACESSAR SEJA ALGUMA DESSAS, ELE PERMITE SEGUIR ADIANTE
-        if (in_array($routeName, [
+        // Rotas liberadas sem autenticação
+        $rotasLiberadas = [
             'loginGET',
-            'psicologoLoginGet',
-            'professorLoginGet',
+            'loginPOST',
             'logout',
+            'psicologoLoginGet',
+            'psicologoLoginPost',
             'psicologoLogout',
+            'professorLoginGet',
+            'professorLoginPost',
             'professorLogout',
-        ])) {
+        ];
+
+        // Se a rota estiver liberada, segue
+        if (in_array($routeName, $rotasLiberadas, true)) {
+            // Se for uma rota de POST de login, processa autenticação aqui
+            if (in_array($routeName, ['loginPOST','psicologoLoginPost','professorLoginPost'], true)) {
+                return $this->processarLogin($request, $routeName, $next);
+            }
             return $next($request);
         }
 
-        // AUTENTICAÇÃO VIA POST
-        if (($routeName === 'loginPOST')
-            ||
-            ($routeName === 'psicologoLoginPost')
-            ||
-            ($routeName === 'professorLoginPost')
-        ) {
-            // ARMAZENA CREDENCIAIS
-            $credentials = [
-                'username' => $request->input('login'),
-                'password' => $request->input('senha'),
-            ];
-
-            // DEPENDENDO DA ROTA, CHAMA UMA API DIFERENTE PARA AUTENTICAÇÃO
-            $response = $routeName === 'psicologoLoginPost'
-                ? $this->getApiDataPsicologo($credentials)
-                : $this->getApiData($credentials);
-
-            if ($response['success']) {
-
-                // VALIDA USUÁRIO NO BANCO DE DADOS
-                $validacao = $this->validarUsuario($credentials);
-
-                if ($validacao->is_null) {
-
-                    return redirect()->back()->with('error', "Usuário Inativo");
-                } else {
-
-                    if ($routeName === "psicologoLoginPost") {
-
-                        if ($validacao->TIPO === "Psicologo") {
-
-                            session(['psicologo' => $validacao]);
-                        } else {
-
-                            return redirect()->back()->with('error', 'Usuário deve ser Psicólogo');
-                        }
-                    } else if ($routeName === "professorLoginPost") {
-
-                        if ($validacao->first()->TIPO === "Professor") {
-
-                            session(['professor' => $validacao]);
-                        } else {
-
-                            return redirect()->back()->with('error', 'Usuário deve ser Professor');
-                        }
-                    } else if ($routeName === "recepcaoMenu") {
-
-                        if ($validacao->TIPO === "Recepcao") {
-
-                            session(['recepcao' => $validacao]);
-                        } else {
-
-                            return redirect()->back()->with('error', 'Usuário deve ser Recepcionista');
-                        }
-                    } else {
-
-                        session(['usuario' => $validacao]);
-                    }
-
-                    return $next($request);
-                }
-            } else {
-                session()->flush();
-                return redirect()->back()->with('error', "Credenciais Inválidas");
-            }
+        // Já logado?
+        if (session()->has('usuario') || session()->has('psicologo') || session()->has('professor')) {
+            return $next($request);
         }
 
-        if (
-            (!session()->has('usuario'))
-            && (!session()->has('psicologo'))
-            && (!session()->has('professor'))
-        ) {
-
-            if (str_starts_with(
-                $routeName,
-                'psicologo'
-            )) {
-
-                return redirect()->route('psicologoLoginGet');
-            } else if (str_starts_with(
-                $routeName,
-                'professor'
-            )) {
-
-                return redirect()->route('professorLoginGet');
-            } else {
-
-                return redirect()->route('loginGET');
-            }
+        // Não logado: redireciona para o login correto por prefixo
+        if (str_starts_with($routeName, 'psicologo')) {
+            return redirect()->route('psicologoLoginGet');
         }
+
+        if (str_starts_with($routeName, 'professor')) {
+            return redirect()->route('professorLoginGet');
+        }
+
+        return redirect()->route('loginGET');
+    }
+
+    /**
+     * Processa autenticação para as rotas de login POST.
+     */
+    private function processarLogin(Request $request, string $routeName, Closure $next)
+    {
+        $credentials = [
+            'username' => $request->input('login'),
+            'password' => $request->input('senha'),
+        ];
+
+        // Chama API (única; ajuste se houver endpoints diferentes por perfil)
+        $response = $this->getApiData($credentials);
+
+        if (!$response['success']) {
+            session()->flush();
+            return redirect()->back()->with('error', $response['message'] ?? 'Credenciais Inválidas');
+        }
+
+        // Valida usuário no banco
+        $validacao = $this->validarUsuario($credentials);
+
+        if (is_null($validacao)) {
+            return redirect()->back()->with('error', 'Usuário Inativo');
+        }
+
+        // Seta a sessão conforme a rota de login utilizada
+        if ($routeName === 'psicologoLoginPost') {
+            if (($validacao->TIPO ?? null) === 'Psicologo') {
+                session(['psicologo' => $validacao]);
+            } else {
+                return redirect()->back()->with('error', 'Usuário deve ser Psicólogo');
+            }
+        } elseif ($routeName === 'professorLoginPost') {
+            if (($validacao->TIPO ?? null) === 'Professor') {
+                session(['professor' => $validacao]);
+            } else {
+                return redirect()->back()->with('error', 'Usuário deve ser Professor');
+            }
+        } else { // loginPOST padrão (recepção/usuário geral)
+            // Se quiser checar recepção especificamente, troque a condição abaixo
+            session(['usuario' => $validacao]);
+        }
+
+        // Autenticado, segue o fluxo normal
         return $next($request);
     }
 
-    public function getApiDataPsicologo(array $credentials): array
+    /**
+     * Chamada à API de autenticação.
+     */
+    private function getApiData(array $credentials): array
     {
-        $apiUrl = config('services.faesa.api_psicologos_url');
-        $apiKey = config('services.faesa.api_psicologos_key');
-
-        try {
-            $response = Http::withHeaders([
-                'Accept'        => "application/json",
-                'Authorization' => $apiKey
-            ])->withoutVerifying()
-                ->timeout(5)
-                ->post($apiUrl, $credentials);
-
-            if ($response->successful()) {
-                return [
-                    'success' => true
-                ];
-            } else {
-                return [
-                    'success' => false
-                ];
-            }
-        } catch (\Exception $e) {
-            return [
-                'success' => false,
-                'message' => $e->getMessage()
-            ];
-        }
-    }
-
-    public function getApiData(array $credentials): array
-    {
-        // CREDENCIAIS DA API
         $apiUrl = config('services.faesa.api_url');
         $apiKey = config('services.faesa.api_key');
 
         try {
-            $response = Http::withHeaders([
-                'Accept' => "application/json",
-                'Authorization' => $apiKey
-            ])->withoutVerifying()
-                ->post($apiUrl, $credentials);
+            $http = Http::withHeaders([
+                'Accept'        => 'application/json',
+                'Authorization' => $apiKey,
+            ])->timeout(5);
 
-            if ($response->successful()) {
+            $resp = $http->post($apiUrl, $credentials);
 
-                return [
-                    'success' => true
-                ];
-            } else {
-
-                return [
-                    'success' => false
-                ];
+            if ($resp->successful()) {
+                return ['success' => true];
             }
-        } catch (\Exception $e) {
 
             return [
                 'success' => false,
-                'message' => $e->getMessage()
+                'message' => $resp->json('message') ?? 'Falha na autenticação',
+            ];
+        } catch (\Throwable $e) {
+            return [
+                'success' => false,
+                'message' => $e->getMessage(),
             ];
         }
     }
-    // VALIDA USUÁRIO NO BANCO DE DADOS
-    public function validarUsuario(array $credentials): FaesaClinicaUsuarioGeral
+
+    /**
+     * Valida usuário ativo no banco.
+     * Retorna o modelo ou null.
+     */
+    private function validarUsuario(array $credentials): ?FaesaClinicaUsuarioGeral
     {
-        $username = $credentials['username'];
-        $usuario = FaesaClinicaUsuarioGeral::where('USUARIO', $username)
-            ->where('STATUS', '=', 'Ativo')
+        $username = $credentials['username'] ?? null;
+
+        if (!$username) {
+            return null;
+        }
+
+        return FaesaClinicaUsuarioGeral::where('USUARIO', $username)
+            ->where('STATUS', 'Ativo')
             ->first();
-        return $usuario;
+    }
+
+    /**
+     * Exemplo de validação de ADM (mantida sua ideia).
+     */
+    private function validarADM(array $credentials)
+    {
+        $usuario = $credentials['username'] ?? null;
+        if (!$usuario) {
+            return null;
+        }
+
+        $usuarioADM = FaesaClinicaUsuario::where('ID_USUARIO_CLINICA', $usuario)
+            ->where('SIT_USUARIO', 'Ativo')
+            ->get();
+
+        return $usuarioADM->isNotEmpty() ? $usuarioADM : null;
     }
 }

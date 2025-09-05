@@ -18,10 +18,11 @@
     <meta name="csrf-token" content="{{ csrf_token() }}">
 
     <style>
+        /* Estilos mantidos e adaptados */
         #limit-container {
             margin-top: 12px;
             display: flex;
-            justify-content: space-between;
+            justify-content: space-between; /* Ajustado para alinhar contador e seletor */
             align-items: center;
             gap: 8px;
         }
@@ -31,7 +32,7 @@
             gap: 8px;
         }
         .flatpickr-input {
-            background-color: #fff;
+            background-color: #fff; /* Garante fundo branco com Bootstrap 5 */
         }
         .shadow-dark {
             box-shadow: 0 0.75rem 1.25rem rgba(0,0,0,0.4) !important;
@@ -49,16 +50,17 @@
             z-index: 1050;
         }
 
+        /* Botões de ação na listagem de agendamentos */
         .agendamento-actions .btn:hover {
-            filter: brightness(85%);
-            transition: filter 0.2s ease-in-out;
+            filter: brightness(85%); /* deixa 15% mais escuro */
+            transition: filter 0.2s ease-in-out; /* animação suave */
         }
 
     </style>
 </head>
 
 <body class="bg-body-secondary">
-    @include('components.navbar')
+    @include('components.psicologo_navbar')
 
     @if($errors->any())
         <div class="alert alert-danger shadow text-center position-fixed top-0 start-50 translate-middle-x mt-3 animate-alert" style="max-width: 90%;">
@@ -241,7 +243,7 @@
 
             function carregarAgendamentos() {
                 const params = getFilters();
-                const url = `/psicologia/get-agendamento?${params.toString()}`;
+                const url = `/psicologo/consultar-agendamento/buscar?${params.toString()}`;
 
                 // Adiciona um feedback visual de carregamento
                 agendamentosTbody.innerHTML = `<tr><td colspan="13" class="text-center"><div class="spinner-border spinner-border-sm" role="status"><span class="visually-hidden">Loading...</span></div> Carregando...</td></tr>`;
@@ -298,7 +300,7 @@
                                 <td class="text-center">${checkPagamento}</td>
                                 <td>${valorPagamento}</td>
                                 <td class="d-flex flex-nowrap gap-1 agendamento-actions">
-                                    <a href="/psicologia/agendamento/${ag.ID_AGENDAMENTO}/editar" class="btn btn-warning flex-grow-1" title="Editar"><i class="bi bi-pencil"></i></a>
+                                    <a href="/psicologo/agendamento/${ag.ID_AGENDAMENTO}/editar" class="btn btn-warning flex-grow-1" title="Editar"><i class="bi bi-pencil"></i></a>
                                     <form action="/psicologia/agendamento/${ag.ID_AGENDAMENTO}" method="POST" onsubmit="return confirm('Confirma a exclusão deste agendamento?');">
                                         @csrf
                                         @method('DELETE')

@@ -15,12 +15,9 @@ class FaesaClinicaSala extends Model
     protected $fillable = [
         'DESCRICAO',
         'ATIVO',
+        'DISCIPLINA',
         'CREATED_AT',
         'UPDATED_AT',
+        'SIT_SALA'
     ];
-
-    public function agendamentos(): BelongsTo
-    {
-        return $this->hasMany(FaesaClinicaAgendamento::class, 'LOCAL', 'ID_SALA_CLINICA');
-    }
 }

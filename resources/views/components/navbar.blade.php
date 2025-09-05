@@ -91,52 +91,84 @@
     .collapse-custom.show {
     display: block;
     }
+    
+    /* --- ESTILOS DA NAVBAR E TRANSIÇÃO --- */
+    #mainNavbar {
+        width: 250px;
+        background-color: var(--blue-color);
+        transition: width 0.3s ease;
+        overflow-x: hidden; /* Previne conteúdo de vazar durante a transição */
+    }
 
-    /* Animação da setinha */
-    #togglePsicologos .bi-chevron-down {
-    transition: transform 0.3s ease;
-    }
-    #togglePsicologos.active .bi-chevron-down {
-    transform: rotate(180deg);
+    /* --- ESTILOS PARA NAVBAR RECOLHIDA (CLASSE .collapsed) --- */
+    
+    /* 1. Reduz a largura da navbar */
+    #mainNavbar.collapsed {
+        width: 80px;
     }
 
-    #toggleProfessores .bi-chevron-down {
-    transition: transform 0.3s ease;
+    /* 2. Esconde os elementos que não são ícones */
+
+    #mainNavbar.collapsed h5,
+    #mainNavbar.collapsed div[classs=""] { /* OBS: Há um typo 'classs' no seu HTML original */
+        opacity: 0;
     }
-    #toggleProfessores.active .bi-chevron-down {
-    transform: rotate(180deg);
+
+    /* 3. Esconde o texto dos links e centraliza os ícones */
+    #mainNavbar.collapsed .link-agendar,
+    #mainNavbar.collapsed .link-logout {
+        font-size: 0; /* Truque para esconder o nó de texto */
+        justify-content: center;
+        padding: 0.75rem;
+    }
+
+    /* 4. Restaura o tamanho do ícone, que foi afetado pelo font-size: 0 */
+    #mainNavbar.collapsed .link-agendar i,
+    #mainNavbar.collapsed .link-logout i {
+        font-size: 1.1rem; /* Ou o tamanho que preferir para os ícones */
+        margin: 0;
+    }
+
+    #logo-faesa {
+        transition: opacity 0.3s ease-in-out;
     }
 </style>
-
 
 <nav class="navbar navbar-dark bg-primary d-lg-none fixed-top shadow-sm px-3" style="height: 56px">
     <button class="btn btn-primary" type="button" data-bs-toggle="offcanvas" data-bs-target="#offcanvasMenu">
         <i class="fas fa-bars"></i>
     </button>
-    <img src="{{ asset('faesa_branco.png') }}" alt="Logo FAESA" class="mx-auto d-block" style="width: 100px;">
+    <img src="{{ asset('img/faesa_logo_expandido.png') }}" alt="Logo FAESA" class="mx-auto d-block" style="width: 100px;" >
 </nav>
 
 
-<div id="main-container" class="d-flex vh-100">
+<div id="main-container" class="d-flex min-vh-100">
 
 <!-- SIDEBAR DESKTOP -->
-<nav class="p-3 d-none d-lg-flex flex-column align-items-center" style="width: 250px; background-color: var(--blue-color);">
-
+<nav class="p-3 d-none d-lg-flex flex-column align-items-center shadow-lg" id="mainNavbar">
     <!-- LOGO DA FAESA - NAVBAR -->
-    <img src="{{ asset('faesa_branco.png') }}" alt="Logo" class="img-fluid mb-2" />
+    <img src="{{ asset('img/faesa_logo_expandido.png') }}" alt="Logo" class="img-fluid mb-2" id="logo-faesa" width="150px" />
 
     <!-- TITULO SIDEBAR -->
-    <h4 class="mb-5 mt-5 p-2 rounded-3"
-        style="color: white;">
-        <strong>Psicologia</strong>
-    </h4>
+    <h5 class="mb-2 mt-3 p-2 rounded-3 text-center"
+        style="color: white; font-size: 18px;">
+        <strong>Clínica de Psicologia</strong>
+        <p class="p-0 m-0 text-center" style="font-size: 12px;"><em>Administrador</em></p>
+    </h5>
 
-    <ul class="list-group list-group-flush w-100 gap-1">
+    <!-- DADOS DA SESSAO DO USUARIO -->
+    <div classs="">
+        <p style="color:#ecf5f9" class="p-0 m-0 text-center">
+            {{ session('usuario')[0]->ID_USUARIO_CLINICA }}
+        </p>
+    </div>
+
+    <ul class="list-group list-group-flush w-100 gap-1 mt-3">
         <!-- LINKS -->
 
         <!-- PÁGINA INICIAL - MENU AGENDA -->
         <li class="list-group-item rounded-1 p-0 overflow-hidden ">
-            <a href="/psicologia" class="link-agendar d-flex align-items-center gap-2 p-2">
+            <a href="/psicologia" class="link-agendar d-flex align-items-center gap-2 p-1">
                 <i class="fas fa-home"></i> Início
             </a>
         </li>
@@ -144,7 +176,7 @@
 
         <!-- INCLUIR AGENDAMENTO -->
         <li class="list-group-item rounded-1 p-0 overflow-hidden ">
-            <a href="/psicologia/criar-agendamento" class="link-agendar d-flex align-items-center gap-2 p-2">
+            <a href="/psicologia/criar-agendamento" class="link-agendar d-flex align-items-center gap-2 p-1">
                 <i class="fas fa-calendar-plus"></i> Criar Agenda
             </a>
         </li>
@@ -152,7 +184,7 @@
 
         <!-- CONSULTAR AGENDA -->
         <li class="list-group-item rounded-1 p-0 overflow-hidden ">
-            <a href="/psicologia/consultar-agendamento" class="link-agendar d-flex align-items-center gap-2 p-2">
+            <a href="/psicologia/consultar-agendamento" class="link-agendar d-flex align-items-center gap-2 p-1">
                 <i class="fas fa-edit"></i> Agendas
             </a>
         </li>
@@ -160,7 +192,7 @@
 
         <!-- CADASTRAR PACIENTE -->
         <li class="list-group-item rounded-1 p-0 overflow-hidden ">
-            <a href="/psicologia/criar-paciente" class="link-agendar d-flex align-items-center gap-2 p-2">
+            <a href="/psicologia/criar-paciente" class="link-agendar d-flex align-items-center gap-2 p-1">
                 <i class="bi bi-person-add"></i> Criar Paciente
             </a>
         </li>
@@ -168,70 +200,15 @@
         
         <!-- CONSULTAR PACIENTE -->
         <li class="list-group-item rounded-1 p-0 overflow-hidden ">
-            <a href="/psicologia/consultar-paciente" class="link-agendar d-flex align-items-center gap-2 p-2">
+            <a href="/psicologia/consultar-paciente" class="link-agendar d-flex align-items-center gap-2 p-1">
                 <i class="bi bi-people"></i> Pacientes
             </a>
         </li>
 
-        <!-- PSICÓLOGOS -->
-        <li class="list-group-item rounded-1 p-0 overflow-hidden">
-
-        <!-- Botão principal -->
-        <a id="togglePsicologos" 
-            class="link-agendar d-flex align-items-center justify-content-between p-2"
-            href="javascript:void(0)">
-            <span><i class="bi bi-person-workspace me-2"></i> Psicólogos</span>
-            <i class="bi bi-chevron-down small"></i>
-        </a>
-
-        <!-- Submenu -->
-        <div id="submenuPsicologos" class="submenu collapse-custom">
-            <ul class="list-group list-group-flush">
-                <li class="list-group-item p-0 overflow-hidden">
-                    <a href="/psicologia/criar-psicologo" class="link-agendar d-flex align-items-center gap-2 p-2 ps-4">
-                        <i class="bi bi-person-plus"></i> Criar Psicólogo
-                    </a>
-                </li>
-                <li class="list-group-item p-0 overflow-hidden">
-                    <a href="/psicologia/consultar-psicologo" class="link-agendar d-flex align-items-center gap-2 p-2 ps-4">
-                        <i class="bi bi-search"></i> Consultar Psicólogo
-                    </a>
-                </li>
-            </ul>
-        </div>
-        </li>
-
-        <!-- PROFESSORES -->
-        <li class="list-group-item rounded-1 p-0 overflow-hidden">
-
-        <!-- Botão principal -->
-        <a id="toggleProfessores" 
-            class="link-agendar d-flex align-items-center justify-content-between p-2"
-            href="javascript:void(0)">
-            <span><i class="bi bi-person-rolodex me-2"></i> Professores</span>
-            <i class="bi bi-chevron-down small"></i>
-        </a>
-
-        <!-- Submenu -->
-        <div id="submenuProfessores" class="submenu collapse-custom">
-            <ul class="list-group list-group-flush">
-                <li class="list-group-item p-0 overflow-hidden">
-                    <a href="/psicologia/criar-professor" class="link-agendar d-flex align-items-center gap-2 p-2 ps-4">
-                        <i class="bi bi-person-plus"></i> Criar Professor
-                    </a>
-                </li>
-                <li class="list-group-item p-0 overflow-hidden">
-                    <a href="/psicologia/consultar_professor" class="link-agendar d-flex align-items-center gap-2 p-2 ps-4">
-                        <i class="bi bi-search"></i> Consultar Professor
-                    </a>
-                </li>
-            </ul>
-        </div>
-        </li>
 
         <!-- CADASTRAR SERVIÇO -->
         <li class="list-group-item rounded-1 p-0 overflow-hidden ">
-            <a href="/psicologia/criar-servico" class="link-agendar d-flex align-items-center gap-2 p-2">
+            <a href="/psicologia/criar-servico" class="link-agendar d-flex align-items-center gap-2 p-1">
                 <i class="bi bi-gear"></i> Serviços
             </a>
         </li>
@@ -239,7 +216,7 @@
 
         <!-- CADASTRAR SALA -->
         <li class="list-group-item rounded-1 p-0 overflow-hidden ">
-            <a href="/psicologia/criar-sala" class="link-agendar d-flex align-items-center gap-2 p-2">
+            <a href="/psicologia/criar-sala" class="link-agendar d-flex align-items-center gap-2 p-1">
                 <i class="bi bi-door-open"></i> Salas
             </a>
         </li>
@@ -247,7 +224,7 @@
 
         <!-- HORÁRIOS -->
         <li class="list-group-item rounded-1 p-0 overflow-hidden ">
-            <a href="/psicologia/criar-horario" class="link-agendar d-flex align-items-center gap-2 p-2">
+            <a href="/psicologia/criar-horario" class="link-agendar d-flex align-items-center gap-2 p-1">
                 <i class="bi bi-alarm"></i> Horários
             </a>
         </li>
@@ -255,7 +232,7 @@
 
         <!-- RELATÓRIO -->
         <li class="list-group-item rounded-1 p-0 overflow-hidden ">
-            <a href="/psicologia/relatorios-agendamento" class="link-agendar d-flex align-items-center gap-2 p-2">
+            <a href="/psicologia/relatorios-agendamento" class="link-agendar d-flex align-items-center gap-2 p-1">
                 <i class="fas fa-chart-bar"></i> Relatório
             </a>
         </li>
@@ -263,7 +240,7 @@
 
         <!-- LOGOUT -->
         <li class="list-group-item mt-auto rounded-1 p-0 overflow-hidden ">
-            <a href="/logout" class="link-logout d-flex align-items-center gap-2 p-2">
+            <a href="/logout" class="link-logout d-flex align-items-center gap-2 p-1">
                 <i class="fas fa-sign-out-alt"></i>
                 Logout
             </a>
@@ -343,26 +320,4 @@
             </li>
         </ul>
     </div>
-
-
-<script>
-    document.addEventListener("DOMContentLoaded", function() {
-    const toggleBtnPsico = document.getElementById("togglePsicologos");
-    const submenuPsico = document.getElementById("submenuPsicologos");
-
-        toggleBtnPsico.addEventListener("click", function() {
-            submenuPsico.classList.toggle("show");
-            toggleBtnPsico.classList.toggle("active");
-        });
-    });
-
-    const toggleBtnProf = document.getElementById("toggleProfessores");
-    const submenuProf = document.getElementById("submenuProfessores");
-
-    toggleBtnProf.addEventListener("click", function() {
-        submenuProf.classList.toggle("show");
-        toggleBtnProf.classList.toggle("active");
-    });
-</script>
-    
 </div>

@@ -31,6 +31,8 @@ class FaesaClinicaAgendamento extends Model
         'CREATED_AT',
         'UPDATED_AT',
         'STATUS_PAG',
+        'ID_PSICOLOGO',
+        'ID_SALA',
     ];
 
     protected $casts = [
@@ -71,11 +73,27 @@ class FaesaClinicaAgendamento extends Model
      * Define um relacionamento BelongsTo com a tabela FAESA_CLINICA_SERVICO
      * Um agendamento pertence a um SERVICO_CLINICA
      * 
-     * @return Illuminate\Database\Eloquent\Relations\BelongsTo
+     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
      */
     public function servico(): BelongsTo
     {
         return $this->belongsTo(FaesaClinicaServico::class, 'ID_SERVICO', 'ID_SERVICO_CLINICA');
+    }
+
+    public function sala(): BelongsTo
+    {
+        return $this->belongsTo(FaesaClinicaSala::class, 'ID_SALA', 'ID_SALA_CLINICA');
+    }
+
+    /**
+     * Define um relacionamento BelongsTo com a tabela LY_ALUNO
+     * Um ID_PSICOLOGO pertence a um LY_ALUNO
+     * 
+     * @return Illuminate\Database\Eloquent\Relations\BelongsTo
+     */
+    public function psicologo(): BelongsTo
+    {
+        return $this->belongsTo(LyAluno::class, 'ID_PSICOLOGO', 'ALUNO');
     }
 
     /**

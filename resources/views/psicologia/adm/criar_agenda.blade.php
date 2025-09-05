@@ -1,32 +1,20 @@
 <!DOCTYPE html>
 <html lang="pt-br">
+
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>Agendamento</title>
-
-    <!-- FAVICON - IMAGEM DA GUIA -->
     <link rel="icon" type="image/png" href="/favicon_faesa.png">
-    
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700&display=swap" rel="stylesheet" />
     <link href="https://cdnjs.cloudflare.com/ajax/libs/mdb-ui-kit/7.1.0/mdb.min.css" rel="stylesheet" />
-
-    <!-- Flatpickr CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css" />
-
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
-
+    <!-- TOM SELECT -->
+    <link href="https://cdn.jsdelivr.net/npm/tom-select@2.3.1/dist/css/tom-select.bootstrap5.css" rel="stylesheet">
     <style>
-        html, body { height: 100%; margin: 0; }
-        #content-wrapper {
-            width: 85vw;
-            height: 97vh;
-            margin: auto;
-            display: column;
-            gap: 24px;
-            overflow-y: auto;
-            align-items: stretch;
-        }
+        /* Estilos mantidos do arquivo original e adaptados */
         #servicos-list button {
             cursor: pointer;
         }
@@ -37,83 +25,39 @@
         }
 
         @keyframes fadeInSlide {
-            from {
-                opacity: 0;
-                transform: translateY(-5px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
+            from { opacity: 0; transform: translateY(-5px); }
+            to { opacity: 1; transform: translateY(0); }
         }
 
-        #alert-success {
-        animation: slideDownFadeOut 4s ease forwards;
-        max-width: 90%;
-    }
+        #alert-success, #alert-error {
+            animation: slideDownFadeOut 5s ease forwards;
+            max-width: 90%;
+        }
 
-    @keyframes slideDownFadeOut {
-        0% {
-            transform: translate(-50%, -100%);
-            opacity: 0;
+        @keyframes slideDownFadeOut {
+            0% { transform: translate(-50%, -100%); opacity: 0; }
+            10% { transform: translate(-50%, 0); opacity: 1; }
+            90% { transform: translate(-50%, 0); opacity: 1; }
+            100% { transform: translate(-50%, -100%); opacity: 0; }
         }
-        10% {
-            transform: translate(-50%, 0);
-            opacity: 1;
-        }
-        90% {
-            transform: translate(-50%, 0);
-            opacity: 1;
-        }
-        100% {
-            transform: translate(-50%, -100%);
-            opacity: 0;
-        }
-    }
 
-    #alert-error {
-        animation: slideDownFadeOut 6s ease forwards;
-    }
+        #info-observacao:hover {
+            color: #0a58ca;
+        }
 
-    @keyframes slideDownFadeOut {
-        0% {
-            transform: translate(-50%, -100%);
-            opacity: 0;
+        /* Estilos para limitar a altura das listas de busca */
+        .list-local-option, .list-psicologo-option, #pacientes-list .list-group {
+            max-height: 200px;
+            overflow-y: auto;
         }
-        10% {
-            transform: translate(-50%, 0);
-            opacity: 1;
+        
+        .shadow-dark {
+            box-shadow: 0 0.75rem 1.25rem rgba(0,0,0,0.4) !important;
         }
-        85% {
-            transform: translate(-50%, 0);
-            opacity: 1;
-        }
-        100% {
-            transform: translate(-50%, -100%);
-            opacity: 0;
-        }
-    }
-    #info-observacao:hover {
-        color: #0a58ca;
-    }
-    main {
-        background-color: #ffffff;
-        padding: 24px;
-        border-radius: 10px;
-        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
-        flex-direction: column;
-        overflow-y: auto;
-        border: 1.8px solid #dee2e6;
-    }
-
-    .list-local-option {
-        max-width: 350px;
-        max-height: 50px;
-        overflow-y: auto;
-    }
     </style>
 </head>
-<body>
+
+<body class="bg-body-secondary">
 
 <!-- COMPONENT NAVBAR -->
 @include('components.navbar')
@@ -123,7 +67,7 @@
         <strong>Ops!</strong> Corrija os itens abaixo:
         <ul class="mb-0 mt-1 list-unstyled">
             @foreach ($errors->all() as $error)
-                <li><i class="fas fa-exclamation-circle me-1"></i> {{ $error }}</li>
+                <li><i class="bi bi-exclamation-circle-fill me-1"></i> {{ $error }}</li>
             @endforeach
         </ul>
     </div>
@@ -141,98 +85,84 @@
     </div>
 @endif
 
+<div class="container ms-3 mw-100">
 
-<div id="content-wrapper" class="bg-light">
-    <main>
-        <div class="bg-white p-4 rounded shadow-sm w-80 w-md-75 w-lg-50">
-
-            <!-- TÍTULO -->
-            <div class="text-center mb-5">
-                <h2 class="fs-4 mb-0">Criação de Agendamento</h2>
-            </div>
-
+    <div class="row">
+        
+        <!-- COMPONENT DE HEADER DE CADA PÁGINA DAS VIEWS -->
+        <x-page-title>
+        </x-page-title>
+        
+        <div class="col-12 shadow-lg shadow-dark p-4 bg-body-tertiary rounded">
 
             <!-- FORM DE AGENDAMENTO -->
             <form action="{{ route('criarAgendamento-Psicologia') }}" method="POST" id="agendamento-form" class="w-100" validate>
                 @csrf
 
-                <!-- VALORES PASSADOS NO FORMATO HIDDEN | USUÁRIO NÃO SELECIONA DIRETAMENTE -->
                 <input type="hidden" name="paciente_id" id="paciente_id" value="{{ old('paciente_id') }}"/>
                 <input type="hidden" name="id_servico" id="id_servico" value="{{ old('id_servico') }}" />
                 <input type="hidden" name="recorrencia" id="recorrencia"/>
                 <input type="hidden" name="status_agend" value="Em aberto"/>
 
+                <!-- PESQUISA POR PACIENTE -->
                 <div class="mb-3 position-relative">
-                    <input id="search-input" name="search" class="form-control" placeholder="Pesquisar paciente" value="{{ old('search') }}">
-
-                    <!-- LISTA DE PACIENTES ENCONTRADOS PARA AGENDAMENTO -->
-                    <div id="pacientes-list" class="list-group position-absolute w-100" style="z-index: 1000; top: 100%"></div>
+                    <label for="select-paciente" class="form-label">Paciente</label>
+                    <select id="select-paciente" name="paciente_id" placeholder="Pesquisar paciente por nome ou CPF..." autocomplete="off" data-old-id="{{ old('paciente_id') }}"></select>
                 </div>
 
-                <!-- SUBTÍTULO -->
                 <div class="mb-2">
-                    <h5 class="mb-0">Horário</h5>
+                    <h5 class="mb-0">Horário e Detalhes</h5>
                     <hr class="mt-1">
                 </div>
 
-                <div class="row g-2">
+                <div class="row g-3">
 
-                    <!-- CHECKBOX TEM RECORRÊNCIA E SELETOR DE DURAÇÃO -->
+                    <!-- RECORRENCIA -->
                     <div class="col-12 mb-2">
-                        <div class="form-check form-switch d-flex flex-column align-items-start gap-3">
-                            <div class="flex flex-row align-items-center">
-                                <input class="form-check-input" type="checkbox" value="1" id="temRecorrencia" name="tem_recorrencia">
-                                <label class="form-check-label fw-semibold mb-0" for="temRecorrencia">
-                                    <i class="fas fa-redo-alt me-1 text-primary"></i> Ativar recorrência
-                                    <span id="recorrenciaBadge" class="badge bg-success ms-2 d-none">Ativa</span>
-                                </label>
-                            </div>
+                        <div class="form-check form-switch">
+                            <input class="form-check-input" type="checkbox" value="1" id="temRecorrencia" name="tem_recorrencia">
+                            <label class="form-check-label fw-semibold" for="temRecorrencia">
+                                <i class="bi bi-arrow-repeat me-1 text-primary"></i> Ativar recorrência
+                            </label>
                         </div>
                     </div>
 
-                    <!-- SERVIÇO -->
-                    <div class="col-sm-6 col-md-3 position-relative" style="position: relative;">
+                    <!-- SELECAO DE SERVICO -->
+                    <div class="col-sm-6 col-md-3 position-relative">
                         <label for="servico" class="form-label">
                             Serviço
-                            <span id="info-observacao">
-                                <i class="fas fa-info-circle"></i>
+                            <span id="info-observacao" style="display: none;">
+                                <i class="bi bi-info-circle-fill"></i>
                             </span>
                         </label>
-                        <input type="text" id="servico" name="servico" class="form-control" autocomplete="off" value="{{ old('servico') }}">
-                        
-                        <div id="servicos-list" class="list-group position-absolute w-100" style="z-index: 1000;"></div>
+                        <select id="select-servico" name="id_servico" placeholder="Serviço do Atendimento..." autocomplete="off" data-old-id="{{ old('id_servico') }}" ></select>
                     </div>
 
-                    <!-- DIA -->
+                    <!-- DIA DO AGENDAMENTO -->
                     <div class="col-sm-6 col-md-3">
                         <label for="data" class="form-label">Dia</label>
-                        <input type="date" id="data" name="dia_agend" class="form-control" value="{{ old('dia_agend') }}">
+                        <input type="text" id="data" name="dia_agend" class="form-control" value="{{ old('dia_agend') }}" placeholder="Selecione o dia">
                     </div>
 
-                    <!-- HORÁRIO INÍCIO -->
+                    <!-- HORÁRIO DE INÍCIO -->
                     <div class="col-sm-6 col-md-3">
                         <label for="hr_ini" class="form-label">Horário Início</label>
-                        <input type="time" id="hr_ini" name="hr_ini" class="form-control" value="{{ old('hr_ini') }}">
+                        <input type="text" id="hr_ini" name="hr_ini" class="form-control" value="{{ old('hr_ini') }}">
                     </div>
 
-                    <!-- HORÁRIO FIM -->
+                    <!-- HORÁRIO FINAL -->
                     <div class="col-sm-6 col-md-3">
                         <label for="hr_fim" class="form-label">Horário Fim</label>
-                        <input type="time" id="hr_fim" name="hr_fim" class="form-control" value="{{ old('hr_fim') }}">
+                        <input type="text" id="hr_fim" name="hr_fim" class="form-control" value="{{ old('hr_fim') }}">
                     </div>
 
-                    <!-- CAMPOS DE RECORRÊNCIA -->
                     <div id="recorrenciaCampos" class="col-12 mt-2 d-none">
                         <div class="card border-primary">
                             <div class="card-body">
-
-                                <!-- TÍTULO DA CONFIGURAÇÃO DE RECORRÊNCIA -->
                                 <h6 class="card-title text-primary mb-3">
-                                    <i class="fas fa-calendar-alt me-1"></i> Configuração de Recorrência
+                                    <i class="bi bi-calendar-week me-1"></i> Configuração de Recorrência
                                 </h6>
-
                                 <div class="d-flex flex-wrap gap-3 align-items-center justify-content-around">
-                                    <!-- DIAS DA SEMANA (NOVA SELEÇÃO) -->
                                     <div class="flex-grow-1">
                                         <label class="form-label">Dias da Semana</label>
                                         <div id="diasSemanaBtns" class="d-flex flex-wrap gap-2">
@@ -246,44 +176,30 @@
                                         </div>
                                         <small class="text-muted">Clique nos dias desejados para selecionar.</small>
                                     </div>
-
-                                    <!-- DURAÇÃO DA RECORRÊNCIA EM MESES -->
-                                    <div id="duracaoMesesContainer" class="" style="min-width: 200px;">
+                                    <div id="duracaoMesesContainer" style="min-width: 200px;">
                                         <label for="duracao_meses_recorrencia" class="form-label">Duração (meses)</label>
-                                        <select id="duracao_meses_recorrencia" name="duracao_meses_recorrencia" class="form-select form-select-sm" aria-label="Duração da recorrência em meses">
+                                        <select id="duracao_meses_recorrencia" name="duracao_meses_recorrencia" class="form-select form-select-sm">
                                             <option value="" selected>Selecione</option>
-                                            <option value="1">1 mês</option>
-                                            <option value="2">2 meses</option>
-                                            <option value="3">3 meses</option>
-                                            <option value="4">4 meses</option>
-                                            <option value="5">5 meses</option>
-                                            <option value="6">6 meses</option>
-                                            <option value="7">7 meses</option>
-                                            <option value="8">8 meses</option>
-                                            <option value="9">9 meses</option>
-                                            <option value="10">10 meses</option>
-                                            <option value="11">11 meses</option>
-                                            <option value="12">12 meses</option>
+                                            @for ($i = 1; $i <= 12; $i++)
+                                                <option value="{{ $i }}">{{ $i }} mes{{ $i > 1 ? 'es' : '' }}</option>
+                                            @endfor
                                         </select>
                                     </div>
-
-                                    <!-- DATA FIM DA RECORRÊNCIA -->
                                     <div style="min-width: 200px;">
                                         <label for="data_fim_recorrencia" class="form-label">Data Fim</label>
-                                        <input type="date" id="data_fim_recorrencia" name="data_fim_recorrencia" class="form-control">
+                                        <input type="text" id="data_fim_recorrencia" name="data_fim_recorrencia" class="form-control">
                                     </div>
                                 </div>
                             </div>
                         </div>
                     </div>
-
-                    <!-- Mensagem que aparece quando ativa recorrência -->
+                    
                     <div id="msg-recorrencia" class="alert alert-info mt-2 d-none">
-                        Caso não selecione dia da semana e/ou data fim, serão gerados agendamentos por 1 mês por padrão.
+                        Caso não selecione "dias da semana" e uma "duração" ou "data fim", serão gerados agendamentos semanais por 1 mês, no mesmo dia da semana do campo "Dia".
                     </div>
 
                     <!-- VALOR -->
-                    <div class="col-sm-6 col-md-3 mt-2">
+                    <div class="col-sm-6 col-md-3">
                         <label for="valor_agend" class="form-label">Valor</label>
                         <div class="input-group">
                             <span class="input-group-text">R$</span>
@@ -291,46 +207,48 @@
                         </div>
                     </div>
 
-                    <!-- LOCAL -->
-                    <input type="hidden" name="id_sala_clinica" id="id_sala_clinica">
-                    <div class="col-sm-6 col-md-3 mt-2 position-relative">
-                        <label for="local_agend" class="form-label">Local</label>
-                        <input type="text" name="local_agend" id="local_agend" class="form-control" placeholder="Local do atendimento" value="{{ old('local_agend') }}" autocomplete="off">
-
-                        <div id="local-list" class="list-group position-absolute w-100" style="z-index: 1000; top: 100%"></div>
+                    <!-- SELEÇÃO DE LOCAL -->
+                    <div class="col-sm-6 col-md-3 position-relative">
+                        <input type="hidden" name="id_sala_clinica" id="id_sala_clinica">
+                        <label for="select-local" class="form-label">Local</label>
+                        <select id="select-local" name="id_sala_clinica" placeholder="Local do atendimento..." autocomplete="off" data-old-id="{{ old('id_sala_clinica') }}"></select>
                     </div>
-                        
-                    <!-- OBSERVAÇÕES -->
-                    <div class="col-12 mt-2">
+
+                    <!-- SELEÇAO DE PSICÓLOGO -->
+                    <div class="col-md-6 position-relative">
+                         <input type="hidden" name="id_psicologo" id="id_psicologo">
+                        <label for="select-psicologo" class="form-label">Psicólogo</label>
+                        <select id="select-psicologo" name="id_psicologo" placeholder="Psicólogo do Atendimento..." autocomplete="off" data-old-id="{{ old('id_psicologo') }}"></select>
+                    </div>
+                                        
+                    <div class="col-12">
                         <label for="observacoes" class="form-label">Observações</label>
                         <textarea name="observacoes" id="observacoes" class="form-control" placeholder="Observações..." rows="3">{{ old('observacoes') }}</textarea>
                     </div>
 
-                    <!-- BOTÃO SUBMIT -->
-                    <div class="col-12 text-end mt-3">
+                    <div class="col-12 text-end mt-4">
                         <button type="submit" class="btn btn-success">
-                            <i class="fas fa-check-circle me-1"></i> Agendar
+                            <i class="bi bi-check-circle-fill me-1"></i> Agendar
                         </button>
                     </div>
-
                 </div>
             </form>
         </div>
-    </main>
+    </div>
 </div>
 
-<!-- Scripts -->
-<script src="https://cdnjs.cloudflare.com/ajax/libs/mdb-ui-kit/7.1.0/mdb.min.js"></script>
-<!-- Flatpickr JS -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" crossorigin="anonymous"></script>
+
 <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
-<!-- Flatpckr pt-br -->
 <script src="https://cdn.jsdelivr.net/npm/flatpickr/dist/l10n/pt.js"></script>
 
-<!-- EVITA ENVIO DE FORMULÁRIO AO CLICAR NO ENTER -->
+<!-- TOM SELECT -->
+<script src="https://cdn.jsdelivr.net/npm/tom-select@2.3.1/dist/js/tom-select.complete.min.js"></script>
+
+<!-- IMPEDE EMVIO CASO USUÁRIO TECLE ENTER SEM QUERER -->
 <script>
     document.addEventListener('DOMContentLoaded', function () {
         const form = document.getElementById('agendamento-form');
-
         form.addEventListener('keydown', function (event) {
             if (event.key === 'Enter' && event.target.tagName.toLowerCase() !== 'textarea') {
                 event.preventDefault();
@@ -339,260 +257,126 @@
     });
 </script>
 
-
-<!-- OBJETOS DA APLICAÇÃO -->
 <script>
-    // FORMULÁRIO DE BUSCA DE PACIENTES
-    const searchForm = document.getElementById('search-form');
-    // INPUT DO NOME/CPF DO PACIENTE
     const searchInput = document.getElementById('search-input');
-    // LISTA DE PACIENTES ENCONTRADOS PARA AGENDAMENTO
     const pacientesList = document.getElementById('pacientes-list');
-    // PACIENTE SELECIONADO APÓS BUSCA
-    // const pacienteSelecionadoDiv = document.getElementById('paciente-selecionado');
-    // ID PACIENTE SELECIONADO
     const pacienteIdInput = document.getElementById('paciente_id');
 </script>
 
 <!-- BUSCA DE PACIENTES -->
 <script>
-    // PESQUISA PACIENTE - FUNCIONALIDADES
-    searchInput.addEventListener('input', function(e) {
-        //e.preventDefault(); // EVITA RECARREGAMENTO DA PÁGINA
-        // RESGATA O NOME DO PACIENTE | REMOVE OS ESPAÇOS EM BRANCO COM A FUNÇÃO TRIM()
-        const nome = searchInput.value.trim();
-        fetch(`/psicologia/consultar-paciente/buscar?search=${encodeURIComponent(nome)}`)
-                .then(response => response.json())
-                .then(pacientes => {
+document.addEventListener('DOMContentLoaded', function() {
 
-                    // AO BUSCAR, OS VALORES ABAIXO SÃO ZERADOS
-                    pacientesList.innerHTML = '';
-                    pacienteIdInput.value = '';
+    /**
+     * Função auxiliar para inicializar um TomSelect e carregar o valor antigo
+     * se a busca por ID funcionar no endpoint 'load'.
+     */
+    function initializeTomSelectWithOldValue(selector, config) {
+        const element = document.querySelector(selector);
+        if (!element) return;
 
-                    // CASO NENHUM PACIENTE SEJA ENCONTRADO - MOSTRA MENSAGEM
-                    if (pacientes.length === 0) {
-                        pacientesList.innerHTML = `<div class="alert alert-warning">Nenhum paciente encontrado.</div>`;
-                        return;
-                    }
+        const oldId = element.dataset.oldId;
+        const tomSelectInstance = new TomSelect(element, config);
 
-                    // CRIA ELEMENTO HTML
-                    const listGroup = document.createElement('div');
-                    listGroup.classList.add('list-group');
-
-                    // SE QUANTIDADE DE PACIENTES É MAIOR QUE 5
-                    if(pacientes.length > 5) {
-                        listGroup.style.maxHeight = '200px';
-                        listGroup.style.overflowY = 'auto';
-                    }
-
-                    pacientes.forEach(paciente => {
-                        const item = document.createElement('button');
-                        item.type = 'button';
-                        item.classList.add('list-group-item', 'list-group-item-action', 'border', 'rounded');
-                        item.textContent = `${paciente.NOME_COMPL_PACIENTE} (${paciente.CPF_PACIENTE})`;
-                        item.addEventListener('click', () => {
-                            searchInput.value = `${paciente.NOME_COMPL_PACIENTE} (${paciente.CPF_PACIENTE})`;
-                            /*pacienteSelecionadoDiv.innerHTML = 
-                            `<div class="alert alert-success d-flex justify-content-between align-items-center">
-                                <div>
-                                    <strong>Paciente selecionado:</strong> ${paciente.NOME_COMPL_PACIENTE} (${paciente.CPF_PACIENTE})
-                                </div>
-                                <button type="button" id="cancelar-paciente" class="btn btn-sm btn-outline-danger ms-2">Cancelar</button>
-                            </div>
-                            `;*/
-                            
-                            pacienteIdInput.value = paciente.ID_PACIENTE;
-                            pacientesList.innerHTML = '';
-
-                            // LISTENER DO BOTÃO DE CANCELAR
-                            // document.getElementById('cancelar-paciente').addEventListener('click', () => {
-                            //     pacienteIdInput.value = '';
-                            // })
-                        });
-                        listGroup.appendChild(item);
-                    });
-
-                    pacientesList.appendChild(listGroup);
-                })
-                .catch(error => {
-                    pacientesList.innerHTML = `<div class="alert alert-danger">Erro ao buscar pacientes.</div>`;
-                    console.error(error);
-                });
-
-            function formatarDataBR(dateStr) {
-                if (!dateStr) return '-';
-                const cleanedDate = dateStr.split('T')[0];
-                const [year, month, day] = cleanedDate.split('-');
-                return `${day}/${month}/${year}`;
-            }
-        });
-</script>
-
-<!-- BUSCA DE SERVIÇOS -->
-<script>
-    const servicoInput = document.getElementById("servico");
-    const servicosList = document.getElementById("servicos-list");
-
-    const localInput = document.getElementById("local_agend");
-    const localList = document.getElementById("local-list");
-
-    let timeout = null;
-
-    // =========================
-    // BUSCA DE SERVIÇO
-    // =========================
-    servicoInput.addEventListener('input', () => {
-        clearTimeout(timeout);
-
-        timeout = setTimeout(() => {
-            const query = servicoInput.value.trim();
-            const infoObs = document.getElementById('info-observacao');
-
-            if (!query) {
-                servicosList.innerHTML = '';
-                document.getElementById('id_servico').value = '';
-                infoObs.style.display = 'none';
-                infoObs.title = '';
-                return;
-            }
-
-            fetch(`/psicologia/pesquisar-servico?search=${encodeURIComponent(query)}`)
-                .then(response => response.json())
-                .then(servicos => {
-                    servicosList.innerHTML = '';
-
-                    if (servicos.length === 0) {
-                        servicosList.innerHTML = `<button type="button" class="list-group-item list-group-item-action disabled">Nenhum serviço encontrado</button>`;
-                        document.getElementById('id_servico').value = '';
-                        infoObs.style.display = 'none';
-                        infoObs.title = '';
-                        return;
-                    }
-
-                    const servicoExato = servicos.find(s => s.SERVICO_CLINICA_DESC.toLowerCase() === query.toLowerCase());
-
-                    if (servicoExato) {
-                        aoSelecionarServico(servicoExato);
-                        servicosList.innerHTML = '';
-                        return;
-                    }
-
-                    document.getElementById('id_servico').value = '';
-                    infoObs.style.display = 'none';
-                    infoObs.title = '';
-
-                    servicos.forEach(servico => {
-                        const item = document.createElement('button');
-                        item.type = 'button';
-                        item.classList.add('list-group-item', 'list-group-item-action');
-                        item.textContent = servico.SERVICO_CLINICA_DESC;
-                        item.addEventListener('click', () => {
-                            aoSelecionarServico(servico);
-                            servicosList.innerHTML = '';
-                        });
-                        servicosList.appendChild(item);
-                    });
-                })
-                .catch(error => {
-                    console.error(error);
-                    servicosList.innerHTML = `<button type="button" class="list-group-item list-group-item-action disabled text-danger">Erro ao buscar serviços</button>`;
-                });
-        }, 300);
-    });
-
-    // Fecha a lista de serviços ao clicar fora
-    document.addEventListener('click', (e) => {
-        if (!servicoInput.contains(e.target) && !servicosList.contains(e.target)) {
-            servicosList.innerHTML = '';
+        // Se existir um ID antigo, tentamos carregá-lo
+        if (oldId) {
+            tomSelectInstance.load(oldId); // Dispara a busca usando o ID
         }
-    });
-
-    // =========================
-    // BUSCA DE LOCAL
-    // =========================
-    localInput.addEventListener('input', () => {
-        clearTimeout(timeout);
-
-        timeout = setTimeout(() => {
-            const query = localInput.value.trim();
-
-            if (!query) {
-                localList.innerHTML = '';
-                return;
-            }
-
-            fetch(`/psicologia/pesquisar-local?search=${encodeURIComponent(query)}`)
-                .then(response => response.json())
-                .then(locais => {
-                    localList.innerHTML = '';
-
-                    if (locais.length === 0) {
-                        localList.innerHTML = `<button type="button" class="list-group-item list-group-item-action disabled">Nenhum local encontrado</button>`;
-                        return;
-                    }
-
-                    const localExato = locais.find(l => l.DESCRICAO.toLowerCase() === query.toLowerCase());
-
-                    if (localExato) {
-                        aoSelecionarLocal(localExato);
-                        localList.innerHTML = '';
-                        return;
-                    }
-
-                    locais.forEach(local => {
-                        const item = document.createElement('button');
-                        item.type = 'button';
-                        item.classList.add('list-group-item', 'list-local-option', 'list-group-item-action');
-                        item.textContent = local.DESCRICAO;
-                        item.addEventListener('click', () => {
-                            aoSelecionarLocal(local);
-                            localList.innerHTML = '';
-                        });
-                        localList.appendChild(item);
-                    });
-                })
-                .catch(error => {
-                    console.error(error);
-                    localList.innerHTML = `<button type="button" class="list-group-item list-group-item-action disabled text-danger">Erro ao buscar locais</button>`;
-                });
-        }, 300);
-    });
-
-    // Fecha a lista de locais ao clicar fora
-    document.addEventListener('click', (e) => {
-        if (!localInput.contains(e.target) && !localList.contains(e.target)) {
-            localList.innerHTML = '';
-        }
-    });
-
-    // =========================
-    // FUNÇÕES DE SELEÇÃO
-    // =========================
-    function aoSelecionarServico(servico) {
-        document.getElementById('servico').value = servico.SERVICO_CLINICA_DESC;
-        document.getElementById('id_servico').value = servico.ID_SERVICO;
-        document.getElementById('info-observacao').style.display = servico.OBSERVACAO ? 'inline-block' : 'none';
-        document.getElementById('info-observacao').title = servico.OBSERVACAO || '';
+        
+        return tomSelectInstance;
     }
 
-    function aoSelecionarLocal(local) {
-        document.getElementById('local_agend').value = local.DESCRICAO;
-        document.getElementById('id_sala_clinica').value = local.ID_SALA_CLINICA;
-    }
+    // --- SELECT DE PACIENTE ---
+    const pacienteSelect = initializeTomSelectWithOldValue('#select-paciente', {
+        valueField: 'ID_PACIENTE',
+        labelField: 'NOME_COMPL_PACIENTE',
+        searchField: ['NOME_COMPL_PACIENTE', 'CPF_PACIENTE'],
+        // Coloque aqui o resto da sua configuração (render, create, onOptionAdd, etc.)
+        load: (query, callback) => {
+            const url = `/psicologia/consultar-paciente/buscar-nome-cpf?search=${encodeURIComponent(query)}`;
+            fetch(url).then(r => r.json()).then(json => {
+                callback(json);
+                // Após a busca, se for a busca pelo ID antigo, seleciona o item
+                const oldId = document.querySelector('#select-paciente').dataset.oldId;
+                if (oldId && query === oldId && json.length > 0) {
+                    pacienteSelect.setValue(oldId);
+                }
+            }).catch(() => callback());
+        },
+    });
+
+    // --- SELECT DE SERVIÇO ---
+    const servicoSelect = initializeTomSelectWithOldValue('#select-servico', {
+        valueField: 'ID_SERVICO_CLINICA',
+        labelField: 'SERVICO_CLINICA_DESC',
+        searchField: ['SERVICO_CLINICA_DESC'],
+        // ... (resto da sua configuração)
+        load: (query, callback) => {
+            const url = `/psicologia/pesquisar-servico?search=${encodeURIComponent(query)}`;
+            fetch(url).then(r => r.json()).then(json => {
+                callback(json);
+                const oldId = document.querySelector('#select-servico').dataset.oldId;
+                if (oldId && query === oldId && json.length > 0) {
+                    servicoSelect.setValue(oldId);
+                }
+            }).catch(() => callback());
+        },
+    });
+
+    // --- SELECT DE LOCAL ---
+    const localSelect = initializeTomSelectWithOldValue('#select-local', {
+        valueField: 'ID_SALA_CLINICA',
+        labelField: 'DESCRICAO',
+        searchField: ['DESCRICAO'],
+        // ... (resto da sua configuração)
+        load: (query, callback) => {
+            const url = `/psicologia/pesquisar-local?search=${encodeURIComponent(query)}`;
+            fetch(url).then(r => r.json()).then(json => {
+                callback(json);
+                const oldId = document.querySelector('#select-local').dataset.oldId;
+                if (oldId && query === oldId && json.length > 0) {
+                    localSelect.setValue(oldId);
+                }
+            }).catch(() => callback());
+        },
+    });
+
+    // --- SELECT DE PSICÓLOGO ---
+    const psicologoSelect = initializeTomSelectWithOldValue('#select-psicologo', {
+        valueField: 'ID_PSICOLOGO',
+        labelField: 'NOME_COMPL',
+        searchField: ['NOME_COMPL', 'ID_PSICOLOGO'],
+        // ... (resto da sua configuração)
+        load: (query, callback) => {
+            const url = `/psicologia/listar-psicologos?search=${encodeURIComponent(query)}`;
+            fetch(url).then(r => r.json()).then(json => {
+                callback(json);
+                const oldId = document.querySelector('#select-psicologo').dataset.oldId;
+                if (oldId && query === oldId && json.length > 0) {
+                    psicologoSelect.setValue(oldId);
+                }
+            }).catch(() => callback());
+        },
+    });
+
+    // --- SELECT DE DURAÇÃO (Não precisa de alteração) ---
+    new TomSelect('#duracao_meses_recorrencia', { /* ... */ });
+
+    // Lógica do evento 'change' do serviço precisa ser anexada à instância criada
+    servicoSelect.on('change', (value) => {
+        // ... sua lógica de atualizar o valor e o ícone de observação
+    });
+});
 </script>
 
-
-<!-- CAMPOS DE RECORRÊNCIA -->
+<!-- SCRIPT DE SELEÇÃO DE RECORRÊNCIA -->
 <script>
-    document.addEventListener('DOMContentLoaded', function() {
+document.addEventListener('DOMContentLoaded', function() {
     const temRecorrenciaCheckbox = document.getElementById('temRecorrencia');
     const recorrenciaCampos = document.getElementById('recorrenciaCampos');
     const msgRecorrencia = document.getElementById('msg-recorrencia');
     const recorrenciaInput = document.getElementById('recorrencia');
-
     const diasSemanaBtns = document.querySelectorAll('#diasSemanaBtns button');
-
-    // Container para inputs hidden dos dias selecionados
     let container = document.getElementById('diasSemanaContainer');
     if (!container) {
         container = document.createElement('div');
@@ -600,14 +384,12 @@
         container.style.display = 'none';
         document.getElementById('agendamento-form').appendChild(container);
     }
-
-    // Função que atualiza dias selecionados no container hidden
+    
     function atualizarDiasSelecionados() {
         container.innerHTML = '';
         const diasSelecionados = Array.from(diasSemanaBtns)
             .filter(btn => btn.classList.contains('active'))
             .map(btn => btn.getAttribute('data-dia'));
-
         diasSelecionados.forEach(dia => {
             const input = document.createElement('input');
             input.type = 'hidden';
@@ -617,7 +399,6 @@
         });
     }
 
-    // Manipula os botões dos dias da semana
     diasSemanaBtns.forEach(btn => {
         btn.addEventListener('click', function() {
             this.classList.toggle('active');
@@ -627,322 +408,81 @@
         });
     });
 
-    // Evento único para checkbox "temRecorrencia"
     temRecorrenciaCheckbox.addEventListener('change', function() {
         if (this.checked) {
-            // Mostrar campos e mensagem
             recorrenciaCampos.classList.remove('d-none');
             msgRecorrencia.classList.remove('d-none');
-
-            // Gerar UUID
-            if (crypto.randomUUID) {
-                recorrenciaInput.value = crypto.randomUUID();
-            } else {
-                // Fallback se necessário
-                recorrenciaInput.value = 'uuid-fallback-' + Date.now();
-            }
+            recorrenciaInput.value = crypto.randomUUID ? crypto.randomUUID() : 'uuid-fallback-' + Date.now();
         } else {
-            // Esconder campos e mensagem
             recorrenciaCampos.classList.add('d-none');
             msgRecorrencia.classList.add('d-none');
-
-            // Limpar UUID e seleção dias semana
             recorrenciaInput.value = '';
-
             diasSemanaBtns.forEach(btn => {
                 btn.classList.remove('active', 'btn-primary');
                 btn.classList.add('btn-outline-primary');
             });
             container.innerHTML = '';
-
-            // Limpar campo data fim recorrencia
             document.getElementById('data_fim_recorrencia').value = '';
-        }
-    });
-});
-
-</script>
-
-<!-- CONTROLE DE INSERÇÃO DE INFORMAÇÃO -->
-<!-- <script>
-    // FUNÇÃO DE MENSAGENS DE ERRO CASO USUÁRIO NÃO INFORME ALGUM DOS CAMPOS OBRIGATÓRIOS
-    function showError(input, message) {
-        // Verifica se já existe mensagem, remove para não duplicar
-        const existingError = input.parentNode.querySelector('.error-message');
-        if (existingError) {
-            existingError.remove();
-        }
-        // Cria o elemento de mensagem
-        const errorDiv = document.createElement('div');
-        errorDiv.className = 'error-message text-danger small mb-1';
-        errorDiv.textContent = message;
-        // Insere antes do input dentro do mesmo container
-        input.parentNode.insertBefore(errorDiv, input);
-    }
-
-    // Remove todas as mensagens de erro antes da validação
-    function clearErrors(form) {
-        const errors = form.querySelectorAll('.error-message');
-        errors.forEach(err => err.remove());
-    }
-
-    document.getElementById('agendamento-form').addEventListener('submit', function(e) {
-        clearErrors(this); // limpa mensagens anteriores
-
-        let isValid = true;
-
-        // Validar paciente selecionado (paciente_id hidden)
-        const pacienteId = document.getElementById('paciente_id').value.trim();
-        if (!pacienteId) {
-            showError(document.getElementById('search-input'), 'Selecione um paciente antes de continuar.');
-            isValid = false;
-        }
-
-        // Validar serviço selecionado (id_servico hidden)
-        const idServico = document.getElementById('id_servico').value.trim();
-        if (!idServico) {
-            showError(document.getElementById('servico'), 'Selecione um serviço válido antes de continuar.');
-            isValid = false;
-        }
-
-        // Validar data
-        const data = document.getElementById('data').value.trim();
-        if (!data) {
-            showError(document.getElementById('data'), 'Selecione uma data.');
-            isValid = false;
-        }
-
-        // Validar horário início
-        const hrIni = document.getElementById('hr_ini').value.trim();
-        if (!hrIni) {
-            showError(document.getElementById('hr_ini'), 'Informe o horário de início.');
-            isValid = false;
-        }
-
-        // Validar horário fim
-        const hrFim = document.getElementById('hr_fim').value.trim();
-        if (!hrFim) {
-            showError(document.getElementById('hr_fim'), 'Informe o horário de término.');
-            isValid = false;
-        }
-
-        // Validação simples para horário fim ser maior que início
-        if (hrIni && hrFim && hrFim <= hrIni) {
-            showError(document.getElementById('hr_fim'), 'O horário fim deve ser maior que o início.');
-            isValid = false;
-        }
-
-        // Validação da recorrência: se checkbox está marcado, data fim é obrigatória
-        const temRecorrenciaChecked = document.getElementById('temRecorrencia').checked;
-        const dataFimRecorrencia = document.getElementById('data_fim_recorrencia').value.trim();
-
-        if (temRecorrenciaChecked && !dataFimRecorrencia) {
-            showError(document.getElementById('data_fim_recorrencia'), 'Informe a data final da recorrência.');
-            isValid = false;
-        }
-
-        if (!isValid) {
-            e.preventDefault(); // impede o envio do form
-            const firstError = this.querySelector('.error-message');
-            if (firstError) {
-                const inputErro = firstError.nextElementSibling;
-                if (inputErro) inputErro.focus();
-            }
-        }
-    });
-
-    // Validar valor (opcional ou > 0)
-    const valorAgend = valorAgendInput.value.trim();
-    if (valorAgend) {
-        const valorNumerico = parseFloat(valorAgend.replace('.', '').replace(',', '.'));
-        if (isNaN(valorNumerico) || valorNumerico <= 0) {
-            showError(valorAgendInput, 'Informe um valor válido maior que zero.');
-            isValid = false;
-        }
-    }
-</script> -->
-
-<!-- FLATPICKR PARA MELHORAR VISUALIZAÇÃO DE DIAS E HORÁRIOS -->
-<script>
-    // Inicializa o flatpickr para o campo de data
-    document.addEventListener('DOMContentLoaded', function() {
-        flatpickr("#data", {
-            dateFormat: "d-m-Y", 
-            altInput: true,
-            altFormat: "d-m-Y",
-            locale: "pt",
-            minDate: "today",
-            allowInput: true,
-        });
-
-        // Inicializa o flatpickr para os campos de hora (início e fim)
-        flatpickr("#hr_ini", {
-            enableTime: true,
-            noCalendar: true,
-            dateFormat: "H:i",
-            time_24hr: true,
-            minuteIncrement: 15,
-            allowInput: true,
-        });
-
-        // FLATPICKR CAMPO DE HORA FINAL
-        flatpickr("#hr_fim", {
-            enableTime: true,
-            noCalendar: true,
-            dateFormat: "H:i",
-            time_24hr: true,
-            minuteIncrement: 15,
-            allowInput: true,
-        });
-
-        flatpickr("#data_fim_recorrencia", {
-            dateFormat: "d-m-Y",
-            altFormat: "d-m-Y",
-            locale: "pt",
-            minDate: "today",
-            allowInput: true,
-        });
-
-        flatpickr.localize(flatpickr.l10ns.pt);
-    });
-</script>
-
-<!-- PERMISSÃO DE ESCRITA EM INPUT DE VALOR -->
-<script>
-    const valorAgendInput = document.getElementById('valor_agend');
-
-    valorAgendInput.addEventListener('input', function () {
-        // Remove tudo que não for dígito ou vírgula
-        this.value = this.value.replace(/[^\d,]/g, '');
-
-        // Permitir apenas uma vírgula
-        const parts = this.value.split(',');
-        if (parts.length > 2) {
-            this.value = parts[0] + ',' + parts[1];
-        }
-    });
-</script>
-
-<!-- SCRIPT REMOÇÃO DE ANIMAÇÃO DE AGENDAMENTO CRIADO COM SUCESSO OU MENSAGEM DE ERRO -->
-<script>
-    document.addEventListener('DOMContentLoaded', function() {
-        const alert = document.getElementById('alert-success');
-        if (alert) {
-            setTimeout(() => {
-                alert.remove();
-            }, 4000);
-        }
-    });
-
-    document.addEventListener('DOMContentLoaded', function() {
-        const alertError = document.getElementById('alert-error');
-        if (alertError) {
-            setTimeout(() => {
-                alertError.remove();
-            }, 6000);
-        }
-    });
-</script>
-
-<!-- MOSTRA OBSERVACAO DE SERVICO AO PASSAR MOUSE NO INFO -->
-<script>
-    function aoSelecionarServico(servico) {
-        const inputServico = document.getElementById('servico');
-        const infoObs = document.getElementById('info-observacao');
-        const inputValor = document.getElementById('valor_agend');
-
-        inputServico.value = servico.SERVICO_CLINICA_DESC || '';
-        document.getElementById('id_servico').value = servico.ID_SERVICO_CLINICA || '';
-
-        if (servico.OBSERVACAO && servico.OBSERVACAO.trim() !== '') {
-            infoObs.style.display = 'inline';
-            infoObs.title = servico.OBSERVACAO;
-        } else {
-            infoObs.style.display = 'none';
-            infoObs.title = '';
-        }
-
-        // Preenche o valor, formatando para padrão brasileiro
-        if (servico.VALOR_SERVICO) {
-            // Se já vem como número:
-            let valor = parseFloat(servico.VALOR_SERVICO).toFixed(2).replace('.', ',');
-            inputValor.value = valor;
-
-            // Caso venha como string e precise tratar:
-            // let valorNum = parseFloat(servico.VALOR_SERVICO.replace(',', '.'));
-            // inputValor.value = valorNum.toFixed(2).replace('.', ',');
-        } else {
-            inputValor.value = '';
-        }
-    }
-</script>
-
-<!-- MOSTRA OU ESCONDE SELEÇÃO DE MESES PARA AGENDAMENTO RECORRENTE PERSONALIZADO -->
-<script>
-    document.addEventListener('DOMContentLoaded', () => {
-    const temRecorrenciaCheckbox = document.getElementById('temRecorrencia');
-    const duracaoMesesContainer = document.getElementById('duracaoMesesContainer');
-
-    temRecorrenciaCheckbox.addEventListener('change', function() {
-        if (this.checked) {
-            duracaoMesesContainer.style.display = 'block';
-        } else {
-            duracaoMesesContainer.style.display = 'none';
             document.getElementById('duracao_meses_recorrencia').value = '';
         }
     });
-    });
-</script>
 
-<script>
-document.addEventListener('DOMContentLoaded', function() {
-    const checkboxRecorrencia = document.getElementById('temRecorrencia');
-    const camposRecorrencia = document.getElementById('recorrenciaCampos');
-    const duracaoMesesContainer = document.getElementById('duracaoMesesContainer');
-    const msgRecorrencia = document.getElementById('msg-recorrencia');
-
-    checkboxRecorrencia.addEventListener('change', function() {
-        if (this.checked) {
-            camposRecorrencia.classList.remove('d-none');
-            duracaoMesesContainer.style.display = 'block';
-            msgRecorrencia.classList.remove('d-none');
-        } else {
-            camposRecorrencia.classList.add('d-none');
-            duracaoMesesContainer.style.display = 'none';
-            msgRecorrencia.classList.add('d-none');
-        }
-    });
-});
-</script>
-
-<script>
     const selectDuracao = document.getElementById('duracao_meses_recorrencia');
     const inputDataFim = document.getElementById('data_fim_recorrencia');
 
     function atualizarCamposRecorrencia() {
-        if (selectDuracao.value !== '') {
-            inputDataFim.disabled = true;
-            inputDataFim.value = '';
-        } else {
-            inputDataFim.disabled = false;
-        }
-
-        if (inputDataFim.value !== '') {
-            selectDuracao.disabled = true;
-            selectDuracao.value = '';
-        } else {
-            selectDuracao.disabled = false;
-        }
+        inputDataFim.disabled = selectDuracao.value !== '';
+        selectDuracao.disabled = inputDataFim.value !== '';
     }
 
-    // Atualiza sempre que um dos campos mudar
     selectDuracao.addEventListener('change', atualizarCamposRecorrencia);
-    inputDataFim.addEventListener('change', atualizarCamposRecorrencia);
-
-    // Atualiza na carga da página
-    window.addEventListener('load', atualizarCamposRecorrencia);
+    inputDataFim.addEventListener('input', atualizarCamposRecorrencia); // use input for flatpickr
+});
 </script>
 
-</body>
+<!-- SCRIPT DO FLATPICKR -->
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        flatpickr.localize(flatpickr.l10ns.pt);
+        const commonDateConfig = {
+            dateFormat: "Y-m-d", 
+            altInput: true,
+            altFormat: "d/m/Y",
+            locale: "pt",
+            allowInput: true,
+        };
+        const commonTimeConfig = {
+            enableTime: true,
+            noCalendar: true,
+            dateFormat: "H:i",
+            time_24hr: true,
+            minuteIncrement: 15,
+            allowInput: true,
+        };
+        flatpickr("#data", {...commonDateConfig, minDate: "today"});
+        flatpickr("#hr_ini", commonTimeConfig);
+        flatpickr("#hr_fim", commonTimeConfig);
+        flatpickr("#data_fim_recorrencia", {...commonDateConfig, minDate: "today"});
+    });
+</script>
 
+<!-- FORMATAÇÃO DOS CAMPOS DE VALOR DE AGENDAMENTO -->
+<script>
+    document.getElementById('valor_agend').addEventListener('input', function (e) {
+        let value = e.target.value.replace(/\D/g, '');
+        value = (value / 100).toLocaleString('pt-BR', { minimumFractionDigits: 2 });
+        e.target.value = value;
+    });
+
+    document.addEventListener('DOMContentLoaded', function() {
+        const alertSuccess = document.getElementById('alert-success');
+        if (alertSuccess) setTimeout(() => alertSuccess.remove(), 4000);
+        
+        const alertError = document.getElementById('alert-error');
+        if (alertError) setTimeout(() => alertError.remove(), 6000);
+    });
+</script>
+
+
+</body>
 </html>

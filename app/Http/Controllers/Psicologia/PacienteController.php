@@ -21,7 +21,6 @@ class PacienteController extends Controller
     // CRIA PACIENTE
     public function createPaciente(Request $request)
     {
-
         $validatedData = $request->validate([
             'NOME_COMPL_PACIENTE' => 'required|string|max:255',
             'DT_NASC_PACIENTE' => 'nullable|date',
@@ -32,7 +31,7 @@ class PacienteController extends Controller
             'END_NUM' => 'required|string',
             'COMPLEMENTO' => 'nullable|string|max:255',
             'BAIRRO' => 'required|string',
-            'municipio' => 'required|string|max:255',
+            'MUNICIPIO' => 'required|string|max:255',
             'UF' => 'required|string|max:2',
             'E_MAIL_PACIENTE' => 'nullable|email|max:255',
             'FONE_PACIENTE' => 'required|string|max:20|regex:/^\(?\d{2}\)?\s?\d{4,5}-?\d{4}$/',
@@ -40,7 +39,7 @@ class PacienteController extends Controller
             'STATUS' => 'required|string|max:50|in:Em espera',
             'NOME_RESPONSAVEL' => 'nullable|string|max:255',
             'CPF_RESPONSAVEL' => 'nullable|string|max:14|regex:/^\d{3}\.?\d{3}\.?\d{3}-?\d{2}$/',
-            'COD_SUS' => 'nullable|string|max:15',
+            'COD_SUS' => 'nullable|string',
         ], [
             'NOME_COMPL_PACIENTE.required' => 'O nome completo do paciente é obrigatório.',
             'NOME_COMPL_PACIENTE.max' => 'O nome completo não pode passar de 255 caracteres.',
@@ -65,8 +64,8 @@ class PacienteController extends Controller
 
             'BAIRRO.required' => 'O bairro é obrigatório.',
 
-            'municipio.required' => 'O município é obrigatório.',
-            'municipio.max' => 'O município não pode ter mais que 255 caracteres.',
+            'MUNICIPIO.required' => 'O município é obrigatório.',
+            'MUNICIPIO.max' => 'O município não pode ter mais que 255 caracteres.',
 
             'UF.required' => 'O estado (UF) é obrigatório.',
             'UF.max' => 'A UF deve conter 2 caracteres.',
@@ -85,11 +84,11 @@ class PacienteController extends Controller
             'NOME_RESPONSAVEL.max' => 'O nome do responsável não pode ter mais que 255 caracteres.',
 
             'CPF_RESPONSAVEL.regex' => 'O CPF do responsável não está em um formato válido.',
-
-            'COD_SUS.max' => 'O código SUS não pode ter mais que 15 caracteres.',
         ]);
 
+        // FORMATA CPF PARA ENVIAR APENAS NÚMEROS PARA SEREM SALVOS NO BANCO
         $validatedData['CPF_PACIENTE'] = str_replace(['-', '.'], '', $validatedData['CPF_PACIENTE']);
+        $validatedData['FONE_PACIENTE'] = str_replace(['(', ')', '-', ' '], '', $validatedData['FONE_PACIENTE']);
 
         $created = $this->pacienteService->createPaciente($validatedData);
 
@@ -120,6 +119,19 @@ class PacienteController extends Controller
         return response()->json($pacientes);
     }
 
+    public function getPacienteByNameCpf(Request $request)
+    {
+        $pacientes = $this->pacienteService->filtrarPacientesByNameOrCpf($request->only('search'));
+        return response()->json($pacientes);
+    }
+
+    public function getPacienteByNameCPFPsicologo(Request $request)
+    {        
+        $pacientes = $this->pacienteService->filtrarPacientesByNameOrCpfPsicologo($request);
+
+        return response()->json($pacientes);
+    }
+
     // EDITA PACIENTE
     public function editarPaciente(Request $request, $id)
     {
@@ -137,7 +149,7 @@ class PacienteController extends Controller
             'cep'        => 'nullable|string|max:20',
             'celular'    => 'nullable|string|max:20',
             'email'      => 'nullable|email|max:255',
-            'municipio'  => 'nullable|string|max:255',
+            'MUNICIPIO'  => 'nullable|string|max:255',
         ]);
 
         try {
@@ -155,7 +167,7 @@ class PacienteController extends Controller
             $paciente->CEP = $validatedData['cep'] ?? $paciente->CEP;
             $paciente->FONE_PACIENTE = $validatedData['celular'] ?? $paciente->FONE_PACIENTE;
             $paciente->E_MAIL_PACIENTE = $validatedData['email'] ?? $paciente->E_MAIL_PACIENTE;
-            $paciente->MUNICIPIO = $validatedData['municipio'] ?? $paciente->MUNICIPIO;
+            $paciente->MUNICIPIO = $validatedData['MUNICIPIO'] ?? $paciente->MUNICIPIO;
 
             $paciente->save();
 

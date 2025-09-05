@@ -4,60 +4,63 @@ namespace App\Http\Middleware;
 
 use Closure;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Http;
 
-class AuthPsicologoMiddleware
+class AuthProfessorMiddleware
 {
     public function handle(Request $request, Closure $next)
     {
         $routeName = $request->route()->getName();
 
-        $rotasLiberadas = ['psicologoLoginGet', 'psicologoLoginPost', 'psicologoLogout'];
+        // ROTAS QUE NAO PRECISA ESTAR LOGADO
+        $rotasLiberadas = ['professorLoginGet', 'professorLoginPost', 'professorLogout'];
 
-        // CASO JÁ TENHA SESSÃO, REDIRECIONA PARA MENU
-        if (session()->has('psicologo')) {
+        // SE A SESSAO JA EXISTIR, PASSA PARA A PROXIMA TELA
+        if (session()->has('professor')) {
             return $next($request);
         }
 
-        // SE A ROTA FOR DE POST
-        if ($routeName === 'psicologoLoginPost') {
-
-            // ARMAZENA CREDENCIAIS
+        // SE A ROTA FOR DE POST, PEGA AS CREDENCIAIS
+        if ($routeName === 'professorLoginPost') {
             $credentials = [
                 'username' => $request->input('login'),
                 'password' => $request->input('senha'),
             ];
 
-            // ARMAZENA RESPOSTA DA API
             $response = $this->getApiData($credentials);
 
             if ($response['success']) {
-                $validacao = $this->validarPsicologo($credentials);
+                // SE A RESPOSTA FOR SUCESSO, ELE CHAMA A FUNCAO PARA VALIDAR O PROFESSOR
+                $validacao = $this->validarProfessor($credentials);
 
+                // SE NAO EXISTIR VALIDACAO, O PROFESSOR NAO TEM ACESSO
                 if (!$validacao) {
-                    return redirect()->back()->with('error', "Aluno sem permissão de acesso");
+                    return redirect()->back()->with('error', "Professor sem permissão de acesso");                    
                 }
 
-                // SALVA O PSICÓLOGO NA SESSÃO NA CHAVE 'psicologo'
-                session(['psicologo' => $validacao]);
-
+                // RETORNA A SESSAO DO PROFESSOR
+                session(['professor' => $validacao]);
                 return $next($request);
             }
 
             session()->flush();
-            return redirect()->route('psicologoLoginGet')->with('error', "Credenciais Inválidas");
+            return redirect()->route('professorLoginGet')->with('error', "Credenciais Inválidas");
         }
 
+        // VERIFICA SE A ROTA E UMAS DAS ROTAS LIBERADAS
         if (!in_array($routeName, $rotasLiberadas)) {
-            if (!session()->has('psicologo')) {
-                return redirect()->route('psicologoLoginGet');
+            //dd(session()->all());
+            if (!session()->has('professor')) {
+                return redirect()->route('professorLoginGet');
             }
         }
 
         return $next($request);
+
     }
 
+    //FUNCAO QUE PEGA OS DADOS DA API
     public function getApiData(array $credentials)
     {
         $apiUrl = config('services.faesa.api_psicologos_url');
@@ -89,41 +92,43 @@ class AuthPsicologoMiddleware
         }
     }
 
-    // VALIDA USUÁRIO PSICÓLOGO
-    public function validarPsicologo(array $credentials)
+    //FUNCAO QUE VALIDA O PROFESSOR
+    public function validarProfessor(array $credentials)
     {
         $usuario = $credentials['username'];
         $retorno[0] = $usuario;
+
+        $anoSemestreLetivo = DB::table('LYCEUM_BKP_PRODUCAO.dbo.LY_OPCOES as o')
+        ->where('o.CHAVE', 4)
+        ->select('o.ANO_LETIVO', 'o.SEM_LETIVO')
+        ->first();
 
         // BUSCA CPF DO USUÁRIO COM CÓD. DE USUÁRIO
         $cpf = DB::table('LYCEUM_BKP_PRODUCAO.dbo.LY_PESSOA as p')
         ->where('p.WINUSUARIO', 'FAESA\\' . $usuario)
         ->value('CPF');
 
-        // VERIFICA SE É ALUNO
-        $aluno = DB::table('LYCEUM_BKP_PRODUCAO.dbo.LY_ALUNO as a')
-        ->join('LYCEUM_BKP_PRODUCAO.dbo.LY_PESSOA as p', 'p.NOME_COMPL', '=', 'a.NOME_COMPL')
-        ->where('p.CPF', $cpf)
-        ->where('a.SIT_ALUNO', 'Ativo')
-        ->select('a.ALUNO', 'p.NOME_COMPL', 'p.E_MAIL_COM', 'p.CELULAR')
+        $docente = DB::table('LYCEUM_BKP_PRODUCAO.dbo.LY_DOCENTE as d')
+        ->where('d.CPF', $cpf)
         ->first();
 
-        if($aluno) {
+        if($docente) {
             // $disciplinas = $this->buscarDisciplinasClinica();
             $disciplinas = ['D009373', 'D009376', 'D009381', 'D009385', 'D009393', 'D009403', 'D009402', 'D009406', 'D009404'];
-            $matricula = DB::table('LYCEUM_BKP_PRODUCAO.dbo.LY_MATRICULA as m')
-            ->where('m.ALUNO', $aluno->ALUNO)
-            ->whereIn('m.DISCIPLINA', $disciplinas)
+            $vinculos = DB::table('LYCEUM_BKP_PRODUCAO.dbo.LY_TURMA as t')
+            ->where('t.NUM_FUNC', $docente->NUM_FUNC)
+            ->whereIn('t.DISCIPLINA', $disciplinas)
+            ->where('t.ANO', $anoSemestreLetivo->ANO_LETIVO)
+            ->where('t.SEMESTRE', $anoSemestreLetivo->SEM_LETIVO)
             ->get();
 
-            if(!$matricula->isEmpty()) {
 
-                $retorno[] = $aluno->ALUNO;
-                $retorno[] = $aluno->NOME_COMPL;
-                $retorno[] = $aluno->E_MAIL_COM;
-                $retorno[] = $aluno->CELULAR;
+            if(!$vinculos->isEmpty()) {
+                $retorno[] = $docente->NUM_FUNC;
+                $retorno[] = $docente->NOME_COMPL;
+                $retorno[] = $docente->CPF;
 
-                $retorno[] = ($matricula->map(function($item) {
+                $retorno[] = ($vinculos->map(function($item) {
                     return [
                         'DISCIPLINA' => $item->DISCIPLINA,
                         'TURMA' => $item->TURMA,
@@ -134,6 +139,7 @@ class AuthPsicologoMiddleware
             } else {
                 return null;
             }
+
         } else {
             return null;
         }

@@ -5,6 +5,9 @@ namespace App\Http\Controllers\Psicologia;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\FaesaClinicaServico;
+use Illuminate\Support\Facades\DB;
+
+use function Laravel\Prompts\search;
 
 class ServicoController extends Controller
 {
@@ -34,6 +37,9 @@ class ServicoController extends Controller
             'VALOR_SERVICO' => 'nullable|numeric',
             'OBSERVACAO' => 'nullable|string|max:500',
             'TEMPO_RECORRENCIA_MESES' => 'nullable|integer|min:0',
+        ], [
+            'SERVICO_CLINICA_DESC.required' => 'Informe o nome do Serviço antes de prosseguir',
+            'COD_INTERNO_SERVICO_CLINICA' => 'O Código Interno deve ser um número, não pode conter letras',
         ]);
 
         // Verificação de duplicidade por nome
@@ -75,6 +81,10 @@ class ServicoController extends Controller
 
         if ($search) {
             $query->where('SERVICO_CLINICA_DESC', 'LIKE', "%{$search}%");
+
+            if (is_numeric($search)) {
+                $query->orWhere('ID_SERVICO_CLINICA', $search);
+            }
         }
 
         $servicos = $query->orderBy('ID_SERVICO_CLINICA', 'desc')->get();
@@ -89,6 +99,26 @@ class ServicoController extends Controller
 
         return response()->json($servicos);
     }
+
+    public function getDisciplinaServico(Request $request)
+    {
+        $matriculasPsicologo = array_column(session('psicologo')[5], 'DISCIPLINA');
+
+        $search = trim($request->query('search', ''));
+
+        $query = FaesaClinicaServico::where('ID_CLINICA', 1)->whereIn('DISCIPLINA', $matriculasPsicologo);
+
+        if ($search) {
+            $query->where(function($q) use ($search) {
+                $q->where('DISCIPLINA', 'LIKE', "%{$search}%")
+                ->orWhere('SERVICO_CLINICA_DESC', 'LIKE', "%{$search}%");
+            });
+        }
+
+        $servicos = $query->orderBy('ID_SERVICO_CLINICA', 'desc')->get();
+
+        return $servicos;
+    } 
 
     // RETORNA SERVIÇO PELO NOME
     public function getServicoByName(string|null $request)
@@ -138,6 +168,7 @@ class ServicoController extends Controller
         $validated = $request->validate([
             'SERVICO_CLINICA_DESC' => 'required|string|max:255',
             'COD_INTERNO_SERVICO_CLINICA' => 'nullable|integer|min:0',
+            'DISCIPLINA' => 'nullable|string|max:50',
             'VALOR_SERVICO' => 'nullable',
             'OBSERVACAO' => 'nullable|max:500',
             'TEMPO_RECORRENCIA_MESES' => 'nullable|integer|min:0',
@@ -188,7 +219,6 @@ class ServicoController extends Controller
         if (!isset($validated['PERMITE_ATENDIMENTO_SIMULTANEO'])) {
             $validated['PERMITE_ATENDIMENTO_SIMULTANEO'] = 'N';
         }
-
         $servico->update($validated);
 
         return response()->json(['message' => 'Serviço atualizado com sucesso']);
@@ -203,7 +233,7 @@ class ServicoController extends Controller
             return response()->json(['message' => 'Serviço não encontrado.'], 404);
         }
 
-        $temAgendamentos = \DB::table('FAESA_CLINICA_AGENDAMENTO')
+        $temAgendamentos = DB::table('FAESA_CLINICA_AGENDAMENTO')
             ->where('ID_SERVICO', $id)
             ->exists();
 

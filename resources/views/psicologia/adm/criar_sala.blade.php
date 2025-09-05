@@ -4,427 +4,372 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Cadastro de Serviço</title>
+    <title>Cadastro de Sala</title>
 
-    <!-- FAVICON - IMAGEM DA GUIA -->
     <link rel="icon" type="image/png" href="/favicon_faesa.png">
     
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700&display=swap" rel="stylesheet" />
     <link href="https://cdnjs.cloudflare.com/ajax/libs/mdb-ui-kit/7.1.0/mdb.min.css" rel="stylesheet" />
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    
     <meta name="csrf-token" content="{{ csrf_token() }}">
 
+    <!-- TOM SELECT -->
+    <link href="https://cdn.jsdelivr.net/npm/tom-select@2.3.1/dist/css/tom-select.bootstrap5.min.css" rel="stylesheet">
+
     <style>
-        html, body {
-            height: 100%;
-            margin: 0;
+        body {
             font-family: "Montserrat", sans-serif;
-            background-color: #f8f9fa;
         }
-        #content-wrapper {
-            width: 80vw;
-            height: 90vh;
-            margin: auto;
-            margin-top: 10px;
-            margin-bottom: 10px;
-            display: flex;
-            gap: 12px;
-            overflow: hidden;
-            align-items: stretch;
-            flex-direction: row; /* mantém lado a lado em telas grandes */
+        .shadow-dark {
+            box-shadow: 0 0.75rem 1.25rem rgba(0,0,0,0.4) !important;
         }
-
-        main {
-            background-color: #ffffff;
-            padding: 24px;
-            border-radius: 10px;
-            width: 50%;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
-            display: flex;
-            flex-direction: column;
-            overflow: hidden;
-            border: 1.8px solid #dee2e6;
+        @keyframes slideDownFadeOut {
+            0%   { transform: translate(-50%, -100%); opacity: 0; }
+            10%  { transform: translate(-50%, 0); opacity: 1; }
+            90%  { transform: translate(-50%, 0); opacity: 1; }
+            100% { transform: translate(-50%, -100%); opacity: 0; }
         }
-
-        /* Para telas menores que 992px */
-        @media (max-width: 991.98px) {
-            #content-wrapper {
-                flex-direction: column; /* empilha os main */
-            }
-
-            main {
-                width: 100%; /* ocupa toda a largura */
-                height: calc(50% - 12px); /* divide igualmente a altura considerando o gap */
-            }
+        .animate-alert {
+            animation: slideDownFadeOut 5s ease forwards;
+            z-index: 1050;
         }
-        form {
-            flex-grow: 1;
-            overflow-y: auto;
-        }
-        h2 {
-            font-size: 24px;
-            color: #333;
-            margin-bottom: 16px;
-        }
-        h5 {
-            margin-bottom: 12px;
-            font-weight: 600;
-        }
-        #salvar {
-            background-color: #007bff;
-            color: #fff;
-            border: none;
-            padding: 10px 20px;
-            font-size: 14px;
-            border-radius: 6px;
-            cursor: pointer;
-            transition: background-color 0.3s ease, box-shadow 0.3s ease;
-        }
-        #salvar:hover {
-            background-color: #0056b3;
-            box-shadow: 0 0.5rem 1rem rgba(0,0,0,0.15);
-        }
-        #servicos-lista {
-            flex-grow: 1;
-            overflow-y: auto;
-            max-height: 100%;
-        }
-
-        /* Estilo atualizado para a tabela ficar com linhas tipo card */
-        table {
-            border-collapse: separate;
-            border-spacing: 0 12px; /* espaço vertical entre as linhas */
-            width: 100%;
-        }
-        thead tr th:first-child {
-            border-top-left-radius: 12px;
-            border-bottom-left-radius: 12px;
-        }
-        thead tr th:last-child {
-            border-top-right-radius: 12px;
-            border-bottom-right-radius: 12px;
-        }
-        tbody tr {
-            background: #fff;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.06);
-            border-radius: 12px;
-            transition: box-shadow 0.3s ease;
-        }
-        tbody tr:hover {
-            box-shadow: 0 6px 16px rgba(0,0,0,0.12);
-        }
-        tbody tr td:first-child {
-            border-top-left-radius: 12px;
-            border-bottom-left-radius: 12px;
-        }
-        tbody tr td:last-child {
-            border-top-right-radius: 12px;
-            border-bottom-right-radius: 12px;
-        }
-
-        @media (max-width: 768px) {
-            #content-wrapper {
-                flex-direction: column;
-                width: 95vw;
-                height: auto;
-            }
-            main {
-                width: 100%;
-            }
-        }
-        /* ALERT FIXO NO TOPO */
-        #alert-container {
-            position: fixed;
-            top: 20px;
-            left: 50%;
-            transform: translateX(-50%);
-            z-index: 1055;
-            width: auto;
-            max-width: 90%;
-            pointer-events: none;
+        .modal-body {
+           max-height: 75vh;
+           overflow-y: auto;
         }
     </style>
 </head>
 
-<body>
-@include('components.navbar')
+<body class="bg-body-secondary">
 
-<div id="alert-container"></div>
+    <!-- NAVBAR COMPONENT -->
+    @include('components.navbar')
 
-<div id="content-wrapper">
-    <main>
-        <div class="text-center">
-            <h2>Cadastro de Sala</h2>
-        </div>
-
-        @if ($errors->any())
-        <script>
-            document.addEventListener('DOMContentLoaded', () => {
-                @foreach ($errors->all() as $erro)
-                    showAlert("{{ $erro }}", 'danger');
+    @if($errors->any())
+        <div class="alert alert-danger shadow text-center position-fixed top-0 start-50 translate-middle-x mt-3 animate-alert" style="max-width: 90%;">
+            <strong>Ops!</strong> Corrija os itens abaixo:
+            <ul class="mb-0 mt-1 list-unstyled">
+                @foreach($errors->all() as $error)
+                    <li><i class="bi bi-exclamation-circle-fill me-1"></i> {{ $error }}</li>
                 @endforeach
-            });
-        </script>
+            </ul>
+        </div>
     @endif
 
-
-        @if(session('success'))
-            <script>
-                document.addEventListener('DOMContentLoaded', () => {
-                    showAlert("{{ session('success') }}", 'success');
-                });
-            </script>
-        @endif
-
-        <!-- FORMULÁRIO DE CRIAÇÃO DE SALA -->
-        <form class="needs-validation" action="{{ route('criarSala-Psicologia') }}" method="POST" novalidate>
-
-            @csrf
-
-            <!-- ID DA CLINICA - NO CASO PSICOLOGIA -->
-            <input type="hidden" name="ID_CLINICA" value="1">
-
-            <!-- TÍTULO -->
-            <h5 class="mt-3">Dados da Sala</h5>
-
-            <hr>
-
-            <!-- NOME DA SALA -->
-            <div class="mb-3">
-                <label for="nome-sala" class="form-label text-muted" style="font-size: 14px;">
-                    Descrição da Sala
-                </label>
-                <input type="text"
-                       id="nome-sala"
-                       name="DESCRICAO"
-                       class="form-control"
-                       value="{{ old('DESCRICAO') }}"
-                       required>
-            </div>
-
-            <!-- BOTÃO DE SALVAR | SUBMIT -->
-            <div class="text-end">
-                <button id="salvar" type="submit">Salvar</button>
-            </div>
-            
-        </form>
-    </main>
-
-    <main style="overflow-y:auto; max-height: 90vh;">
-
-        <!-- TITULO LISTAGEM DE SALAS -->
-        <h2 class="text-center mb-4">Consulta e Edição de Salas</h2>
-
-        <!-- INPUT DE BUSCA -->
-        <input type="text" id="search-sala" class="form-control mb-3" placeholder="Buscar sala por nome..." />
-
-        <!-- LISTAGEM DE SALAS -->
-        <div id="salas-lista" style="max-height: 65vh; overflow-y:auto;">
-            <table class="table table-striped table-hover">
-                <thead>
-                <tr>
-                    <th>Descrição</th>
-                    <th>Status</th>
-                </tr>
-                </thead>
-                <tbody id="salas-tbody">
-                <tr><td colspan="5" class="text-center">Carregando...</td></tr>
-                </tbody>
-            </table>
+    @if(session('success'))
+        <div class="alert alert-success text-center shadow position-fixed top-0 start-50 translate-middle-x mt-3 animate-alert">
+            {{ session('success') }}
         </div>
+    @endif
+    
+    <div id="modal-alert-container" class="position-fixed top-0 start-50 translate-middle-x p-3" style="z-index: 1056;"></div>
 
-        <!-- MODAL DE EDIÇÃO DE SALA -->
-        <div class="modal fade" id="editarSalaModal" tabindex="-1" aria-hidden="true">
-        <div class="modal-dialog">
-                <div class="modal-content">
-                    <div id="modal-alert-container"></div>
-                    <form id="form-editar-sala">
-
-                        <!-- HEADER DO MODAL -->
-                        <div class="modal-header">
-                            <h5 class="modal-title">Editar Sala</h5>
-                            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+    <div class="container ms-3 mw-100">
+        <div class="row">
+             <x-page-title>
+            </x-page-title>
+            <div class="col-12 shadow-lg shadow-dark p-4 bg-body-tertiary rounded">
+                
+                <form class="needs-validation" action="{{ route('criarSala-Psicologia') }}" method="POST" novalidate>
+                    @csrf
+                    <input type="hidden" name="ID_CLINICA" value="1">
+                    
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <label for="nome-sala" class="form-label">Descrição da Sala</label>
+                            <input type="text" id="nome-sala" name="DESCRICAO" class="form-control" value="{{ old('DESCRICAO') }}" required>
                         </div>
-
-                        <!-- CORPO DO MODAL -->
-                        <div class="modal-body">
-
-                            <input type="hidden" id="edit-sala-id" name="ID_SALA_CLINICA" />
-
-                            <!-- EDIÇÃO DE DESCRIÇÃO DA SALA -->
-                            <div class="mb-3">
-                                <label class="form-label">Descrição</label>
-                                <input type="text" id="edit-sala-desc" name="DESCRICAO" class="form-control" required />
-                            </div>
-                            
-                            <!-- EDIÇÃO DE STATUS DA SALA -->
-                            <div>
-                                <label class="form-label">Status</label>
-                                <select id="edit-sala-status" name="ATIVO" class="form-select" required>
-                                    <option value="S">Ativo</option>
-                                    <option value="N">Inativo</option>
-                                </select>
-                            </div>
+                        <div class="col-md-6">
+                            <label for="disciplina-sala" class="form-label">Disciplina</label>
+                            <select name="DISCIPLINA" id="disciplina-sala" class="form-select">
+                                <option value="" selected>Carregando...</option>
+                            </select>
                         </div>
-
-                        <!-- RODAÉ DO MODAL -->
-                        <div class="modal-footer d-flex justify-content-between">
-                            <button type="button" class="btn btn-danger" id="btn-deletar-sala">Excluir</button>
-                            <div>
-                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-                                <button type="submit" class="btn btn-primary">Salvar Alterações</button>
-                            </div>
+                        <div class="col-12 text-end">
+                            <button class="btn btn-primary" type="submit"><i class="bi bi-check-circle me-2"></i>Salvar Sala</button>
                         </div>
+                    </div>
+                </form>
 
-                    </form>
+                <hr class="my-4">
+
+                <div class="text-center mb-4">
+                    <h2 class="fs-4 mb-0">Consulta e Edição de Salas</h2>
+                </div>
+                <div class="mb-3">
+                    <input type="search" id="search-sala" class="form-control" placeholder="Buscar sala por nome..." />
+                </div>
+                <div class="table-responsive border rounded" style="max-height: 50vh; overflow-y: auto;">
+                    <table class="table table-hover table-bordered align-middle mb-0">
+                        <thead class="table-light" style="position: sticky; top: 0; z-index: 1;">
+                            <tr>
+                                <th>Descrição</th>
+                                <th>Disciplina</th>
+                                <th>Status</th>
+                                <th>Ações</th>
+                            </tr>
+                        </thead>
+                        <tbody id="salas-tbody">
+                            <tr><td colspan="4" class="text-center">Carregando...</td></tr>
+                        </tbody>
+                    </table>
                 </div>
             </div>
         </div>
-    </main>
-</div>
-
-
-<script src="https://cdnjs.cloudflare.com/ajax/libs/mdb-ui-kit/7.1.0/mdb.min.js"></script>
-
-
-<script>
-
-    // FUNÇÃO PARA EXIBIR ALERTAS
-    function showAlert(message, type = 'success') {
-        const alertContainer = document.getElementById('alert-container');
-        const alert = document.createElement('div');
-        alert.className = `alert alert-${type} alert-dismissible fade show mt-2`;
-        alert.role = 'alert';
-        alert.style.pointerEvents = 'auto';
-        alert.innerHTML = `
-            ${message}
-            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-        `;
-
-        alertContainer.appendChild(alert);
-
-        setTimeout(() => {
-            alert.classList.remove('show');
-            alert.classList.add('hide');
-            setTimeout(() => alert.remove(), 300);
-        }, 4000);
-    }
-
-    function showModalAlert(message, type = 'danger') {
-        const modalAlertContainer = document.getElementById('modal-alert-container');
-        modalAlertContainer.innerHTML = `
-            <div class="alert alert-${type} alert-dismissible fade show m-3 mb-0">
-                ${message}
-                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+    
+    <div class="modal fade" id="editarSalaModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <form id="form-editar-sala" novalidate>
+                    <div class="modal-header">
+                        <h5 class="modal-title">Editar Sala</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                    </div>
+                    <div class="modal-body">
+                        <input type="hidden" id="edit-sala-id" name="ID_SALA_CLINICA" />
+                        <div class="mb-3">
+                            <label class="form-label">Descrição</label>
+                            <input type="text" id="edit-sala-desc" name="DESCRICAO" class="form-control" required />
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Disciplina</label>
+                            <select name="DISCIPLINA" id="edit-sala-disc" class="form-select"></select>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Status</label>
+                            <select id="edit-sala-status" name="ATIVO" class="form-select" required>
+                                <option value="S">Ativo</option>
+                                <option value="N">Inativo</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="modal-footer d-flex justify-content-between">
+                        <button type="button" class="btn btn-danger" id="btn-deletar-sala"><i class="bi bi-trash"></i> Excluir</button>
+                        <div>
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                            <button type="submit" class="btn btn-primary">Salvar Alterações</button>
+                        </div>
+                    </div>
+                </form>
             </div>
-        `;
-    }
+        </div>
+    </div>
 
-    document.addEventListener('DOMContentLoaded', () => {
+    <!-- TOM SELECT -->
+    <script src="https://cdn.jsdelivr.net/npm/tom-select@2.3.1/dist/js/tom-select.complete.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/mdb-ui-kit/7.1.0/mdb.min.js"></script>
 
-        // === VARIÁVEIS GLOBAIS ===
-        const salasTBody = document.getElementById('salas-tbody');
-        const searchInput = document.getElementById('search-sala');
-        const editarSalaModal = new bootstrap.Modal(document.getElementById('editarSalaModal'));
-        const formEditarSala = document.getElementById('form-editar-sala');
+    <script>
+        // === FUNÇÕES ===
+        function showModalAlert(message, type = 'danger') {
+            const container = document.getElementById('modal-alert-container');
+            const alert = document.createElement('div');
+            alert.className = `alert alert-${type} alert-dismissible fade show m-3`;
+            alert.innerHTML = `${message} <button type="button" class="btn-close" data-bs-dismiss="alert"></button>`;
+            container.innerHTML = '';
+            container.appendChild(alert);
+            setTimeout(() => alert.classList.remove('show'), 4000);
+        }
 
-        // === FUNÇÃO PARA CARREGAR SALAS ===
-        function carregarSalas(search = '') {
-                fetch(`/psicologia/salas/listar?search=${encodeURIComponent(search)}`)
-                .then(response => response.json())
-                .then(salas => {
-                    salasTBody.innerHTML = '';
+        window.addEventListener('DOMContentLoaded', () => {
+            // === CONSTANTES E VARIÁVEIS GLOBAIS ===
+            const salasTbody = document.getElementById('salas-tbody');
+            const searchInput = document.getElementById('search-sala');
+            const formEditarSala = document.getElementById('form-editar-sala');
+            const editarSalaModalEl = document.getElementById('editarSalaModal');
+            const editarSalaModal = new bootstrap.Modal(editarSalaModalEl);
+            const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+            let disciplinasCache = null;
 
-                    // NENHUMA SALA ENCONTRADA
+            // === INSTANCIA DO TOM SELECT ===
+            let tomSelectInstances = {};
+
+            // === FUNÇÕES AUXILIARES ===
+            async function carregarDisciplinas(selectElement, valorSelecionado = null) {
+                // Pega o ID do elemento para usar como chave da instância
+                const selectId = selectElement.id;
+
+                if (!disciplinasCache) {
+                    try {
+                        const response = await fetch('/psicologia/disciplinas-psicologia');
+                        if (!response.ok) throw new Error('Erro ao buscar disciplinas');
+                        disciplinasCache = await response.json();
+                    } catch (error) {
+                        console.error(error);
+                        selectElement.innerHTML = '<option value="">Erro ao carregar</option>';
+                        return;
+                    }
+                }
+                
+                // Verifica se já existe uma instância do Tom Select para este elemento
+                let tomSelect = tomSelectInstances[selectId];
+
+                if (tomSelect) {
+                    // Se já existe, limpa as opções e o valor atual
+                    tomSelect.clear();
+                    tomSelect.clearOptions();
+                }
+
+                // Adiciona as opções formatadas para o Tom Select
+                const options = disciplinasCache.map(d => ({
+                    value: d.DISCIPLINA,
+                    text: `${d.DISCIPLINA} - ${d.NOME}`
+                }));
+                
+                if (!tomSelect) {
+                    // Se não existe, cria uma nova instância do Tom Select
+                    tomSelect = new TomSelect(selectElement, {
+                        options: options,
+                        placeholder: 'Selecione ou pesquise...',
+                        create: false,
+                        sortField: {
+                            field: "text",
+                            direction: "asc"
+                        }
+                    });
+                    tomSelectInstances[selectId] = tomSelect;
+                } else {
+                    // Se a instância já existia, apenas adiciona as novas opções
+                    tomSelect.addOptions(options);
+                }
+                
+                // Define o valor selecionado, se houver
+                if (valorSelecionado) {
+                    tomSelect.setValue(valorSelecionado);
+                }
+            }
+
+            function ativarEventosTabela() {
+                document.querySelectorAll('.btn-editar').forEach(btn => {
+                    btn.addEventListener('click', async () => {
+                        const sala = JSON.parse(btn.dataset.sala);
+                        
+                        formEditarSala.querySelector('#edit-sala-id').value = sala.ID_SALA_CLINICA;
+                        formEditarSala.querySelector('#edit-sala-desc').value = sala.DESCRICAO;
+                        formEditarSala.querySelector('#edit-sala-status').value = sala.ATIVO;
+
+                        const selectDisc = formEditarSala.querySelector('#edit-sala-disc');
+                        await carregarDisciplinas(selectDisc, sala.DISCIPLINA);
+                        
+                        editarSalaModal.show();
+                    });
+                });
+            }
+
+            async function carregarSalas(search = ''){
+                salasTbody.innerHTML = `<tr><td colspan="4" class="text-center">Carregando...</td></tr>`;
+
+                try {
+                    const response = await fetch(`/psicologia/salas/listar?search=${encodeURIComponent(search)}`);
+                    const salas = await response.json();
+
                     if (salas.length === 0) {
-                        salasTBody.innerHTML = `
-                            <tr>
-                                <td colspan="3" class="text-center">Nenhuma sala encontrada</td>
-                            </tr>
-                        `;
+                        salasTbody.innerHTML = `<tr><td colspan="4" class="text-center">Nenhuma sala encontrada.</td></tr>`;
                         return;
                     }
 
-                    // CASO ENCONTRE SALAS
-                    salas.forEach(sala => {
+                    salasTbody.innerHTML = '';
+                    salas.forEach((s, index) => {
+                        const statusBadge = s.ATIVO === 'S' 
+                            ? `<span class="badge bg-success">Ativo</span>` 
+                            : `<span class="badge bg-danger">Inativo</span>`;
+
                         const tr = document.createElement('tr');
                         tr.innerHTML = `
-                            <td>${sala.DESCRICAO}</td>
-                            <td>${sala.ATIVO === 'S' ? 'Ativo' : 'Inativo'}</td>
+                            <td>${s.DESCRICAO}</td>
+                            <td>${s.DISCIPLINA || ''}</td>
+                            <td>${statusBadge}</td>
                             <td>
-                                <button class="btn btn-primary btn-sm btn-editar"
-                                    data-id="${sala.ID_SALA_CLINICA}"
-                                    data-desc="${sala.DESCRICAO}"
-                                    data-status="${sala.ATIVO}">
-                                    Editar
+                                <button class="btn btn-sm btn-warning btn-editar" title="Editar" data-sala='${JSON.stringify(s)}'>
+                                    <i class="bi bi-pencil"></i> <span class="d-none d-sm-inline">Editar</span>
                                 </button>
                             </td>
                         `;
-                        salasTBody.appendChild(tr);
+                        salasTbody.appendChild(tr);
                     });
 
-                    document.querySelectorAll('.btn-editar').forEach(btn => {
-                        btn.addEventListener('click', () => {
-                            document.getElementById('edit-sala-id').value = btn.dataset.id;
-                            document.getElementById('edit-sala-desc').value = btn.dataset.desc;
-                            document.getElementById('edit-sala-status').value = btn.dataset.status;
-                            editarSalaModal.show();
-                        });
-                    });
+                    ativarEventosTabela();
+
+                } catch (error) {
+                    console.error("Erro ao carregar salas ou disciplinas:", error);
+                    salasTbody.innerHTML = `<tr><td colspan="4" class="text-center text-danger">Erro ao carregar salas.</td></tr>`;
+                }
+            }
+
+            // === EVENTOS ===
+            searchInput.addEventListener('input', () => carregarSalas(searchInput.value));
+
+            formEditarSala.addEventListener('submit', e => {
+                
+                e.preventDefault();
+
+                const id = formEditarSala.querySelector('#edit-sala-id').value;
+                const formData = new FormData(formEditarSala);
+                const data = Object.fromEntries(formData.entries());
+
+                fetch(`/psicologia/salas/${id}`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': csrfToken },
+                    body: JSON.stringify(data)
                 })
-                .catch(error => {
-                    console.error('Erro ao carregar salas:', error);
-                    salasTBody.innerHTML = `
-                        <tr>
-                            <td colspan="3" class="text-center text-danger">Erro ao carregar salas</td>
-                        </tr>
-                    `;
-                });
-        }
-
-        // === CHAMADA INICIAL ===
-        carregarSalas();
-
-        // === PESQUISA AO DIGITAR ===
-        searchInput.addEventListener('input', () => {
-            carregarSalas(searchInput.value);
-        });
-
-        // === FUNÇÃO PARA EDITAR SALAS ===
-        formEditarSala.addEventListener('submit', e => {
-            e.preventDefault();
-
-            const desc = document.getElementById('edit-sala-desc').value;
-            const status = document.getElementById('edit-sala-status').value;
-            const id = document.getElementById('edit-sala-id').value;
-
-            fetch(`{{ route('atualizarSala-Psicologia', ['id' => 'ID_PLACEHOLDER']) }}`.replace('ID_PLACEHOLDER', id), {
-                method: 'PUT',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
-                },
-                body: JSON.stringify({
-                    DESCRICAO: desc,
-                    ATIVO: status
+                .then(res => res.json().then(body => ({ ok: res.ok, body })))
+                .then(({ ok, body }) => {
+                    if (!ok) throw new Error(body.message || 'Erro ao salvar.');
+                    editarSalaModal.hide();
+                    window.location.reload(); 
                 })
-            })
-            .then(res => {
-                if (!res.ok) throw new Error('Erro ao salvar');
-                return res.json();
-            })
-            .then(() => {
-                showAlert('Sala atualizada com sucesso!', 'success');
-                editarSalaModal.hide();
-                carregarSalas(searchInput.value);
-            })
-            .catch(error => {
-                console.error('Erro ao atualizar sala:', error);
-                showModalAlert('Erro ao atualizar sala. Tente novamente.', 'danger');
+                .catch(err => showModalAlert(err.message));
             });
-        }); 
-    });
-</script>
+            
+            document.getElementById('btn-deletar-sala').addEventListener('click', () => {
+                if (!confirm('Tem certeza que deseja excluir esta sala? Esta ação não pode ser desfeita.')) return;
 
+                const id = formEditarSala.querySelector('#edit-sala-id').value;
+                
+                fetch(`/psicologia/salas/${id}`, {
+                    method: 'DELETE',
+                    headers: { 'X-CSRF-TOKEN': csrfToken }
+                })
+                .then(res => {
+                    // Este bloco agora pode lidar com JSON em qualquer resposta, seja erro ou sucesso
+                    return res.json().then(body => ({ ok: res.ok, status: res.status, body }));
+                })
+                .then(({ ok, body }) => {
+                    // Se a resposta NÃO for OK (status 4xx, 5xx), o erro será lançado
+                    if (!ok) {
+                        // O `body.message` agora contém a mensagem de erro correta do seu controller
+                        throw new Error(body.message || 'Ocorreu um erro ao processar a solicitação.');
+                    }
+
+                    // Se a resposta for OK (sucesso)
+                    editarSalaModal.hide();
+
+                    // ✨ A MÁGICA ACONTECE AQUI:
+                    // Em vez de recarregar, mostramos a mensagem de sucesso que veio do backend.
+                    // Supondo que sua função showModalAlert possa ter um tipo 'success'.
+                    showModalAlert(body.message, 'success'); 
+
+                    // Depois de mostrar a mensagem, você pode recarregar a página após um tempo
+                    // para o usuário ver a mensagem, ou remover a linha da tabela dinamicamente.
+                    setTimeout(() => {
+                        window.location.reload();
+                    }, 2000); // Recarrega após 2 segundos
+                })
+                .catch(err => {
+                    // Este .catch agora vai pegar todos os erros e exibir a mensagem no modal
+                    showModalAlert(err.message, 'danger'); // Passando o tipo 'danger'
+                });
+            });
+
+            // === INICIALIZAÇÃO ===
+            carregarSalas();
+            carregarDisciplinas(document.getElementById('disciplina-sala'));
+        });
+    </script>
 
 </body>
 </html>
