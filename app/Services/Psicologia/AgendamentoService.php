@@ -10,6 +10,8 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Carbon\Carbon;
 
+use function PHPUnit\Framework\isNumeric;
+
 class AgendamentoService
 {
     const ID_CLINICA = 1;
@@ -209,110 +211,115 @@ class AgendamentoService
         return response()->json($agendamentos);
     }
 
-    public function getAgendamentosForProfessor(Request $request)
-    {
-        $professor = session('professor');
-        $turmas = array_column($professor[4], 'TURMA');
+public function getAgendamentosForProfessor(Request $request)
+{
+    $professor = session('professor');
+    $turmas = array_column($professor[4], 'TURMA');
 
-        $psicologos = DB::table('LYCEUM_BKP_PRODUCAO.dbo.LY_MATRICULA as mat')
+    $psicologos = DB::table('LYCEUM_BKP_PRODUCAO.dbo.LY_MATRICULA as mat')
         ->join('FAESA_CLINICA_AGENDAMENTO as ag', 'ag.ID_PSICOLOGO', 'mat.ALUNO')
         ->whereIn('mat.TURMA', $turmas)
         ->pluck('ag.ID_PSICOLOGO');
 
-        $query = FaesaClinicaAgendamento::with([
-            'paciente',
-            'servico',
-            'clinica',
-            'agendamentoOriginal',
-            'remarcacoes'
-        ])
+    $query = FaesaClinicaAgendamento::with([
+        'paciente',
+        'servico',
+        'clinica',
+        'agendamentoOriginal',
+        'remarcacoes'
+    ])
         ->where('ID_CLINICA', 1)
         ->where('STATUS_AGEND', '<>', 'Excluido')
-        ->where('ID_PSICOLOGO', $psicologos);
+        ->whereIn('ID_PSICOLOGO', $psicologos);
 
-        // Filtro por nome ou CPF do paciente
-        if ($request->filled('search')) {
-            $search = $request->input('search');
-            $query->whereHas('paciente', function($q) use ($search) {
-                $q->where('NOME_COMPL_PACIENTE', 'like', "%{$search}%")
+    // FILTRO POR NOME OU CPF DO PACIENTE
+    if ($request->filled('search')) {
+        $search = $request->input('search');
+        $query->whereHas('paciente', function ($q) use ($search) {
+            $q->where('NOME_COMPL_PACIENTE', 'like', "%{$search}%")
                 ->orWhere('CPF_PACIENTE', 'like', "%{$search}%");
-            });
-        }
+        });
+    }
 
-        // FILTRO POR PSICÓLOGO
-        if ($request->filled('psicologo')) {
-            $psicologo = $request->input('psicologo');
+    // FILTRO POR PSICÓLOGO
+    if ($request->filled('psicologo')) {
+        $psicologo = $request->input('psicologo');
 
-            $query->whereHas('psicologo', function($q) use ($psicologo) {
-                $q->where('ALUNO', 'like', "{$psicologo}%")
+        $query->whereHas('psicologo', function ($q) use ($psicologo) {
+            $q->where('ID_PSICOLOGO', 'like', "{$psicologo}%")
                 ->orWhere('NOME_COMPL', 'like', "%{$psicologo}%");
-            });
-        }
+        });
+    }
 
-        // FILTRO POR DATA
-        if ($request->filled('date')) {
-            try {
-                $date = Carbon::parse($request->input('date'))->format('Y-m-d');
-                $query->where('DT_AGEND', $date);
-            } catch (\Exception $e) {
-                // DATA INVÁLIDA - IGNORA FILTRO
-            }
+    // FILTRO POR DATA
+    if ($request->filled('date')) {
+        $rawDate = $request->input('date');
+        if (strtotime($rawDate)) {
+            $date = Carbon::parse($rawDate)->format('Y-m-d');
+            $query->whereDate('DT_AGEND', $date);
         }
+        // se for inválido, ignora
+    }
 
-        // FILTRO POR HORA DE INÍCIO
-        if ($request->filled('start_time')) {
-            try {
-                $startTime = Carbon::createFromFormat('H:i', $request->input('start_time'))->format('H:i:s');
-                $query->where('HR_AGEND_INI', '>=', $startTime);
-            } catch (\Exception $e) {
-                // Hora inválida - ignora filtro
-            }
+    // FILTRO POR HORA DE INÍCIO
+    if ($request->filled('start_time')) {
+        $rawStart = $request->input('start_time');
+        try {
+            $startTime = Carbon::createFromFormat('H:i', $rawStart)->format('H:i:s');
+            $query->where('HR_AGEND_INI', $startTime);
+        } catch (\Exception $e) {
+            // ignora se for inválido
         }
+    }
 
-        // FILTRO POR HORA DE FIM
-        if ($request->filled('end_time')) {
-            try {
-                $endTime = Carbon::createFromFormat('H:i', $request->input('end_time'))->format('H:i:s');
-                $query->where('HR_AGEND_FIN', '<=', $endTime);
-            } catch (\Exception $e) {
-                // Hora inválida - ignora filtro
-            }
+    // FILTRO POR HORA DE FIM
+    if ($request->filled('end_time')) {
+        $rawEnd = $request->input('end_time');
+        try {
+            $endTime = Carbon::createFromFormat('H:i', $rawEnd)->format('H:i:s');
+            $query->where('HR_AGEND_FIN', $endTime);
+        } catch (\Exception $e) {
+            // ignora se for inválido
         }
+    }
 
-        // FILTRO POR STATUS
-        if ($request->filled('status')) {
-            $query->where('STATUS_AGEND', $request->input('status'));
-        }
+    // FILTRO POR STATUS
+    if ($request->filled('status')) {
+        $query->where('STATUS_AGEND', $request->input('status'));
+    }
 
-        // FILTRO POR SERVIÇO
-        if ($request->filled('service')) {
-            $service = $request->input('service');
-            $query->whereHas('servico', function($q) use ($service) {
-                $q->where('SERVICO_CLINICA_DESC', 'like', "%{$service}%");
-            });
-        }
+    // FILTRO POR SERVIÇO
+    if ($request->filled('service')) {
+        $service = $request->input('service');
+        $query->whereHas('servico', function ($q) use ($service) {
+            $q->where('SERVICO_CLINICA_DESC', 'like', "%{$service}%");
+        });
+    }
 
-        // FILTRO POR VALOR
-        if ($request->filled('valor')) {
-            $valorFormatado = str_replace(',', '.', $request->input('valor'));
+    // FILTRO POR VALOR
+    if ($request->filled('valor')) {
+        $valorFormatado = str_replace(',', '.', $request->input('valor'));
+        if (is_numeric($valorFormatado)) {
             $query->where('VALOR_AGEND', '=', $valorFormatado);
         }
-
-        // FILTRO POR LOCAL
-        if ($request->filled('local')) {
-            $local = $request->input('local');
-            $query->where('LOCAL', 'like', "%{$local}%");
-        }
-
-        $query->orderBy('DT_AGEND', 'desc');
-
-        // Limita o número de registros retornados - Limite de 100
-        $limit = min((int) $request->input('limit', 10), 100);
-
-        $agendamentos = $query->limit($limit)->get();
-
-        return response()->json($agendamentos);
     }
+
+    // FILTRO POR LOCAL
+    if ($request->filled('local')) {
+        $local = $request->input('local');
+        $query->where('LOCAL', 'like', "%{$local}%");
+    }
+
+    $query->orderBy('DT_AGEND', 'desc');
+
+    // Limita o número de registros retornados - Limite de 100
+    $limit = min((int)$request->input('limit', 10), 100);
+
+    $agendamentos = $query->limit($limit)->get();
+
+    return response()->json($agendamentos);
+}
+
 
     public function atualizarAgendamento(array $dados): FaesaClinicaAgendamento
     {
