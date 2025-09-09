@@ -6,7 +6,8 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Services\Psicologia\PacienteService;
 use App\Models\FaesaClinicaPaciente;
-use Illuminate\Support\Carbon;
+use Illuminate\Validation\Rule;
+use Illuminate\Support\Facades\Validator;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 
 class PacienteController extends Controller
@@ -45,6 +46,7 @@ class PacienteController extends Controller
             'NOME_COMPL_PACIENTE.max' => 'O nome completo não pode passar de 255 caracteres.',
 
             'DT_NASC_PACIENTE.date' => 'A data de nascimento deve ser uma data válida.',
+            'DT_NASC_PACIENTE.required' => 'A data de nascimento deve ser preenchida',
 
             'CPF_PACIENTE.required' => 'O CPF do paciente é obrigatório.',
             'CPF_PACIENTE.regex' => 'O CPF informado não está em um formato válido.',
@@ -135,26 +137,42 @@ class PacienteController extends Controller
     // EDITA PACIENTE
     public function editarPaciente(Request $request, $id)
     {
-        
-        $validatedData = $request->validate([
+        $validator = Validator::make($request->all(), [
             'nome'       => 'required|string|max:255',
-            'cpf'        => 'required|string|max:14',
-            'dt_nasc'    => 'nullable|date',
-            'sexo'       => 'nullable|string|in:M,F,O',
-            'endereco'   => 'nullable|string|max:255',
-            'num'        => 'nullable|string',
+            'cpf'        => ['required', 'string', 'max:14', Rule::unique('FAESA_CLINICA_PACIENTE', 'CPF_PACIENTE')->ignore($id, 'ID_PACIENTE')],
+            'dt_nasc'    => ['required','date','date_format:Y-m-d'],
+            'sexo'       => 'required|string|in:M,F,O',
+            'endereco'   => 'required|string|max:255',
+            'num'        => 'required|string',
             'complemento'=> 'nullable|string|max:255',
             'bairro'     => 'nullable|string|max:255',
-            'uf'         => 'nullable|string|max:2',
-            'cep'        => 'nullable|string|max:20',
-            'celular'    => 'nullable|string|max:20',
+            'uf'         => 'required|string|max:2',
+            'cep'        => 'required|string|max:10',
+            'celular'    => 'required|string|max:20',
             'email'      => 'nullable|email|max:255',
-            'MUNICIPIO'  => 'nullable|string|max:255',
+            'municipio'  => 'required|string|max:255',
+        ], [
+            'nome.required' => 'O nome do Paciente deve ser fornecido',
+            'dt_nasc.required' => 'A data de nascimento deve ser fornecida',
+            'cpf.required' => 'O CPF do paciente deve ser fornecido',
+            'cpf.unique' => 'O CPF do paciente deve ser único, não pode ser igual ao de outro paciente',
+            'cep.required' => 'O CEP de paciente deve ser fornecido',
+            'celular.required' => 'O número de celular para contato com o paciente deve ser fornecido',
+            'num.required' => 'O número do endereço deve ser fornecido',
+            'endereco.required' => 'O logradouro do endereço deve ser fornecido',
+            'municipio.required' => 'O município do endereço deve ser fornecido',
         ]);
+
+        if ($validator->fails()) {
+            return response()->json([
+                'errors' => $validator->errors()
+            ], 422); // HTTP 422 Unprocessable Entity
+        }
+
+        $validatedData = $validator->validated();
 
         try {
             $paciente = FaesaClinicaPaciente::findOrFail($id);
-
             $paciente->NOME_COMPL_PACIENTE = $validatedData['nome'];
             $paciente->CPF_PACIENTE = str_replace(['-', '.'], '', $validatedData['cpf']);
             $paciente->DT_NASC_PACIENTE = $validatedData['dt_nasc'] ?? $paciente->DT_NASC_PACIENTE;
