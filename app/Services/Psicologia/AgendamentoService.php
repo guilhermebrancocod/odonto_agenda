@@ -24,7 +24,8 @@ class AgendamentoService
             'servico',
             'clinica',
             'agendamentoOriginal',
-            'remarcacoes'
+            'remarcacoes',
+            'psicologo'
         ])
         ->where('ID_CLINICA', 1)
         ->where('STATUS_AGEND', '<>', 'Excluido');
@@ -121,7 +122,8 @@ class AgendamentoService
             'servico',
             'clinica',
             'agendamentoOriginal',
-            'remarcacoes'
+            'remarcacoes',
+            'psicologo'
         ])
         ->where('ID_CLINICA', 1)
         ->where('ID_PSICOLOGO', session('psicologo')[1])
@@ -215,7 +217,6 @@ public function getAgendamentosForProfessor(Request $request)
 {
     $professor = session('professor');
     $turmas = array_column($professor[4], 'TURMA');
-
     $psicologos = DB::table('LYCEUM_BKP_PRODUCAO.dbo.LY_MATRICULA as mat')
         ->join('FAESA_CLINICA_AGENDAMENTO as ag', 'ag.ID_PSICOLOGO', 'mat.ALUNO')
         ->whereIn('mat.TURMA', $turmas)
@@ -226,7 +227,8 @@ public function getAgendamentosForProfessor(Request $request)
         'servico',
         'clinica',
         'agendamentoOriginal',
-        'remarcacoes'
+        'remarcacoes',
+        'psicologo'
     ])
         ->where('ID_CLINICA', 1)
         ->where('STATUS_AGEND', '<>', 'Excluido')
