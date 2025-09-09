@@ -35,6 +35,11 @@ class LoginController extends Controller
         }
     }
 
+    public function psicologiaLogin(Request $request)
+    {
+        $usuario = 
+    }
+
     public function logout(Request $request)
     {
         // LIMPA OS DADOS DA SESSÃO DE USUÁRIO

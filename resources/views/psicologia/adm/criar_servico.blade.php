@@ -67,8 +67,6 @@
 
     <div class="container ms-3 mw-100">
         <div class="row">
-            <x-page-title>
-            </x-page-title>
             <div class="col-12 shadow-lg shadow-dark p-4 bg-body-tertiary rounded">
                 
                 <form class="needs-validation" action="{{ route('criarServico-Psicologia') }}" method="POST" novalidate id="form-criar-servico">

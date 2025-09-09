@@ -134,8 +134,6 @@
 
         <div class="row">
 
-            <x-page-title>
-            </x-page-title>
 
             <div class="col-12 shadow-lg shadow-dark pt-3 bg-body-tertiary rounded">
                 <!-- CALENDÁRIO -->

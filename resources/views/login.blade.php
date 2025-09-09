@@ -2,7 +2,7 @@
 <html lang="pt-br">
 
 <head>
-    
+
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="icon" type="image/png" href="/favicon_faesa.png">
@@ -17,7 +17,7 @@
             font-family: Arial, Helvetica, sans-serif;
             margin: 0;
             padding: 0;
-            background-color: #5CA4EA;   /* #107ed8  #5CA4EA */
+            background-color: #5CA4EA;  /* #107ed8  #5CA4EA */
             display: flex;
             align-items: center;
             justify-content: center;
@@ -61,14 +61,13 @@
             width: 281px;
             padding: 15px;
             margin-top:15px;
-            background-color: #007bff; /*  #007bff   #007bff */
+            background-color: #007bff; /* #007bff   #007bff */
             border: none;
             border-radius: 4px;
             color: #fff;
             cursor: pointer;
             font-size: 15px;
             height: 50px;
-
         }
 
         input[type="submit"]:hover {
@@ -198,7 +197,31 @@
             box-shadow: 0 3px 6px rgba(0, 0, 0, 0.1);
         }
 
+        /* Estilo para o menu de seleção */
+        select {
+            width: 100%;
+            padding: 10px 5px;
+            margin-top: 5px;
+            margin-bottom: 20px;
+            font-size: 16px;
+            color: gray;
+            border: none;
+            border-bottom: 1px solid #ccc;
+            background-color: transparent;
+            -webkit-appearance: none;
+            -moz-appearance: none;
+            appearance: none;
+            background-image: url('data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22292.4%22%20height%3D%22292.4%22%3E%3Cpath%20fill%3D%22%23cccccc%22%20d%3D%22M287%2069.4a17.6%2017.6%200%200%200-13-5.4H18.4c-5%200-9.3%201.8-12.9%205.4A17.6%2017.6%200%200%200%200%2082.2c0%205%201.8%209.3%205.4%2012.9l128%20127.9c3.6%203.6%207.8%205.4%2012.8%205.4s9.2-1.8%2012.8-5.4L287%2095c3.5-3.5%205.4-7.8%205.4-12.8%200-5-1.9-9.2-5.5-12.8z%22%2F%3E%3C%2Fsvg%3E');
+            background-repeat: no-repeat;
+            background-position: right 10px top 50%;
+            background-size: 12px;
+        }
 
+        select:focus {
+            outline: none;
+            border-bottom: 2px solid #2596be;
+        }
+        /* */
 
     </style>
 
@@ -208,14 +231,12 @@
     <div class="container">
 
 
-        <!-- LOGO FAESA -->
         <img src="{{ asset('faesa.png') }}" alt="Logo">
         
         
         <form action="{{ route('loginPOST') }}" method="POST">
             @csrf
 
-            <!-- USUARIO -->
             <div class="input-group">
                 <input type="text" id="login" name="login" required placeholder=" ">
                 <label for="login">Usuário</label>
@@ -241,6 +262,13 @@
             <div class="error">{{ $message }}</div>
             @enderror
 
+            <div class="input-group">
+                <select name="perfil" id="perfil" required>
+                    <option value="aluno">Aluno</option>
+                    <option value="professor">Professor</option>
+                    <option value="admin">Administrador</option>
+                </select>
+            </div>
             @if (session('error'))
             <div class="alert alert-danger">
                 {{ session('error') }}
@@ -251,7 +279,6 @@
             <input type="submit" value="Entrar">
 
             
-            <!-- ESQUECEU A SENHA? -->
             <div class="forgot-password-link">
                 <a href="https://acesso.faesa.br/#/auth-user/forgot-password">Esqueceu a senha?</a>
             </div>
@@ -279,7 +306,5 @@
             }
         }
     </script>
-
-
 
 </html>

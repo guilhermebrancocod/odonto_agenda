@@ -50,8 +50,6 @@
     <div class="container ms-3 mw-100">
         <div class="row">
 
-            <x-page-title>
-            </x-page-title>
 
             <form method="POST" action="{{ route('agendamento.update') }}">
                 @csrf

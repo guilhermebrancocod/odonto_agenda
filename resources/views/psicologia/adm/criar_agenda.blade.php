@@ -89,9 +89,6 @@
 
     <div class="row">
         
-        <!-- COMPONENT DE HEADER DE CADA PÁGINA DAS VIEWS -->
-        <x-page-title>
-        </x-page-title>
         
         <div class="col-12 shadow-lg shadow-dark p-4 bg-body-tertiary rounded">
 

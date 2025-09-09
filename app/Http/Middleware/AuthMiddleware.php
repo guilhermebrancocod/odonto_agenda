@@ -5,170 +5,222 @@ namespace App\Http\Middleware;
 use Closure;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Http;
-use App\Models\FaesaClinicaUsuarioGeral; // ajuste conforme seu modelo real
-use App\Models\FaesaClinicaUsuario;      // usado no validarADM
+use Illuminate\Support\Facades\DB;
+use App\Models\FaesaClinicaUsuario; // Usado apenas para o Administrador
 
 class AuthMiddleware
 {
+    /**
+     * Ponto de entrada do middleware.
+     */
     public function handle(Request $request, Closure $next)
     {
-        // Nome da rota atual
-        $routeName = optional($request->route())->getName();
+        $routeName = $request->route()->getName();
 
-        // Se a rota não tiver nome, deixa passar
-        if (!$routeName) {
-            return $next($request);
-        }
+        // Rotas que não precisam de autenticação
+        $rotasLiberadas = ['loginGET', 'loginPOST', 'logout'];
 
-        // Rotas liberadas sem autenticação
-        $rotasLiberadas = [
-            'loginGET',
-            'loginPOST',
-            'logout',
-            'psicologoLoginGet',
-            'psicologoLoginPost',
-            'psicologoLogout',
-            'professorLoginGet',
-            'professorLoginPost',
-            'professorLogout',
-        ];
-
-        // Se a rota estiver liberada, segue
+        // Se a rota estiver na lista de liberadas, processa e continua
         if (in_array($routeName, $rotasLiberadas, true)) {
-            // Se for uma rota de POST de login, processa autenticação aqui
-            if (in_array($routeName, ['loginPOST','psicologoLoginPost','professorLoginPost'], true)) {
-                return $this->processarLogin($request, $routeName, $next);
+            if ($routeName === 'loginPOST') {
+                return $this->processarLogin($request, $next);
             }
             return $next($request);
         }
 
-        // Já logado?
-        if (session()->has('usuario') || session()->has('psicologo') || session()->has('professor')) {
+        // Se o usuário JÁ ESTIVER LOGADO (com a sessão 'usuario'), permite o acesso
+        if (session()->has('usuario')) {
             return $next($request);
         }
 
-        // Não logado: redireciona para o login correto por prefixo
-        if (str_starts_with($routeName, 'psicologo')) {
-            return redirect()->route('psicologoLoginGet');
-        }
-
-        if (str_starts_with($routeName, 'professor')) {
-            return redirect()->route('professorLoginGet');
-        }
-
-        return redirect()->route('loginGET');
+        // Se não está logado e a rota não é pública, redireciona para o login
+        return redirect()->route('loginGET')->with('error', 'Você precisa fazer login para acessar esta página.');
     }
 
     /**
-     * Processa autenticação para as rotas de login POST.
+     * Processa a tentativa de login do formulário.
      */
-    private function processarLogin(Request $request, string $routeName, Closure $next)
+    private function processarLogin(Request $request, Closure $next)
     {
         $credentials = [
             'username' => $request->input('login'),
             'password' => $request->input('senha'),
         ];
+        $perfil = $request->input('perfil');
 
-        // Chama API (única; ajuste se houver endpoints diferentes por perfil)
-        $response = $this->getApiData($credentials);
+        if (!$perfil) {
+            return redirect()->back()->with('error', 'Selecione um perfil para continuar.');
+        }
+
+        // 1. Autenticação via API (agora ciente do perfil)
+        $response = $this->getApiData($credentials, $perfil);
 
         if (!$response['success']) {
             session()->flush();
             return redirect()->back()->with('error', $response['message'] ?? 'Credenciais Inválidas');
         }
 
-        // Valida usuário no banco
-        $validacao = $this->validarUsuario($credentials);
-
-        if (is_null($validacao)) {
-            return redirect()->back()->with('error', 'Usuário Inativo');
+        // 2. Validação no banco de dados local conforme o perfil
+        $usuarioValidado = null;
+        switch ($perfil) {
+            case 'aluno':
+                $usuarioValidado = $this->validarAluno($credentials);
+                break;
+            case 'professor':
+                $usuarioValidado = $this->validarProfessor($credentials);
+                break;
+            case 'admin':
+                $usuarioValidado = $this->validarAdmin($credentials);
+                break;
+            default:
+                return redirect()->back()->with('error', 'Perfil inválido selecionado.');
         }
 
-        // Seta a sessão conforme a rota de login utilizada
-        if ($routeName === 'psicologoLoginPost') {
-            if (($validacao->TIPO ?? null) === 'Psicologo') {
-                session(['psicologo' => $validacao]);
-            } else {
-                return redirect()->back()->with('error', 'Usuário deve ser Psicólogo');
-            }
-        } elseif ($routeName === 'professorLoginPost') {
-            if (($validacao->TIPO ?? null) === 'Professor') {
-                session(['professor' => $validacao]);
-            } else {
-                return redirect()->back()->with('error', 'Usuário deve ser Professor');
-            }
-        } else { // loginPOST padrão (recepção/usuário geral)
-            // Se quiser checar recepção especificamente, troque a condição abaixo
-            session(['usuario' => $validacao]);
+        // 3. Verifica se a validação local encontrou um usuário válido
+        if (is_null($usuarioValidado)) {
+            $errorMessage = $perfil === 'aluno' ? 'Aluno sem permissão de acesso' : 'Usuário sem permissão de acesso para este perfil';
+            return redirect()->back()->with('error', $errorMessage);
         }
 
-        // Autenticado, segue o fluxo normal
+        // 4. SUCESSO: Armazena dados na sessão de forma unificada
+        session([
+            'usuario' => $usuarioValidado, // Chave única para todos os perfis
+            'perfil'  => $perfil
+        ]);
+
         return $next($request);
     }
 
     /**
-     * Chamada à API de autenticação.
+     * Chama a API de autenticação correta com base no perfil.
      */
-    private function getApiData(array $credentials): array
+    private function getApiData(array $credentials, string $perfil): array
     {
-        $apiUrl = config('services.faesa.api_url');
-        $apiKey = config('services.faesa.api_key');
+        $apiUrl = '';
+        $apiKey = '';
+
+        // Administrador usa uma API, Aluno/Professor usam outra
+        if ($perfil === 'admin') {
+            // Use as credenciais da API para administradores (do seu primeiro arquivo)
+            $apiUrl = config('services.faesa.api_url');
+            $apiKey = config('services.faesa.api_key');
+        } else {
+            // Aluno e Professor usam a mesma API (dos seus arquivos de aluno/professor)
+            $apiUrl = config('services.faesa.api_psicologos_url');
+            $apiKey = config('services.faesa.api_psicologos_key');
+        }
+        
+        // Verifica se as chaves de configuração existem
+        if (!$apiUrl || !$apiKey) {
+            return ['success' => false, 'message' => 'API de autenticação não configurada para este perfil.'];
+        }
 
         try {
-            $http = Http::withHeaders([
-                'Accept'        => 'application/json',
-                'Authorization' => $apiKey,
-            ])->timeout(5);
+            $response = Http::withHeaders([
+                'Accept' => "application/json",
+                'Authorization' => $apiKey
+            ])->timeout(5)->post($apiUrl, $credentials);
 
-            $resp = $http->post($apiUrl, $credentials);
-
-            if ($resp->successful()) {
-                return ['success' => true];
+            if ($response->successful()) {
+                return ['success' => true, 'data' => $response->json()];
             }
+            
+            return ['success' => false, 'message' => 'Credenciais Inválidas'];
 
-            return [
-                'success' => false,
-                'message' => $resp->json('message') ?? 'Falha na autenticação',
-            ];
-        } catch (\Throwable $e) {
-            return [
-                'success' => false,
-                'message' => $e->getMessage(),
-            ];
+        } catch (\Exception $e) {
+            return ['success' => false, 'message' => 'Erro ao conectar com o serviço de autenticação.'];
         }
     }
 
     /**
-     * Valida usuário ativo no banco.
-     * Retorna o modelo ou null.
+     * VALIDA ALUNO (lógica copiada do seu AuthPsicologoMiddleware)
      */
-    private function validarUsuario(array $credentials): ?FaesaClinicaUsuarioGeral
+    private function validarAluno(array $credentials)
     {
-        $username = $credentials['username'] ?? null;
+        $usuario = $credentials['username'];
+        $retorno[0] = $usuario;
 
-        if (!$username) {
-            return null;
-        }
+        $cpf = DB::table('LYCEUM_BKP_PRODUCAO.dbo.LY_PESSOA as p')
+            ->where('p.WINUSUARIO', 'FAESA\\' . $usuario)
+            ->value('CPF');
 
-        return FaesaClinicaUsuarioGeral::where('USUARIO', $username)
-            ->where('STATUS', 'Ativo')
+        if (!$cpf) return null;
+
+        $aluno = DB::table('LYCEUM_BKP_PRODUCAO.dbo.LY_ALUNO as a')
+            ->join('LYCEUM_BKP_PRODUCAO.dbo.LY_PESSOA as p', 'p.NOME_COMPL', '=', 'a.NOME_COMPL')
+            ->where('p.CPF', $cpf)
+            ->where('a.SIT_ALUNO', 'Ativo')
+            ->select('a.ALUNO', 'p.NOME_COMPL', 'p.E_MAIL_COM', 'p.CELULAR')
             ->first();
+
+        if ($aluno) {
+            $disciplinas = ['D009373', 'D009376', 'D009381', 'D009385', 'D009393', 'D009403', 'D009402', 'D009406', 'D009404'];
+            $matricula = DB::table('LYCEUM_BKP_PRODUCAO.dbo.LY_MATRICULA as m')
+                ->where('m.ALUNO', $aluno->ALUNO)
+                ->whereIn('m.DISCIPLINA', $disciplinas)
+                ->get();
+
+            if (!$matricula->isEmpty()) {
+                $retorno[] = $aluno->ALUNO;
+                $retorno[] = $aluno->NOME_COMPL;
+                $retorno[] = $aluno->E_MAIL_COM;
+                $retorno[] = $aluno->CELULAR;
+                $retorno[] = $matricula->map(fn($item) => ['DISCIPLINA' => $item->DISCIPLINA, 'TURMA' => $item->TURMA])->toArray();
+                return $retorno;
+            }
+        }
+        return null;
     }
 
     /**
-     * Exemplo de validação de ADM (mantida sua ideia).
+     * VALIDA PROFESSOR (lógica copiada do seu AuthProfessorMiddleware)
      */
-    private function validarADM(array $credentials)
+    private function validarProfessor(array $credentials)
     {
-        $usuario = $credentials['username'] ?? null;
-        if (!$usuario) {
-            return null;
+        $usuario = $credentials['username'];
+        $retorno[0] = $usuario;
+
+        $anoSemestreLetivo = DB::table('LYCEUM_BKP_PRODUCAO.dbo.LY_OPCOES')->where('CHAVE', 4)->select('ANO_LETIVO', 'SEM_LETIVO')->first();
+        
+        if(!$anoSemestreLetivo) return null;
+
+        $cpf = DB::table('LYCEUM_BKP_PRODUCAO.dbo.LY_PESSOA')->where('WINUSUARIO', 'FAESA\\' . $usuario)->value('CPF');
+        
+        if (!$cpf) return null;
+
+        $docente = DB::table('LYCEUM_BKP_PRODUCAO.dbo.LY_DOCENTE')->where('CPF', $cpf)->first();
+
+        if ($docente) {
+            $disciplinas = ['D009373', 'D009376', 'D009381', 'D009385', 'D009393', 'D009403', 'D009402', 'D009406', 'D009404'];
+            $vinculos = DB::table('LYCEUM_BKP_PRODUCAO.dbo.LY_TURMA as t')
+                ->where('t.NUM_FUNC', $docente->NUM_FUNC)
+                ->whereIn('t.DISCIPLINA', $disciplinas)
+                ->where('t.ANO', $anoSemestreLetivo->ANO_LETIVO)
+                ->where('t.SEMESTRE', $anoSemestreLetivo->SEM_LETIVO)
+                ->get();
+
+            if (!$vinculos->isEmpty()) {
+                $retorno[] = $docente->NUM_FUNC;
+                $retorno[] = $docente->NOME_COMPL;
+                $retorno[] = $docente->CPF;
+                $retorno[] = $vinculos->map(fn($item) => ['DISCIPLINA' => $item->DISCIPLINA, 'TURMA' => $item->TURMA])->toArray();
+                return $retorno;
+            }
         }
-
-        $usuarioADM = FaesaClinicaUsuario::where('ID_USUARIO_CLINICA', $usuario)
+        return null;
+    }
+    
+    /**
+     * VALIDA ADMINISTRADOR (lógica do seu primeiro AuthMiddleware)
+     */
+    private function validarAdmin(array $credentials)
+    {
+        $admin = FaesaClinicaUsuario::where('ID_USUARIO_CLINICA', $credentials['username'])
             ->where('SIT_USUARIO', 'Ativo')
-            ->get();
+            ->where('ID_CLINICA', 1)
+            ->first();
 
-        return $usuarioADM->isNotEmpty() ? $usuarioADM : null;
+        // Retorna um array para manter o padrão dos outros perfis, ou null se não encontrar
+        return $admin ? $admin->toArray() : null;
     }
 }
