@@ -358,6 +358,7 @@ public function getAgendamentosForProfessor(Request $request)
                     throw new \Exception('A sala selecionada está inativa.');
                 }
             }
+            
             $agendamentoOriginal->update($this->_mapearDadosRequestParaUpdate($dados));
             return $agendamentoOriginal;
         }
@@ -496,6 +497,7 @@ public function getAgendamentosForProfessor(Request $request)
         $local = !empty($dados['ID_SALA']) ? FaesaClinicaSala::find($dados['ID_SALA'])->DESCRICAO : null;
         return [
             'ID_SERVICO'   => $dados['ID_SERVICO'],
+            'ID_PACIENTE' => $dados['ID_PACIENTE'],
             'ID_ALUNO' => $dados['ID_ALUNO'] ?? null,
             'ID_SALA'      => $dados['ID_SALA'] ?? null,
             'STATUS_AGEND' => $dados['STATUS_AGEND'],
