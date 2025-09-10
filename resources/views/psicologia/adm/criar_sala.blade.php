@@ -79,7 +79,7 @@
                     <div class="row g-3">
                         <div class="col-md-6">
                             <label for="nome-sala" class="form-label">Descrição da Sala</label>
-                            <input type="text" id="nome-sala" name="DESCRICAO" class="form-control" value="{{ old('DESCRICAO') }}" required>
+                            <input type="text" id="nome-sala" name="DESCRICAO" class="form-control" value="{{ old('DESCRICAO', request('DESCRICAO')) }}" required>
                         </div>
                         <div class="col-md-6">
                             <label for="disciplina-sala" class="form-label">Disciplina</label>
