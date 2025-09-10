@@ -13,7 +13,7 @@ use App\Http\Controllers\Psicologia\ClinicaController;
 use App\Http\Controllers\Psicologia\SalaController;
 use App\Http\Controllers\Psicologia\HorarioController;
 use App\Http\Controllers\Psicologia\DisciplinaController;
-use App\Http\Controllers\Psicologia\alunoController;
+use App\Http\Controllers\Psicologia\AlunoController;
 use App\Models\FaesaClinicaServico;
 use App\Models\FaesaClinicaPaciente;
 use App\Http\Middleware\AuthMiddleware;

@@ -217,13 +217,15 @@
                         <select id="select-local" name="id_sala_clinica" placeholder="Local do atendimento..." autocomplete="off" data-old-id="{{ old('id_sala_clinica') }}"></select>
                     </div>
 
-                    <!-- SELEÇAO DE aluno -->
+                    <!-- SELEÇAO DE ALUNO -->
                     <div class="col-md-6 position-relative">
                          <input type="hidden" name="ID_ALUNO" id="ID_ALUNO">
                         <label for="select-aluno" class="form-label">Aluno</label>
                         <select id="select-aluno" name="ID_ALUNO" placeholder="Aluno do Atendimento..." autocomplete="off" data-old-id="{{ old('ID_ALUNO') }}"></select>
+                        <small id="aluno-count" class="text-muted mt-1 d-block"></small>
                     </div>
-                                        
+                              
+                    <!-- OBSERVAÇÕES -->
                     <div class="col-12">
                         <label for="observacoes" class="form-label">Observações</label>
                         <textarea name="observacoes" id="observacoes" class="form-control" placeholder="Observações..." rows="3">{{ old('observacoes') }}</textarea>
@@ -234,6 +236,7 @@
                             <i class="bi bi-check-circle-fill me-1"></i> Agendar
                         </button>
                     </div>
+
                 </div>
             </form>
 
@@ -268,203 +271,228 @@
 
 <!-- BUSCA DE PACIENTES -->
 <script>
-document.addEventListener('DOMContentLoaded', function() {
+    document.addEventListener('DOMContentLoaded', function() {
 
-    /**
-     * Função auxiliar para inicializar um TomSelect e carregar o valor antigo
-     * se a busca por ID funcionar no endpoint 'load'.
-     */
-    function initializeTomSelectWithOldValue(selector, config) {
-        const element = document.querySelector(selector);
-        if (!element) return;
-
-        const oldId = element.dataset.oldId;
-        const tomSelectInstance = new TomSelect(element, config);
-
-        // Se existir um ID antigo, tentamos carregá-lo
-        if (oldId) {
-            tomSelectInstance.load(oldId); // Dispara a busca usando o ID
+        function initializeTomSelectWithOldValue(selector, config) {
+            const element = document.querySelector(selector);
+            if (!element) return;
+            const oldId = element.dataset.oldId;
+            const ts = new TomSelect(element, config);
+            if (oldId) ts.load(oldId);
+            return ts;
         }
-        
-        return tomSelectInstance;
-    }
 
-    // --- SELECT DE PACIENTE ---
-    const pacienteSelect = initializeTomSelectWithOldValue('#select-paciente', {
-        valueField: 'ID_PACIENTE',
-        labelField: 'NOME_COMPL_PACIENTE',
-        searchField: ['NOME_COMPL_PACIENTE', 'CPF_PACIENTE'],
-        // Coloque aqui o resto da sua configuração (render, create, onOptionAdd, etc.)
-        load: (query, callback) => {
-            const url = `/psicologia/consultar-paciente/buscar-nome-cpf?search=${encodeURIComponent(query)}`;
-            fetch(url).then(r => r.json()).then(json => {
-                callback(json);
-                // Após a busca, se for a busca pelo ID antigo, seleciona o item
-                const oldId = document.querySelector('#select-paciente').dataset.oldId;
-                if (oldId && query === oldId && json.length > 0) {
-                    pacienteSelect.setValue(oldId);
+        // --- SELECT DE PACIENTE ---
+        const pacienteSelect = initializeTomSelectWithOldValue('#select-paciente', {
+            valueField: 'ID_PACIENTE',
+            labelField: 'NOME_COMPL_PACIENTE',
+            searchField: ['NOME_COMPL_PACIENTE', 'CPF_PACIENTE'],
+
+            load: (query, callback) => {
+                if (!query.length) return callback();
+                const url = `/psicologia/consultar-paciente/buscar-nome-cpf?search=${encodeURIComponent(query)}`;
+                fetch(url)
+                    .then(r => r.json())
+                    .then(json => callback(json))
+                    .catch(() => callback());
+            },
+
+            render: {
+                no_results: function(data, escape) {
+                    const query = encodeURIComponent(data.input || ''); // pega o que o usuário digitou
+                    return `<div class="no-results">
+                                Nenhum paciente encontrado. 
+                                <a href="/psicologia/criar-paciente?nome_compl_paciente=${query}" 
+                                target="_blank" class="text-primary fw-bold">
+                                Criar novo paciente
+                                </a>
+                            </div>`;
                 }
-            }).catch(() => callback());
-        },
-    });
-
-    // --- SELECT DE SERVIÇO ---
-    const servicoSelect = initializeTomSelectWithOldValue('#select-servico', {
-        valueField: 'ID_SERVICO_CLINICA',
-        labelField: 'SERVICO_CLINICA_DESC',
-        searchField: ['SERVICO_CLINICA_DESC'],
-        // ... (resto da sua configuração)
-        load: (query, callback) => {
-            const url = `/psicologia/pesquisar-servico?search=${encodeURIComponent(query)}`;
-            fetch(url).then(r => r.json()).then(json => {
-                callback(json);
-                const oldId = document.querySelector('#select-servico').dataset.oldId;
-                if (oldId && query === oldId && json.length > 0) {
-                    servicoSelect.setValue(oldId);
-                }
-            }).catch(() => callback());
-        },
-    });
-
-    // --- SELECT DE LOCAL ---
-    const localSelect = initializeTomSelectWithOldValue('#select-local', {
-        valueField: 'ID_SALA_CLINICA',
-        labelField: 'DESCRICAO',
-        searchField: ['DESCRICAO'],
-        // ... (resto da sua configuração)
-        load: (query, callback) => {
-            const url = `/psicologia/pesquisar-local?search=${encodeURIComponent(query)}`;
-            fetch(url).then(r => r.json()).then(json => {
-                callback(json);
-                const oldId = document.querySelector('#select-local').dataset.oldId;
-                if (oldId && query === oldId && json.length > 0) {
-                    localSelect.setValue(oldId);
-                }
-            }).catch(() => callback());
-        },
-    });
-
-    // --- SELECT DE ALUNO ---
-    const alunoSelect = initializeTomSelectWithOldValue('#select-aluno', {
-        valueField: 'ID_ALUNO',
-        labelField: 'NOME_COMPL',
-        searchField: ['NOME_COMPL', 'ID_ALUNO'],
-        load: (query, callback) => {
-            const url = `/psicologia/listar-alunos?search=${encodeURIComponent(query)}`;
-            fetch(url).then(r => r.json()).then(json => {
-                callback(json);
-                const oldId = document.querySelector('#select-aluno').dataset.oldId;
-                if (oldId && query === oldId && json.length > 0) {
-                    alunoSelect.setValue(oldId);
-                }
-            }).catch(() => callback());
-        },
-    });
-
-    new TomSelect('#duracao_meses_recorrencia', {});
-
-    alunoSelect.disable();
-
-    // Lógica do evento 'change' do serviço precisa ser anexada à instância criada
-    servicoSelect.on('change', (value) => {
-        if(value) {
-            alunoSelect.enable();
-        } else {
-            alunoSelect.clear();
-            alunoSelect.disable();
-        }
-    });
-
-    // --- CAPTURA DO CAMPO DE VALOR ---
-    const valorInput = document.getElementById('valor_agend');
-
-    // Quando mudar o serviço selecionado
-    servicoSelect.on('change', (value) => {
-        if (value) {
-            const selectedItem = servicoSelect.options[value];
-            if (selectedItem && selectedItem.VALOR_SERVICO) {
-                // Formata o valor em reais
-                const valor = parseFloat(selectedItem.VALOR_SERVICO).toLocaleString('pt-BR', {
-                    minimumFractionDigits: 2,
-                });
-                valorInput.value = valor;
             }
-        } else {
-            valorInput.value = '';
-        }
+        });
+
+       const servicoSelect = initializeTomSelectWithOldValue('#select-servico', {
+            valueField: 'ID_SERVICO_CLINICA',
+            labelField: 'SERVICO_CLINICA_DESC',
+            searchField: ['SERVICO_CLINICA_DESC'],
+
+            load: (query, callback) => {
+                if (!query.length) return callback();
+                const url = `/psicologia/pesquisar-servico?search=${encodeURIComponent(query)}`;
+                fetch(url)
+                    .then(r => r.json())
+                    .then(json => callback(json))
+                    .catch(() => callback());
+            },
+
+            render: {
+                no_results: function(data, escape) {
+                    const query = encodeURIComponent(data.input || '');
+                    return `<div class="no-results">
+                                Nenhum serviço encontrado. 
+                                <a href="/psicologia/criar-servico?SERVICO_CLINICA_DESC=${query}" 
+                                target="_blank" class="text-primary fw-bold">
+                                Criar novo serviço
+                                </a>
+                            </div>`;
+                }
+            }
+        });
+
+        const localSelect = initializeTomSelectWithOldValue('#select-local', {
+            valueField: 'ID_SALA_CLINICA',
+            labelField: 'DESCRICAO',
+            searchField: ['DESCRICAO'],
+
+            load: (query, callback) => {
+                if (!query.length) return callback();
+                const url = `/psicologia/pesquisar-local?search=${encodeURIComponent(query)}`;
+                fetch(url)
+                    .then(r => r.json())
+                    .then(json => callback(json))
+                    .catch(() => callback());
+            },
+
+            render: {
+                no_results: function(data, escape) {
+                    const query = encodeURIComponent(data.input || '');
+                    return `<div class="no-results">
+                                Nenhum local encontrado. 
+                                <a href="/psicologia/criar-sala?DESCRICAO=${query}" 
+                                target="_blank" class="text-primary fw-bold">
+                                Criar nova sala
+                                </a>
+                            </div>`;
+                }
+            }
+        });
+
+        // --- SELECT DE ALUNO ---
+        const alunoSelect = initializeTomSelectWithOldValue('#select-aluno', {
+            valueField: 'ID_ALUNO',
+            labelField: 'NOME_COMPL',
+            searchField: ['NOME_COMPL', 'ID_ALUNO'],
+            load: (query, callback) => {
+
+                // Pega o serviço selecionado
+                const servicoValue = servicoSelect.getValue();
+                let disciplina = '';
+                if (servicoValue) {
+                    const selectedServico = servicoSelect.options[servicoValue];
+                    if (selectedServico && selectedServico.DISCIPLINA) {
+                        disciplina = selectedServico.DISCIPLINA;
+                    }
+                }
+
+                // Monta a URL com o parâmetro disciplina
+                const url = `/psicologia/listar-alunos?search=${encodeURIComponent(query)}&disciplina=${encodeURIComponent(disciplina)}`;
+
+                fetch(url)
+                    .then(r => r.json())
+                    .then(json => callback(json))
+                    .catch(() => callback());
+            }
+        });
+
+        alunoSelect.disable();
+
+        // Atualiza o select de aluno quando o serviço mudar
+        servicoSelect.on('change', (value) => {
+            if (value) {
+                // Preenche o valor do serviço no campo valor_agend
+                const selectedItem = servicoSelect.options[value];
+                if (selectedItem && selectedItem.VALOR_SERVICO) {
+                    const valor = parseFloat(selectedItem.VALOR_SERVICO).toLocaleString('pt-BR', { minimumFractionDigits: 2 });
+                    document.getElementById('valor_agend').value = valor;
+                } else {
+                    document.getElementById('valor_agend').value = '';
+                }
+
+                alunoSelect.clear();
+                alunoSelect.enable();
+                alunoSelect.load(''); // recarrega alunos com a disciplina correta
+            } else {
+                alunoSelect.clear();
+                alunoSelect.disable();
+                document.getElementById('valor_agend').value = '';
+            }
+        });
+
+        // Inicializa select de duração da recorrência
+        new TomSelect('#duracao_meses_recorrencia', {});
+
     });
-});
 </script>
 
 <!-- SCRIPT DE SELEÇÃO DE RECORRÊNCIA -->
 <script>
-document.addEventListener('DOMContentLoaded', function() {
-    const temRecorrenciaCheckbox = document.getElementById('temRecorrencia');
-    const recorrenciaCampos = document.getElementById('recorrenciaCampos');
-    const msgRecorrencia = document.getElementById('msg-recorrencia');
-    const recorrenciaInput = document.getElementById('recorrencia');
-    const diasSemanaBtns = document.querySelectorAll('#diasSemanaBtns button');
-    let container = document.getElementById('diasSemanaContainer');
-    if (!container) {
-        container = document.createElement('div');
-        container.id = 'diasSemanaContainer';
-        container.style.display = 'none';
-        document.getElementById('agendamento-form').appendChild(container);
-    }
-    
-    function atualizarDiasSelecionados() {
-        container.innerHTML = '';
-        const diasSelecionados = Array.from(diasSemanaBtns)
-            .filter(btn => btn.classList.contains('active'))
-            .map(btn => btn.getAttribute('data-dia'));
-        diasSelecionados.forEach(dia => {
-            const input = document.createElement('input');
-            input.type = 'hidden';
-            input.name = 'dias_semana[]';
-            input.value = dia;
-            container.appendChild(input);
-        });
-    }
-
-    diasSemanaBtns.forEach(btn => {
-        btn.addEventListener('click', function() {
-            this.classList.toggle('active');
-            this.classList.toggle('btn-primary');
-            this.classList.toggle('btn-outline-primary');
-            atualizarDiasSelecionados();
-        });
-    });
-
-    temRecorrenciaCheckbox.addEventListener('change', function() {
-        if (this.checked) {
-            recorrenciaCampos.classList.remove('d-none');
-            msgRecorrencia.classList.remove('d-none');
-            recorrenciaInput.value = crypto.randomUUID ? crypto.randomUUID() : 'uuid-fallback-' + Date.now();
-        } else {
-            recorrenciaCampos.classList.add('d-none');
-            msgRecorrencia.classList.add('d-none');
-            recorrenciaInput.value = '';
-            diasSemanaBtns.forEach(btn => {
-                btn.classList.remove('active', 'btn-primary');
-                btn.classList.add('btn-outline-primary');
-            });
-            container.innerHTML = '';
-            document.getElementById('data_fim_recorrencia').value = '';
-            document.getElementById('duracao_meses_recorrencia').value = '';
+    document.addEventListener('DOMContentLoaded', function() {
+        const temRecorrenciaCheckbox = document.getElementById('temRecorrencia');
+        const recorrenciaCampos = document.getElementById('recorrenciaCampos');
+        const msgRecorrencia = document.getElementById('msg-recorrencia');
+        const recorrenciaInput = document.getElementById('recorrencia');
+        const diasSemanaBtns = document.querySelectorAll('#diasSemanaBtns button');
+        let container = document.getElementById('diasSemanaContainer');
+        if (!container) {
+            container = document.createElement('div');
+            container.id = 'diasSemanaContainer';
+            container.style.display = 'none';
+            document.getElementById('agendamento-form').appendChild(container);
         }
+        
+        function atualizarDiasSelecionados() {
+            container.innerHTML = '';
+            const diasSelecionados = Array.from(diasSemanaBtns)
+                .filter(btn => btn.classList.contains('active'))
+                .map(btn => btn.getAttribute('data-dia'));
+            diasSelecionados.forEach(dia => {
+                const input = document.createElement('input');
+                input.type = 'hidden';
+                input.name = 'dias_semana[]';
+                input.value = dia;
+                container.appendChild(input);
+            });
+        }
+
+        diasSemanaBtns.forEach(btn => {
+            btn.addEventListener('click', function() {
+                this.classList.toggle('active');
+                this.classList.toggle('btn-primary');
+                this.classList.toggle('btn-outline-primary');
+                atualizarDiasSelecionados();
+            });
+        });
+
+        temRecorrenciaCheckbox.addEventListener('change', function() {
+            if (this.checked) {
+                recorrenciaCampos.classList.remove('d-none');
+                msgRecorrencia.classList.remove('d-none');
+                recorrenciaInput.value = crypto.randomUUID ? crypto.randomUUID() : 'uuid-fallback-' + Date.now();
+            } else {
+                recorrenciaCampos.classList.add('d-none');
+                msgRecorrencia.classList.add('d-none');
+                recorrenciaInput.value = '';
+                diasSemanaBtns.forEach(btn => {
+                    btn.classList.remove('active', 'btn-primary');
+                    btn.classList.add('btn-outline-primary');
+                });
+                container.innerHTML = '';
+                document.getElementById('data_fim_recorrencia').value = '';
+                document.getElementById('duracao_meses_recorrencia').value = '';
+            }
+        });
+
+        const selectDuracao = document.getElementById('duracao_meses_recorrencia');
+        const inputDataFim = document.getElementById('data_fim_recorrencia');
+
+        function atualizarCamposRecorrencia() {
+            inputDataFim.disabled = selectDuracao.value !== '';
+            selectDuracao.disabled = inputDataFim.value !== '';
+        }
+
+        selectDuracao.addEventListener('change', atualizarCamposRecorrencia);
+        inputDataFim.addEventListener('input', atualizarCamposRecorrencia); // use input for flatpickr
     });
-
-    const selectDuracao = document.getElementById('duracao_meses_recorrencia');
-    const inputDataFim = document.getElementById('data_fim_recorrencia');
-
-    function atualizarCamposRecorrencia() {
-        inputDataFim.disabled = selectDuracao.value !== '';
-        selectDuracao.disabled = inputDataFim.value !== '';
-    }
-
-    selectDuracao.addEventListener('change', atualizarCamposRecorrencia);
-    inputDataFim.addEventListener('input', atualizarCamposRecorrencia); // use input for flatpickr
-});
 </script>
 
 <!-- SCRIPT DO FLATPICKR -->
