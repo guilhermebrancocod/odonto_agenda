@@ -167,8 +167,8 @@
                                         </div>
                                     </dd>
                                     
-                                    <!-- aluno -->
-                                    <dt>aluno(a)</dt>
+                                    <!-- ALUNO -->
+                                    <dt>Aluno(a)</dt>
                                     <dd>
                                         <input type="text" class="form-control view-mode" value="{{ $agendamento->aluno->NOME_COMPL ?? '-' }}" readonly>
 
@@ -218,7 +218,7 @@
                                 <dl class="details-grid">
                                     <dt>Valor</dt>
                                     <dd>
-                                        <input type="text" class="form-control editable-field" name="VALOR_AGEND" 
+                                        <input type="text" class="form-control editable-field" name="VALOR_AGEND" id="valor_edit_agenda" 
                                             value="{{ $agendamento->VALOR_AGEND ? number_format($agendamento->VALOR_AGEND, 2, ',', '.') : '' }}" disabled>
                                     </dd>
                                 </dl>
@@ -372,5 +372,15 @@
     }
 });
 </script>
+
+<!-- FORMATA VALOR DA AGENDA EDITADA -->
+<script>
+    document.getElementById('valor_edit_agenda').addEventListener('input', function (e) {
+        let value = e.target.value.replace(/\D/g, '');
+        value = (value / 100).toLocaleString('pt-BR', { minimumFractionDigits: 2 });
+        e.target.value = value; 
+    });
+</script>
+
 </body>
 </html>
