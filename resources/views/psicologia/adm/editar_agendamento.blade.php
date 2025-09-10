@@ -178,6 +178,7 @@
                                                     <option value="{{ $agendamento->aluno->ALUNO }}" selected>
                                                         {{ $agendamento->aluno->NOME_COMPL }}
                                                     </option>
+                                                    <input type="hidden" name="ID_ALUNO" value="{{ $agendamento->ID_ALUNO }}">
                                                 @endif
                                             </select>
                                         </div>
