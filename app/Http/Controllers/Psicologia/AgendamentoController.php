@@ -378,9 +378,10 @@ class AgendamentoController extends Controller
     }
 
     // RETORNA VIEW DE EDIÇÃO DE AGENDAMENTO - Utiliza Injeção de Dependência
-    public function editAgendamento($id, FaesaClinicaAgendamento $agendamentoModel)
+    public function editAgendamento($id)
     {
-        $agendamento = $agendamentoModel->with('paciente', 'servico')->findOrFail($id);
+        $agendamento = FaesaClinicaAgendamento::with('paciente', 'servico', 'aluno')
+        ->findOrFail($id);
         return view('psicologia.adm.editar_agendamento', compact('agendamento'));
     }
 
