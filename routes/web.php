@@ -19,7 +19,7 @@ use App\Models\FaesaClinicaPaciente;
 use App\Http\Middleware\AuthMiddleware;
 use App\Http\Middleware\AuthProfessorMiddleware;
 use App\Http\Middleware\CheckClinicaMiddleware;
-use App\Http\Middleware\AuthalunoMiddleware;
+use App\Http\Middleware\AuthAlunoMiddleware;
 use App\Services\Psicologia\PacienteService;
 
 // -------------------- ODONTOLOGIA --------------------
@@ -344,7 +344,7 @@ Route::get('/aluno', function() {
     }
 })->name('alunoAgenda');
 
-Route::middleware([AuthalunoMiddleware::class])->group(function () {
+Route::middleware([AuthAlunoMiddleware::class])->group(function () {
     Route::post('/aluno/login', function() {
         return redirect()->route('alunoAgenda');
         // return view('psicologia.aluno.menu_agenda');
@@ -357,6 +357,8 @@ Route::middleware([AuthalunoMiddleware::class])->group(function () {
     Route::get('/aluno/consultar-agendamento/buscar', [AgendamentoController::class, 'getAgendamentosForaluno'])->name('getAgendamentosForaluno');
 
     Route::get('/aluno/agendamento/{id}/editar', [AgendamentoController::class, 'editAgendamentoaluno'])->name('agendamentoaluno.edit');
+
+    Route::put('/aluno/agendamento', [AgendamentoController::class, 'updateAgendamento'])->name('aluno.agendamento.update');
 
     Route::get('/aluno/pesquisar-disciplina', [ServicoController::class, 'getDisciplinaServico'])->name('alunoGetDisciplina');
 

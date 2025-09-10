@@ -110,6 +110,8 @@
 
                 <input type="hidden" name="ID_ALUNO" id="ID_ALUNO" value="{{ session('aluno')[1] }}"/>
 
+                <input type="hidden" id="HR_FIM" name="hr_fim" value="{{ old('hr_fim') }}">
+
                 <div id="session-data"
                    data-aluno='@json(session('aluno'))'
                 ></div>
@@ -134,7 +136,7 @@
                             Disciplina
                         </label>
                         <label for="disciplina" class="form-label"></label>
-                        <select name="disciplina" id="disciplina" placeholder="Disciplina do Atendimento" autocomplete="off"></select>
+                        <select name="id_servico" id="disciplina" placeholder="Disciplina do Atendimento" autocomplete="off"></select>
                     </div>
 
                     <div class="col-sm-6 col-md-3">
@@ -301,8 +303,9 @@
             if (selectedDates.length > 0) {
                 const dataInicio = selectedDates[0];
                 const dataFim = new Date(dataInicio.getTime());
-                dataFim.setHours(dataFim.getHours() + 1);
+                dataFim.setHours(dataFim.getHours()+1);
                 hrFinalFP.setDate(dataFim, true);
+                document.getElementById('HR_FIM').value = `${String(dataFim.getHours()).padStart(2, '0')}:${String(dataFim.getMinutes()).padStart(2, '0')}`;
             }
         }
     });
