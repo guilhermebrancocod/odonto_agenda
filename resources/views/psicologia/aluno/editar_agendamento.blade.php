@@ -53,7 +53,7 @@
             <x-page-title>
             </x-page-title>
 
-            <form method="POST" action="{{ route('agendamento.update') }}">
+            <form method="POST" action="{{ route('aluno.agendamento.update') }}">
                 @csrf
                 @method('PUT')
 
@@ -155,7 +155,7 @@
                                     <dt>Paciente</dt>
                                     <dd>
                                         <input type="text" class="form-control view-mode" 
-                                            value="{{ $agendamento->paciente->NOME_COMPL_PACIENTE ?? '' }}" readonly>
+                                            value="{{ $agendamento->paciente->NOME_COMPL_PACIENTE ?? '-' }}" readonly>
                                         <div class="edit-mode d-none">
                                             <select id="select-paciente" name="ID_PACIENTE" placeholder="Selecione ou busque um paciente...">
                                                 @if($agendamento->paciente)
@@ -170,14 +170,15 @@
                                     <!-- aluno -->
                                     <dt>aluno(a)</dt>
                                     <dd>
-                                        <input type="text" class="form-control view-mode" value="{{ $agendamento->ID_ALUNO }}" readonly>
+                                        <input type="text" class="form-control view-mode" value="{{ $agendamento->aluno->NOME_COMPL ?? '-' }}" readonly>
 
                                         <div class="edit-mode d-none">
                                             <select id="select-aluno" name="ID_ALUNO" placeholder="" disabled>
                                                 @if($agendamento->ID_ALUNO)
                                                     <option value="{{ $agendamento->ID_ALUNO}}" selected>
-                                                        {{ $agendamento->ID_ALUNO }}
+                                                        {{ $agendamento->aluno->NOME_COMPL }}
                                                     </option>
+                                                    <input type="hidden" name="ID_ALUNO" value="{{ $agendamento->ID_ALUNO }}">
                                                 @endif
                                             </select>
                                         </div>

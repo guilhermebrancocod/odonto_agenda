@@ -387,7 +387,7 @@ class AgendamentoController extends Controller
 
     public function editAgendamentoaluno($id, FaesaClinicaAgendamento $agendamentoModel)
     {
-        $agendamento = $agendamentoModel->with('paciente', 'servico')->findOrFail($id);
+        $agendamento = $agendamentoModel->with('paciente', 'servico', 'aluno')->findOrFail($id);
         return view('psicologia.aluno.editar_agendamento', compact('agendamento'));
     }
 

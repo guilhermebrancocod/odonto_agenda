@@ -170,11 +170,11 @@
                                     <!-- aluno -->
                                     <dt>aluno(a)</dt>
                                     <dd>
-                                        <input type="text" class="form-control view-mode" value="{{ $agendamento->aluno->NOME_COMPL }}" readonly>
+                                        <input type="text" class="form-control view-mode" value="{{ $agendamento->aluno->NOME_COMPL ?? '-' }}" readonly>
 
                                         <div class="edit-mode d-none">
                                             <select id="select-aluno" name="ID_ALUNO" placeholder="Selecione ou busque um aluno...">
-                                                @if($agendamento->aluno->ALUNO)
+                                                @if($agendamento->ID_ALUNO)
                                                     <option value="{{ $agendamento->aluno->ALUNO }}" selected>
                                                         {{ $agendamento->aluno->NOME_COMPL }}
                                                     </option>

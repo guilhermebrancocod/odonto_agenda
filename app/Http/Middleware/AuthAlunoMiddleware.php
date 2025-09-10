@@ -7,7 +7,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\DB;
 
-class AuthalunoMiddleware
+class AuthAlunoMiddleware
 {
     public function handle(Request $request, Closure $next)
     {

@@ -512,8 +512,8 @@ public function getAgendamentosForProfessor(Request $request)
             $sala = FaesaClinicaSala::find($dados['id_sala_clinica']);
             $localAgend = $sala ? $sala->DESCRICAO : null;
         }
-
-        return FaesaClinicaAgendamento::create([
+        
+        $novoAgendamento = FaesaClinicaAgendamento::create([
             'ID_CLINICA'         => $dados['ID_CLINICA'] ?? self::ID_CLINICA,
             'ID_PACIENTE'        => $dados['paciente_id'],
             'ID_SERVICO'         => $dados['id_servico'],
@@ -528,6 +528,8 @@ public function getAgendamentosForProfessor(Request $request)
             'LOCAL'              => $localAgend,
             'ID_AGEND_REMARCADO' => $dados['id_agend_remarcado'] ?? null,
         ]);
+
+        return $novoAgendamento;
     }
 
     private function _calcularDatasParaAgendar(array $dados): array
