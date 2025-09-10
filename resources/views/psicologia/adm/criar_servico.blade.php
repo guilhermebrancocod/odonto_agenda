@@ -80,7 +80,7 @@
                         <!-- NOME DO SERVIÇO -->
                         <div class="col-md-6">
                             <label for="nome-servico" class="form-label">Nome do Serviço</label>
-                            <input type="text" id="nome-servico" name="SERVICO_CLINICA_DESC" class="form-control" value="{{ old('SERVICO_CLINICA_DESC') }}" required>
+                            <input type="text" id="nome-servico" name="SERVICO_CLINICA_DESC" class="form-control" value="{{ old('SERVICO_CLINICA_DESC', request('SERVICO_CLINICA_DESC')) }}" required>
                         </div>
                         
                         <!-- DISCIPLINA DO SERVIÇO -->
