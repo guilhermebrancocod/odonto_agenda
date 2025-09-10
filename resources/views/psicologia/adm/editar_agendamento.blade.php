@@ -228,7 +228,7 @@
                 </div>
                 
                 <div class="mt-4 d-flex justify-content-between">
-                    <button type="button" class="btn btn-secondary" onclick="window.history.go(-1)">
+                    <button type="button" class="btn btn-secondary" onclick="window.location='{{ route('listagem-agendamentos') }}'">
                         <i class="bi bi-arrow-left me-2"></i>Voltar
                     </button>
                     <div>
