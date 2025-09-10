@@ -407,7 +407,8 @@ class AgendamentoController extends Controller
             'VALOR_AGEND'    => 'nullable|string',
             'OBSERVACOES'    => 'nullable|string',
         ], [
-            'ID_SERVICO.required'  => 'O serviço do agendamento é obrigatório.',
+            'ID_SERVICO.required'  => 'É obrigatório informar o serviço para prosseguir com a edição',
+            'ID_PACIENTE.required' => 'É obrigatório informar o paciente para prosseguir com a edição',
             'HR_AGEND_FIN.after'   => 'O horário final deve ser posterior ao horário inicial.',
             'ID_AGENDAMENTO.exists' => 'O agendamento que você está tentando editar não foi encontrado.',
         ]);
