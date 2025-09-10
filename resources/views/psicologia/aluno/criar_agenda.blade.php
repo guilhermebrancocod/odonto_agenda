@@ -47,7 +47,7 @@
         }
 
         /* Estilos para limitar a altura das listas de busca */
-        .list-local-option, .list-psicologo-option, #pacientes-list .list-group {
+        .list-local-option, .list-aluno-option, #pacientes-list .list-group {
             max-height: 200px;
             overflow-y: auto;
         }
@@ -61,7 +61,7 @@
 <body class="bg-body-secondary">
 
 <!-- COMPONENT NAVBAR -->
-@include('components.psicologo_navbar')
+@include('components.aluno_navbar')
 
 @if ($errors->any())
     <div id="alert-error" class="alert alert-danger shadow text-center position-fixed top-0 start-50 translate-middle-x mt-3" style="z-index: 1050; max-width: 90%;">
@@ -95,7 +95,7 @@
         <div class="col-12 shadow-lg shadow-dark p-4 bg-body-tertiary rounded">
 
             <!-- FORM DE AGENDAMENTO -->
-            <form action="{{ route('criarAgendamento-Psicologo') }}" method="POST" id="agendamento-form" class="w-100" validate>
+            <form action="{{ route('criarAgendamento-aluno') }}" method="POST" id="agendamento-form" class="w-100" validate>
                 @csrf
 
                 <!-- VALORES PASSADOS NO FORMATO HIDDEN | USUÁRIO NÃO SELECIONA DIRETAMENTE -->
@@ -108,10 +108,10 @@
 
                 <input type="hidden" name="status_agend" value="Em aberto"/>
 
-                <input type="hidden" name="id_psicologo" id="id_psicologo" value="{{ session('psicologo')[1] }}"/>
+                <input type="hidden" name="id_aluno" id="id_aluno" value="{{ session('aluno')[1] }}"/>
 
                 <div id="session-data"
-                   data-psicologo='@json(session('psicologo'))'
+                   data-aluno='@json(session('aluno'))'
                 ></div>
 
                 <!-- PESQUISA DE PACIENTE POR NOME OU CPF -->
@@ -221,7 +221,7 @@
         // Carrega dados da sua API
         load: (query, callback) => {
             if (query.length < 0) return callback();
-            const url = `/psicologo/consultar-paciente/buscar?search=${encodeURIComponent(query)}`;
+            const url = `/aluno/consultar-paciente/buscar?search=${encodeURIComponent(query)}`;
             fetch(url)
             .then(response => response.json())
                 .then(json => callback(json))
@@ -236,7 +236,7 @@
         searchField: ['SERVICO_CLINICA_DESC'],
         createFilter: (input) => input.length > 0,
         load: (query, callback) => {
-            const url = `/psicologo/pesquisar-disciplina?search=${encodeURIComponent(query)}`;
+            const url = `/aluno/pesquisar-disciplina?search=${encodeURIComponent(query)}`;
             fetch(url)
                 .then(r => r.json())
                 .then(j => callback(j))

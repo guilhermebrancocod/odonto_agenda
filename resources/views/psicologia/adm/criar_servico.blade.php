@@ -83,12 +83,6 @@
                             <input type="text" id="nome-servico" name="SERVICO_CLINICA_DESC" class="form-control" value="{{ old('SERVICO_CLINICA_DESC') }}" required>
                         </div>
                         
-                        <!-- CÓDIGO INTERNO DO SERVIÇO -->
-                        <div class="col-md-6">
-                            <label for="cod-interno-servico" class="form-label">Código Interno</label>
-                            <input type="number" id="cod-interno-servico" name="COD_INTERNO_SERVICO_CLINICA" class="form-control" value="{{ old('COD_INTERNO_SERVICO_CLINICA') }}">
-                        </div>
-
                         <!-- DISCIPLINA DO SERVIÇO -->
                         <div class="col-md-6">
                             <label for="disciplina-servico" class="form-label">Disciplina</label>
@@ -137,7 +131,6 @@
                         <thead class="table-light" style="position: sticky; top: 0; z-index: 1;">
                             <tr>
                                 <th>Descrição</th>
-                                <th>Código Interno</th>
                                 <th>Disciplina</th>
                                 <th>Valor</th>
                                 <th>Ações</th>
@@ -166,10 +159,6 @@
                         <div class="mb-3">
                             <label class="form-label">Descrição</label>
                             <input type="text" id="edit-servico-desc" name="SERVICO_CLINICA_DESC" class="form-control" required />
-                        </div>
-                        <div class="mb-3">
-                            <label class="form-label">Código Interno</label>
-                            <input type="number" id="edit-servico-cod" name="COD_INTERNO_SERVICO_CLINICA" class="form-control"/>
                         </div>
                         <div class="mb-3">
                             <label class="form-label">Disciplina</label>
@@ -240,7 +229,6 @@
 
             // === FUNÇÕES AUXILIARES ===
             async function carregarDisciplinas(selectElement, valorSelecionado = null) {
-                // Pega o ID do elemento para usar como chave da instância
                 const selectId = selectElement.id;
 
                 if (!disciplinasCache) {
@@ -301,7 +289,6 @@
                         
                         formEditarServico.querySelector('#edit-servico-id').value = servico.ID_SERVICO_CLINICA;
                         formEditarServico.querySelector('#edit-servico-desc').value = servico.SERVICO_CLINICA_DESC;
-                        formEditarServico.querySelector('#edit-servico-cod').value = servico.COD_INTERNO_SERVICO_CLINICA;
                         formEditarServico.querySelector('#edit-valor-servico').value = (servico.VALOR_SERVICO || '').toString().replace('.', ',');
                         formEditarServico.querySelector('#edit-tempo-recorrencia-meses').value = servico.TEMPO_RECORRENCIA_MESES || '';
                         formEditarServico.querySelector('#edit-observacao-servico').value = servico.OBSERVACAO || '';
@@ -332,7 +319,6 @@
                             const tr = document.createElement('tr');
                             tr.innerHTML = `
                                 <td>${s.SERVICO_CLINICA_DESC}</td>
-                                <td>${s.COD_INTERNO_SERVICO_CLINICA || '-'}</td>
                                 <td>${s.DISCIPLINA || '-'}</td>
                                 <td>${formatarValor(s.VALOR_SERVICO) || '-'}</td>
                                 <td>

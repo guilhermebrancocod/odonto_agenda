@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Pacientes por Psicólogo</title>
+    <title>Pacientes por aluno</title>
 
     <link rel="icon" type="image/png" href="/favicon_faesa.png">
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700&display=swap" rel="stylesheet" />
@@ -77,10 +77,10 @@
                 <form id="search-form" class="w-100 mb-4">
                     <div class="row g-3 align-items-end">
                         <div class="col-12 col-md-6 col-lg-4">
-                            <label for="psicologo-input" class="form-label fw-bold">Filtrar por Psicólogo</label>
+                            <label for="aluno-input" class="form-label fw-bold">Filtrar por aluno</label>
                             <div class="input-group">
                                 <span class="input-group-text"><i class="bi bi-person-workspace"></i></span>
-                                <input id="psicologo-input" name="psicologo" type="search" class="form-control" placeholder="Nome ou Matrícula" />
+                                <input id="aluno-input" name="aluno" type="search" class="form-control" placeholder="Nome ou Matrícula" />
                             </div>
                         </div>
                         <div class="col-12 col-md-6 col-lg-auto d-flex gap-2">
@@ -93,7 +93,7 @@
                 <hr>
 
                 <h5 class="mb-3">Resultados Agrupados</h5>
-                <div class="accordion" id="accordionPsicologos"></div>
+                <div class="accordion" id="accordionalunos"></div>
 
             </div>
         </div>
@@ -105,7 +105,7 @@
     <script>
         document.addEventListener("DOMContentLoaded", () => {
             const searchForm = document.getElementById('search-form');
-            const accordionContainer = document.getElementById('accordionPsicologos');
+            const accordionContainer = document.getElementById('accordionalunos');
 
             // Se true => permite múltiplos abertos; se false => um por vez (comportamento "accordion")
             const allowMultipleOpen = false;
@@ -116,15 +116,15 @@
             }
 
             function sanitizeId(value) {
-                // Prefixa com 'psicologo-' e troca caracteres não alfanuméricos por underscore
-                return 'psicologo-' + String(value).replace(/[^\w-]/g, '_');
+                // Prefixa com 'aluno-' e troca caracteres não alfanuméricos por underscore
+                return 'aluno-' + String(value).replace(/[^\w-]/g, '_');
             }
 
-            function montarItem(psicologo) {
-                const safeId = sanitizeId(psicologo.id);
+            function montarItem(aluno) {
+                const safeId = sanitizeId(aluno.id);
 
                 let pacientesHtml = '<ul class="list-group list-group-flush">';
-                psicologo.pacientes
+                aluno.pacientes
                     .sort((a, b) => a.nome.localeCompare(b.nome, 'pt-BR'))
                     .forEach(paciente => {
                         pacientesHtml += `<li class="list-group-item"><strong>${escapeHtml(paciente.nome)}</strong> (CPF: ${escapeHtml(paciente.cpf)})</li>`;
@@ -139,8 +139,8 @@
                         <button class="accordion-button collapsed d-flex align-items-center" type="button"
                             aria-expanded="false"
                             aria-controls="${safeId}">
-                            <strong class="me-3">${escapeHtml(psicologo.nome)}</strong>
-                            <span class="badge bg-primary rounded-pill ms-auto">${psicologo.pacientes.length} Paciente(s)</span>
+                            <strong class="me-3">${escapeHtml(aluno.nome)}</strong>
+                            <span class="badge bg-primary rounded-pill ms-auto">${aluno.pacientes.length} Paciente(s)</span>
                         </button>
                     </h2>
 
@@ -231,37 +231,37 @@
                         return response.json();
                     })
                     .then(agendamentos => {
-                        const psicologos = {};
+                        const alunos = {};
 
                         agendamentos.forEach(ag => {
-                            if (!ag.ID_PSICOLOGO || !ag.paciente) return;
+                            if (!ag.ID_aluno || !ag.paciente) return;
 
-                            if (!psicologos[ag.ID_PSICOLOGO]) {
-                                psicologos[ag.ID_PSICOLOGO] = {
-                                    id: ag.ID_PSICOLOGO,
-                                    nome: 'Psicólogo não identificado',
+                            if (!alunos[ag.ID_aluno]) {
+                                alunos[ag.ID_aluno] = {
+                                    id: ag.ID_aluno,
+                                    nome: 'aluno não identificado',
                                     pacientes: [],
                                     pacientes_ids: new Set()
                                 };
                             }
 
-                            if (ag.psicologo && ag.psicologo.NOME_COMPL) {
-                                psicologos[ag.ID_PSICOLOGO].nome = ag.psicologo.NOME_COMPL;
+                            if (ag.aluno && ag.aluno.NOME_COMPL) {
+                                alunos[ag.ID_aluno].nome = ag.aluno.NOME_COMPL;
                             }
 
-                            if (!psicologos[ag.ID_PSICOLOGO].pacientes_ids.has(ag.paciente.ID_PACIENTE)) {
-                                psicologos[ag.ID_PSICOLOGO].pacientes.push({
+                            if (!alunos[ag.ID_aluno].pacientes_ids.has(ag.paciente.ID_PACIENTE)) {
+                                alunos[ag.ID_aluno].pacientes.push({
                                     nome: ag.paciente.NOME_COMPL_PACIENTE,
                                     cpf: ag.paciente.CPF_PACIENTE || 'Não informado'
                                 });
-                                psicologos[ag.ID_PSICOLOGO].pacientes_ids.add(ag.paciente.ID_PACIENTE);
+                                alunos[ag.ID_aluno].pacientes_ids.add(ag.paciente.ID_PACIENTE);
                             }
                         });
 
                         accordionContainer.innerHTML = '';
-                        const psicologosArray = Object.values(psicologos);
+                        const alunosArray = Object.values(alunos);
 
-                        if (psicologosArray.length === 0) {
+                        if (alunosArray.length === 0) {
                             accordionContainer.innerHTML = `
                                 <div class="text-center p-4">
                                     <p class="text-muted">Nenhum resultado encontrado para os filtros aplicados.</p>
@@ -269,8 +269,8 @@
                             return;
                         }
 
-                        psicologosArray.forEach(psicologo => {
-                            const item = montarItem(psicologo);
+                        alunosArray.forEach(aluno => {
+                            const item = montarItem(aluno);
                             accordionContainer.appendChild(item);
                         });
                     })

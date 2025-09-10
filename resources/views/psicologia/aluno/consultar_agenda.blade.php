@@ -60,7 +60,7 @@
 </head>
 
 <body class="bg-body-secondary">
-    @include('components.psicologo_navbar')
+    @include('components.aluno_navbar')
 
     @if($errors->any())
         <div class="alert alert-danger shadow text-center position-fixed top-0 start-50 translate-middle-x mt-3 animate-alert" style="max-width: 90%;">
@@ -101,7 +101,7 @@
                         <div class="col-12 col-sm-6 col-md-3">
                             <div class="input-group">
                                 <span class="input-group-text"><i class="bi bi-person-workspace"></i></span>
-                                <input id="psicologo-input" name="psicologo" type="search" class="form-control" placeholder="Nome/Matrícula do Psicólogo" />
+                                <input id="aluno-input" name="aluno" type="search" class="form-control" placeholder="Nome/Matrícula do aluno" />
                             </div>
                         </div>
 
@@ -181,7 +181,7 @@
                             <thead class="table-light" style="position: sticky; top: 0; z-index: 1;">
                                 <tr>
                                     <th>Paciente</th>
-                                    <th>Psicólogo</th>
+                                    <th>Aluno</th>
                                     <th>Serviço</th>
                                     <th>Data</th>
                                     <th>Início</th>
@@ -243,7 +243,7 @@
 
             function carregarAgendamentos() {
                 const params = getFilters();
-                const url = `/psicologo/consultar-agendamento/buscar?${params.toString()}`;
+                const url = `/aluno/consultar-agendamento/buscar?${params.toString()}`;
 
                 // Adiciona um feedback visual de carregamento
                 agendamentosTbody.innerHTML = `<tr><td colspan="13" class="text-center"><div class="spinner-border spinner-border-sm" role="status"><span class="visually-hidden">Loading...</span></div> Carregando...</td></tr>`;
@@ -264,7 +264,7 @@
 
                         agendamentos.forEach(ag => {
                             const paciente = ag.paciente ? ag.paciente.NOME_COMPL_PACIENTE : '-';
-                            const psicologo = ag.psicologo ? ag.psicologo.NOME_COMPL : (ag.ID_PSICOLOGO || '-');
+                            const aluno = ag.aluno ? ag.aluno.NOME_COMPL : (ag.ID_aluno || '-');
                             const servico = ag.servico ? ag.servico.SERVICO_CLINICA_DESC : '-';
                             const data = ag.DT_AGEND ? new Date(ag.DT_AGEND).toLocaleDateString('pt-BR', {timeZone: 'UTC'}) : '-';
                             const horaIni = ag.HR_AGEND_INI ? ag.HR_AGEND_INI.substring(0, 5) : '-';
@@ -288,7 +288,7 @@
                             const row = document.createElement('tr');
                             row.innerHTML = `
                                 <td>${paciente}</td>
-                                <td>${psicologo}</td>
+                                <td>${aluno}</td>
                                 <td>${servico}</td>
                                 <td>${data}</td>
                                 <td>${horaIni}</td>
@@ -300,7 +300,7 @@
                                 <td class="text-center">${checkPagamento}</td>
                                 <td>${valorPagamento}</td>
                                 <td class="d-flex flex-nowrap gap-1 agendamento-actions">
-                                    <a href="/psicologo/agendamento/${ag.ID_AGENDAMENTO}/editar" class="btn btn-warning flex-grow-1" title="Editar"><i class="bi bi-pencil"></i></a>
+                                    <a href="/aluno/agendamento/${ag.ID_AGENDAMENTO}/editar" class="btn btn-warning flex-grow-1" title="Editar"><i class="bi bi-pencil"></i></a>
                                     <form action="/psicologia/agendamento/${ag.ID_AGENDAMENTO}" method="POST" onsubmit="return confirm('Confirma a exclusão deste agendamento?');">
                                         @csrf
                                         @method('DELETE')

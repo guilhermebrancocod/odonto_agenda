@@ -127,9 +127,9 @@ class PacienteController extends Controller
         return response()->json($pacientes);
     }
 
-    public function getPacienteByNameCPFPsicologo(Request $request)
+    public function getPacienteByNameCPFaluno(Request $request)
     {        
-        $pacientes = $this->pacienteService->filtrarPacientesByNameOrCpfPsicologo($request);
+        $pacientes = $this->pacienteService->filtrarPacientesByNameOrCpfaluno($request);
 
         return response()->json($pacientes);
     }

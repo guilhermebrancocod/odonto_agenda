@@ -27,7 +27,7 @@
 <body class="bg-body-secondary">
 
     <!-- COMPONENT NAVBAR -->
-    @include('components.psicologo_navbar')
+    @include('components.aluno_navbar')
 
     <!-- EM CASO DE ERROS -->
     @if ($errors->any())
@@ -120,7 +120,7 @@
                                         </select>
 
                                         @if ($agendamento->ID_AGEND_REMARCADO)
-                                            <a href="{{ url('/psicologo/agendamento/' . $agendamento->ID_AGEND_REMARCADO . '/editar') }}" 
+                                            <a href="{{ url('/aluno/agendamento/' . $agendamento->ID_AGEND_REMARCADO . '/editar') }}" 
                                             class="btn btn-secondary btn-sm mt-2 w-100" 
                                             target="_blank" 
                                             title="Ir para agendamento anterior">
@@ -167,16 +167,16 @@
                                         </div>
                                     </dd>
                                     
-                                    <!-- PSICOLOGO -->
-                                    <dt>Psicólogo(a)</dt>
+                                    <!-- aluno -->
+                                    <dt>aluno(a)</dt>
                                     <dd>
-                                        <input type="text" class="form-control view-mode" value="{{ $agendamento->ID_PSICOLOGO }}" readonly>
+                                        <input type="text" class="form-control view-mode" value="{{ $agendamento->ID_aluno }}" readonly>
 
                                         <div class="edit-mode d-none">
-                                            <select id="select-psicologo" name="ID_PSICOLOGO" placeholder="" disabled>
-                                                @if($agendamento->ID_PSICOLOGO)
-                                                    <option value="{{ $agendamento->ID_PSICOLOGO}}" selected>
-                                                        {{ $agendamento->ID_PSICOLOGO }}
+                                            <select id="select-aluno" name="ID_aluno" placeholder="" disabled>
+                                                @if($agendamento->ID_aluno)
+                                                    <option value="{{ $agendamento->ID_aluno}}" selected>
+                                                        {{ $agendamento->ID_aluno }}
                                                     </option>
                                                 @endif
                                             </select>
@@ -308,7 +308,7 @@
             create: false,
             load: (query, callback) => {
                 if (query.length < 2) return callback();
-                const url = `/psicologo/consultar-paciente/buscar-nome-cpf?search=${encodeURIComponent(query)}`;
+                const url = `/aluno/consultar-paciente/buscar-nome-cpf?search=${encodeURIComponent(query)}`;
                 fetch(url).then(response => response.json()).then(json => callback(json)).catch(() => callback());
             },
             render: {
@@ -329,18 +329,18 @@
             }
         });
 
-        // --- SELECT PSICÓLOGO ---
-        new TomSelect('#select-psicologo', {
-            valueField: 'ID_PSICOLOGO',
+        // --- SELECT aluno ---
+        new TomSelect('#select-aluno', {
+            valueField: 'ID_aluno',
             labelField: 'NOME_COMPL',
             searchField: ['NOME_COMPL', 'ALUNO'],
             create: false,
             load: (query, callback) => {
-                const url = `/psicologia/listar-psicologos?search=${encodeURIComponent(query)}`;
+                const url = `/psicologia/listar-alunos?search=${encodeURIComponent(query)}`;
                 fetch(url).then(r => r.json()).then(j => callback(j)).catch(() => callback());
             },
             render: {
-                option: (data, escape) => `<div>${escape(data.NOME_COMPL)} - ${escape(data.ID_PSICOLOGO)}</div>`,
+                option: (data, escape) => `<div>${escape(data.NOME_COMPL)} - ${escape(data.ID_aluno)}</div>`,
                 item: (data, escape) => `<div>${escape(data.NOME_COMPL)}</div>`
             }
         });

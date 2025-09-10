@@ -99,7 +99,7 @@
                         <div class="col-12 col-sm-6 col-md-3">
                             <div class="input-group">
                                 <span class="input-group-text"><i class="bi bi-person-workspace"></i></span>
-                                <input id="psicologo-input" name="psicologo" type="search" class="form-control" placeholder="Nome/Matrícula do Psicólogo" />
+                                <input id="aluno-input" name="aluno" type="search" class="form-control" placeholder="Nome/Matrícula do aluno" />
                             </div>
                         </div>
 
@@ -179,7 +179,7 @@
                             <thead class="table-light" style="position: sticky; top: 0; z-index: 1;">
                                 <tr>
                                     <th>Paciente</th>
-                                    <th>Psicólogo</th>
+                                    <th>Aluno</th>
                                     <th>Serviço</th>
                                     <th>Data</th>
                                     <th>Início</th>
@@ -262,7 +262,7 @@
 
                         agendamentos.forEach(ag => {
                             const paciente = ag.paciente ? ag.paciente.NOME_COMPL_PACIENTE : '-';
-                            const psicologo = ag.psicologo ? ag.psicologo.NOME_COMPL : (ag.ID_PSICOLOGO || '-');
+                            const aluno = ag.aluno ? ag.aluno.NOME_COMPL : (ag.ID_ALUNO || '-');
                             const servico = ag.servico ? ag.servico.SERVICO_CLINICA_DESC : '-';
                             const data = ag.DT_AGEND ? new Date(ag.DT_AGEND).toLocaleDateString('pt-BR', {timeZone: 'UTC'}) : '-';
                             const horaIni = ag.HR_AGEND_INI ? ag.HR_AGEND_INI.substring(0, 5) : '-';
@@ -286,7 +286,7 @@
                             const row = document.createElement('tr');
                             row.innerHTML = `
                                 <td>${paciente}</td>
-                                <td>${psicologo}</td>
+                                <td>${aluno}</td>
                                 <td>${servico}</td>
                                 <td>${data}</td>
                                 <td>${horaIni}</td>

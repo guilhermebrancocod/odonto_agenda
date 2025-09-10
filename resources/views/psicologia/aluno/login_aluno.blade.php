@@ -209,9 +209,9 @@
         <!-- LOGO FAESA -->
         <img src="{{ asset('faesa.png') }}" alt="Logo">
 
-        <h5>Acesso Psicólogo</h5>
+        <h5>Acesso aluno</h5>
         
-        <form action="{{ route('psicologoLoginPost') }}" method="POST">
+        <form action="{{ route('alunoLoginPost') }}" method="POST">
             @csrf
 
             <!-- USUARIO -->

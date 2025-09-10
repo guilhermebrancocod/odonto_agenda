@@ -118,19 +118,19 @@ class PacienteService
         return $query->orderBy('ID_PACIENTE', 'desc')->get()->toArray();
     }
 
-    public function filtrarPacientesByNameOrCpfPsicologo($filtros)
+    public function filtrarPacientesByNameOrCpfaluno($filtros)
     {
         $search = $filtros['search'];
-        $psicologo = session('psicologo')[1];
+        $aluno = session('aluno')[1];
 
-        $pacientesDoPsicologo = DB::TABLE('FAESA_CLINICA_PACIENTE as p')
+        $pacientesDoaluno = DB::TABLE('FAESA_CLINICA_PACIENTE as p')
         ->join('FAESA_CLINICA_AGENDAMENTO as ag', 'ag.ID_PACIENTE', '=', 'p.ID_PACIENTE')
-        ->where('ag.ID_PSICOLOGO', $psicologo)
+        ->where('ag.ID_aluno', $aluno)
         ->where('p.NOME_COMPL_PACIENTE', 'LIKE', "%{$search}%")
         ->where('ag.STATUS_AGEND', '<>', 'Excluido')
         ->get()->toArray();
 
-        return $pacientesDoPsicologo;
+        return $pacientesDoaluno;
     }
 
     public function filtrarPacientes(array $filtros): Collection

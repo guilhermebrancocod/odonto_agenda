@@ -11,8 +11,10 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" crossorigin="anonymous">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css" />
+
     <!-- TOM SELECT -->
     <link href="https://cdn.jsdelivr.net/npm/tom-select@2.3.1/dist/css/tom-select.bootstrap5.css" rel="stylesheet">
+
     <style>
         /* Estilos mantidos do arquivo original e adaptados */
         #servicos-list button {
@@ -46,7 +48,7 @@
         }
 
         /* Estilos para limitar a altura das listas de busca */
-        .list-local-option, .list-psicologo-option, #pacientes-list .list-group {
+        .list-local-option, .list-aluno-option, #pacientes-list .list-group {
             max-height: 200px;
             overflow-y: auto;
         }
@@ -55,6 +57,7 @@
             box-shadow: 0 0.75rem 1.25rem rgba(0,0,0,0.4) !important;
         }
     </style>
+    
 </head>
 
 <body class="bg-body-secondary">
@@ -214,11 +217,11 @@
                         <select id="select-local" name="id_sala_clinica" placeholder="Local do atendimento..." autocomplete="off" data-old-id="{{ old('id_sala_clinica') }}"></select>
                     </div>
 
-                    <!-- SELEÇAO DE PSICÓLOGO -->
+                    <!-- SELEÇAO DE aluno -->
                     <div class="col-md-6 position-relative">
-                         <input type="hidden" name="id_psicologo" id="id_psicologo">
-                        <label for="select-psicologo" class="form-label">Psicólogo</label>
-                        <select id="select-psicologo" name="id_psicologo" placeholder="Psicólogo do Atendimento..." autocomplete="off" data-old-id="{{ old('id_psicologo') }}"></select>
+                         <input type="hidden" name="id_aluno" id="id_aluno">
+                        <label for="select-aluno" class="form-label">aluno</label>
+                        <select id="select-aluno" name="id_aluno" placeholder="aluno do Atendimento..." autocomplete="off" data-old-id="{{ old('id_aluno') }}"></select>
                     </div>
                                         
                     <div class="col-12">
@@ -233,12 +236,12 @@
                     </div>
                 </div>
             </form>
+
         </div>
     </div>
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" crossorigin="anonymous"></script>
-
 <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
 <script src="https://cdn.jsdelivr.net/npm/flatpickr/dist/l10n/pt.js"></script>
 
@@ -341,19 +344,18 @@ document.addEventListener('DOMContentLoaded', function() {
         },
     });
 
-    // --- SELECT DE PSICÓLOGO ---
-    const psicologoSelect = initializeTomSelectWithOldValue('#select-psicologo', {
-        valueField: 'ID_PSICOLOGO',
+    // --- SELECT DE aluno ---
+    const alunoSelect = initializeTomSelectWithOldValue('#select-aluno', {
+        valueField: 'ID_aluno',
         labelField: 'NOME_COMPL',
-        searchField: ['NOME_COMPL', 'ID_PSICOLOGO'],
-        // ... (resto da sua configuração)
+        searchField: ['NOME_COMPL', 'ID_aluno'],
         load: (query, callback) => {
-            const url = `/psicologia/listar-psicologos?search=${encodeURIComponent(query)}`;
+            const url = `/psicologia/listar-alunos?search=${encodeURIComponent(query)}`;
             fetch(url).then(r => r.json()).then(json => {
                 callback(json);
-                const oldId = document.querySelector('#select-psicologo').dataset.oldId;
+                const oldId = document.querySelector('#select-aluno').dataset.oldId;
                 if (oldId && query === oldId && json.length > 0) {
-                    psicologoSelect.setValue(oldId);
+                    alunoSelect.setValue(oldId);
                 }
             }).catch(() => callback());
         },
@@ -362,9 +364,17 @@ document.addEventListener('DOMContentLoaded', function() {
     // --- SELECT DE DURAÇÃO (Não precisa de alteração) ---
     new TomSelect('#duracao_meses_recorrencia', { /* ... */ });
 
+    // SELEÇÃO DE ALUNO DESATIVADA DE INICIO
+    alunoSelect.disable();
+
     // Lógica do evento 'change' do serviço precisa ser anexada à instância criada
     servicoSelect.on('change', (value) => {
-        // ... sua lógica de atualizar o valor e o ícone de observação
+        if(value) {
+            alunoSelect.enable();
+        } else {
+            alunoSelect.clear();
+            alunoSelect.disable();
+        }
     });
 });
 </script>

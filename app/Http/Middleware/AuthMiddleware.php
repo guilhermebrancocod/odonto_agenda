@@ -25,9 +25,9 @@ class AuthMiddleware
             'loginGET',
             'loginPOST',
             'logout',
-            'psicologoLoginGet',
-            'psicologoLoginPost',
-            'psicologoLogout',
+            'alunoLoginGet',
+            'alunoLoginPost',
+            'alunoLogout',
             'professorLoginGet',
             'professorLoginPost',
             'professorLogout',
@@ -36,20 +36,20 @@ class AuthMiddleware
         // Se a rota estiver liberada, segue
         if (in_array($routeName, $rotasLiberadas, true)) {
             // Se for uma rota de POST de login, processa autenticação aqui
-            if (in_array($routeName, ['loginPOST','psicologoLoginPost','professorLoginPost'], true)) {
+            if (in_array($routeName, ['loginPOST','alunoLoginPost','professorLoginPost'], true)) {
                 return $this->processarLogin($request, $routeName, $next);
             }
             return $next($request);
         }
 
         // Já logado?
-        if (session()->has('usuario') || session()->has('psicologo') || session()->has('professor')) {
+        if (session()->has('usuario') || session()->has('aluno') || session()->has('professor')) {
             return $next($request);
         }
 
         // Não logado: redireciona para o login correto por prefixo
-        if (str_starts_with($routeName, 'psicologo')) {
-            return redirect()->route('psicologoLoginGet');
+        if (str_starts_with($routeName, 'aluno')) {
+            return redirect()->route('alunoLoginGet');
         }
 
         if (str_starts_with($routeName, 'professor')) {
@@ -85,11 +85,11 @@ class AuthMiddleware
         }
 
         // Seta a sessão conforme a rota de login utilizada
-        if ($routeName === 'psicologoLoginPost') {
-            if (($validacao->TIPO ?? null) === 'Psicologo') {
-                session(['psicologo' => $validacao]);
+        if ($routeName === 'alunoLoginPost') {
+            if (($validacao->TIPO ?? null) === 'aluno') {
+                session(['aluno' => $validacao]);
             } else {
-                return redirect()->back()->with('error', 'Usuário deve ser Psicólogo');
+                return redirect()->back()->with('error', 'Usuário deve ser aluno');
             }
         } elseif ($routeName === 'professorLoginPost') {
             if (($validacao->TIPO ?? null) === 'Professor') {

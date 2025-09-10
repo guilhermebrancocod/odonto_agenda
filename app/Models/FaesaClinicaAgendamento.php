@@ -31,7 +31,7 @@ class FaesaClinicaAgendamento extends Model
         'CREATED_AT',
         'UPDATED_AT',
         'STATUS_PAG',
-        'ID_PSICOLOGO',
+        'ID_aluno',
         'ID_SALA',
     ];
 
@@ -87,13 +87,13 @@ class FaesaClinicaAgendamento extends Model
 
     /**
      * Define um relacionamento BelongsTo com a tabela LY_ALUNO
-     * Um ID_PSICOLOGO pertence a um LY_ALUNO
+     * Um ID_aluno pertence a um LY_ALUNO
      * 
      * @return Illuminate\Database\Eloquent\Relations\BelongsTo
      */
-    public function psicologo(): BelongsTo
+    public function aluno(): BelongsTo
     {
-        return $this->belongsTo(LyAluno::class, 'ID_PSICOLOGO', 'ALUNO');
+        return $this->belongsTo(LyAluno::class, 'ID_ALUNO', 'ALUNO');
     }
 
     /**

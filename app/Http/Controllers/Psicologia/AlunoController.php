@@ -6,7 +6,7 @@ use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Http\Request;
 
-class PsicologoController extends Controller
+class alunoController extends Controller
 {
     public function listAlunos(Request $request) {
         $search = $request->query('search');
@@ -27,7 +27,7 @@ class PsicologoController extends Controller
         }
 
         $resultado = $query->distinct()
-            ->select('m.ALUNO as ID_PSICOLOGO', 'a.NOME_COMPL', 'p.DT_NASC', 'p.CPF', 'p.SEXO')
+            ->select('m.ALUNO as ID_aluno', 'a.NOME_COMPL', 'p.DT_NASC', 'p.CPF', 'p.SEXO')
             ->get();
 
         return response()->json($resultado);

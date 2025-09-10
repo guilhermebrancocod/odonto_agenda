@@ -167,16 +167,16 @@
                                         </div>
                                     </dd>
                                     
-                                    <!-- PSICOLOGO -->
-                                    <dt>Psicólogo(a)</dt>
+                                    <!-- aluno -->
+                                    <dt>aluno(a)</dt>
                                     <dd>
-                                        <input type="text" class="form-control view-mode" value="{{ $agendamento->ID_PSICOLOGO }}" readonly>
+                                        <input type="text" class="form-control view-mode" value="{{ $agendamento->ID_aluno }}" readonly>
 
                                         <div class="edit-mode d-none">
-                                            <select id="select-psicologo" name="ID_PSICOLOGO" placeholder="Selecione ou busque um psicólogo...">
-                                                @if($agendamento->ID_PSICOLOGO)
-                                                    <option value="{{ $agendamento->ID_PSICOLOGO}}" selected>
-                                                        {{ $agendamento->ID_PSICOLOGO }}
+                                            <select id="select-aluno" name="ID_aluno" placeholder="Selecione ou busque um aluno...">
+                                                @if($agendamento->ID_aluno)
+                                                    <option value="{{ $agendamento->ID_aluno}}" selected>
+                                                        {{ $agendamento->ID_aluno }}
                                                     </option>
                                                 @endif
                                             </select>
@@ -341,18 +341,18 @@
             }
         });
 
-        // --- SELECT PSICÓLOGO ---
-        new TomSelect('#select-psicologo', {
-            valueField: 'ID_PSICOLOGO',
+        // --- SELECT aluno ---
+        new TomSelect('#select-aluno', {
+            valueField: 'ID_aluno',
             labelField: 'NOME_COMPL',
             searchField: ['NOME_COMPL', 'ALUNO'],
             create: false,
             load: (query, callback) => {
-                const url = `/psicologia/listar-psicologos?search=${encodeURIComponent(query)}`;
+                const url = `/psicologia/listar-alunos?search=${encodeURIComponent(query)}`;
                 fetch(url).then(r => r.json()).then(j => callback(j)).catch(() => callback());
             },
             render: {
-                option: (data, escape) => `<div>${escape(data.NOME_COMPL)} - ${escape(data.ID_PSICOLOGO)}</div>`,
+                option: (data, escape) => `<div>${escape(data.NOME_COMPL)} - ${escape(data.ID_aluno)}</div>`,
                 item: (data, escape) => `<div>${escape(data.NOME_COMPL)}</div>`
             }
         });

@@ -102,11 +102,11 @@ class ServicoController extends Controller
 
     public function getDisciplinaServico(Request $request)
     {
-        $matriculasPsicologo = array_column(session('psicologo')[5], 'DISCIPLINA');
+        $matriculasaluno = array_column(session('aluno')[5], 'DISCIPLINA');
 
         $search = trim($request->query('search', ''));
 
-        $query = FaesaClinicaServico::where('ID_CLINICA', 1)->whereIn('DISCIPLINA', $matriculasPsicologo);
+        $query = FaesaClinicaServico::where('ID_CLINICA', 1)->whereIn('DISCIPLINA', $matriculasaluno);
 
         if ($search) {
             $query->where(function($q) use ($search) {

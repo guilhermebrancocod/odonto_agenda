@@ -88,7 +88,7 @@
 
             <div class="bg-white p-4 rounded shadow-sm w-100">  
 
-                <h2>Consultar Psicólogo</h2>
+                <h2>Consultar aluno</h2>
 
                 
                 
