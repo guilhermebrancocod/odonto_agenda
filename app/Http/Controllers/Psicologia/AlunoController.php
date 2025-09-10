@@ -27,7 +27,7 @@ class alunoController extends Controller
         }
 
         $resultado = $query->distinct()
-            ->select('m.ALUNO as ID_aluno', 'a.NOME_COMPL', 'p.DT_NASC', 'p.CPF', 'p.SEXO')
+            ->select('m.ALUNO as ID_ALUNO', 'a.NOME_COMPL', 'p.DT_NASC', 'p.CPF', 'p.SEXO')
             ->get();
 
         return response()->json($resultado);

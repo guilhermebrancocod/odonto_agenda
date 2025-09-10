@@ -219,9 +219,9 @@
 
                     <!-- SELEÇAO DE aluno -->
                     <div class="col-md-6 position-relative">
-                         <input type="hidden" name="id_aluno" id="id_aluno">
-                        <label for="select-aluno" class="form-label">aluno</label>
-                        <select id="select-aluno" name="id_aluno" placeholder="aluno do Atendimento..." autocomplete="off" data-old-id="{{ old('id_aluno') }}"></select>
+                         <input type="hidden" name="ID_ALUNO" id="ID_ALUNO">
+                        <label for="select-aluno" class="form-label">Aluno</label>
+                        <select id="select-aluno" name="ID_ALUNO" placeholder="Aluno do Atendimento..." autocomplete="off" data-old-id="{{ old('ID_ALUNO') }}"></select>
                     </div>
                                         
                     <div class="col-12">
@@ -344,11 +344,11 @@ document.addEventListener('DOMContentLoaded', function() {
         },
     });
 
-    // --- SELECT DE aluno ---
+    // --- SELECT DE ALUNO ---
     const alunoSelect = initializeTomSelectWithOldValue('#select-aluno', {
-        valueField: 'ID_aluno',
+        valueField: 'ID_ALUNO',
         labelField: 'NOME_COMPL',
-        searchField: ['NOME_COMPL', 'ID_aluno'],
+        searchField: ['NOME_COMPL', 'ID_ALUNO'],
         load: (query, callback) => {
             const url = `/psicologia/listar-alunos?search=${encodeURIComponent(query)}`;
             fetch(url).then(r => r.json()).then(json => {
@@ -361,10 +361,8 @@ document.addEventListener('DOMContentLoaded', function() {
         },
     });
 
-    // --- SELECT DE DURAÇÃO (Não precisa de alteração) ---
-    new TomSelect('#duracao_meses_recorrencia', { /* ... */ });
+    new TomSelect('#duracao_meses_recorrencia', {});
 
-    // SELEÇÃO DE ALUNO DESATIVADA DE INICIO
     alunoSelect.disable();
 
     // Lógica do evento 'change' do serviço precisa ser anexada à instância criada
@@ -374,6 +372,25 @@ document.addEventListener('DOMContentLoaded', function() {
         } else {
             alunoSelect.clear();
             alunoSelect.disable();
+        }
+    });
+
+    // --- CAPTURA DO CAMPO DE VALOR ---
+    const valorInput = document.getElementById('valor_agend');
+
+    // Quando mudar o serviço selecionado
+    servicoSelect.on('change', (value) => {
+        if (value) {
+            const selectedItem = servicoSelect.options[value];
+            if (selectedItem && selectedItem.VALOR_SERVICO) {
+                // Formata o valor em reais
+                const valor = parseFloat(selectedItem.VALOR_SERVICO).toLocaleString('pt-BR', {
+                    minimumFractionDigits: 2,
+                });
+                valorInput.value = valor;
+            }
+        } else {
+            valorInput.value = '';
         }
     });
 });

@@ -234,11 +234,11 @@
                         const alunos = {};
 
                         agendamentos.forEach(ag => {
-                            if (!ag.ID_aluno || !ag.paciente) return;
+                            if (!ag.ID_ALUNO || !ag.paciente) return;
 
-                            if (!alunos[ag.ID_aluno]) {
-                                alunos[ag.ID_aluno] = {
-                                    id: ag.ID_aluno,
+                            if (!alunos[ag.ID_ALUNO]) {
+                                alunos[ag.ID_ALUNO] = {
+                                    id: ag.ID_ALUNO,
                                     nome: 'aluno não identificado',
                                     pacientes: [],
                                     pacientes_ids: new Set()
@@ -246,15 +246,15 @@
                             }
 
                             if (ag.aluno && ag.aluno.NOME_COMPL) {
-                                alunos[ag.ID_aluno].nome = ag.aluno.NOME_COMPL;
+                                alunos[ag.ID_ALUNO].nome = ag.aluno.NOME_COMPL;
                             }
 
-                            if (!alunos[ag.ID_aluno].pacientes_ids.has(ag.paciente.ID_PACIENTE)) {
-                                alunos[ag.ID_aluno].pacientes.push({
+                            if (!alunos[ag.ID_ALUNO].pacientes_ids.has(ag.paciente.ID_PACIENTE)) {
+                                alunos[ag.ID_ALUNO].pacientes.push({
                                     nome: ag.paciente.NOME_COMPL_PACIENTE,
                                     cpf: ag.paciente.CPF_PACIENTE || 'Não informado'
                                 });
-                                alunos[ag.ID_aluno].pacientes_ids.add(ag.paciente.ID_PACIENTE);
+                                alunos[ag.ID_ALUNO].pacientes_ids.add(ag.paciente.ID_PACIENTE);
                             }
                         });
 

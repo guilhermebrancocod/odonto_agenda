@@ -125,7 +125,7 @@ class PacienteService
 
         $pacientesDoaluno = DB::TABLE('FAESA_CLINICA_PACIENTE as p')
         ->join('FAESA_CLINICA_AGENDAMENTO as ag', 'ag.ID_PACIENTE', '=', 'p.ID_PACIENTE')
-        ->where('ag.ID_aluno', $aluno)
+        ->where('ag.ID_ALUNO', $aluno)
         ->where('p.NOME_COMPL_PACIENTE', 'LIKE', "%{$search}%")
         ->where('ag.STATUS_AGEND', '<>', 'Excluido')
         ->get()->toArray();

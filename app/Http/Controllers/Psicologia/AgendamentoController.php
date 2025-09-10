@@ -105,7 +105,7 @@ class AgendamentoController extends Controller
         ->where('ID_CLINICA', 1)
         ->where('STATUS_AGEND', '<>', 'Excluido')
         ->where('STATUS_AGEND', '<>', 'Remarcado')
-        ->where('ID_aluno', $aluno[1] ?? null)
+        ->where('ID_ALUNO', $aluno[1] ?? null)
         ->get();
         
         $events = $agendamentos
@@ -154,15 +154,15 @@ class AgendamentoController extends Controller
         $turmas = array_column($professor[4], 'TURMA');
 
         $alunos = DB::table('LYCEUM_BKP_PRODUCAO.dbo.LY_MATRICULA as mat')
-        ->join('FAESA_CLINICA_AGENDAMENTO as ag', 'ag.ID_aluno', 'mat.ALUNO')
+        ->join('FAESA_CLINICA_AGENDAMENTO as ag', 'ag.ID_ALUNO', 'mat.ALUNO')
         ->whereIn('mat.TURMA', $turmas)
-        ->pluck('ag.ID_aluno');
+        ->pluck('ag.ID_ALUNO');
 
         $agendamentos = FaesaClinicaAgendamento::with('paciente', 'servico')
         ->where('ID_CLINICA', 1)
         ->where('STATUS_AGEND', '<>', 'Excluido')
         ->where('STATUS_AGEND', '<>', 'Remarcado')
-        ->whereIn('ID_aluno', $alunos)
+        ->whereIn('ID_ALUNO', $alunos)
         ->get();
 
         $events = $agendamentos
@@ -220,21 +220,21 @@ class AgendamentoController extends Controller
     // CRIAR AGENDAMENTO - ADM | RECEPÇÃO
     public function criarAgendamento(Request $request)
     {
-        // 1. Validação dos dados da requisição (continua no controller)
+        // VALIDACAO DOS DADOS
         $validatedData = $request->validate([
             'paciente_id' => 'required|integer',
             'id_servico' => 'required|integer',
             'dia_agend' => 'required|date',
             'hr_ini' => 'required',
             'hr_fim' => 'required|after:hr_ini',
-            'id_aluno' => 'nullable|integer',
+            'ID_ALUNO' => 'nullable|integer',
             'id_sala_clinica' => 'nullable|integer|exists:faesa_clinica_sala,ID_SALA_CLINICA',
             'tem_recorrencia' => 'nullable|string',
             'dias_semana' => 'nullable|array',
             'dias_semana.*' => 'in:0,1,2,3,4,5,6',
             'data_fim_recorrencia' => 'nullable|date|after_or_equal:dia_agend',
             'duracao_meses_recorrencia' => 'nullable|integer|min:1',
-            // Adicione outras validações conforme necessário...
+            'valor_agend' => 'nullable|string',
         ], [
             'paciente_id.required' => 'A seleção de paciente é obrigatória.',
             'id_servico.required' => 'A seleção de serviço obrigatória.',
@@ -244,9 +244,12 @@ class AgendamentoController extends Controller
             'hr_fim.after' => 'A hora de término deve ser posterior à hora de início.',
             'id_sala_clinica.exists' => 'A sala selecionada não existe.',
         ]);
+    
+        if (!empty($validatedData['valor_agend'])) {
+            $validatedData['valor_agend'] = str_replace(',', '.', $validatedData['valor_agend']);
+        }
 
         try {
-            // 2. Chama o serviço para processar e criar os agendamentos
             $resultado = $this->agendamentoService->criarAgendamentos($validatedData);
 
             // 3. Trata a resposta do serviço
@@ -290,7 +293,7 @@ class AgendamentoController extends Controller
             'observacoes' => 'nullable|string',
             'local_agend' => 'nullable|string|max:255',
             'id_sala_clinica' => 'nullable|integer|exists:faesa_clinica_sala,ID_SALA_CLINICA',
-            'id_aluno' => 'required|integer',
+            'ID_ALUNO' => 'required|integer',
         ], [
             'paciente_id.required' => 'A seleção de paciente é obrigatória.',
             'id_servico.required' => 'A seleção de serviço obrigatória.',
@@ -301,8 +304,8 @@ class AgendamentoController extends Controller
             'id_sala_clinica.exists' => 'A sala selecionada não existe.',
             'observacoes.string' => 'As observações devem ser um texto.',
             'status_agend.required' => 'O status do agendamento é obrigatório.',
-            'id_aluno.integer' => 'A identificação do aluno deve ser o número de matrícula',
-            'id_aluno.required' => 'A identificação do aluno é necesária'
+            'ID_ALUNO.integer' => 'A identificação do aluno deve ser o número de matrícula',
+            'ID_ALUNO.required' => 'A identificação do aluno é necesária'
         ]);
 
         // BUSCA QUAL SERVIÇO aluno SELECIONOU
@@ -315,7 +318,7 @@ class AgendamentoController extends Controller
         }
 
         // AGENDAMENTO SIMPLES
-        if ($this->existeConflitoAgendamento($idClinica, $request->id_sala_clinica, $request->dia_agend, $request->hr_ini, $request->hr_fim, $request->paciente_id, idaluno: $request->id_aluno)) {
+        if ($this->existeConflitoAgendamento($idClinica, $request->id_sala_clinica, $request->dia_agend, $request->hr_ini, $request->hr_fim, $request->paciente_id, idaluno: $request->ID_ALUNO)) {
             return redirect()->back()
                 ->withInput()
                 ->withErrors(['conflito' => 'Conflito de Agendamento identificado']);
@@ -332,7 +335,7 @@ class AgendamentoController extends Controller
             'OBSERVACOES' => $request->observacoes ?? null,
             'ID_SALA_CLINICA' => $request->id_sala_clinica,
             'LOCAL' => $request->local_agend,
-            'ID_aluno' => $request->id_aluno,
+            'ID_ALUNO' => $request->ID_ALUNO,
         ];
 
         if (!$this->salaEstaAtiva($request->id_sala_clinica)) {
@@ -366,8 +369,8 @@ class AgendamentoController extends Controller
         $agendamento = FaesaClinicaAgendamento::findOrFail($id);
 
         $lista_alunos = DB::table('FAESA_CLINICA_AGENDAMENTO')
-            ->select('ID_aluno')
-            ->whereNotNull('ID_aluno')
+            ->select('ID_ALUNO')
+            ->whereNotNull('ID_ALUNO')
             ->distinct()
             ->get();
 
@@ -394,7 +397,7 @@ class AgendamentoController extends Controller
             'ID_AGENDAMENTO' => 'required|integer|exists:faesa_clinica_agendamento,ID_AGENDAMENTO',
             'ID_SERVICO'     => 'required|integer',
             'ID_PACIENTE'    => 'required|integer',
-            'ID_aluno'   => 'nullable|integer',
+            'ID_ALUNO'   => 'nullable|integer',
             'ID_SALA'        => 'nullable|integer',
             'DT_AGEND'       => 'required|date_format:Y-m-d',
             'HR_AGEND_INI'   => 'required|date_format:H:i',
@@ -515,7 +518,7 @@ class AgendamentoController extends Controller
             }
             
             if ($idaluno) {
-                $query->orWhere('ID_aluno', $idaluno);
+                $query->orWhere('ID_ALUNO', $idaluno);
             }
         });
 
@@ -653,7 +656,7 @@ class AgendamentoController extends Controller
             $dadosAgendamento['HR_AGEND_INI'],
             $dadosAgendamento['HR_AGEND_FIN'],
             $dadosAgendamento['ID_PACIENTE'],
-            $dadosAgendamento['ID_aluno']
+            $dadosAgendamento['ID_ALUNO']
         )) {
             return "Conflito de agendamento"; // Mensagem específica
         }

@@ -278,7 +278,7 @@
 
                         if(matriculas.length === 0) {
                             matriculaList.innerHTML = `<button type="button" class="list-group-item list-group-item-action disabled">Nenhuma matrícula encontrada</button>`;
-                            document.getElementById('id_aluno').value = '';
+                            document.getElementById('ID_ALUNO').value = '';
                             return;
                         } else {
                             matriculas.forEach(matricula => {

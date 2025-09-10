@@ -261,7 +261,7 @@
 
                         agendamentos.forEach(ag => {
                             const paciente = ag.paciente ? ag.paciente.NOME_COMPL_PACIENTE : '-';
-                            const aluno = ag.aluno ? ag.aluno.NOME_COMPL : (ag.ID_aluno || '-');
+                            const aluno = ag.aluno ? ag.aluno.NOME_COMPL : (ag.ID_ALUNO || '-');
                             const servico = ag.servico ? ag.servico.SERVICO_CLINICA_DESC : '-';
                             const data = ag.DT_AGEND ? new Date(ag.DT_AGEND).toLocaleDateString('pt-BR', {timeZone: 'UTC'}) : '-';
                             const horaIni = ag.HR_AGEND_INI ? ag.HR_AGEND_INI.substring(0, 5) : '-';

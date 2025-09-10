@@ -126,7 +126,7 @@ class AgendamentoService
             'aluno'
         ])
         ->where('ID_CLINICA', 1)
-        ->where('ID_aluno', session('aluno')[1])
+        ->where('ID_ALUNO', session('aluno')[1])
         ->where('STATUS_AGEND', '<>', 'Excluido');
 
         // Filtro por nome ou CPF do paciente
@@ -218,9 +218,9 @@ public function getAgendamentosForProfessor(Request $request)
     $professor = session('professor');
     $turmas = array_column($professor[4], 'TURMA');
     $alunos = DB::table('LYCEUM_BKP_PRODUCAO.dbo.LY_MATRICULA as mat')
-        ->join('FAESA_CLINICA_AGENDAMENTO as ag', 'ag.ID_aluno', 'mat.ALUNO')
+        ->join('FAESA_CLINICA_AGENDAMENTO as ag', 'ag.ID_ALUNO', 'mat.ALUNO')
         ->whereIn('mat.TURMA', $turmas)
-        ->pluck('ag.ID_aluno');
+        ->pluck('ag.ID_ALUNO');
 
     $query = FaesaClinicaAgendamento::with([
         'paciente',
@@ -232,7 +232,7 @@ public function getAgendamentosForProfessor(Request $request)
     ])
         ->where('ID_CLINICA', 1)
         ->where('STATUS_AGEND', '<>', 'Excluido')
-        ->whereIn('ID_aluno', $alunos);
+        ->whereIn('ID_ALUNO', $alunos);
 
     // FILTRO POR NOME OU CPF DO PACIENTE
     if ($request->filled('search')) {
@@ -248,7 +248,7 @@ public function getAgendamentosForProfessor(Request $request)
         $aluno = $request->input('aluno');
 
         $query->whereHas('aluno', function ($q) use ($aluno) {
-            $q->where('ID_aluno', 'like', "{$aluno}%")
+            $q->where('ID_ALUNO', 'like', "{$aluno}%")
                 ->orWhere('NOME_COMPL', 'like', "%{$aluno}%");
         });
     }
@@ -398,7 +398,7 @@ public function getAgendamentosForProfessor(Request $request)
         $hrIni = $dados['hr_ini'];
         $hrFim = $dados['hr_fim'];
         $idSala = $dados['id_sala_clinica'] ?? null;
-        $idaluno = $dados['id_aluno'] ?? null;
+        $idaluno = $dados['ID_ALUNO'] ?? null;
         $idPaciente = $dados['paciente_id'];
 
         if ($this->_isFeriado($data)) return "A data selecionada é um feriado.";
@@ -408,7 +408,7 @@ public function getAgendamentosForProfessor(Request $request)
             if ($this->_hasConflito('ID_SALA', $idSala, $data, $hrIni, $hrFim, $idParaIgnorar)) return "Sala já ocupada neste horário.";
         }
         if ($idaluno) {
-            if ($this->_hasConflito('ID_aluno', $idaluno, $data, $hrIni, $hrFim, $idParaIgnorar)) return "aluno indisponível neste horário.";
+            if ($this->_hasConflito('ID_ALUNO', $idaluno, $data, $hrIni, $hrFim, $idParaIgnorar)) return "aluno indisponível neste horário.";
         }
         if ($this->_hasConflito('ID_PACIENTE', $idPaciente, $data, $hrIni, $hrFim, $idParaIgnorar)) return "Paciente já possui um agendamento neste horário.";
 
@@ -468,7 +468,7 @@ public function getAgendamentosForProfessor(Request $request)
             'hr_ini'          => $dados['HR_AGEND_INI'],
             'hr_fim'          => $dados['HR_AGEND_FIN'],
             'id_sala_clinica' => $dados['ID_SALA'] ?? null,
-            'id_aluno'    => $dados['ID_aluno'] ?? null,
+            'ID_ALUNO'    => $dados['ID_ALUNO'] ?? null,
             'paciente_id'     => $dados['ID_PACIENTE'],
         ];
     }
@@ -479,7 +479,7 @@ public function getAgendamentosForProfessor(Request $request)
             'ID_CLINICA'         => $original->ID_CLINICA,
             'paciente_id'        => $dados['ID_PACIENTE'],
             'id_servico'         => $dados['ID_SERVICO'],
-            'id_aluno'       => $dados['ID_aluno'] ?? null,
+            'ID_ALUNO'       => $dados['ID_ALUNO'] ?? null,
             'id_sala_clinica'    => $dados['ID_SALA'] ?? null,
             'dia_agend'          => $dados['DT_AGEND'],
             'hr_ini'             => $dados['HR_AGEND_INI'],
@@ -496,7 +496,7 @@ public function getAgendamentosForProfessor(Request $request)
         $local = !empty($dados['ID_SALA']) ? FaesaClinicaSala::find($dados['ID_SALA'])->DESCRICAO : null;
         return [
             'ID_SERVICO'   => $dados['ID_SERVICO'],
-            'ID_aluno' => $dados['ID_aluno'] ?? null,
+            'ID_ALUNO' => $dados['ID_ALUNO'] ?? null,
             'ID_SALA'      => $dados['ID_SALA'] ?? null,
             'STATUS_AGEND' => $dados['STATUS_AGEND'],
             'VALOR_AGEND'  => $dados['VALOR_AGEND'] ?? null,
@@ -517,7 +517,7 @@ public function getAgendamentosForProfessor(Request $request)
             'ID_CLINICA'         => $dados['ID_CLINICA'] ?? self::ID_CLINICA,
             'ID_PACIENTE'        => $dados['paciente_id'],
             'ID_SERVICO'         => $dados['id_servico'],
-            'ID_aluno'       => $dados['id_aluno'] ?? null,
+            'ID_ALUNO'       => $dados['ID_ALUNO'] ?? null,
             'ID_SALA'            => $dados['id_sala_clinica'] ?? null,
             'DT_AGEND'           => $dados['dia_agend'],
             'HR_AGEND_INI'       => $dados['hr_ini'],

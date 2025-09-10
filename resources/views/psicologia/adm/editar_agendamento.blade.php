@@ -170,13 +170,13 @@
                                     <!-- aluno -->
                                     <dt>aluno(a)</dt>
                                     <dd>
-                                        <input type="text" class="form-control view-mode" value="{{ $agendamento->ID_aluno }}" readonly>
+                                        <input type="text" class="form-control view-mode" value="{{ $agendamento->ID_ALUNO }}" readonly>
 
                                         <div class="edit-mode d-none">
-                                            <select id="select-aluno" name="ID_aluno" placeholder="Selecione ou busque um aluno...">
-                                                @if($agendamento->ID_aluno)
-                                                    <option value="{{ $agendamento->ID_aluno}}" selected>
-                                                        {{ $agendamento->ID_aluno }}
+                                            <select id="select-aluno" name="ID_ALUNO" placeholder="Selecione ou busque um aluno...">
+                                                @if($agendamento->ID_ALUNO)
+                                                    <option value="{{ $agendamento->ID_ALUNO}}" selected>
+                                                        {{ $agendamento->ID_ALUNO }}
                                                     </option>
                                                 @endif
                                             </select>
@@ -343,7 +343,7 @@
 
         // --- SELECT aluno ---
         new TomSelect('#select-aluno', {
-            valueField: 'ID_aluno',
+            valueField: 'ID_ALUNO',
             labelField: 'NOME_COMPL',
             searchField: ['NOME_COMPL', 'ALUNO'],
             create: false,
@@ -352,7 +352,7 @@
                 fetch(url).then(r => r.json()).then(j => callback(j)).catch(() => callback());
             },
             render: {
-                option: (data, escape) => `<div>${escape(data.NOME_COMPL)} - ${escape(data.ID_aluno)}</div>`,
+                option: (data, escape) => `<div>${escape(data.NOME_COMPL)} - ${escape(data.ID_ALUNO)}</div>`,
                 item: (data, escape) => `<div>${escape(data.NOME_COMPL)}</div>`
             }
         });

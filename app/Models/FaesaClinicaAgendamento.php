@@ -31,7 +31,7 @@ class FaesaClinicaAgendamento extends Model
         'CREATED_AT',
         'UPDATED_AT',
         'STATUS_PAG',
-        'ID_aluno',
+        'ID_ALUNO',
         'ID_SALA',
     ];
 
@@ -87,7 +87,7 @@ class FaesaClinicaAgendamento extends Model
 
     /**
      * Define um relacionamento BelongsTo com a tabela LY_ALUNO
-     * Um ID_aluno pertence a um LY_ALUNO
+     * Um ID_ALUNO pertence a um LY_ALUNO
      * 
      * @return Illuminate\Database\Eloquent\Relations\BelongsTo
      */

@@ -108,7 +108,7 @@
 
                 <input type="hidden" name="status_agend" value="Em aberto"/>
 
-                <input type="hidden" name="id_aluno" id="id_aluno" value="{{ session('aluno')[1] }}"/>
+                <input type="hidden" name="ID_ALUNO" id="ID_ALUNO" value="{{ session('aluno')[1] }}"/>
 
                 <div id="session-data"
                    data-aluno='@json(session('aluno'))'
