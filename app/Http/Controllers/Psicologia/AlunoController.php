@@ -6,7 +6,7 @@ use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Http\Request;
 
-class alunoController extends Controller
+class AlunoController extends Controller
 {
     public function listAlunos(Request $request) {
 

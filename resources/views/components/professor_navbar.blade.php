@@ -187,7 +187,7 @@
         <!-- CONSULTAR alunoS E PACIENTES DOS alunoS -->
         <li class="list-group-item rounded-1 p-0 overflow-hidden ">
             <a href="/professor/aluno" class="link-agendar d-flex align-items-center gap-2 p-1">
-                <i class="bi bi-people-fill"></i> alunos
+                <i class="bi bi-people-fill"></i> Alunos
             </a>
         </li>
 
