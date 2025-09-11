@@ -91,7 +91,7 @@
                         <div class="col-12 col-sm-6 col-lg-3">
                             <div class="input-group">
                                 <span class="input-group-text"><i class="bi bi-calendar-event"></i></span>
-                                <input id="DT_NASC_PACIENTE-input" name="DT_NASC_PACIENTE" type="text" class="form-control" placeholder="Data de Nascimento" />
+                                <input id="DT_NASC_PACIENTE-input" name="DT_NASC_PACIENTE" type="text" class="form-control" placeholder="Data de Nascimento"/>
                             </div>
                         </div>
                         <div class="col-12 col-sm-6 col-lg-2">
@@ -182,7 +182,7 @@
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fechar"></button>
                 </div>
                 <div class="modal-body">
-                    <p>Deseja editar o paciente: <strong id="modal-paciente-nome"></strong>?</p>
+                    <p><strong id="modal-paciente-nome"></strong></p>
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
@@ -232,10 +232,12 @@
     <div class="modal fade" id="editPacienteModal" tabindex="-1" aria-labelledby="editPacienteModalLabel" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered modal-lg">
             <div class="modal-content">
+
                 <div class="modal-header">
                     <h5 class="modal-title">Editar Paciente</h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fechar"></button>
                 </div>
+
                 <div class="modal-body">
                     <form id="editPacienteForm">
 
@@ -247,7 +249,7 @@
 
                             <!-- NOME -->
                             <div class="col-md-6 form-floating">
-                                <input type="text" class="form-control" id="editPacienteNome" name="nome" placeholder="Nome">
+                                <input type="text" class="form-control" id="editPacienteNome" name="nome" placeholder="Nome"  value="{{ old('name') }}">
                                 <label for="editPacienteNome">Nome</label>
                             </div>
 
@@ -265,7 +267,7 @@
 
                             <!-- DATA DE NASCIMENTO -->
                             <div class="col-md-6 form-floating">
-                                <input type="date" class="form-control" id="editPacienteDTNASC" name="dt_nasc" placeholder="Data de Nascimento">
+                                <input type="text" class="form-control" id="editPacienteDTNASC" name="dt_nasc" placeholder="Data de Nascimento">
                                 <label for="editPacienteDTNASC">Data de Nascimento</label>
                             </div>
 
@@ -354,6 +356,7 @@
                         <div class="d-flex justify-content-end mt-4">
                             <button type="submit" class="btn btn-primary">Salvar Alterações</button>
                         </div>
+
                     </form>
                 </div>
             </div>
@@ -423,6 +426,7 @@
             function ativarEventosEditar() {
                 document.querySelectorAll('.editar-btn').forEach(button => {
                     button.addEventListener('click', () => {
+
                         selectedPaciente = {
                             id: button.getAttribute('data-id'),
                             status: button.getAttribute('data-status') ?? 'nada',
@@ -440,6 +444,7 @@
                             email: button.getAttribute('data-email'),
                             municipio: button.getAttribute('data-municipio'),
                         };
+                        
                         document.getElementById('modal-paciente-nome').textContent = `Deseja editar o paciente: ${selectedPaciente.nome}?`;
                         new bootstrap.Modal(document.getElementById('confirmEditModal')).show();
                     });
@@ -549,7 +554,7 @@
                                 <td>
                                     <div class="d-flex flex-nowrap gap-1">
                                         <button type="button" class="btn btn-sm btn-warning editar-btn"
-                                            data-id="${paciente.ID_PACIENTE}" 
+                                            data-id="${paciente.ID_PACIENTE}"
                                             data-status="${paciente.STATUS ?? '-'}"
                                             data-nome="${paciente.NOME_COMPL_PACIENTE ?? 'Paciente'}"
                                             data-cpf="${paciente.CPF_PACIENTE ?? ''}"
@@ -623,14 +628,18 @@
 
             function enviarEdicao(e) {
                 e.preventDefault();
+                
                 if (!selectedPaciente || !selectedPaciente.id) {
-                    //alert('Paciente não selecionado.');
+                    alert('Paciente não selecionado.');
                     return;
                 }
 
+                const cpfComMascara = document.getElementById('editPacienteCPF').value;
+                const cpfLimpo = cpfComMascara.replace(/[^\d]/g, ''); 
+
                 const dados = {
                     nome: document.getElementById('editPacienteNome').value,
-                    cpf: document.getElementById('editPacienteCPF').value,
+                    cpf: cpfLimpo,
                     status: document.getElementById('editPacienteStatus').value ?? '-',
                     dt_nasc: document.getElementById('editPacienteDTNASC').value,
                     sexo: document.getElementById('editPacienteSEXO').value,
@@ -653,8 +662,11 @@
                     },
                     body: JSON.stringify(dados),
                 })
-                .then(response => {
-                    if (!response.ok) throw new Error('Erro ao salvar dados');
+                .then(async response => {
+                    if (!response.ok) {
+                        const errorData = await response.json();
+                        throw errorData;
+                    }
                     return response.json();
                 })
                 .then(data => {
@@ -662,7 +674,8 @@
                     location.reload();
                 })
                 .catch(error => {
-                    console.error(error);
+                    console.error("Erros de validação:", error.errors);
+                    alert(Object.values(error.errors).join("\n"));
                 });
             }
 
@@ -862,6 +875,5 @@
             e.target.value = value;
         });
     </script>
-
 </body>
 </html>

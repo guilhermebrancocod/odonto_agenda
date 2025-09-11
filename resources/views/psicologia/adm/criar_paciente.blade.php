@@ -79,7 +79,7 @@
                         </div>
                         <div class="col-md-3">
                             <label for="dt_nasc" class="form-label">Data de Nascimento</label>
-                            <input type="text" id="dt_nasc" name="DT_NASC_PACIENTE" class="form-control" placeholder="dd/mm/aaaa" value="{{ old('DT_NASC_PACIENTE') }}"/>
+                            <input type="text" id="dt_nasc" name="DT_NASC_PACIENTE" class="form-control" placeholder="dd/mm/aaaa" value="{{ old('DT_NASC_PACIENTE') }}" required/>
                         </div>
                         <div class="col-md-3">
                             <label for="cpf_paciente" class="form-label">CPF <span class="required-field">*</span></label>

@@ -60,7 +60,7 @@
 </head>
 
 <body class="bg-body-secondary">
-    @include('components.psicologo_navbar')
+    @include('components.aluno_navbar')
 
     @if($errors->any())
         <div class="alert alert-danger shadow text-center position-fixed top-0 start-50 translate-middle-x mt-3 animate-alert" style="max-width: 90%;">
@@ -95,13 +95,19 @@
                             <div class="input-group">
                                 <span class="input-group-text"><i class="bi bi-person"></i></span>
                                 <input id="search-input" name="search" type="search" class="form-control" placeholder="Nome ou CPF do paciente" />
+                                <button type="button" class="btn btn-outline-secondary clear-input" data-target="search-input">
+                                    <i class="bi bi-x"></i>
+                                </button>
                             </div>
                         </div>
 
                         <div class="col-12 col-sm-6 col-md-3">
                             <div class="input-group">
                                 <span class="input-group-text"><i class="bi bi-person-workspace"></i></span>
-                                <input id="psicologo-input" name="psicologo" type="search" class="form-control" placeholder="Nome/Matrícula do Psicólogo" />
+                                <input id="aluno-input" name="aluno" type="search" class="form-control" placeholder="Nome/Matrícula do aluno" />
+                                <button type="button" class="btn btn-outline-secondary clear-input" data-target="aluno-input">
+                                    <i class="bi bi-x"></i>
+                                </button>
                             </div>
                         </div>
 
@@ -109,6 +115,9 @@
                             <div class="input-group">
                                 <span class="input-group-text"><i class="bi bi-calendar-event"></i></span>
                                 <input id="date-input" name="date" type="text" class="form-control" placeholder="Data" />
+                                <button type="button" class="btn btn-outline-secondary clear-input" data-target="date-input">
+                                    <i class="bi bi-x"></i>
+                                </button>
                             </div>
                         </div>
 
@@ -116,6 +125,9 @@
                             <div class="input-group">
                                 <span class="input-group-text"><i class="bi bi-clock-history"></i></span>
                                 <input id="start-time-input" name="start_time" type="text" class="form-control" placeholder="Hora Início" />
+                                <button type="button" class="btn btn-outline-secondary clear-input" data-target="start-time-input">
+                                    <i class="bi bi-x"></i>
+                                </button>
                             </div>
                         </div>
 
@@ -123,6 +135,9 @@
                             <div class="input-group">
                                 <span class="input-group-text"><i class="bi bi-clock"></i></span>
                                 <input id="end-time-input" name="end_time" type="text" class="form-control" placeholder="Hora Fim" />
+                                <button type="button" class="btn btn-outline-secondary clear-input" data-target="end-time-input">
+                                    <i class="bi bi-x"></i>
+                                </button>
                             </div>
                         </div>
 
@@ -137,6 +152,9 @@
                                     <option value="Cancelado">Cancelado</option>
                                     <option value="Finalizado">Finalizado</option>
                                 </select>
+                                <button type="button" class="btn btn-outline-secondary clear-input" data-target="status-input">
+                                    <i class="bi bi-x"></i>
+                                </button>
                             </div>
                         </div>
 
@@ -144,6 +162,9 @@
                             <div class="input-group">
                                 <span class="input-group-text"><i class="bi bi-briefcase"></i></span>
                                 <input id="service-input" name="service" type="text" class="form-control" placeholder="Serviço" />
+                                <button type="button" class="btn btn-outline-secondary clear-input" data-target="service-input">
+                                    <i class="bi bi-x"></i>
+                                </button>
                             </div>
                         </div>
 
@@ -151,13 +172,9 @@
                             <div class="input-group">
                                 <span class="input-group-text"><i class="bi bi-geo-alt"></i></span>
                                 <input id="local-input" name="local" type="text" class="form-control" placeholder="Local" />
-                            </div>
-                        </div>
-
-                        <div class="col-12 col-sm-6 col-md-3">
-                            <div class="input-group">
-                                <span class="input-group-text"><i class="bi bi-currency-dollar"></i></span>
-                                <input id="valor-input" name="valor" type="text" class="form-control" placeholder="Valor" />
+                                <button type="button" class="btn btn-outline-secondary clear-input" data-target="local-input">
+                                    <i class="bi bi-x"></i>
+                                </button>
                             </div>
                         </div>
 
@@ -181,17 +198,14 @@
                             <thead class="table-light" style="position: sticky; top: 0; z-index: 1;">
                                 <tr>
                                     <th>Paciente</th>
-                                    <th>Psicólogo</th>
+                                    <th>Aluno</th>
                                     <th>Serviço</th>
                                     <th>Data</th>
                                     <th>Início</th>
                                     <th>Fim</th>
                                     <th>Local</th>
                                     <th>Status</th>
-                                    <th>Reagend.</th>
-                                    <th>Valor</th>
-                                    <th>Pago?</th>
-                                    <th>Valor Pago</th>
+                                    <th>Reagendamento?</th>
                                     <th>Ações</th>
                                 </tr>
                             </thead>
@@ -227,6 +241,27 @@
     <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
     <script src="https://cdn.jsdelivr.net/npm/flatpickr/dist/l10n/pt.js"></script>
 
+    <!-- LIMPAR VALORES DE CAMPOS DE PESQUISA AO CLICAR NO X -->
+    <script>
+        document.querySelectorAll('.clear-input').forEach(btn => {
+            btn.addEventListener('click', function() {
+                const targetId = this.getAttribute('data-target');
+                const input = document.getElementById(targetId);
+
+                if (!input) return;
+
+                if (input._flatpickr) {
+                    input._flatpickr.clear();
+                } else {
+                    input.value = "";
+                }
+
+                input.dispatchEvent(new Event('input'));
+                input.dispatchEvent(new Event('change')); 
+            });
+        });
+    </script>
+
     <script>
         document.addEventListener("DOMContentLoaded", function () {
             const agendamentosTbody = document.getElementById('agendamentos-tbody');
@@ -243,7 +278,7 @@
 
             function carregarAgendamentos() {
                 const params = getFilters();
-                const url = `/psicologo/consultar-agendamento/buscar?${params.toString()}`;
+                const url = `/aluno/consultar-agendamento/buscar?${params.toString()}`;
 
                 // Adiciona um feedback visual de carregamento
                 agendamentosTbody.innerHTML = `<tr><td colspan="13" class="text-center"><div class="spinner-border spinner-border-sm" role="status"><span class="visually-hidden">Loading...</span></div> Carregando...</td></tr>`;
@@ -264,16 +299,13 @@
 
                         agendamentos.forEach(ag => {
                             const paciente = ag.paciente ? ag.paciente.NOME_COMPL_PACIENTE : '-';
-                            const psicologo = ag.psicologo ? ag.psicologo.NOME_COMPL : (ag.ID_PSICOLOGO || '-');
+                            const aluno = ag.aluno ? ag.aluno.NOME_COMPL : (ag.ID_ALUNO || '-');
                             const servico = ag.servico ? ag.servico.SERVICO_CLINICA_DESC : '-';
                             const data = ag.DT_AGEND ? new Date(ag.DT_AGEND).toLocaleDateString('pt-BR', {timeZone: 'UTC'}) : '-';
                             const horaIni = ag.HR_AGEND_INI ? ag.HR_AGEND_INI.substring(0, 5) : '-';
                             const horaFim = ag.HR_AGEND_FIN ? ag.HR_AGEND_FIN.substring(0, 5) : '-';
                             const local = ag.LOCAL ?? '-';
                             const status = ag.STATUS_AGEND || '-';
-                            const valor = ag.VALOR_AGEND ? parseFloat(ag.VALOR_AGEND).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' }) : '-';
-                            const checkPagamento = ag.STATUS_PAG === 'S' ? '<span class="badge bg-success">Sim</span>' : '<span class="badge bg-danger">Não</span>';
-                            const valorPagamento = ag.VALOR_PAG ? parseFloat(ag.VALOR_PAG).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' }) : '-';
                             const reagendamento = ag.ID_AGEND_REMARCADO != null ? 'Sim' : 'Não';
                             
                             const statusMap = {
@@ -288,7 +320,7 @@
                             const row = document.createElement('tr');
                             row.innerHTML = `
                                 <td>${paciente}</td>
-                                <td>${psicologo}</td>
+                                <td>${aluno}</td>
                                 <td>${servico}</td>
                                 <td>${data}</td>
                                 <td>${horaIni}</td>
@@ -296,11 +328,8 @@
                                 <td>${local}</td>
                                 <td class="fw-bold ${statusInfo.color}"><i class="bi ${statusInfo.icon} me-1"></i>${status}</td>
                                 <td>${reagendamento}</td>
-                                <td>${valor}</td>
-                                <td class="text-center">${checkPagamento}</td>
-                                <td>${valorPagamento}</td>
                                 <td class="d-flex flex-nowrap gap-1 agendamento-actions">
-                                    <a href="/psicologo/agendamento/${ag.ID_AGENDAMENTO}/editar" class="btn btn-warning flex-grow-1" title="Editar"><i class="bi bi-pencil"></i></a>
+                                    <a href="/aluno/agendamento/${ag.ID_AGENDAMENTO}/editar" class="btn btn-warning flex-grow-1" title="Editar"><i class="bi bi-pencil"></i></a>
                                     <form action="/psicologia/agendamento/${ag.ID_AGENDAMENTO}" method="POST" onsubmit="return confirm('Confirma a exclusão deste agendamento?');">
                                         @csrf
                                         @method('DELETE')

@@ -27,7 +27,7 @@
 <body class="bg-body-secondary">
 
     <!-- COMPONENT NAVBAR -->
-    @include('components.psicologo_navbar')
+    @include('components.aluno_navbar')
 
     <!-- EM CASO DE ERROS -->
     @if ($errors->any())
@@ -53,7 +53,7 @@
             <x-page-title>
             </x-page-title>
 
-            <form method="POST" action="{{ route('agendamento.update') }}">
+            <form method="POST" action="{{ route('aluno.agendamento.update') }}">
                 @csrf
                 @method('PUT')
 
@@ -120,7 +120,7 @@
                                         </select>
 
                                         @if ($agendamento->ID_AGEND_REMARCADO)
-                                            <a href="{{ url('/psicologo/agendamento/' . $agendamento->ID_AGEND_REMARCADO . '/editar') }}" 
+                                            <a href="{{ url('/aluno/agendamento/' . $agendamento->ID_AGEND_REMARCADO . '/editar') }}" 
                                             class="btn btn-secondary btn-sm mt-2 w-100" 
                                             target="_blank" 
                                             title="Ir para agendamento anterior">
@@ -155,7 +155,7 @@
                                     <dt>Paciente</dt>
                                     <dd>
                                         <input type="text" class="form-control view-mode" 
-                                            value="{{ $agendamento->paciente->NOME_COMPL_PACIENTE ?? '' }}" readonly>
+                                            value="{{ $agendamento->paciente->NOME_COMPL_PACIENTE ?? '-' }}" readonly>
                                         <div class="edit-mode d-none">
                                             <select id="select-paciente" name="ID_PACIENTE" placeholder="Selecione ou busque um paciente...">
                                                 @if($agendamento->paciente)
@@ -167,17 +167,18 @@
                                         </div>
                                     </dd>
                                     
-                                    <!-- PSICOLOGO -->
-                                    <dt>Psicólogo(a)</dt>
+                                    <!-- aluno -->
+                                    <dt>aluno(a)</dt>
                                     <dd>
-                                        <input type="text" class="form-control view-mode" value="{{ $agendamento->ID_PSICOLOGO }}" readonly>
+                                        <input type="text" class="form-control view-mode" value="{{ $agendamento->aluno->NOME_COMPL ?? '-' }}" readonly>
 
                                         <div class="edit-mode d-none">
-                                            <select id="select-psicologo" name="ID_PSICOLOGO" placeholder="" disabled>
-                                                @if($agendamento->ID_PSICOLOGO)
-                                                    <option value="{{ $agendamento->ID_PSICOLOGO}}" selected>
-                                                        {{ $agendamento->ID_PSICOLOGO }}
+                                            <select id="select-aluno" name="ID_ALUNO" placeholder="" disabled>
+                                                @if($agendamento->ID_ALUNO)
+                                                    <option value="{{ $agendamento->ID_ALUNO}}" selected>
+                                                        {{ $agendamento->aluno->NOME_COMPL }}
                                                     </option>
+                                                    <input type="hidden" name="ID_ALUNO" value="{{ $agendamento->ID_ALUNO }}">
                                                 @endif
                                             </select>
                                         </div>
@@ -214,7 +215,7 @@
                 </div>
                 
                 <div class="mt-4 d-flex justify-content-between">
-                    <button type="button" class="btn btn-secondary" onclick="window.history.go(-1)">
+                    <button type="button" class="btn btn-secondary" onclick="window.location='{{ route('alunoConsultarAgendamentos-GET') }}'">
                         <i class="bi bi-arrow-left me-2"></i>Voltar
                     </button>
                     <div>
@@ -308,7 +309,7 @@
             create: false,
             load: (query, callback) => {
                 if (query.length < 2) return callback();
-                const url = `/psicologo/consultar-paciente/buscar-nome-cpf?search=${encodeURIComponent(query)}`;
+                const url = `/aluno/consultar-paciente/buscar-nome-cpf?search=${encodeURIComponent(query)}`;
                 fetch(url).then(response => response.json()).then(json => callback(json)).catch(() => callback());
             },
             render: {
@@ -329,18 +330,18 @@
             }
         });
 
-        // --- SELECT PSICÓLOGO ---
-        new TomSelect('#select-psicologo', {
-            valueField: 'ID_PSICOLOGO',
+        // --- SELECT aluno ---
+        new TomSelect('#select-aluno', {
+            valueField: 'ID_ALUNO',
             labelField: 'NOME_COMPL',
             searchField: ['NOME_COMPL', 'ALUNO'],
             create: false,
             load: (query, callback) => {
-                const url = `/psicologia/listar-psicologos?search=${encodeURIComponent(query)}`;
+                const url = `/psicologia/listar-alunos?search=${encodeURIComponent(query)}`;
                 fetch(url).then(r => r.json()).then(j => callback(j)).catch(() => callback());
             },
             render: {
-                option: (data, escape) => `<div>${escape(data.NOME_COMPL)} - ${escape(data.ID_PSICOLOGO)}</div>`,
+                option: (data, escape) => `<div>${escape(data.NOME_COMPL)} - ${escape(data.ID_ALUNO)}</div>`,
                 item: (data, escape) => `<div>${escape(data.NOME_COMPL)}</div>`
             }
         });

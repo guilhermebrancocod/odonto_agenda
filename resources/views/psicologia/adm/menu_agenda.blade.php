@@ -29,6 +29,8 @@
 
     <style>
         #calendar {
+            width: 100%;
+            height: 100vh; /* ocupa toda altura da tela */
             max-width: 900px;
             max-height: 86vh;
             overflow-y: auto;
@@ -51,10 +53,22 @@
             background: linear-gradient(180deg, #7aacce, #2596be);
         }
 
-        /* Esconde o scroll normalmente */
-        .fc-daygrid-day-events {
+        /* Limita altura de eventos apenas na view Mês */
+        .fc-dayGridMonth-view .fc-daygrid-day-events {
             max-height: 120px;
             overflow-y: auto;
+        }
+
+        /* Na view Dia, os eventos ocupam todo o espaço disponível */
+        .fc-dayGridDay-view .fc-daygrid-day-events,
+        .fc-timeGridDay-view .fc-timegrid-event {
+            max-height: none;
+            height: auto !important;
+        }
+
+
+        /* Esconde o scroll normalmente */
+        .fc-daygrid-day-events {
             overflow-x: hidden;
             padding-right: 4px;
             scrollbar-width: none;
@@ -344,12 +358,20 @@
     });
 
     // RECRIA O CALENDÁRIO AO REDIMENSIONAR (com debounce)
-    let resizeTimeout;
+    let currentScreenWidth = window.innerWidth;
+
     window.addEventListener('resize', () => {
         clearTimeout(resizeTimeout);
         resizeTimeout = setTimeout(() => {
-            renderCalendar();
-        }, 300); // espera 300ms após parar de redimensionar
+            const newScreenWidth = window.innerWidth;
+            
+            // só recria se cruzar o breakpoint de 600px
+            if ((currentScreenWidth <= 600 && newScreenWidth > 600) ||
+                (currentScreenWidth > 600 && newScreenWidth <= 600)) {
+                currentScreenWidth = newScreenWidth;
+                renderCalendar();
+            }
+        }, 300);
     });
 
     // SCRIPT PARA MUDANÇA DE STATUS DE AGENDAMENTO

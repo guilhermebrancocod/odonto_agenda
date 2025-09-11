@@ -128,14 +128,14 @@
     
 <body class="bg-body-secondary">
     
-    @include('components.psicologo_navbar')
+    @include('components.aluno_navbar')
 
     <div class="container ms-3 mw-100">
 
         <div class="row">
 
             <x-page-title>
-                    <p onclick="window.location.href = '/psicologo/criar-agendamento'" class="btn btn-success p-2 me-3" style="font-size: 15px;" >
+                    <p onclick="window.location.href = '/aluno/criar-agendamento'" class="btn btn-success p-2 me-3" style="font-size: 15px;" >
                         <span>Novo Agendamento</span>
                     </p>
             </x-page-title>
@@ -263,7 +263,7 @@
                 info.el.style.borderColor = info.event.backgroundColor;
                 info.el.style.color = 'white';
             },
-            events: '/psicologo/agendamentos-calendar/',
+            events: '/aluno/agendamentos-calendar/',
 
             // EXECUTADO QUANDO O USUÁRIO CLICA EM UM EVENTO DO CALENDÁRIO
             eventClick: function(info) {

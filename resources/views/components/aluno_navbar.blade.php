@@ -159,13 +159,13 @@
     <!-- DADOS DA SESSAO DO USUARIO -->
     <div classs="">
         <p style="color:#ecf5f9" class="p-0 m-0 text-center">
-            {{ session('psicologo')[0] }}
+            {{ session('aluno')[0] }}
         </p>
         <p style="color:#ecf5f9" class="p-0 m-0 text-center">
-            {{ session('psicologo')[1] }}
+            {{ session('aluno')[1] }}
         </p>
         <p style="color:#ecf5f9" class="p-0 m-0 text-center">
-            {{ session('psicologo')[2] }}
+            {{ session('aluno')[2] }}
         </p>
     </div>
 
@@ -174,28 +174,28 @@
 
         <!-- PÁGINA INICIAL - MENU AGENDA -->
         <li class="list-group-item rounded-1 p-0 overflow-hidden ">
-            <a href="/psicologo" class="link-agendar d-flex align-items-center gap-2 p-1">
+            <a href="/aluno" class="link-agendar d-flex align-items-center gap-2 p-1">
                 <i class="fas fa-home"></i> Início
             </a>
         </li>
 
         <!-- INCLUIR AGENDAMENTO -->
         <li class="list-group-item rounded-1 p-0 overflow-hidden ">
-            <a href="/psicologo/criar-agendamento" class="link-agendar d-flex align-items-center gap-2 p-1">
+            <a href="/aluno/criar-agendamento" class="link-agendar d-flex align-items-center gap-2 p-1">
                 <i class="fas fa-calendar-plus"></i> Criar Agenda
             </a>
         </li>
 
         <!-- CONSULTAR AGENDA -->
         <li class="list-group-item rounded-1 p-0 overflow-hidden ">
-            <a href="/psicologo/consultar-agendamento" class="link-agendar d-flex align-items-center gap-2 p-1">
+            <a href="/aluno/consultar-agendamento" class="link-agendar d-flex align-items-center gap-2 p-1">
                 <i class="fas fa-edit"></i> Agendas
             </a>
         </li>
 
         <!-- LOGOUT -->
         <li class="list-group-item mt-auto rounded-1 p-0 overflow-hidden ">
-            <a href="/logout" class="link-logout d-flex align-items-center gap-2 p-1">
+            <a href="/aluno/logout" class="link-logout d-flex align-items-center gap-2 p-1">
                 <i class="fas fa-sign-out-alt"></i>
                 Logout
             </a>

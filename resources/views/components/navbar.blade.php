@@ -159,7 +159,7 @@
     <!-- DADOS DA SESSAO DO USUARIO -->
     <div classs="">
         <p style="color:#ecf5f9" class="p-0 m-0 text-center">
-            {{ session('usuario')[0]->ID_USUARIO_CLINICA }}
+            {{ session('usuario')->USUARIO }}
         </p>
     </div>
 

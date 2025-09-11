@@ -167,20 +167,22 @@
                                         </div>
                                     </dd>
                                     
-                                    <!-- PSICOLOGO -->
-                                    <dt>Psicólogo(a)</dt>
+                                    <!-- ALUNO -->
+                                    <dt>Aluno(a)</dt>
                                     <dd>
-                                        <input type="text" class="form-control view-mode" value="{{ $agendamento->ID_PSICOLOGO }}" readonly>
+                                        <input type="text" class="form-control view-mode" value="{{ $agendamento->aluno->NOME_COMPL ?? '-' }}" readonly>
 
                                         <div class="edit-mode d-none">
-                                            <select id="select-psicologo" name="ID_PSICOLOGO" placeholder="Selecione ou busque um psicólogo...">
-                                                @if($agendamento->ID_PSICOLOGO)
-                                                    <option value="{{ $agendamento->ID_PSICOLOGO}}" selected>
-                                                        {{ $agendamento->ID_PSICOLOGO }}
+                                            <select id="select-aluno" name="ID_ALUNO" placeholder="Selecione ou busque um aluno...">
+                                                @if($agendamento->ID_ALUNO)
+                                                    <option value="{{ $agendamento->aluno->ALUNO }}" selected>
+                                                        {{ $agendamento->aluno->NOME_COMPL }}
                                                     </option>
+                                                    <input type="hidden" name="ID_ALUNO" id="id_aluno_input" value="{{ $agendamento->ID_ALUNO }}">
                                                 @endif
-                                            </select>
+                                            </select> 
                                         </div>
+
                                     </dd>
 
                                     <!-- CLÍNICA -->
@@ -217,7 +219,7 @@
                                 <dl class="details-grid">
                                     <dt>Valor</dt>
                                     <dd>
-                                        <input type="text" class="form-control editable-field" name="VALOR_AGEND" 
+                                        <input type="text" class="form-control editable-field" name="VALOR_AGEND" id="valor_edit_agenda" 
                                             value="{{ $agendamento->VALOR_AGEND ? number_format($agendamento->VALOR_AGEND, 2, ',', '.') : '' }}" disabled>
                                     </dd>
                                 </dl>
@@ -227,7 +229,7 @@
                 </div>
                 
                 <div class="mt-4 d-flex justify-content-between">
-                    <button type="button" class="btn btn-secondary" onclick="window.history.go(-1)">
+                    <button type="button" class="btn btn-secondary" onclick="window.location='{{ route('listagem-agendamentos') }}'">
                         <i class="bi bi-arrow-left me-2"></i>Voltar
                     </button>
                     <div>
@@ -251,125 +253,178 @@
 
     <script>
     document.addEventListener('DOMContentLoaded', function() {
-    const btnEditar = document.getElementById('btn-editar');
-    const btnSalvar = document.getElementById('btn-salvar');
+        const btnEditar = document.getElementById('btn-editar');
+        const btnSalvar = document.getElementById('btn-salvar');
 
-    // Flag para garantir que a inicialização ocorra apenas uma vez
-    let editModeInicializado = false;
+        // Flag para garantir que a inicialização ocorra apenas uma vez
+        let editModeInicializado = false;
 
-    // Traduz o Flatpickr para português assim que a página carrega
-    flatpickr.localize(flatpickr.l10ns.pt);
+        // Traduz o Flatpickr para português assim que a página carrega
+        flatpickr.localize(flatpickr.l10ns.pt);
 
-    btnEditar.addEventListener('click', function () {
-        // Habilita campos simples
-        document.querySelectorAll('.editable-field').forEach(el => el.removeAttribute('disabled'));
+        btnEditar.addEventListener('click', function () {
+            // Habilita campos simples
+            document.querySelectorAll('.editable-field').forEach(el => el.removeAttribute('disabled'));
 
-        // Alterna a visibilidade dos campos
-        document.querySelectorAll('.view-mode').forEach(el => el.classList.add('d-none'));
-        document.querySelectorAll('.edit-mode').forEach(el => el.classList.remove('d-none'));
-        
-        // Troca os botões
-        btnSalvar.classList.remove('d-none');
-        this.classList.add('d-none');
+            // Alterna a visibilidade dos campos
+            document.querySelectorAll('.view-mode').forEach(el => el.classList.add('d-none'));
+            document.querySelectorAll('.edit-mode').forEach(el => el.classList.remove('d-none'));
+            
+            // Troca os botões
+            btnSalvar.classList.remove('d-none');
+            this.classList.add('d-none');
 
-        // Inicializa os plugins (apenas na primeira vez)
-        if (!editModeInicializado) {
-            inicializarTomSelects();
-            inicializarFlatpickr(); // <--- CHAMADA DA NOVA FUNÇÃO
-            editModeInicializado = true;
+            // Inicializa os plugins (apenas na primeira vez)
+            if (!editModeInicializado) {
+                inicializarTomSelects();
+                inicializarFlatpickr(); // <--- CHAMADA DA NOVA FUNÇÃO
+                editModeInicializado = true;
+            }
+        });
+
+        /**
+         * FUNÇÃO PARA INICIALIZAR O FLATPICKR
+         */
+        function inicializarFlatpickr() {
+            const commonDateConfig = {
+                altInput: true,       
+                altFormat: "d/m/Y",  
+                dateFormat: "Y-m-d", 
+                allowInput: true,
+                minDate: "today"
+            };
+
+            const commonTimeConfig = {
+                enableTime: true,
+                noCalendar: true,
+                dateFormat: "H:i",
+                time_24hr: true,
+                minuteIncrement: 15,
+                allowInput: true
+            };
+
+            // Aplica a configuração aos campos pelos seus IDs
+            flatpickr("#DT_AGEND", commonDateConfig);
+            flatpickr("#HR_AGEND_INI", commonTimeConfig);
+            flatpickr("#HR_AGEND_FIN", commonTimeConfig);
+        }
+
+
+        /**
+         * FUNÇÃO PARA INICIALIZAR OS TOMSELECTS (já existente)
+         */
+        function inicializarTomSelects() {
+            // --- SELECT PACIENTE ---
+            new TomSelect('#select-paciente', {
+                valueField: 'ID_PACIENTE',
+                labelField: 'NOME_COMPL_PACIENTE',
+                searchField: ['NOME_COMPL_PACIENTE', 'CPF_PACIENTE'],
+                create: false,
+                load: (query, callback) => {
+                    if (query.length < 2) return callback();
+                    const url = `/psicologia/consultar-paciente/buscar-nome-cpf?search=${encodeURIComponent(query)}`;
+                    fetch(url).then(response => response.json()).then(json => callback(json)).catch(() => callback());
+                },
+                render: {
+                    option: (data, escape) => `<div><strong>${escape(data.NOME_COMPL_PACIENTE)}</strong><small class="d-block text-muted">${escape(data.CPF_PACIENTE || '')}</small></div>`,
+                    item: (data, escape) => `<div>${escape(data.NOME_COMPL_PACIENTE)}</div>`,
+                    no_results: function(data, escape) {
+                        const query = encodeURIComponent(data.input || '');
+                        return `
+                            <div class="no-results">
+                                Nenhum paciente encontrado. 
+                                <a href="/psicologia/criar-paciente?nome_compl_paciente=${query}" 
+                                target="_blank" class="text-primary fw-bold">
+                                Criar novo paciente
+                                </a>
+                            </div>
+                        `
+                    }
+                }
+            });
+
+            // --- SELECT SERVIÇO ---
+            new TomSelect('#select-servico', {
+                valueField: 'ID_SERVICO_CLINICA',
+                labelField: 'SERVICO_CLINICA_DESC',
+                searchField: ['SERVICO_CLINICA_DESC'],
+                create: false,
+                load: (query, callback) => {
+                    const url = `/psicologia/pesquisar-servico?search=${encodeURIComponent(query)}`;
+                    fetch(url).then(r => r.json()).then(j => callback(j)).catch(() => callback());
+                },
+
+                render: {
+                    no_results: function(data, escape) {
+                        const query = encodeURIComponent(data.input || '');
+                        return `
+                        <div class="no-results">
+                                    Nenhum serviço encontrado. 
+                                    <a href="/psicologia/criar-servico?SERVICO_CLINICA_DESC=${query}" 
+                                    target="_blank" class="text-primary fw-bold">
+                                    Criar novo serviço
+                                    </a>
+                                </div>
+                        `
+                    }
+                }
+            });
+
+            // --- SELECT ALUNO ---
+            new TomSelect('#select-aluno', {
+                valueField: 'ID_ALUNO',
+                labelField: 'NOME_COMPL',
+                searchField: ['NOME_COMPL', 'ALUNO'],
+                create: false,
+                load: (query, callback) => {
+                    const url = `/psicologia/listar-alunos?search=${encodeURIComponent(query)}`;
+                    fetch(url).then(r => r.json()).then(j => callback(j)).catch(() => callback());
+                },
+                render: {
+                    option: (data, escape) => `<div>${escape(data.NOME_COMPL)} - ${escape(data.ID_ALUNO)}</div>`,
+                    item: (data, escape) => `<div>${escape(data.NOME_COMPL)}</div>`
+                },
+                onChange: (value) => {
+                    const hiddenInput = document.getElementById('id_aluno_input');
+                    hiddenInput.value = value || '';
+                }
+            });
+
+            // --- SELECT LOCAL ---
+            new TomSelect('#select-local', {
+                valueField: 'ID_SALA_CLINICA',
+                labelField: 'DESCRICAO',
+                searchField: ['DESCRICAO'],
+                create: false,
+                load: (query, callback) => {
+                    const url = `/psicologia/pesquisar-local?search=${encodeURIComponent(query)}`;
+                    fetch(url).then(r => r.json()).then(j => callback(j)).catch(() => callback());
+                },
+                render: {
+                    no_results: function(data, escape) {
+                        const query = encodeURIComponent(data.input || '');
+                        return `<div class="no-results">
+                                Nenhum local encontrado. 
+                                <a href="/psicologia/criar-sala?DESCRICAO=${query}" 
+                                target="_blank" class="text-primary fw-bold">
+                                Criar nova sala
+                                </a>
+                            </div>`;
+                    }
+                }
+            });
         }
     });
-
-    /**
-     * NOVA FUNÇÃO PARA INICIALIZAR O FLATPICKR
-     */
-    function inicializarFlatpickr() {
-        const commonDateConfig = {
-            altInput: true,       
-            altFormat: "d/m/Y",  
-            dateFormat: "Y-m-d", 
-            allowInput: true,
-            minDate: "today"
-        };
-
-        const commonTimeConfig = {
-            enableTime: true,
-            noCalendar: true,
-            dateFormat: "H:i",
-            time_24hr: true,
-            minuteIncrement: 15,
-            allowInput: true
-        };
-
-        // Aplica a configuração aos campos pelos seus IDs
-        flatpickr("#DT_AGEND", commonDateConfig);
-        flatpickr("#HR_AGEND_INI", commonTimeConfig);
-        flatpickr("#HR_AGEND_FIN", commonTimeConfig);
-    }
-
-
-    /**
-     * FUNÇÃO PARA INICIALIZAR OS TOMSELECTS (já existente)
-     */
-    function inicializarTomSelects() {
-        // --- SELECT PACIENTE ---
-        new TomSelect('#select-paciente', {
-            valueField: 'ID_PACIENTE',
-            labelField: 'NOME_COMPL_PACIENTE',
-            searchField: ['NOME_COMPL_PACIENTE', 'CPF_PACIENTE'],
-            create: false,
-            load: (query, callback) => {
-                if (query.length < 2) return callback();
-                const url = `/psicologia/consultar-paciente/buscar-nome-cpf?search=${encodeURIComponent(query)}`;
-                fetch(url).then(response => response.json()).then(json => callback(json)).catch(() => callback());
-            },
-            render: {
-                option: (data, escape) => `<div><strong>${escape(data.NOME_COMPL_PACIENTE)}</strong><small class="d-block text-muted">${escape(data.CPF_PACIENTE || '')}</small></div>`,
-                item: (data, escape) => `<div>${escape(data.NOME_COMPL_PACIENTE)}</div>`
-            }
-        });
-
-        // --- SELECT SERVIÇO ---
-        new TomSelect('#select-servico', {
-            valueField: 'ID_SERVICO_CLINICA',
-            labelField: 'SERVICO_CLINICA_DESC',
-            searchField: ['SERVICO_CLINICA_DESC'],
-            create: false,
-            load: (query, callback) => {
-                const url = `/psicologia/pesquisar-servico?search=${encodeURIComponent(query)}`;
-                fetch(url).then(r => r.json()).then(j => callback(j)).catch(() => callback());
-            }
-        });
-
-        // --- SELECT PSICÓLOGO ---
-        new TomSelect('#select-psicologo', {
-            valueField: 'ID_PSICOLOGO',
-            labelField: 'NOME_COMPL',
-            searchField: ['NOME_COMPL', 'ALUNO'],
-            create: false,
-            load: (query, callback) => {
-                const url = `/psicologia/listar-psicologos?search=${encodeURIComponent(query)}`;
-                fetch(url).then(r => r.json()).then(j => callback(j)).catch(() => callback());
-            },
-            render: {
-                option: (data, escape) => `<div>${escape(data.NOME_COMPL)} - ${escape(data.ID_PSICOLOGO)}</div>`,
-                item: (data, escape) => `<div>${escape(data.NOME_COMPL)}</div>`
-            }
-        });
-
-        // --- SELECT LOCAL ---
-        new TomSelect('#select-local', {
-            valueField: 'ID_SALA_CLINICA',
-            labelField: 'DESCRICAO',
-            searchField: ['DESCRICAO'],
-            create: false,
-            load: (query, callback) => {
-                const url = `/psicologia/pesquisar-local?search=${encodeURIComponent(query)}`;
-                fetch(url).then(r => r.json()).then(j => callback(j)).catch(() => callback());
-            }
-        });
-    }
-});
 </script>
+
+<!-- FORMATA VALOR DA AGENDA EDITADA -->
+<script>
+    document.getElementById('valor_edit_agenda').addEventListener('input', function (e) {
+        let value = e.target.value.replace(/\D/g, '');
+        value = (value / 100).toLocaleString('pt-BR', { minimumFractionDigits: 2 });
+        e.target.value = value; 
+    });
+</script>
+
 </body>
 </html>

@@ -47,7 +47,7 @@
         }
 
         /* Estilos para limitar a altura das listas de busca */
-        .list-local-option, .list-psicologo-option, #pacientes-list .list-group {
+        .list-local-option, .list-aluno-option, #pacientes-list .list-group {
             max-height: 200px;
             overflow-y: auto;
         }
@@ -61,7 +61,7 @@
 <body class="bg-body-secondary">
 
 <!-- COMPONENT NAVBAR -->
-@include('components.psicologo_navbar')
+@include('components.aluno_navbar')
 
 @if ($errors->any())
     <div id="alert-error" class="alert alert-danger shadow text-center position-fixed top-0 start-50 translate-middle-x mt-3" style="z-index: 1050; max-width: 90%;">
@@ -95,7 +95,7 @@
         <div class="col-12 shadow-lg shadow-dark p-4 bg-body-tertiary rounded">
 
             <!-- FORM DE AGENDAMENTO -->
-            <form action="{{ route('criarAgendamento-Psicologo') }}" method="POST" id="agendamento-form" class="w-100" validate>
+            <form action="{{ route('criarAgendamento-aluno') }}" method="POST" id="agendamento-form" class="w-100" validate>
                 @csrf
 
                 <!-- VALORES PASSADOS NO FORMATO HIDDEN | USUÁRIO NÃO SELECIONA DIRETAMENTE -->
@@ -108,10 +108,12 @@
 
                 <input type="hidden" name="status_agend" value="Em aberto"/>
 
-                <input type="hidden" name="id_psicologo" id="id_psicologo" value="{{ session('psicologo')[1] }}"/>
+                <input type="hidden" name="ID_ALUNO" id="ID_ALUNO" value="{{ session('aluno')[1] }}"/>
+
+                <input type="hidden" id="HR_FIM" name="hr_fim" value="{{ old('hr_fim') }}">
 
                 <div id="session-data"
-                   data-psicologo='@json(session('psicologo'))'
+                   data-aluno='@json(session('aluno'))'
                 ></div>
 
                 <!-- PESQUISA DE PACIENTE POR NOME OU CPF -->
@@ -134,7 +136,7 @@
                             Disciplina
                         </label>
                         <label for="disciplina" class="form-label"></label>
-                        <select name="disciplina" id="disciplina" placeholder="Disciplina do Atendimento" autocomplete="off"></select>
+                        <select name="id_servico" id="disciplina" placeholder="Disciplina do Atendimento" autocomplete="off"></select>
                     </div>
 
                     <div class="col-sm-6 col-md-3">
@@ -158,11 +160,9 @@
                     </div>
 
                     <!-- LOCAL -->
-                    <input type="hidden" name="id_sala_clinica" id="id_sala_clinica">
                     <div class="col-sm-6 col-md-3 mt-2 position-relative">
                         <label for="local_agend" class="form-label">Local</label>
-                        <label for="local_agend" class="form-label"></label>
-                        <select name="local_agend" id="local_agend" placeholder="Selecione uma sala"></select>
+                        <select name="id_sala_clinica" id="id_sala_clinica" placeholder="Selecione uma sala"></select>
                     </div>
 
                     <!-- OBSERVAÇÕES -->
@@ -221,7 +221,7 @@
         // Carrega dados da sua API
         load: (query, callback) => {
             if (query.length < 0) return callback();
-            const url = `/psicologo/consultar-paciente/buscar?search=${encodeURIComponent(query)}`;
+            const url = `/aluno/consultar-paciente/buscar?search=${encodeURIComponent(query)}`;
             fetch(url)
             .then(response => response.json())
                 .then(json => callback(json))
@@ -236,27 +236,46 @@
         searchField: ['SERVICO_CLINICA_DESC'],
         createFilter: (input) => input.length > 0,
         load: (query, callback) => {
-            const url = `/psicologo/pesquisar-disciplina?search=${encodeURIComponent(query)}`;
+            const url = `/aluno/pesquisar-disciplina?search=${encodeURIComponent(query)}`;
             fetch(url)
                 .then(r => r.json())
                 .then(j => callback(j))
                 .catch(() => callback());
         },
+        onChange: function(value) {
+            // Quando a disciplina mudar, limpar salas e recarregar
+            localSelect.clearOptions();
+            localSelect.load('');
+        }
     });
 
-    // BUSCA DE LOCAL
-    const localSelect = new TomSelect('#local_agend', {
+    // SELECT DE SALA (LOCAL)
+    const localSelect = new TomSelect('#id_sala_clinica', {
         valueField: 'ID_SALA_CLINICA',
         labelField: 'DESCRICAO',
         searchField: ['DESCRICAO'],
-        createFilter: (input) => input.length > 0,
         load: (query, callback) => {
-            const url = `/psicologia/pesquisar-local?search=${encodeURIComponent(query)}`;
+            const servicoId = document.querySelector('#disciplina').value;
+            if (!servicoId) return callback(); // não carrega se não houver serviço
+            
+            const url = `/psicologia/pesquisar-local?search=${encodeURIComponent(query)}&servico=${encodeURIComponent(servicoId)}`;
             fetch(url)
                 .then(r => r.json())
-                .then(j => callback(j))
+                .then(json => callback(json))
                 .catch(() => callback());
         },
+        render: {
+            no_results: function(data, escape) {
+                const query = encodeURIComponent(data.input || '');
+                return `<div class="no-results">
+                            Nenhum local encontrado. 
+                            <a href="/psicologia/criar-sala?DESCRICAO=${query}" 
+                            target="_blank" class="text-primary fw-bold">
+                            Criar nova sala
+                            </a>
+                        </div>`;
+            }
+        }
     });
 </script>
 
@@ -301,8 +320,9 @@
             if (selectedDates.length > 0) {
                 const dataInicio = selectedDates[0];
                 const dataFim = new Date(dataInicio.getTime());
-                dataFim.setHours(dataFim.getHours() + 1);
+                dataFim.setHours(dataFim.getHours()+1);
                 hrFinalFP.setDate(dataFim, true);
+                document.getElementById('HR_FIM').value = `${String(dataFim.getHours()).padStart(2, '0')}:${String(dataFim.getMinutes()).padStart(2, '0')}`;
             }
         }
     });

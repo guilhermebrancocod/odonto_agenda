@@ -63,8 +63,8 @@ class AuthProfessorMiddleware
     //FUNCAO QUE PEGA OS DADOS DA API
     public function getApiData(array $credentials)
     {
-        $apiUrl = config('services.faesa.api_psicologos_url');
-        $apiKey = config('services.faesa.api_psicologos_key');
+        $apiUrl = config('services.faesa.api_alunos_url');
+        $apiKey = config('services.faesa.api_alunos_key');
 
         try {
             $response = Http::withHeaders([

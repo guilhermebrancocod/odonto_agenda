@@ -7,21 +7,21 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\DB;
 
-class AuthPsicologoMiddleware
+class AuthAlunoMiddleware
 {
     public function handle(Request $request, Closure $next)
     {
         $routeName = $request->route()->getName();
 
-        $rotasLiberadas = ['psicologoLoginGet', 'psicologoLoginPost', 'psicologoLogout'];
+        $rotasLiberadas = ['alunoLoginGet', 'alunoLoginPost', 'alunoLogout'];
 
         // CASO JÁ TENHA SESSÃO, REDIRECIONA PARA MENU
-        if (session()->has('psicologo')) {
+        if (session()->has('aluno')) {
             return $next($request);
         }
 
         // SE A ROTA FOR DE POST
-        if ($routeName === 'psicologoLoginPost') {
+        if ($routeName === 'alunoLoginPost') {
 
             // ARMAZENA CREDENCIAIS
             $credentials = [
@@ -33,25 +33,25 @@ class AuthPsicologoMiddleware
             $response = $this->getApiData($credentials);
 
             if ($response['success']) {
-                $validacao = $this->validarPsicologo($credentials);
+                $validacao = $this->validaraluno($credentials);
 
                 if (!$validacao) {
                     return redirect()->back()->with('error', "Aluno sem permissão de acesso");
                 }
 
-                // SALVA O PSICÓLOGO NA SESSÃO NA CHAVE 'psicologo'
-                session(['psicologo' => $validacao]);
+                // SALVA O aluno NA SESSÃO NA CHAVE 'aluno'
+                session(['aluno' => $validacao]);
 
                 return $next($request);
             }
 
             session()->flush();
-            return redirect()->route('psicologoLoginGet')->with('error', "Credenciais Inválidas");
+            return redirect()->route('alunoLoginGet')->with('error', "Credenciais Inválidas");
         }
 
         if (!in_array($routeName, $rotasLiberadas)) {
-            if (!session()->has('psicologo')) {
-                return redirect()->route('psicologoLoginGet');
+            if (!session()->has('aluno')) {
+                return redirect()->route('alunoLoginGet');
             }
         }
 
@@ -60,8 +60,8 @@ class AuthPsicologoMiddleware
 
     public function getApiData(array $credentials)
     {
-        $apiUrl = config('services.faesa.api_psicologos_url');
-        $apiKey = config('services.faesa.api_psicologos_key');
+        $apiUrl = config('services.faesa.api_alunos_url');
+        $apiKey = config('services.faesa.api_alunos_key');
 
         try {
             $response = Http::withHeaders([
@@ -89,8 +89,8 @@ class AuthPsicologoMiddleware
         }
     }
 
-    // VALIDA USUÁRIO PSICÓLOGO
-    public function validarPsicologo(array $credentials)
+    // VALIDA USUÁRIO aluno
+    public function validaraluno(array $credentials)
     {
         $usuario = $credentials['username'];
         $retorno[0] = $usuario;
