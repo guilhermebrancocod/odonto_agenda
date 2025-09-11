@@ -577,7 +577,7 @@ class AgendamentoService
         return $datasParaAgendar;
     }
 
-    public function criarAgendamentoaluno(Request $request)
+    public function criarAgendamentoAluno(Request $request)
     {
         dd($request);
     }

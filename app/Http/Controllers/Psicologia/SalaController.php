@@ -5,6 +5,7 @@ namespace app\Http\Controllers\Psicologia;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use App\Models\FaesaClinicaAgendamento;
+use App\Models\FaesaClinicaServico;
 use App\Models\FaesaClinicaSala;
 use Illuminate\Validation\Rule;
 use Illuminate\Http\JsonResponse;
@@ -38,16 +39,32 @@ class SalaController extends Controller
     public function getSala(Request $request)
     {
         $search = trim($request->query('search', ''));
+        $idServico = $request->query('servico');
 
-        // RETORNA APENAS SALAS QUE ESTÃO ATIVAS PARA CRIAR AGENDAMENTO
-        $salas = FaesaClinicaSala::where('DESCRICAO', 'like', "%{$search}%")
-                    ->where('ATIVO', '<>', 'N')
-                    ->select('ID_SALA_CLINICA', 'DESCRICAO')
-                    ->get();
+        $query = FaesaClinicaSala::query()
+            ->where('ATIVO', '<>', 'N')
+            ->when($search, function ($q) use ($search) {
+                $q->where('DESCRICAO', 'like', "%{$search}%");
+            });
+
+        if ($idServico) {
+            // Recupera disciplina do serviço
+            $servico = FaesaClinicaServico::find($idServico);
+
+            if ($servico && $servico->DISCIPLINA) {
+                $disciplina = $servico->DISCIPLINA;
+
+                $query->where(function ($q) use ($disciplina) {
+                    $q->whereNull('DISCIPLINA') // salas sem disciplina sempre aparecem
+                    ->orWhere('DISCIPLINA', $disciplina);
+                });
+            }
+        }
+
+        $salas = $query->select('ID_SALA_CLINICA', 'DESCRICAO')->get();
 
         return response()->json($salas);
     }
-
 
     public function updateSala(Request $request, $id)
     {

@@ -366,7 +366,7 @@ Route::middleware([AuthAlunoMiddleware::class])->group(function () {
         return view('psicologia.aluno.criar_agenda');
     })->name('alunoCriarAgenda-Get');
 
-    Route::post('/aluno/criar-agendamento/criar', [AgendamentoController::class, 'criarAgendamentoaluno'])->name('criarAgendamento-aluno');
+    Route::post('/aluno/criar-agendamento/criar', [AgendamentoController::class, 'criarAgendamentoAluno'])->name('criarAgendamento-aluno');
 
     Route::get('/aluno/consultar-agendamento', function() {
         return view('psicologia.aluno.consultar_agenda');

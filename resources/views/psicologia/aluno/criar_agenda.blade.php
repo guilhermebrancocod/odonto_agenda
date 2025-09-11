@@ -160,11 +160,9 @@
                     </div>
 
                     <!-- LOCAL -->
-                    <input type="hidden" name="id_sala_clinica" id="id_sala_clinica">
                     <div class="col-sm-6 col-md-3 mt-2 position-relative">
                         <label for="local_agend" class="form-label">Local</label>
-                        <label for="local_agend" class="form-label"></label>
-                        <select name="local_agend" id="local_agend" placeholder="Selecione uma sala"></select>
+                        <select name="id_sala_clinica" id="id_sala_clinica" placeholder="Selecione uma sala"></select>
                     </div>
 
                     <!-- OBSERVAÇÕES -->
@@ -244,21 +242,40 @@
                 .then(j => callback(j))
                 .catch(() => callback());
         },
+        onChange: function(value) {
+            // Quando a disciplina mudar, limpar salas e recarregar
+            localSelect.clearOptions();
+            localSelect.load('');
+        }
     });
 
-    // BUSCA DE LOCAL
-    const localSelect = new TomSelect('#local_agend', {
+    // SELECT DE SALA (LOCAL)
+    const localSelect = new TomSelect('#id_sala_clinica', {
         valueField: 'ID_SALA_CLINICA',
         labelField: 'DESCRICAO',
         searchField: ['DESCRICAO'],
-        createFilter: (input) => input.length > 0,
         load: (query, callback) => {
-            const url = `/psicologia/pesquisar-local?search=${encodeURIComponent(query)}`;
+            const servicoId = document.querySelector('#disciplina').value;
+            if (!servicoId) return callback(); // não carrega se não houver serviço
+            
+            const url = `/psicologia/pesquisar-local?search=${encodeURIComponent(query)}&servico=${encodeURIComponent(servicoId)}`;
             fetch(url)
                 .then(r => r.json())
-                .then(j => callback(j))
+                .then(json => callback(json))
                 .catch(() => callback());
         },
+        render: {
+            no_results: function(data, escape) {
+                const query = encodeURIComponent(data.input || '');
+                return `<div class="no-results">
+                            Nenhum local encontrado. 
+                            <a href="/psicologia/criar-sala?DESCRICAO=${query}" 
+                            target="_blank" class="text-primary fw-bold">
+                            Criar nova sala
+                            </a>
+                        </div>`;
+            }
+        }
     });
 </script>
 
