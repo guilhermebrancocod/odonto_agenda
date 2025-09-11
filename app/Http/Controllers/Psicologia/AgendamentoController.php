@@ -37,9 +37,9 @@ class AgendamentoController extends Controller
     }
 
     // RETORNA AGENDAMENTOS - aluno
-    public function getAgendamentosForaluno(Request $request)
+    public function getAgendamentosForAluno(Request $request)
     {
-        $agendamentos = $this->agendamentoService->getAgendamentosForaluno($request);
+        $agendamentos = $this->agendamentoService->getAgendamentosForAluno($request);
         return $agendamentos;
     }
 

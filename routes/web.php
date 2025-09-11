@@ -354,7 +354,7 @@ Route::middleware([AuthAlunoMiddleware::class])->group(function () {
 
     Route::get('/aluno/consultar-paciente/buscar', [PacienteController::class, 'getPacienteByNameCPFaluno'])->name('alunoGetPaciente');
 
-    Route::get('/aluno/consultar-agendamento/buscar', [AgendamentoController::class, 'getAgendamentosForaluno'])->name('getAgendamentosForaluno');
+    Route::get('/aluno/consultar-agendamento/buscar', [AgendamentoController::class, 'getAgendamentosForAluno'])->name('getAgendamentosForAluno');
 
     Route::get('/aluno/agendamento/{id}/editar', [AgendamentoController::class, 'editAgendamentoaluno'])->name('agendamentoaluno.edit');
 

@@ -178,10 +178,11 @@
                                                     <option value="{{ $agendamento->aluno->ALUNO }}" selected>
                                                         {{ $agendamento->aluno->NOME_COMPL }}
                                                     </option>
-                                                    <input type="hidden" name="ID_ALUNO" value="{{ $agendamento->ID_ALUNO }}">
+                                                    <input type="hidden" name="ID_ALUNO" id="id_aluno_input" value="{{ $agendamento->ID_ALUNO }}">
                                                 @endif
-                                            </select>
+                                            </select> 
                                         </div>
+
                                     </dd>
 
                                     <!-- CLÍNICA -->
@@ -382,6 +383,10 @@
                 render: {
                     option: (data, escape) => `<div>${escape(data.NOME_COMPL)} - ${escape(data.ID_ALUNO)}</div>`,
                     item: (data, escape) => `<div>${escape(data.NOME_COMPL)}</div>`
+                },
+                onChange: (value) => {
+                    const hiddenInput = document.getElementById('id_aluno_input');
+                    hiddenInput.value = value || '';
                 }
             });
 
