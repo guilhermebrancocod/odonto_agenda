@@ -66,7 +66,7 @@
     
     <div id="modal-alert-container" class="position-fixed top-0 start-50 translate-middle-x p-3" style="z-index: 1056;"></div>
 
-    <div class="container ms-3 mw-100">
+    <div class="container ms-3 me-3 mw-100">
         <div class="row">
              <x-page-title>
             </x-page-title>
