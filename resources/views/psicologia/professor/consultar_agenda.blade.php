@@ -151,13 +151,6 @@
                             </div>
                         </div>
 
-                        <div class="col-12 col-sm-6 col-md-3">
-                            <div class="input-group">
-                                <span class="input-group-text"><i class="bi bi-currency-dollar"></i></span>
-                                <input id="valor-input" name="valor" type="text" class="form-control" placeholder="Valor" />
-                            </div>
-                        </div>
-
                         <div class="col-12 col-lg-auto d-flex gap-2">
                             <button type="submit" class="btn btn-primary">
                                 <i class="bi bi-search"></i> Pesquisar
@@ -186,10 +179,6 @@
                                     <th>Local</th>
                                     <th>Status</th>
                                     <th>Reagend.</th>
-                                    <th>Valor</th>
-                                    <th>Pago?</th>
-                                    <th>Valor Pago</th>
-                                    <th>Ações</th>
                                 </tr>
                             </thead>
                             <tbody id="agendamentos-tbody">
@@ -293,17 +282,6 @@
                                 <td>${local}</td>
                                 <td class="fw-bold ${statusInfo.color}"><i class="bi ${statusInfo.icon} me-1"></i>${status}</td>
                                 <td>${reagendamento}</td>
-                                <td>${valor}</td>
-                                <td class="text-center">${checkPagamento}</td>
-                                <td>${valorPagamento}</td>
-                                <td class="d-flex flex-nowrap gap-1 agendamento-actions">
-                                    <a href="/professor/agendamento/${ag.ID_AGENDAMENTO}/editar" class="btn btn-warning flex-grow-1" title="Editar"><i class="bi bi-pencil"></i></a>
-                                    <form action="/psicologia/agendamento/${ag.ID_AGENDAMENTO}" method="POST" onsubmit="return confirm('Confirma a exclusão deste agendamento?');">
-                                        @csrf
-                                        @method('DELETE')
-                                        <button type="submit" class="btn btn-danger flex-grow-1" title="Excluir"><i class="bi bi-trash"></i></button>
-                                    </form>
-                                </td>
                             `;
                             agendamentosTbody.appendChild(row);
                         });
