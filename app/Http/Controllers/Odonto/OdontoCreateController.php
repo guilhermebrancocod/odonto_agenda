@@ -512,6 +512,7 @@ class OdontoCreateController extends Controller
                 'a.HR_AGEND_FIN',
                 'la.ID_BOX',
                 'a.LOCAL',
+                'a.OBSERVACOES',
                 'cb.DESCRICAO',
                 'a.RECORRENCIA',
                 'la.DISCIPLINA',

@@ -63,6 +63,9 @@ Route::middleware([AuthMiddleware::class, CheckClinicaMiddleware::class])->prefi
     })->name('criarbox_disciplina_odontologia');
 });
 
+//AUDITORIA
+Route::get('/odontologia/pacientes/{id}/audits', [OdontoCreateController::class, 'historyPaciente'])->name('pacientes.audit');
+
 // CRIAÇÃO E EDIÇÃO - PACIENTE
 Route::get('/odontologia/criarpaciente', [OdontoCreateController::class, 'showForm'])->name('criarpaciente');
 Route::get('/odontologia/criarpaciente/{pacienteId}', [OdontoCreateController::class, 'editPatient'])->whereNumber('pacienteId')->name('editPatient');
@@ -109,6 +112,10 @@ Route::get('/odontologia/turmas', [OdontoConsultController::class, 'getTurmas'])
 Route::get('/odontologia/datas/{disciplina}/{turma}', [OdontoConsultController::class, 'getDatasTurmaDisciplina']);
 Route::get('/odontologia/horarios/{disciplina}/{turma}/{diasemana}', [OdontoConsultController::class, 'getHorariosDatasTurmaDisciplina']);
 Route::get('/odontologia/disciplinas', [OdontoConsultController::class, 'getDisciplinas']);
+<<<<<<< HEAD
+=======
+
+>>>>>>> 14eaa20b5ccfecaab132341f2b68a3312d2e7309
 Route::get('/odontologia/boxes', [OdontoConsultController::class, 'getBoxes']);
 Route::get('/odontologia/boxes/{boxId}', [OdontoConsultController::class, 'getBoxesId']);
 Route::get('/odontologia/boxeservicos/{servicoId}', [OdontoConsultController::class, 'getBoxeServicos']);
