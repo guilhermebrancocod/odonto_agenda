@@ -205,7 +205,7 @@
                                     <th>Fim</th>
                                     <th>Local</th>
                                     <th>Status</th>
-                                    <th>Reagend.</th>
+                                    <th>Reagendamento?</th>
                                     <th>Ações</th>
                                 </tr>
                             </thead>

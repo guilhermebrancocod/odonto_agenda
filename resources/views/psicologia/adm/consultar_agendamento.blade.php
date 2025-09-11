@@ -213,7 +213,7 @@
                                     <th>Fim</th>
                                     <th>Local</th>
                                     <th>Status</th>
-                                    <th>Reagend.</th>
+                                    <th>Reagendamento?</th>
                                     <th>Valor</th>
                                     <th>Pago?</th>
                                     <th>Valor Pago</th>

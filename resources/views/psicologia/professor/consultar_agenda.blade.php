@@ -92,6 +92,9 @@
                             <div class="input-group">
                                 <span class="input-group-text"><i class="bi bi-person"></i></span>
                                 <input id="search-input" name="search" type="search" class="form-control" placeholder="Nome ou CPF do paciente" />
+                                <button type="button" class="btn btn-outline-secondary clear-input" data-target="search-input">
+                                    <i class="bi bi-x"></i>
+                                </button>
                             </div>
                         </div>
 
@@ -99,6 +102,9 @@
                             <div class="input-group">
                                 <span class="input-group-text"><i class="bi bi-person-workspace"></i></span>
                                 <input id="aluno-input" name="aluno" type="search" class="form-control" placeholder="Nome/Matrícula do aluno" />
+                                <button type="button" class="btn btn-outline-secondary clear-input" data-target="aluno-input">
+                                    <i class="bi bi-x"></i>
+                                </button>
                             </div>
                         </div>
 
@@ -106,6 +112,9 @@
                             <div class="input-group">
                                 <span class="input-group-text"><i class="bi bi-calendar-event"></i></span>
                                 <input id="date-input" name="date" type="text" class="form-control" placeholder="Data" />
+                                <button type="button" class="btn btn-outline-secondary clear-input" data-target="date-input">
+                                    <i class="bi bi-x"></i>
+                                </button>
                             </div>
                         </div>
 
@@ -113,6 +122,9 @@
                             <div class="input-group">
                                 <span class="input-group-text"><i class="bi bi-clock-history"></i></span>
                                 <input id="start-time-input" name="start_time" type="text" class="form-control" placeholder="Hora Início" />
+                                <button type="button" class="btn btn-outline-secondary clear-input" data-target="start-time-input">
+                                    <i class="bi bi-x"></i>
+                                </button>
                             </div>
                         </div>
 
@@ -120,6 +132,9 @@
                             <div class="input-group">
                                 <span class="input-group-text"><i class="bi bi-clock"></i></span>
                                 <input id="end-time-input" name="end_time" type="text" class="form-control" placeholder="Hora Fim" />
+                                <button type="button" class="btn btn-outline-secondary clear-input" data-target="end-time-input">
+                                    <i class="bi bi-x"></i>
+                                </button>
                             </div>
                         </div>
 
@@ -134,6 +149,9 @@
                                     <option value="Cancelado">Cancelado</option>
                                     <option value="Finalizado">Finalizado</option>
                                 </select>
+                                <button type="button" class="btn btn-outline-secondary clear-input" data-target="status-input">
+                                    <i class="bi bi-x"></i>
+                                </button>
                             </div>
                         </div>
 
@@ -141,6 +159,9 @@
                             <div class="input-group">
                                 <span class="input-group-text"><i class="bi bi-briefcase"></i></span>
                                 <input id="service-input" name="service" type="text" class="form-control" placeholder="Serviço" />
+                                <button type="button" class="btn btn-outline-secondary clear-input" data-target="service-input">
+                                    <i class="bi bi-x"></i>
+                                </button>
                             </div>
                         </div>
 
@@ -148,6 +169,9 @@
                             <div class="input-group">
                                 <span class="input-group-text"><i class="bi bi-geo-alt"></i></span>
                                 <input id="local-input" name="local" type="text" class="form-control" placeholder="Local" />
+                                <button type="button" class="btn btn-outline-secondary clear-input" data-target="local-input">
+                                    <i class="bi bi-x"></i>
+                                </button>
                             </div>
                         </div>
 
@@ -178,7 +202,7 @@
                                     <th>Fim</th>
                                     <th>Local</th>
                                     <th>Status</th>
-                                    <th>Reagend.</th>
+                                    <th>Reagendamento?</th>
                                 </tr>
                             </thead>
                             <tbody id="agendamentos-tbody">
@@ -338,6 +362,27 @@
 
         // Se você realmente precisa de um array com todas as instâncias, pode criá-lo assim:
         const flatpickrInstances = [datePicker, startTimePicker, endTimePicker];
+    </script>
+
+    <!-- LIMPAR VALORES DE CAMPOS DE PESQUISA AO CLICAR NO X -->
+    <script>
+        document.querySelectorAll('.clear-input').forEach(btn => {
+            btn.addEventListener('click', function() {
+                const targetId = this.getAttribute('data-target');
+                const input = document.getElementById(targetId);
+
+                if (!input) return;
+
+                if (input._flatpickr) {
+                    input._flatpickr.clear();
+                } else {
+                    input.value = "";
+                }
+
+                input.dispatchEvent(new Event('input'));
+                input.dispatchEvent(new Event('change')); 
+            });
+        });
     </script>
 </body>
 </html>

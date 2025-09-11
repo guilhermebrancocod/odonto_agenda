@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Pacientes por aluno</title>
+    <title>Pacientes por Aluno</title>
 
     <link rel="icon" type="image/png" href="/favicon_faesa.png">
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700&display=swap" rel="stylesheet" />
