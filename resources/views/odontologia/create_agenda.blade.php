@@ -16,6 +16,112 @@
 
     <link href="/css/style.css" rel="stylesheet">
 </head>
+<style>
+    /* Layout das duas colunas */
+    .agendamento-grid {
+        display: grid;
+        grid-template-columns: 2fr 1fr;
+        gap: 20px;
+        align-items: start;
+    }
+
+    /* Campo padrão */
+    .field {
+        margin-bottom: 12px;
+    }
+
+    .field label {
+        font-size: 14px;
+        color: #666;
+        margin-bottom: 6px;
+    }
+
+    .field .form-select {
+        width: 100%;
+        padding: 8px;
+        border: 1px solid #ddd;
+        border-radius: 6px;
+        font-size: 14px;
+    }
+
+    /* Grade de horários como "cards" */
+    .horarios-grid {
+        display: grid;
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+        /* 4 por linha */
+        gap: 6px;
+    }
+
+    /* Item */
+    .time-item {
+        position: relative;
+    }
+
+    /* Input escondido (usa a label como botão) */
+    .time-input {
+        position: absolute;
+        opacity: 0;
+        pointer-events: none;
+    }
+
+    /* Card do horário */
+    .time-card {
+        display: inline-block;
+        width: 100%;
+        padding: 8px 10px;
+        border: 1px solid #ddd;
+        border-radius: 8px;
+        font-size: 14px;
+        line-height: 1;
+        text-align: center;
+        background: #fff;
+        cursor: pointer;
+        user-select: none;
+        transition: all .15s ease;
+    }
+
+    /* Hover / foco */
+    .time-card:hover {
+        border-color: #bbb;
+        transform: translateY(-1px);
+    }
+
+    .time-input:focus+.time-card,
+    .time-input:focus-visible+.time-card {
+        outline: 2px solid #8dbbfd;
+        outline-offset: 2px;
+    }
+
+    /* Selecionado */
+    .time-input:checked+.time-card {
+        background: #e8f3ff;
+        border-color: #8dbbfd;
+        box-shadow: inset 0 0 0 1px #8dbbfd;
+        font-weight: 600;
+    }
+
+    /* Desabilitado (se usar disabled no input) */
+    .time-input:disabled+.time-card {
+        background: #f8f9fa;
+        color: #adb5bd;
+        border-color: #e9ecef;
+        cursor: not-allowed;
+        transform: none;
+    }
+
+    /* Responsivo opcional */
+    @media (max-width: 992px) {
+        .horarios-grid {
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+        }
+    }
+
+    @media (max-width: 576px) {
+        .horarios-grid {
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+        }
+    }
+</style>
 
 <body>
     @include('components.sidebar')
@@ -23,7 +129,7 @@
         <fieldset class="border p-1 rounded mb-3">
             <legend class="w-auto px-2">Novo agendamento</legend>
         </fieldset>
-        <form class="row g-3 needs-validation"
+        <form class="row g-3 needs-validation" onsubmit="return validarFormulario()"
             action="{{ isset($agenda) ? route('updateAgenda', $agenda->ID_AGENDAMENTO) : route('createAgenda') }}"
             method="POST">
             @csrf
@@ -75,7 +181,6 @@
                         <label for="date">Dia Início</label>
                     </div>
                 </div>
-
                 <div class="col-6 col-md-2">
                     <div class="form-floating">
                         <input
@@ -96,21 +201,26 @@
                     <div class="row g-3">
                         <!-- Linha: Disciplina / Box / Procedimento -->
                         @php
-                        // valor efetivo: prioriza old() e cai para o do banco
-                        $valor = old('disciplina', $agenda->DISCIPLINA ?? '');
-                        // rótulo (se tiver nome da disciplina, use aqui)
-                        $rotulo = $agenda->DISCIPLINA_NOME ?? $valor;
+                        // Define defaults
+                        $valor = old('disciplina', isset($agenda) ? ($agenda->DISCIPLINA ?? '') : '');
+                        $rotulo = '';
+
+                        // Monta rótulo apenas se houver agenda/valor
+                        if ($valor !== '' && isset($agenda)) {
+                        $rotulo = ($agenda->DISCIPLINA ?? '') . '-' . ($agenda->DISCIPLINA_NOME ?? '');
+                        }
                         @endphp
                         <div class="col-12 col-md-6">
                             <div class="form-floating">
                                 <select id="form-select-discipline" name="disciplina" class="form-select">
                                     <option value="" {{ $valor === '' ? 'selected' : '' }}>Disciplina</option>
                                     @if($valor !== '')
-                                    <option value="{{ $valor }}" selected>{{ $rotulo }}</option>
+                                    <option value="{{ $valor }}" selected>{{ $rotulo !== '' ? $rotulo : $valor }}</option>
                                     @endif
                                 </select>
                             </div>
                         </div>
+
                         <div class="col-12 col-md-2">
                             <div class="form-floating">
                                 <select id="form-select-box" name="ID_BOX" class="form-select">
@@ -125,6 +235,7 @@
                                 </select>
                             </div>
                         </div>
+
                         <div class="col-12 col-md-4">
                             <div class="form-floating">
                                 <select id="form-select-turma" name="turma" class="form-select">
@@ -153,293 +264,148 @@
                                 </select>
                             </div>
                         </div>
-
-                        <style>
-                            /* Layout das duas colunas */
-                            .agendamento-grid {
-                                display: grid;
-                                grid-template-columns: 2fr 1fr;
-                                gap: 20px;
-                                align-items: start;
-                            }
-
-                            /* Campo padrão */
-                            .field {
-                                margin-bottom: 12px;
-                            }
-
-                            .field label {
-                                font-size: 14px;
-                                color: #666;
-                                margin-bottom: 6px;
-                                /*display: block;*/
-                            }
-
-                            .field .form-select {
-                                width: 100%;
-                                padding: 8px;
-                                border: 1px solid #ddd;
-                                border-radius: 6px;
-                                font-size: 14px;
-                            }
-
-                            /* Grade de horários como botões */
-                            .horarios-grid {
-                                display: grid;
-                                grid-template-columns: repeat(4, minmax(0, 1fr));
-                                /* 4 por linha; ajuste se quiser 3 */
-                                gap: 6px;
-                                /* espaçamento menor entre botões */
-                            }
-
-                            .time-check {
-                                position: relative;
-                            }
-
-                            .time-check input[type="checkbox"] {
-                                position: absolute;
-                                opacity: 0;
-                                pointer-events: none;
-                            }
-
-                            .time-check label {
-                                display: inline-block;
-                                width: 100%;
-                                padding: 8px 10px;
-                                border: 1px solid #ddd;
-                                border-radius: 8px;
-                                font-size: 14px;
-                                line-height: 1;
-                                text-align: center;
-                                background: #fff;
-                                cursor: pointer;
-                                user-select: none;
-                                transition: all .15s ease;
-                            }
-
-                            .time-check label:hover {
-                                border-color: #bbb;
-                                transform: translateY(-1px);
-                            }
-
-                            .time-check input[type="checkbox"]:checked+label {
-                                background: #e8f3ff;
-                                border-color: #8dbbfd;
-                                box-shadow: inset 0 0 0 1px #8dbbfd;
-                                font-weight: 600;
-                            }
-
-                            /* Box selector (lado direito) */
-                            .boxes-wrapper {
-                                border: 1px solid #ddd;
-                                border-radius: 6px;
-                                padding: 10px;
-                                max-height: 260px;
-                                overflow-y: auto;
-                                background-color: #f9f9f9;
-                            }
-
-                            /* Responsivo */
-                            @media (max-width: 992px) {
-                                .agendamento-grid {
-                                    grid-template-columns: 1fr;
-                                }
-                            }
-                        </style>
-
                         @php
-                        // Seus horários (label) por chave
-                        $dias = [
-                        '1' => '7:30','2' => '8:15','3' => '9:00','4' => '9:45',
-                        '5' => '10:15','6' => '11:00','7' => '11:45','8' => '12:30',
-                        '9' => '13:15','10' => '14:00','11' => '14:45','12' => '15:30',
-                        '13' => '16:15','14' => '17:00','15' => '17:45','16' => '18:30',
-                        ];
+                        $hrIniRaw = old('hr_ini', $agenda->HR_AGEND_INI ?? null);
+                        $hrFimRaw = old('hr_fim', $agenda->HR_AGEND_FIN ?? null);
+                        $hrIni = $hrIniRaw ? \Carbon\Carbon::parse($hrIniRaw)->format('H:i') : '';
+                        $hrFim = $hrFimRaw ? \Carbon\Carbon::parse($hrFimRaw)->format('H:i') : '';
+                        @endphp
 
-                        // Converte "H:i" p/ minutos
-                        $toMin = function (string $hi) {
-                        [$h,$m] = array_map('intval', explode(':', $hi));
-                        return $h * 60 + $m;
-                        };
-
-                        // Normaliza "07:30:00.0000000" -> "07:30"
-                        $fmtDB = function ($t) {
-                        if (!$t) return null;
-                        try { return \Carbon\Carbon::parse($t)->format('H:i'); }
-                        catch (\Exception $e) { return null; }
-                        };
-
-                        // Lista vinda do POST anterior (se houver erro de validação)
-                        $oldDias = collect(old('dias_semana', []))->map(fn($v) => (string)$v)->all();
-
-                        // Pré-seleção baseada no banco (só se não houver old)
-                        $prechecked = [];
-                        if (isset($agenda) && empty($oldDias)) {
-                        $ini = $fmtDB($agenda->HR_AGEND_INI); // ex: "07:30"
-                        $fim = $fmtDB($agenda->HR_AGEND_FIN); // ex: "09:00"
-                        if ($ini && $fim) {
-                        $mi = $toMin($ini);
-                        $mf = $toMin($fim);
-
-                        foreach ($dias as $k => $lbl) {
-                        // normaliza "7:30" -> "07:30" e compara
-                        [$h,$m] = array_map('intval', explode(':', $lbl));
-                        $tm = $h * 60 + $m;
-
-                        // Inclui limites (07:30 e 09:00 também marcam)
-                        if ($tm >= $mi && $tm <= $mf) {
-                            $prechecked[]=(string)$k;
-                            }
-                            }
-                            }
-                            }
-                            @endphp
+                        <div class="row g-3 align-items-start"><!-- PAI: duas colunas irmãs -->
+                            <!-- ESQUERDA: horários -->
                             <div class="col-12 col-lg-9">
-                            <fieldset class="select-hr border rounded p-3" style="margin-top: 10px;">
-                                <legend class="float-none w-auto px-2 fs-6 mb-2">Horários</legend>
+                                <fieldset class="border rounded p-3" style="margin-top:10px;">
+                                    <legend class="float-none w-auto px-2 fs-6 mb-2">Horários</legend>
 
-                                @php
-                                $dias = [
-                                '1' => '7:30','2' => '8:15','3' => '9:00','4' => '9:45',
-                                '5' => '10:15','6' => '11:00','7' => '11:45','8' => '12:30',
-                                '9' => '13:15','10' => '14:00','11' => '14:45','12' => '15:30',
-                                '13' => '16:15','14' => '17:00','15' => '17:45','16' => '18:30',
-                                ];
-                                @endphp
-
-                                <div class="horarios-grid">
-                                    @foreach($dias as $val => $lbl)
-                                    @php
-                                    // Se existir old(), usa old; senão, usa a pré-seleção do banco
-                                    $checked = !empty($oldDias)
-                                    ? in_array((string)$val, $oldDias, true)
-                                    : in_array((string)$val, $prechecked, true);
-                                    @endphp
-                                    <div class="time-check">
-                                        <input
-                                            class="form-check-input"
-                                            type="checkbox"
-                                            id="dia_{{ $val }}"
-                                            name="dias_semana[]"
-                                            value="{{ $val }}"
-                                            {{ $checked ? 'checked' : '' }}>
-                                        {{-- data-time sem zero à esquerda para casar com o JS (ex.: "07:30" -> "7:30") --}}
-                                        <label class="form-check-label" for="dia_{{ $val }}" data-time="{{ ltrim($lbl, '0') }}">
-                                            {{ $lbl }}
-                                        </label>
+                                    <div id="horarios-grid"
+                                        class="horarios-grid"
+                                        data-disciplina="{{ $agenda->DISCIPLINA ?? '' }}"
+                                        data-turma="{{ $agenda->TURMA ?? '' }}"
+                                        data-dia="{{ $agenda->DIA_SEMANA ?? '' }}"
+                                        data-hr-ini="{{ $hrIni }}"
+                                        data-hr-fim="{{ $hrFim }}"
+                                        data-selected='@json($horariosSelecionados ?? [])'>
                                     </div>
-                                    @endforeach
-                                </div>
-                            </fieldset>
-                    </div>
-                    <!-- Coluna lateral: Recorrência + Dias -->
-                    <div class="col-12 col-lg-3">
-                        <fieldset class="border rounded p-3 h-100">
-                            <legend class="float-none w-auto px-2 fs-6 mb-2">Recorrência</legend>
 
-                            <div class="form-check mb-2">
-                                <input class="form-check-input" id='recorrencia' type="checkbox" id="flexCheckChecked" name="recorrencia" value="1"
-                                    {{ old('rec_checked', true) ? 'checked' : '' }}>
-                                <label class="form-check-label" for="flexCheckChecked">Pontual</label>
+                                    <input type="hidden" name="hr_ini" id="hr_ini" value="{{ $hrIni }}">
+                                    <input type="hidden" name="hr_fim" id="hr_fim" value="{{ $hrFim }}">
+
+                                    @isset($agenda)
+                                    <div class="text-muted small mt-2">Intervalo atual: {{ $hrIni }} – {{ $hrFim }}</div>
+                                    @endisset
+                                </fieldset>
                             </div>
 
-                            <div class="form-check mb-3">
-                                <input class="form-check-input" id='recorrencia' type="checkbox" id="flexCheckDefault" name="recorrencia" value="2"
-                                    {{ old('rec_default') ? 'checked' : '' }}>
-                                <label class="form-check-label" for="flexCheckDefault">Recorrência</label>
-                            </div>
+                            <!-- DIREITA: recorrência -->
+                            <div class="col-12 col-lg-3">
+                                <fieldset class="border rounded p-3 h-100 sticky-top" style="top: 12px;">
+                                    <legend class="float-none w-auto px-2 fs-6 mb-2">Recorrência</legend>
 
-                            <div class="fw-semibold mb-2">Dias da semana</div>
-                            <div class="row row-cols-3 g-2">
-                                @php $dias = ['1'=>'Seg','2'=>'Ter','3'=>'Qua','4'=>'Qui','5'=>'Sex','6'=>'Sáb']; @endphp
-                                @foreach($dias as $val=>$lbl)
-                                <div class="col">
-                                    <div class="form-check">
-                                        <input class="form-check-input" type="checkbox" id="dia_{{ $val }}" name="dia_recorrencia[]" value="{{ $val }}"
-                                            {{ (collect(old('dia_recorrencia', []))->contains($val)) ? 'checked' : '' }}>
-                                        <label class="form-check-label" for="dia_{{ $val }}">{{ $lbl }}</label>
+                                    <div class="form-check mb-2">
+                                        <input class="form-check-input" id="recorrenciapon" type="radio" name="recorrencia" value="1"
+                                            {{ old('recorrencia', '1') == '1' ? 'checked' : '' }}>
+                                        <label class="form-check-label" for="recorrenciapon">Pontual</label>
                                     </div>
-                                </div>
-                                @endforeach
+
+                                    <div class="form-check mb-3">
+                                        <input class="form-check-input" id="recorrenciarec" type="radio" name="recorrencia" value="2"
+                                            {{ old('recorrencia') == '2' ? 'checked' : '' }}>
+                                        <label class="form-check-label" for="recorrenciarec">Recorrência</label>
+                                    </div>
+
+                                    <div class="fw-semibold mb-2">Dias da semana</div>
+                                    <div class="row row-cols-3 g-2">
+                                        @php $dias = ['1'=>'Seg','2'=>'Ter','3'=>'Qua','4'=>'Qui','5'=>'Sex','6'=>'Sáb']; @endphp
+                                        @foreach($dias as $val=>$lbl)
+                                        <div class="col">
+                                            <div class="form-check">
+                                                <input class="form-check-input" type="checkbox" id="dia_{{ $val }}" name="dia_recorrencia[]" value="{{ $val }}"
+                                                    {{ (collect(old('dia_recorrencia', []))->contains($val)) ? 'checked' : '' }}>
+                                                <label class="form-check-label" for="dia_{{ $val }}">{{ $lbl }}</label>
+                                            </div>
+                                        </div>
+                                        @endforeach
+                                    </div>
+                                </fieldset>
                             </div>
-                        </fieldset>
-                    </div>
-                    <!-- Observações ocupa largura total para respiro -->
-                    <div class="col-12">
-                        <div class="form-floating">
-                            <input
-                                type="text"
-                                id="obs"
-                                name="obs"
-                                class="form-control"
-                                placeholder="Escreva observações"
-                                value="{{ old('obs', $agenda->OBSERVACOES ?? '') }}">
-                            <label for="obs">Observações</label>
                         </div>
                     </div>
-                    <!-- Status alinhado à direita em telas grandes -->
-                    @php
-                    $remarcado = old('remarcado', isset($agenda) ? ($agenda->UPDATED_AT ? '1' : '0') : '0');
-                    @endphp
                 </div>
-            </div>
-    </div>
-    <div class="mb-5">
-        <div class="linha-com-titulo">
-            <h5>Pagamento</h5>
-            <div class="linha-flex"></div>
-        </div>
-        <!-- Pagamento -->
-        @php
-        $pagto = old('pagto');
-        if (is_null($pagto) && isset($agenda)) {
-        $pagto = $agenda->VALOR_AGEND !== null ? 'S' : 'N';
-        }
-        @endphp
-        <div class="row g-3 align-items-end">
-            <!-- Haverá Pagamento? -->
-            <div class="col-12 col-md-3">
-                <label for="pagto" class="form-label">Haverá Pagamento?<div id="help-pagto" class="form-text">Selecione “Sim” para informar o valor.</div></label>
-                <select id="pagto" name="pagto" class="form-select" aria-describedby="help-pagto">
-                    <option value=""></option>
-                    <option value="S" {{ $pagto === 'S' ? 'selected' : '' }}>Sim</option>
-                    <option value="N" {{ $pagto === 'N' ? 'selected' : '' }}>Não</option>
-                </select>
-                @error('pagto')<div class="invalid-feedback d-block">{{ $message }}</div>@enderror
-            </div>
-            @php $valorDisabled = ($pagto === 'N') ? 'disabled' : ''; @endphp
-            <div class="col-12 col-md-3">
-                <label for="valor" class="form-label" style="font-size: 15px;">Valor</label>
-                <div class="input-group">
-                    <span class="input-group-text">R$</span>
-                    <input
-                        type="text"
-                        id="valor"
-                        name="valor"
-                        class="form-control"
-                        placeholder="0,00"
-                        inputmode="decimal"
-                        value="{{ old('valor', $agenda->VALOR_AGEND ?? '') }}"
-                        {{ $valorDisabled }}>
+                <!-- Observações ocupa largura total para respiro -->
+                <div class="col-12">
+                    <div class="form-floating">
+                        <input
+                            type="text"
+                            id="obs"
+                            name="obs"
+                            class="form-control"
+                            placeholder="Escreva observações"
+                            value="{{ old('obs', $agenda->OBSERVACOES ?? '') }}">
+                        <label for="obs">Observações</label>
+                    </div>
                 </div>
-                @error('valor')<div class="invalid-feedback d-block">{{ $message }}</div>@enderror
+                <!-- Status alinhado à direita em telas grandes -->
+                @php
+                $remarcado = old('remarcado', isset($agenda) ? ($agenda->UPDATED_AT ? '1' : '0') : '0');
+                @endphp
+            </div>
+            <div class="mb-5">
+                <div class="linha-com-titulo">
+                    <h5>Pagamento</h5>
+                    <div class="linha-flex"></div>
+                </div>
+                <!-- Pagamento -->
+                @php
+                $pagto = old('pagto');
+                if (is_null($pagto) && isset($agenda)) {
+                $pagto = $agenda->VALOR_AGEND !== null ? 'S' : 'N';
+                }
+                @endphp
+                <div class="row g-3 align-items-end">
+                    <!-- Haverá Pagamento? -->
+                    <div class="col-12 col-md-3">
+                        <label for="pagto" class="form-label">Haverá Pagamento?<div id="help-pagto" class="form-text">Selecione “Sim” para informar o valor.</div></label>
+                        <select id="pagto" name="pagto" class="form-select" aria-describedby="help-pagto">
+                            <option value=""></option>
+                            <option value="S" {{ $pagto === 'S' ? 'selected' : '' }}>Sim</option>
+                            <option value="N" {{ $pagto === 'N' ? 'selected' : '' }}>Não</option>
+                        </select>
+                        @error('pagto')<div class="invalid-feedback d-block">{{ $message }}</div>@enderror
+                    </div>
+                    @php $valorDisabled = ($pagto === 'N') ? 'disabled' : ''; @endphp
+                    <div class="col-12 col-md-3">
+                        <label for="valor" class="form-label" style="font-size: 15px;">Valor</label>
+                        <div class="input-group">
+                            <span class="input-group-text">R$</span>
+                            <input
+                                type="text"
+                                id="valor"
+                                name="valor"
+                                class="form-control"
+                                placeholder="0,00"
+                                inputmode="decimal"
+                                value="{{ old('valor', $agenda->VALOR_AGEND ?? '') }}"
+                                {{ $valorDisabled }}>
+                        </div>
+                        @error('valor')<div class="invalid-feedback d-block">{{ $message }}</div>@enderror
+                    </div>
+
+                    <div class="col-12 col-md-3">
+                        <label for="remarcado" class="form-label" style="font-size: 15px;">Remarcado?</label>
+                        <select id="remarcado" name="remarcado" class="form-select" disabled>
+                            <option value="0" {{ $remarcado == '0' ? 'selected' : '' }}>Não</option>
+                            <option value="1" {{ $remarcado == '1' ? 'selected' : '' }}>Sim</option>
+                        </select>
+                    </div>
+                    <div class="col-12 col-md-3 d-flex justify-content-md-end">
+                        <button class="btn btn-primary btn-lg w-100 w-md-auto" id="btn-agendar" type="submit">
+                            <i class="bi bi-calendar-plus"></i> Agendar
+                        </button>
+                    </div>
+                </div>
             </div>
 
-            <div class="col-12 col-md-3">
-                <label for="remarcado" class="form-label" style="font-size: 15px;">Remarcado?</label>
-                <select id="remarcado" name="remarcado" class="form-select" disabled>
-                    <option value="0" {{ $remarcado == '0' ? 'selected' : '' }}>Não</option>
-                    <option value="1" {{ $remarcado == '1' ? 'selected' : '' }}>Sim</option>
-                </select>
-            </div>
-            <div class="col-12 col-md-3 d-flex justify-content-md-end">
-                <button class="btn btn-primary btn-lg w-100 w-md-auto" id="btn-agendar" type="submit">
-                    <i class="bi bi-calendar-plus"></i> Agendar
-                </button>
-            </div>
-        </div>
-    </div>
-    </form>
+        </form>
     </div>
     </div>
     <script>

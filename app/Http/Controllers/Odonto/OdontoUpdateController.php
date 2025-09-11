@@ -180,45 +180,6 @@ class OdontoUpdateController extends Controller
         $diaStr = \Carbon\Carbon::createFromFormat('d/m/Y', $request->input('date'))->format('Y-m-d');
         $dateEnd = \Carbon\Carbon::createFromFormat('d/m/Y', $request->input('date_end'))->format('Y-m-d');
 
-        $dias = [
-            '1' =>  '7:30',
-            '2' =>  '8:15',
-            '3' =>  '9:00',
-            '4' =>  '9:45',
-            '5' =>  '10:15',
-            '6' =>  '11:00',
-            '7' =>  '11:45',
-            '8' =>  '12:30',
-            '9' =>  '13:15',
-            '10' => '14:00',
-            '11' => '14:45',
-            '12' => '15:30',
-            '13' => '16:15',
-            '14' => '17:00',
-            '15' => '17:45',
-            '16' => '18:30',
-        ];
-
-        $horarios = collect((array) $request->input('dias_semana', []))
-            ->map(fn($v) => (string) $v)                     // normaliza p/ string
-            ->filter(fn($v) => array_key_exists($v, $dias))  // só os válidos no mapa
-            ->map(fn($v) => (int) $v)                        // para ordenar numericamente
-            ->sort()
-            ->values();
-
-        if ($horarios->isNotEmpty()) {
-            $minKey = (string) $horarios->first();
-            $maxKey = (string) $horarios->last();
-
-            // Usa 'G:i' porque suas horas podem vir sem zero à esquerda (ex.: "7:30")
-            $hrIni = Carbon::createFromFormat('G:i', $dias[$minKey])->format('H:i:s');
-            $hrFim = Carbon::createFromFormat('G:i', $dias[$maxKey])->format('H:i:s');
-        } else {
-            // fallback: se nada foi enviado em dias_semana, usa os campos do formulário
-            $hrIni = Carbon::createFromFormat('H:i', $request->input('hr_ini'))->format('H:i:s');
-            $hrFim = Carbon::createFromFormat('H:i', $request->input('hr_fim'))->format('H:i:s');
-        }
-
         $valor_convert = $request->input('valor');
         if ($valor_convert === null || $valor_convert === '') {
             $valor_convert = null;
@@ -249,8 +210,8 @@ class OdontoUpdateController extends Controller
                 'ID_SERVICO' => $servico,
                 'DT_AGEND' => $diaStr,
                 'DT_AGEND_FINAL' => $dateEnd,
-                'HR_AGEND_INI' => $hrIni,
-                'HR_AGEND_FIN' => $hrFim,
+                'HR_AGEND_INI' => $request->input('hr_ini'),
+                'HR_AGEND_FIN' => $request->input('hr_fim'),
                 'STATUS_AGEND' => $request->input('status'),
                 'ID_AGEND_REMARCADO' => $request->input('ID_AGEND_REMARCADO') ?: null,
                 'RECORRENCIA' => $request->input('recorrencia'),

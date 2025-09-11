@@ -33,7 +33,7 @@
             </div>
             <div class="input-group" style="flex: 1; flex-direction: column;">
                 <div class="form-outline">
-                    <select id="selectUserLyceum"style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 6px; font-size: 14px;">
+                    <select id="selectUserLyceum" style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 6px; font-size: 14px;">
                         <option></option>
                     </select>
                 </div>
@@ -77,14 +77,15 @@
                     </select>
                 </div>
             </div>
-            <div style="display: flex; justify-content: space-between; gap: 10px;">
-                <button id="voltar" name="voltar" type="submit" style="background-color: #007bff; color: #fff; border: none; padding: 10px 20px; font-size: 14px; border-radius: 6px; cursor: pointer;">
+            <div class="d-flex justify-content-between">
+                <a href="{{ url('/odontologia/consultarusuario') }}" class="btn btn-primary" id="voltar">
                     Voltar
-                </button>
-                <button type="submit" style="background-color: #007bff; color: #fff; border: none; padding: 10px 20px; font-size: 14px; border-radius: 6px; cursor: pointer;">
+                </a>
+                <button type="submit" class="btn btn-primary">
                     Salvar
                 </button>
             </div>
+
         </form>
     </div>
     </form>
@@ -112,7 +113,7 @@
     </script>
     @endif
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-    
+
     <!-- Select2 principal -->
     <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
 

@@ -85,8 +85,3 @@ document.getElementById('cep').addEventListener('blur', async function () {
         }
     }
 });
-
-document.getElementById('voltar').addEventListener('click', function (event) {
-    event.preventDefault(); // previne submit padrão
-    window.location.href = 'consultarpaciente'; // substitua pela rota que deseja
-});

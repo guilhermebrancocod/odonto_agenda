@@ -22,7 +22,7 @@ function carregarTodosProcedimentos() {
                 const html = `
                     <tr>
                         <td>${procedimento.SERVICO_CLINICA_DESC}</td>
-                        <td>${procedimento.VALOR_SERVICO != null && servico.VALOR_SERVICO !== '' ? 'R$ ' + parseFloat(servico.VALOR_SERVICO).toFixed(2) : ''}</td>
+                        <td>${procedimento.VALOR_SERVICO != null && procedimento.VALOR_SERVICO !== '' ? 'R$ ' + parseFloat(procedimento.VALOR_SERVICO).toFixed(2) : ''}</td>
                         <td>${procedimento.ATIVO}</td>
                         <td>
                             <button 

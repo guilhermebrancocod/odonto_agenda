@@ -182,19 +182,15 @@
                         value="{{ old('obs_laudo', $paciente->OBSERVACAO ?? '') }}" style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 6px; font-size: 14px;" maxlength="20">
                 </div>
 
-                <div style="display: flex; justify-content: space-between; margin-top: 30px;margin-bottom:20px">
-
-                    <div>
-                        <button id="voltar" name="voltar" type="submit" style="background-color: #007bff; color: #fff; border: none; padding: 10px 20px; font-size: 14px; border-radius: 6px; cursor: pointer;">
-                            Voltar
-                        </button>
-                    </div>
-                    <div>
-                        <button id="salvar" name="salvar" type="submit" style="background-color: #007bff; color: #fff; border: none; padding: 10px 20px; font-size: 14px; border-radius: 6px; cursor: pointer;">
-                            Salvar
-                        </button>
-                    </div>
+                <div class="d-flex justify-content-between" style="margin-bottom: 20px;">
+                    <a href="{{ url('/odontologia/consultarpaciente') }}" class="btn btn-primary" id="voltar">
+                        Voltar
+                    </a>
+                    <button type="submit" class="btn btn-primary">
+                        Salvar
+                    </button>
                 </div>
+            </tr>
         </form>
     </div>
     @if (session('success'))

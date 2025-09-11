@@ -229,14 +229,11 @@
                     </div>
                 </div>
             </div>
-
-            <div style="display: flex; justify-content: space-between; gap: 10px;">
-                <a href="{{ url('odontologia/consultardisciplinabox') }}"
-                    class="btn btn-primary"
-                    id="voltar">
+            <div class="d-flex justify-content-between">
+                <a href="{{ url('odontologia/consultardisciplinabox') }}" class="btn btn-primary" id="voltar">
                     Voltar
                 </a>
-                <button style="background-color: #007bff; color: #fff; border: none; padding: 10px 20px; font-size: 14px; border-radius: 6px; cursor: pointer;">
+                <button type="submit" class="btn btn-primary">
                     Salvar
                 </button>
             </div>

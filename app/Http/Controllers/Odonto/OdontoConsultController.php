@@ -243,18 +243,13 @@ class OdontoConsultController extends Controller
     {
         // serviço (sem depender de disciplina)
         $row = DB::table('FAESA_CLINICA_SERVICO as s')
-            ->leftJoin('FAESA_CLINICA_SERVICO_DISCIPLINA as sd', 'sd.ID_SERVICO_CLINICA', '=', 's.ID_SERVICO_CLINICA')
-            ->leftJoin('LYCEUM_BKP_PRODUCAO.dbo.LY_DISCIPLINA as ld', 'ld.DISCIPLINA', '=', 'sd.DISCIPLINA')
             ->where('s.ID_SERVICO_CLINICA', $servicoId)
             ->select(
                 's.ID_SERVICO_CLINICA as id',
                 's.SERVICO_CLINICA_DESC as descricao',
                 's.VALOR_SERVICO as valor',
-                's.ATIVO as ativo',
-                'sd.DISCIPLINA as disciplina_codigo',
-                'ld.NOME as disciplina_nome'
+                's.ATIVO as ativo'
             )
-            ->orderBy('ld.NOME')   // define um critério para qual disciplina pegar
             ->limit(1)             // garante apenas UMA disciplina
             ->first();
 
@@ -266,8 +261,6 @@ class OdontoConsultController extends Controller
             'descricao'         => $row->descricao,
             'valor'             => $row->valor,
             'ativo'             => $row->ativo,
-            'disciplina_codigo' => $row->disciplina_codigo, // pode vir null se não houver
-            'disciplina_nome'   => $row->disciplina_nome,   // pode vir null se não houver
         ]);
     }
 
@@ -479,10 +472,11 @@ class OdontoConsultController extends Controller
         return response()->json($turmas);
     }
 
-    public function getTodasTurmas(Request $request)
+    public function getTodasTurmas($disciplina)
     {
         $turma = DB::table('FAESA_CLINICA_BOX_DISCIPLINA')
             ->select('TURMA')
+            ->where('DISCIPLINA', $disciplina)
             ->distinct()
             ->pluck('TURMA');
         return response()->json($turma);

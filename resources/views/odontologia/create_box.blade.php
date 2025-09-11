@@ -46,11 +46,11 @@
                     </select>
                 </div>
             </div>
-            <div style="display: flex; justify-content: space-between; gap: 10px;">
-                <button id="voltar" name="voltar" type="submit" style="background-color: #007bff; color: #fff; border: none; padding: 10px 20px; font-size: 14px; border-radius: 6px; cursor: pointer;">
+            <div class="d-flex justify-content-between">
+                <a href="{{ url('odontologia/consultarbox') }}" class="btn btn-primary" id="voltar">
                     Voltar
-                </button>
-                <button id="salvar" name="salvar" type="submit" onclick="saveGroupData()" style="background-color: #007bff; color: #fff; border: none; padding: 10px 20px; font-size: 14px; border-radius: 6px; cursor: pointer;">
+                </a>
+                <button type="submit" class="btn btn-primary">
                     Salvar
                 </button>
             </div>

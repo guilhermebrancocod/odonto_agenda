@@ -59,14 +59,15 @@
             <div class="linha-com-titulo" style="margin-bottom: 5px">
                 <div class="linha-flex"></div>
             </div>
-            <div style="display: flex; justify-content: space-between; gap: 10px;">
-                <button id="voltar" name="voltar" style="background-color: #007bff; color: #fff; border: none; padding: 10px 20px; font-size: 14px; border-radius: 6px; cursor: pointer;">
+            <div class="d-flex justify-content-between">
+                <a href="{{ url('/odontologia/consultarservico') }}" class="btn btn-primary" id="voltar">
                     Voltar
-                </button>
-                <button style="background-color: #007bff; color: #fff; border: none; padding: 10px 20px; font-size: 14px; border-radius: 6px; cursor: pointer;">
+                </a>
+                <button type="submit" class="btn btn-primary">
                     Salvar
                 </button>
             </div>
+
         </form>
     </div>
     @if (session('success'))

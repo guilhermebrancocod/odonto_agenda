@@ -153,7 +153,6 @@ class OdontoCreateController extends Controller
 
     public function fCreateAgenda(Request $request)
     {
-
         $rules = [
             'ID_PACIENTE'     => ['required'],
             'status'          => ['required'],   // 11 dígitos
@@ -468,11 +467,15 @@ class OdontoCreateController extends Controller
 
     public function editPatient($pacienteId)
     {
-        $paciente = DB::table('FAESA_CLINICA_PACIENTE')->where('ID_PACIENTE', $pacienteId)->first();
-
-        if (!$paciente) {
-            abort(404);
+        if (!ctype_digit((string)$pacienteId)) {
+            abort(404); // ou 422
         }
+
+        $paciente = DB::table('FAESA_CLINICA_PACIENTE')
+            ->where('ID_PACIENTE', (int)$pacienteId)
+            ->first();
+
+        if (!$paciente) abort(404);
 
         return view('odontologia/create_patient', compact('paciente'));
     }
@@ -493,6 +496,7 @@ class OdontoCreateController extends Controller
 
         $agenda = DB::table('FAESA_CLINICA_AGENDAMENTO as a')
             ->leftjoin('FAESA_CLINICA_LOCAL_AGENDAMENTO as la', 'la.ID_AGENDAMENTO', '=', 'a.ID_AGENDAMENTO')
+            ->leftJoin('LYCEUM_BKP_PRODUCAO.dbo.LY_DISCIPLINA as ld', 'ld.DISCIPLINA', '=', 'la.DISCIPLINA')
             ->leftjoin('FAESA_CLINICA_BOXES as cb', 'cb.ID_BOX_CLINICA', '=', 'la.ID_BOX')
             ->leftjoin('FAESA_CLINICA_PACIENTE as p', 'p.ID_PACIENTE', '=', 'a.ID_PACIENTE')
             ->join('FAESA_CLINICA_SERVICO as s', 's.ID_SERVICO_CLINICA', '=', 'a.ID_SERVICO')
@@ -511,6 +515,7 @@ class OdontoCreateController extends Controller
                 'cb.DESCRICAO',
                 'a.RECORRENCIA',
                 'la.DISCIPLINA',
+                'ld.NOME AS DISCIPLINA_NOME',
                 'la.TURMA',
                 'a.UPDATED_AT',
                 'a.VALOR_AGEND',
@@ -639,7 +644,7 @@ class OdontoCreateController extends Controller
     public function editBoxDiscipline(Request $request, $idBoxDiscipline)
     {
         $BoxDiscipline = DB::table('FAESA_CLINICA_BOX_DISCIPLINA')
-        ->where('ID_BOX_DISCIPLINA', $idBoxDiscipline)->first();
+            ->where('ID_BOX_DISCIPLINA', $idBoxDiscipline)->first();
 
         if (!$BoxDiscipline) {
             return redirect('odontologia/criarboxdisciplina')->with('error', 'Serviço não encontrado.');
