@@ -63,6 +63,9 @@ Route::middleware([AuthMiddleware::class, CheckClinicaMiddleware::class])->prefi
     })->name('criarbox_disciplina_odontologia');
 });
 
+//AUDITORIA
+Route::get('/odontologia/pacientes/{id}/audits', [OdontoCreateController::class, 'historyPaciente'])->name('pacientes.audit');
+
 // CRIAÇÃO E EDIÇÃO - PACIENTE
 Route::get('/odontologia/criarpaciente', [OdontoCreateController::class, 'showForm'])->name('criarpaciente');
 Route::get('/odontologia/criarpaciente/{pacienteId}', [OdontoCreateController::class, 'editPatient'])->whereNumber('pacienteId')->name('editPatient');
