@@ -146,7 +146,7 @@
                                     <option value="" selected>Todos os Status</option>
                                     <option value="Agendado">Agendado</option>
                                     <option value="Presente">Presente</option>
-                                    <option value="Remarcado">Reagendado</option>
+                                    <option value="Remarcado">Remarcado</option>
                                     <option value="Cancelado">Cancelado</option>
                                     <option value="Finalizado">Finalizado</option>
                                 </select>

@@ -271,157 +271,164 @@
 
 <!-- BUSCA DE PACIENTES -->
 <script>
-    document.addEventListener('DOMContentLoaded', function() {
 
-        function initializeTomSelectWithOldValue(selector, config) {
-            const element = document.querySelector(selector);
-            if (!element) return;
-            const oldId = element.dataset.oldId;
-            const ts = new TomSelect(element, config);
-            if (oldId) ts.load(oldId);
-            return ts;
+    // BUSCA DE VALOR ANTIGO, CASO EXISTA
+    function initializeTomSelectWithOldValue(selector, config) {
+        
+        const element = document.querySelector(selector);
+
+        if (!element) return;
+
+        const oldId = element.dataset.oldId;
+        
+        const ts = new TomSelect(element, config);
+
+        if (oldId) ts.load(oldId);
+        
+        return ts;
+    }
+
+    // --- SELECT DE PACIENTE ---
+    const pacienteSelect = initializeTomSelectWithOldValue('#select-paciente', {
+
+        valueField: 'ID_PACIENTE',
+        labelField: 'NOME_COMPL_PACIENTE',
+        searchField: ['NOME_COMPL_PACIENTE', 'CPF_PACIENTE'],
+
+        load: (query, callback) => {
+            if (!query.length) return callback();
+            const url = `/psicologia/consultar-paciente/buscar-nome-cpf?search=${encodeURIComponent(query)}`;
+            fetch(url)
+                .then(r => r.json())
+                .then(json => callback(json))
+                .catch(() => callback());
+        },
+
+        render: {
+            no_results: function(data, escape) {
+                const query = encodeURIComponent(data.input || ''); // pega o que o usuário digitou
+                return `<div class="no-results">
+                            Nenhum paciente encontrado. 
+                            <a href="/psicologia/criar-paciente?nome_compl_paciente=${query}" 
+                            target="_blank" class="text-primary fw-bold">
+                            Criar novo paciente
+                            </a>
+                        </div>`;
+            }
         }
+    });
 
-        // --- SELECT DE PACIENTE ---
-        const pacienteSelect = initializeTomSelectWithOldValue('#select-paciente', {
-            valueField: 'ID_PACIENTE',
-            labelField: 'NOME_COMPL_PACIENTE',
-            searchField: ['NOME_COMPL_PACIENTE', 'CPF_PACIENTE'],
+    // SELECT DE SERVICO
+    const servicoSelect = initializeTomSelectWithOldValue('#select-servico', {
+        valueField: 'ID_SERVICO_CLINICA',
+        labelField: 'SERVICO_CLINICA_DESC',
+        searchField: ['SERVICO_CLINICA_DESC'],
 
-            load: (query, callback) => {
-                if (!query.length) return callback();
-                const url = `/psicologia/consultar-paciente/buscar-nome-cpf?search=${encodeURIComponent(query)}`;
-                fetch(url)
-                    .then(r => r.json())
-                    .then(json => callback(json))
-                    .catch(() => callback());
-            },
+        load: (query, callback) => {
+            if (!query.length) return callback();
+            const url = `/psicologia/pesquisar-servico?search=${encodeURIComponent(query)}`;
+            fetch(url)
+                .then(r => r.json())
+                .then(json => callback(json))
+                .catch(() => callback());
+        },
 
-            render: {
-                no_results: function(data, escape) {
-                    const query = encodeURIComponent(data.input || ''); // pega o que o usuário digitou
-                    return `<div class="no-results">
-                                Nenhum paciente encontrado. 
-                                <a href="/psicologia/criar-paciente?nome_compl_paciente=${query}" 
-                                target="_blank" class="text-primary fw-bold">
-                                Criar novo paciente
-                                </a>
-                            </div>`;
+        render: {
+            no_results: function(data, escape) {
+                const query = encodeURIComponent(data.input || '');
+                return `<div class="no-results">
+                            Nenhum serviço encontrado. 
+                            <a href="/psicologia/criar-servico?SERVICO_CLINICA_DESC=${query}" 
+                            target="_blank" class="text-primary fw-bold">
+                            Criar novo serviço
+                            </a>
+                        </div>`;
+            }
+        }
+    });
+
+    // SELECT DE SALA (LOCAL)
+    const localSelect = initializeTomSelectWithOldValue('#select-local', {
+        valueField: 'ID_SALA_CLINICA',
+        labelField: 'DESCRICAO',
+        searchField: ['DESCRICAO'],
+
+        load: (query, callback) => {
+            if (!query.length) return callback();
+            const url = `/psicologia/pesquisar-local?search=${encodeURIComponent(query)}`;
+            fetch(url)
+                .then(r => r.json())
+                .then(json => callback(json))
+                .catch(() => callback());
+        },
+
+        render: {
+            no_results: function(data, escape) {
+                const query = encodeURIComponent(data.input || '');
+                return `<div class="no-results">
+                            Nenhum local encontrado. 
+                            <a href="/psicologia/criar-sala?DESCRICAO=${query}" 
+                            target="_blank" class="text-primary fw-bold">
+                            Criar nova sala
+                            </a>
+                        </div>`;
+            }
+        }
+    });
+
+    // --- SELECT DE ALUNO ---
+    const alunoSelect = initializeTomSelectWithOldValue('#select-aluno', {
+        valueField: 'ID_ALUNO',
+        labelField: 'NOME_COMPL',
+        searchField: ['NOME_COMPL', 'ID_ALUNO'],
+        load: (query, callback) => {
+
+            // Pega o serviço selecionado
+            const servicoValue = servicoSelect.getValue();
+            let disciplina = '';
+            if (servicoValue) {
+                const selectedServico = servicoSelect.options[servicoValue];
+                if (selectedServico && selectedServico.DISCIPLINA) {
+                    disciplina = selectedServico.DISCIPLINA;
                 }
             }
-        });
 
-       const servicoSelect = initializeTomSelectWithOldValue('#select-servico', {
-            valueField: 'ID_SERVICO_CLINICA',
-            labelField: 'SERVICO_CLINICA_DESC',
-            searchField: ['SERVICO_CLINICA_DESC'],
+            // Monta a URL com o parâmetro disciplina
+            const url = `/psicologia/listar-alunos?search=${encodeURIComponent(query)}&disciplina=${encodeURIComponent(disciplina)}`;
 
-            load: (query, callback) => {
-                if (!query.length) return callback();
-                const url = `/psicologia/pesquisar-servico?search=${encodeURIComponent(query)}`;
-                fetch(url)
-                    .then(r => r.json())
-                    .then(json => callback(json))
-                    .catch(() => callback());
-            },
+            fetch(url)
+                .then(r => r.json())
+                .then(json => callback(json))
+                .catch(() => callback());
+        }
+    });
 
-            render: {
-                no_results: function(data, escape) {
-                    const query = encodeURIComponent(data.input || '');
-                    return `<div class="no-results">
-                                Nenhum serviço encontrado. 
-                                <a href="/psicologia/criar-servico?SERVICO_CLINICA_DESC=${query}" 
-                                target="_blank" class="text-primary fw-bold">
-                                Criar novo serviço
-                                </a>
-                            </div>`;
-                }
-            }
-        });
+    alunoSelect.disable();
 
-        const localSelect = initializeTomSelectWithOldValue('#select-local', {
-            valueField: 'ID_SALA_CLINICA',
-            labelField: 'DESCRICAO',
-            searchField: ['DESCRICAO'],
-
-            load: (query, callback) => {
-                if (!query.length) return callback();
-                const url = `/psicologia/pesquisar-local?search=${encodeURIComponent(query)}`;
-                fetch(url)
-                    .then(r => r.json())
-                    .then(json => callback(json))
-                    .catch(() => callback());
-            },
-
-            render: {
-                no_results: function(data, escape) {
-                    const query = encodeURIComponent(data.input || '');
-                    return `<div class="no-results">
-                                Nenhum local encontrado. 
-                                <a href="/psicologia/criar-sala?DESCRICAO=${query}" 
-                                target="_blank" class="text-primary fw-bold">
-                                Criar nova sala
-                                </a>
-                            </div>`;
-                }
-            }
-        });
-
-        // --- SELECT DE ALUNO ---
-        const alunoSelect = initializeTomSelectWithOldValue('#select-aluno', {
-            valueField: 'ID_ALUNO',
-            labelField: 'NOME_COMPL',
-            searchField: ['NOME_COMPL', 'ID_ALUNO'],
-            load: (query, callback) => {
-
-                // Pega o serviço selecionado
-                const servicoValue = servicoSelect.getValue();
-                let disciplina = '';
-                if (servicoValue) {
-                    const selectedServico = servicoSelect.options[servicoValue];
-                    if (selectedServico && selectedServico.DISCIPLINA) {
-                        disciplina = selectedServico.DISCIPLINA;
-                    }
-                }
-
-                // Monta a URL com o parâmetro disciplina
-                const url = `/psicologia/listar-alunos?search=${encodeURIComponent(query)}&disciplina=${encodeURIComponent(disciplina)}`;
-
-                fetch(url)
-                    .then(r => r.json())
-                    .then(json => callback(json))
-                    .catch(() => callback());
-            }
-        });
-
-        alunoSelect.disable();
-
-        // Atualiza o select de aluno quando o serviço mudar
-        servicoSelect.on('change', (value) => {
-            if (value) {
-                // Preenche o valor do serviço no campo valor_agend
-                const selectedItem = servicoSelect.options[value];
-                if (selectedItem && selectedItem.VALOR_SERVICO) {
-                    const valor = parseFloat(selectedItem.VALOR_SERVICO).toLocaleString('pt-BR', { minimumFractionDigits: 2 });
-                    document.getElementById('valor_agend').value = valor;
-                } else {
-                    document.getElementById('valor_agend').value = '';
-                }
-
-                alunoSelect.clear();
-                alunoSelect.enable();
-                alunoSelect.load(''); // recarrega alunos com a disciplina correta
+    // ATUALIZA O SELECT DE ALUNO QUANDO O SERVICO MUDAR
+    servicoSelect.on('change', (value) => {
+        if (value) {
+            // Preenche o valor do serviço no campo valor_agend
+            const selectedItem = servicoSelect.options[value];
+            if (selectedItem && selectedItem.VALOR_SERVICO) {
+                const valor = parseFloat(selectedItem.VALOR_SERVICO).toLocaleString('pt-BR', { minimumFractionDigits: 2 });
+                document.getElementById('valor_agend').value = valor;
             } else {
-                alunoSelect.clear();
-                alunoSelect.disable();
                 document.getElementById('valor_agend').value = '';
             }
-        });
 
-        // Inicializa select de duração da recorrência
-        new TomSelect('#duracao_meses_recorrencia', {});
-
+            alunoSelect.clear();
+            alunoSelect.enable();
+            alunoSelect.load('');
+        } else {
+            alunoSelect.clear();
+            alunoSelect.disable();
+            document.getElementById('valor_agend').value = '';
+        }
     });
+
+    // Inicializa select de duração da recorrência
+    new TomSelect('#duracao_meses_recorrencia', {});
 </script>
 
 <!-- SCRIPT DE SELEÇÃO DE RECORRÊNCIA -->
