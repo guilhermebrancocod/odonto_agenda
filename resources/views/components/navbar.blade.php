@@ -94,6 +94,7 @@
     
     /* --- ESTILOS DA NAVBAR E TRANSIÇÃO --- */
     #mainNavbar {
+        min-width: 250px;
         width: 250px;
         background-color: var(--blue-color);
         transition: width 0.3s ease;
@@ -104,13 +105,14 @@
     
     /* 1. Reduz a largura da navbar */
     #mainNavbar.collapsed {
+        min-width: 80px;
         width: 80px;
     }
 
     /* 2. Esconde os elementos que não são ícones */
 
     #mainNavbar.collapsed h5,
-    #mainNavbar.collapsed div[classs=""] { /* OBS: Há um typo 'classs' no seu HTML original */
+    #mainNavbar.collapsed div[class=""] { /* OBS: Há um typo 'class' no seu HTML original */
         opacity: 0;
     }
 
@@ -157,7 +159,7 @@
     </h5>
 
     <!-- DADOS DA SESSAO DO USUARIO -->
-    <div classs="">
+    <div class="">
         <p style="color:#ecf5f9" class="p-0 m-0 text-center">
             {{ session('usuario')->USUARIO }}
         </p>
