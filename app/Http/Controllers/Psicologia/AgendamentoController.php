@@ -278,22 +278,19 @@ class AgendamentoController extends Controller
     }
 
     // CRIAR AGENDAMENTO - aluno
-    public function criarAgendamentoaluno(Request $request)
+    public function criarAgendamentoAluno(Request $request)
     {
-        // CLINICA FIXO
-        $idClinica = 1;
-        
-        $validated = $request->validate([
+        // VALIDAÇÃO INICIAL
+        $validatedData = $request->validate([
             'paciente_id' => 'required|integer',
             'id_servico' => 'required|integer',
             'dia_agend' => 'required|date',
             'hr_ini' => 'required',
             'hr_fim' => 'required|after:hr_ini',
-            'status_agend' => 'required|string',
-            'observacoes' => 'nullable|string',
-            'local_agend' => 'nullable|string|max:255',
-            'id_sala_clinica' => 'nullable|integer|exists:faesa_clinica_sala,ID_SALA_CLINICA',
             'ID_ALUNO' => 'required|integer',
+            'id_sala_clinica' => 'nullable|integer|exists:faesa_clinica_sala,ID_SALA_CLINICA',
+            'local_agend' => 'nullable|string|max:255',
+            'observacoes' => 'nullable|string',
         ], [
             'paciente_id.required' => 'A seleção de paciente é obrigatória.',
             'id_servico.required' => 'A seleção de serviço obrigatória.',
@@ -302,65 +299,44 @@ class AgendamentoController extends Controller
             'hr_fim.required' => 'A hora de término é obrigatória.',
             'hr_fim.after' => 'A hora de término deve ser posterior à hora de início.',
             'id_sala_clinica.exists' => 'A sala selecionada não existe.',
-            'observacoes.string' => 'As observações devem ser um texto.',
-            'status_agend.required' => 'O status do agendamento é obrigatório.',
-            'ID_ALUNO.integer' => 'A identificação do aluno deve ser o número de matrícula',
-            'ID_ALUNO.required' => 'A identificação do aluno é necesária'
+            'ID_ALUNO.required' => 'A identificação do aluno é necessária.',
         ]);
 
-        // BUSCA QUAL SERVIÇO aluno SELECIONOU
-        $servico = FaesaClinicaServico::find($request->id_servico);
-        
-        // VERIFICA SE A DATA NAO CAI EM FERIADO
-        if ($this->verificaFeriado($validated['dia_agend'])) {
-            return redirect('/psicologia/criar-agendamento/')
-                ->with('error', 'Agendamento não foi criado devido a um feriado');
-        }
-
-        // AGENDAMENTO SIMPLES
-        if ($this->existeConflitoAgendamento($idClinica, $request->id_sala_clinica, $request->dia_agend, $request->hr_ini, $request->hr_fim, $request->paciente_id, idaluno: $request->ID_ALUNO)) {
-            return redirect()->back()
-                ->withInput()
-                ->withErrors(['conflito' => 'Conflito de Agendamento identificado']);
-        }
-
-        $dados = [
-            'ID_CLINICA' => $idClinica,
-            'ID_PACIENTE' => $request->paciente_id,
-            'ID_SERVICO' => $request->id_servico,
-            'DT_AGEND' => $request->dia_agend,
-            'HR_AGEND_INI' => $request->hr_ini,
-            'HR_AGEND_FIN' => $request->hr_fim,
-            'STATUS_AGEND' => 'Agendado',
-            'OBSERVACOES' => $request->observacoes ?? null,
-            'ID_SALA_CLINICA' => $request->id_sala_clinica,
-            'LOCAL' => $request->local_agend,
-            'ID_ALUNO' => $request->ID_ALUNO,
-        ];
-
-        if (!$this->salaEstaAtiva($request->id_sala_clinica)) {
-            return redirect()->back()
-                ->withInput()
-                ->withErrors(['sala_indisponivel' => 'Sala não está ativa.']);
-        }
-
-        if (!$this->horarioEstaDisponivel($idClinica, $request->dia_agend, $request->hr_ini, $request->hr_fim)) {
-            return redirect()->back()
-                ->withInput()
-                ->withErrors(['horario_indisponivel' => 'O horário solicitado não está disponível.']);
-        }
-
-        FaesaClinicaAgendamento::create($dados);
-
+        // Chama o mesmo service que o método criarAgendamento
         try {
-            $this->pacienteService->setEmAtendimento($request->paciente_id);
-        } catch (\Illuminate\Database\Eloquent\ModelNotFoundException $e) {
-            return redirect()->back()->with('error', 'Paciente não encontrado.');
+            $resultado = $this->agendamentoService->criarAgendamentos([
+                'paciente_id' => $validatedData['paciente_id'],
+                'id_servico' => $validatedData['id_servico'],
+                'dia_agend' => $validatedData['dia_agend'],
+                'hr_ini' => $validatedData['hr_ini'],
+                'hr_fim' => $validatedData['hr_fim'],
+                'ID_ALUNO' => $validatedData['ID_ALUNO'],
+                'id_sala_clinica' => $validatedData['id_sala_clinica'] ?? null,
+                'local_agend' => $validatedData['local_agend'] ?? null,
+                'observacoes' => $validatedData['observacoes'] ?? null,
+            ]);
+
+            // 1. Nenhum agendamento criado
+            if ($resultado['criados'] === 0 && !empty($resultado['erros'])) {
+                $primeiroErro = reset($resultado['erros']);
+                return redirect()->back()->withInput()
+                    ->with('error', "Nenhum agendamento criado. Motivo: " . $primeiroErro);
+            }
+
+            // 2. Alguns agendamentos criados, outros com conflito
+            if (!empty($resultado['erros'])) {
+                $diasProblematicos = implode(', ', array_keys($resultado['erros']));
+                return redirect()->back()
+                    ->with('success', "Agendamentos criados, exceto para os dias: $diasProblematicos devido a conflitos.");
+            }
+
+            // 3. Todos os agendamentos criados com sucesso
+            return redirect()->back()->with('success', 'Agendamento criado com sucesso!');
+
         } catch (\Exception $e) {
-            return redirect()->back()->with('error', 'Erro ao atualizar o status do paciente.');
+            return redirect()->back()->withInput()
+                ->with('error', 'Ocorreu um erro inesperado: ' . $e->getMessage());
         }
-        return redirect('/aluno/criar-agendamento/')
-            ->with('success', 'Agendamento criado com sucesso!');
     }
 
     // MOSTRA AGENDAMENTOS RETORNANDO VIEW - Utiliza Injeção de Dependência
@@ -476,16 +452,13 @@ class AgendamentoController extends Controller
     // FUNÇÃO DE EXCLUSÃO DE AGENDAMENTO
     public function deleteAgendamento(Request $request, $id)
     {
-        // Busca o agendamento pelo ID ou falha (404)
         $agendamento = FaesaClinicaAgendamento::findOrFail($id);
 
-        // Altera o status para Excluido
         $agendamento->STATUS_AGEND = "Excluido";
         $agendamento->save();
 
-        // Redireciona para a lista ou outra rota com mensagem de sucesso
-        return redirect()->route('listagem-agendamentos')
-                        ->with('success', 'Agendamento excluído com sucesso!');
+        // Volta para a página anterior
+        return redirect()->back()->with('success', 'Agendamento excluído com sucesso');
     }
 
     // VERIFICA CONFLITOS DE AGENDAMENTO

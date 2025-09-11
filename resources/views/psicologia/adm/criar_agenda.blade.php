@@ -354,8 +354,10 @@
         searchField: ['DESCRICAO'],
 
         load: (query, callback) => {
-            if (!query.length) return callback();
-            const url = `/psicologia/pesquisar-local?search=${encodeURIComponent(query)}`;
+            const servicoId = document.querySelector('#select-servico').value;
+            if (!query.length && !servicoId) return callback();
+            
+            const url = `/psicologia/pesquisar-local?search=${encodeURIComponent(query)}&servico=${encodeURIComponent(servicoId)}`;
             fetch(url)
                 .then(r => r.json())
                 .then(json => callback(json))
