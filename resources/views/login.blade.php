@@ -61,7 +61,7 @@
             width: 281px;
             padding: 15px;
             margin-top:15px;
-            background-color: #007bff; /*  #007bff   #007bff */
+            background-color: #007bff;
             border: none;
             border-radius: 4px;
             color: #fff;
