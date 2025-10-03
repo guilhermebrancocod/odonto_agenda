@@ -7,19 +7,13 @@ document.addEventListener('DOMContentLoaded', function () {
     const turma = document.getElementById('turma');
     const data = document.getElementById('data');
 
-    const CAP = 3; // Aqui limito o número de alunos no box
+    const CAP = 2; // Aqui limito o número de alunos no box
     const state = {
         selected: new Set(),                // ids marcados na lista
         activeBox: null,                    // 'BOX 3', p.ex.
         boxes: new Map(),                   // boxId -> Set<alunoId>
         alunos: new Map(),                  // alunoId -> {id, nome}
     };
-
-    // pega Set<alunoId> do box (cria se não existir)
-    function getBucket(boxId) {
-        if (!state.boxes.has(boxId)) state.boxes.set(boxId, new Set());
-        return state.boxes.get(boxId);
-    }
 
     // aluno já alocado em algum box?
     function isAssigned(id) {
@@ -534,6 +528,52 @@ document.addEventListener('DOMContentLoaded', function () {
         wrap.appendChild(frag);
     }
 
+    function assignSelectedTo(boxId) {
+        if (!boxId) return;
+
+        const selected = [...(state?.selected ?? new Set())];
+        if (selected.length === 0) {
+            console.log('Necessário selecionar ao menos 1 aluno para selecionar o box.');
+            return;
+        }
+
+        // bucket alvo
+        const bucket = state.boxes.get(boxId) ?? new Set();
+        const before = bucket.size;
+        let free = CAP - before;
+
+        if (free <= 0) {
+            warn('Box atingiu o limite de alunos');
+            return; // mantém selecionados para você escolher outro box
+        }
+
+        // cada aluno só pode estar em 1 box: remove dos outros antes
+        for (const id of selected) {
+            for (const [bId, set] of state.boxes) {
+                if (bId !== boxId) set.delete(id);
+            }
+        }
+
+        // adiciona até CAP; remove do selected apenas os que couberem
+        let added = 0;
+        for (const id of selected) {
+            if (free <= 0) break;
+            bucket.add(id);
+            state.selected.delete(id);
+            free--; added++;
+        }
+
+        state.boxes.set(boxId, bucket);
+
+        if (added < selected.length) {
+            // sobrou gente em selected → não coube todo mundo
+            warn('Box atingiu o limite de alunos');
+        }
+
+        renderAlunosBoxes?.();
+        renderAlunosSelectionState?.();
+    }
+
     function assignSelectedToActive() {
         const container = document.getElementById('boxes-container');
         const boxId = state.activeBox;
@@ -570,6 +610,8 @@ document.addEventListener('DOMContentLoaded', function () {
                 bucket.add(id);
                 state.selected.delete(id);
             }
+
+            assignSelectedTo(boxId);
 
             state.boxes.set(boxId, bucket);
             renderPreSelecao?.();
