@@ -24,21 +24,33 @@
                 <h5>Pesquisar</h5>
                 <div class="linha-flex"></div>
             </div>
-            <div style="display: flex; gap: 20px; align-items: flex-end; flex-wrap: wrap; margin: 20px 0;">
-                <div class="input-group" style="flex: 1; flex-direction: column;">
-                    <div class="form-outline">
-                        <select id="selectPatient" name="selectPatient" style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 6px; font-size: 14px;">
-                            <option></option>
-                        </select>
-                    </div>
+            <div style="display: flex; flex-wrap: wrap; gap: 16px; align-items: flex-end; margin: 20px 0;">
+                <!-- Campo turma -->
+                <div style="flex: 1 1 200px;">
+                    <select id="selectTurma" name="selectTurma"
+                        style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 6px; font-size: 14px;">
+                        <option></option>
+                    </select>
                 </div>
-                <div style="flex-shrink: 0;">
-                    <button type="submit" id='reload' style="background-color: #007bff; color: #fff; border: none; padding: 10px 15px; font-size: 14px; border-radius: 6px; cursor: pointer;" title="Limpar">
+
+                <!-- Campo paciente -->
+                <div style="flex: 2 1 300px;">
+                    <select id="selectPatient" name="selectPatient"
+                        style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 6px; font-size: 14px;">
+                        <option></option>
+                    </select>
+                </div>
+
+                <!-- Botões -->
+                <div style="display: flex; gap: 10px; flex-shrink: 0;">
+                    <button type="submit" id='reload'
+                        style="background-color: #007bff; color: #fff; border: none; padding: 10px 15px; font-size: 14px; border-radius: 6px; cursor: pointer;"
+                        title="Limpar">
                         <iconify-icon icon="streamline:arrow-round-left-solid"></iconify-icon>
                     </button>
-                </div>
-                <div style="flex-shrink: 0;">
-                    <button type="submit" id='add' style="background-color: #007bff; color: #fff; border: none; padding: 10px 15px; font-size: 14px; border-radius: 6px; cursor: pointer;" title="Adicionar paciente">
+                    <button type="submit" id='add'
+                        style="background-color: #007bff; color: #fff; border: none; padding: 10px 15px; font-size: 14px; border-radius: 6px; cursor: pointer;"
+                        title="Adicionar paciente">
                         <iconify-icon icon="ix:add-circle-filled"></iconify-icon>
                     </button>
                 </div>
@@ -55,7 +67,7 @@
                             <th>Data</th>
                             <th>Horário</th>
                             <th>Serviço</th>
-                            <th>E-mail</th>
+                            <th>Turma</th>
                             <th>Telefone</th>
                             <th>Editar</th>
                         </tr>

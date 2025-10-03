@@ -178,22 +178,22 @@
                             placeholder="dd/mm/aaaa"
                             inputmode="numeric"
                             value="{{ old('date', isset($agenda->DT_AGEND) ? \Carbon\Carbon::parse($agenda->DT_AGEND)->format('d/m/Y') : '') }}">
-                        <label for="date">Dia Início</label>
+                        <label for="date">Data</label>
                     </div>
                 </div>
                 <div class="col-6 col-md-2">
                     <div class="form-floating">
                         <input
-                            type="text"
+                            type="hidden"
                             id="date_end"
                             name="date_end"
                             class="form-control datepicker"
                             placeholder="dd/mm/aaaa"
                             inputmode="numeric"
                             value="{{ old('date_end', isset($agenda->DT_AGEND_FINAL) ? \Carbon\Carbon::parse($agenda->DT_AGEND_FINAL)->format('d/m/Y') : '') }}">
-                        <label for="date_end">Dia Fim</label>
                     </div>
                 </div>
+
             </div>
             <div class="row g-4 align-items-start my-1">
                 <!-- Coluna principal (mais larga) -->
@@ -242,38 +242,66 @@
                                     <option value="" {{ old('TURMA', $agenda->TURMA ?? '') == '' ? 'selected' : '' }}>
                                         Turma
                                     </option>
-                                    @if(isset($agenda) && $agenda->ID_BOX)
-                                    <option value="{{ old('ID_SERVICO', isset($agenda->ID_SERVICO) ? $agenda->ID_SERVICO : '') }}" selected>
+                                    @if(isset($agenda) && $agenda->TURMA)
+                                    <option value="{{ old('TURMA', isset($agenda->TURMA) ? $agenda->TURMA : '') }}" selected>
                                         {{ isset($agenda->TURMA) ? $agenda->TURMA: '' }}
                                     </option>
                                     @endif
                                 </select>
                             </div>
                         </div>
-                        <div class="col-12 col-md-7">
-                            <div class="form-floating">
-                                <select id="form-select-proc" name="procedimento" class="form-select">
-                                    <option value="" {{ old('SERVICO_CLINICA_DESC', $agenda->SERVICO_CLINICA_DESC ?? '') == '' ? 'selected' : '' }}>
-                                        Procedimento
-                                    </option>
-                                    @if(isset($agenda) && $agenda->ID_SERVICO)
-                                    <option value="{{ old('ID_SERVICO', isset($agenda->ID_SERVICO) ? $agenda->ID_SERVICO : '') }}" selected>
-                                        {{ isset($agenda->SERVICO_CLINICA_DESC) ? $agenda->SERVICO_CLINICA_DESC : '' }}
-                                    </option>
-                                    @endif
-                                </select>
-                            </div>
-                        </div>
-                        @php
-                        $hrIniRaw = old('hr_ini', $agenda->HR_AGEND_INI ?? null);
-                        $hrFimRaw = old('hr_fim', $agenda->HR_AGEND_FIN ?? null);
-                        $hrIni = $hrIniRaw ? \Carbon\Carbon::parse($hrIniRaw)->format('H:i') : '';
-                        $hrFim = $hrFimRaw ? \Carbon\Carbon::parse($hrFimRaw)->format('H:i') : '';
-                        @endphp
+                        <div class="row g-3 align-items-center">
+                            <div class="col-12 col-lg-6">
+                                @php
+                                // $alunosSelecionados pode ser:
+                                // - mapa [id => nome], ou
+                                // - lista de objetos [{id, nome}] / stdClass com ->id, ->nome
+                                $lista = $alunosSelecionados ?? [];
+                                $temSelecionados = !empty($lista);
+                                @endphp
 
-                        <div class="row g-3 align-items-start"><!-- PAI: duas colunas irmãs -->
+                                <fieldset class="border rounded p-3">
+                                    <legend class="float-none w-auto px-2 fs-6 mb-2">Alunos</legend>
+
+                                    <div
+                                        id="alunos-readonly"
+                                        class="d-flex flex-wrap gap-2"
+                                        aria-live="polite"
+                                        @if(!$temSelecionados)
+                                        data-ajax="1"
+                                        data-disc="{{ $disc ?? '' }}"
+                                        data-turma="{{ $turma ?? '' }}"
+                                        data-box="{{ $box ?? '' }}"
+                                        @endif>
+                                        @if($temSelecionados)
+                                        {{-- MODO CONSULTA/EDIÇÃO: renderiza direto da variável --}}
+                                        @foreach($lista as $k => $v)
+                                        @php
+                                        // Suporta tanto mapa [id=>nome] quanto objetos
+                                        $id = is_object($v) ? ($v->id ?? $v->ALUNO ?? $k) : $k;
+                                        $nome = is_object($v) ? ($v->nome ?? $v->NOME ?? $v->NOME_COMPL ?? $v->NOME_COMPL_PACIENTE ?? '') : $v;
+                                        @endphp
+                                        <span class="badge bg-secondary">{{ $nome ?: 'Aluno' }} ({{ $id }})</span>
+                                        @endforeach
+                                        @else
+                                        {{-- MODO CRIAÇÃO: placeholder enquanto AJAX carrega --}}
+                                        <span class="text-muted">Selecione: dia, disciplina e box</span>
+                                        @endif
+                                    </div>
+
+                                    {{-- (Opcional) eco de IDs mostrados --}}
+                                    <input type="hidden" name="alunos_visualizados" id="alunos-ids-eco" value="">
+                                </fieldset>
+                            </div>
+                            @php
+                            $hrIniRaw = old('hr_ini', $agenda->HR_AGEND_INI ?? null);
+                            $hrFimRaw = old('hr_fim', $agenda->HR_AGEND_FIN ?? null);
+                            $hrIni = $hrIniRaw ? \Carbon\Carbon::parse($hrIniRaw)->format('H:i') : '';
+                            $hrFim = $hrFimRaw ? \Carbon\Carbon::parse($hrFimRaw)->format('H:i') : '';
+                            @endphp
+                            <!-- PAI: duas colunas irmãs -->
                             <!-- ESQUERDA: horários -->
-                            <div class="col-12 col-lg-9">
+                            <div class="col-12 col-lg-6">
                                 <fieldset class="border rounded p-3" style="margin-top:10px;">
                                     <legend class="float-none w-auto px-2 fs-6 mb-2">Horários</legend>
 
@@ -285,46 +313,69 @@
                                         data-hr-ini="{{ $hrIni }}"
                                         data-hr-fim="{{ $hrFim }}"
                                         data-selected='@json($horariosSelecionados ?? [])'>
+                                        <span class="text-muted">Informe dados</span>
                                     </div>
-
-                                    <input type="hidden" name="hr_ini" id="hr_ini" value="{{ $hrIni }}">
-                                    <input type="hidden" name="hr_fim" id="hr_fim" value="{{ $hrFim }}">
-
                                     @isset($agenda)
                                     <div class="text-muted small mt-2">Intervalo atual: {{ $hrIni }} – {{ $hrFim }}</div>
                                     @endisset
                                 </fieldset>
+                                <div class="col-1">
+                                    <input id="hr_ini" name="hr_ini" type="hidden" value="{{ $hrIni }}">
+                                    <input id="hr_fim" name="hr_fim" type="hidden" value="{{ $hrFim }}">
+                                </div>
                             </div>
 
                             <!-- DIREITA: recorrência -->
+                            <div class="col-12 col-md-6">
+                                <div class="d-flex align-items-stretch gap-2">
+                                    <div class="form-floating flex-grow-1" id="wrap-proc">
+                                        <select id="form-select-proc" name="procedimento" class="form-select" placeholder="Procedimento">
+                                            <option value="" disabled
+                                                {{ old('SERVICO_CLINICA_DESC', $agenda->SERVICO_CLINICA_DESC ?? '') == '' ? 'selected' : '' }}>
+                                                Selecione um procedimento…
+                                            </option>
+                                            @if(isset($agenda) && $agenda->ID_SERVICO)
+                                            <option value="{{ old('ID_SERVICO', $agenda->ID_SERVICO ?? '') }}" selected>
+                                                {{ $agenda->SERVICO_CLINICA_DESC ?? '' }}
+                                            </option>
+                                            @endif
+                                        </select>
+                                    </div>
+                                    <div placeholder="Adicionar procedimento" style="margin-top: 8px;">
+                                        <a href="{{ route('selectService') }}"
+                                            class="btn btn-outline-primary d-flex align-items-center justify-content-center px-2">
+                                            <i class="fas fa-plus" aria-hidden="true"></i>
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
                             <div class="col-12 col-lg-3">
-                                <fieldset class="border rounded p-3 h-100 sticky-top" style="top: 12px;">
-                                    <legend class="float-none w-auto px-2 fs-6 mb-2">Recorrência</legend>
+                                <fieldset class="border rounded p-3 h-100 sticky-top" style="width: max-content;">
+                                    <legend class="float-none w-auto px-2 fs-6 mb-3">Recorrência</legend>
 
-                                    <div class="form-check mb-2">
-                                        <input class="form-check-input" id="recorrenciapon" type="radio" name="recorrencia" value="1"
-                                            {{ old('recorrencia', '1') == '1' ? 'checked' : '' }}>
-                                        <label class="form-check-label" for="recorrenciapon">Pontual</label>
-                                    </div>
+                                    <div class="d-flex align-items-center gap-3 flex-nowrap">
 
-                                    <div class="form-check mb-3">
-                                        <input class="form-check-input" id="recorrenciarec" type="radio" name="recorrencia" value="2"
-                                            {{ old('recorrencia') == '2' ? 'checked' : '' }}>
-                                        <label class="form-check-label" for="recorrenciarec">Recorrência</label>
-                                    </div>
-
-                                    <div class="fw-semibold mb-2">Dias da semana</div>
-                                    <div class="row row-cols-3 g-2">
-                                        @php $dias = ['1'=>'Seg','2'=>'Ter','3'=>'Qua','4'=>'Qui','5'=>'Sex','6'=>'Sáb']; @endphp
-                                        @foreach($dias as $val=>$lbl)
-                                        <div class="col">
-                                            <div class="form-check">
-                                                <input class="form-check-input" type="checkbox" id="dia_{{ $val }}" name="dia_recorrencia[]" value="{{ $val }}"
-                                                    {{ (collect(old('dia_recorrencia', []))->contains($val)) ? 'checked' : '' }}>
-                                                <label class="form-check-label" for="dia_{{ $val }}">{{ $lbl }}</label>
-                                            </div>
+                                        <div class="form-check mb-0">
+                                            <input class="form-check-input" id="recorrenciapon" type="radio" name="recorrencia" value="1"
+                                                {{ old('recorrencia','1') == '1' ? 'checked' : '' }}>
+                                            <label class="form-check-label" for="recorrenciapon">Pontual</label>
                                         </div>
-                                        @endforeach
+
+                                        <div class="d-flex align-items-center gap-2">
+                                            <div class="form-check mb-0">
+                                                <input class="form-check-input" id="recorrenciarec" type="radio" name="recorrencia" value="2"
+                                                    {{ old('recorrencia') == '2' ? 'checked' : '' }}>
+                                                <label class="form-check-label" for="recorrenciarec">Recorrência</label>
+                                            </div>
+
+                                            <select id="freq" name="freq" class="form-select form-select-sm w-auto"
+                                                @disabled(old('recorrencia','1')!='2' )>
+                                                @php $freqOld = old('freq','WEEKLY'); @endphp
+                                                <option value="0" {{ $freqOld=='0'  ? 'selected' : '' }}>Semanal</option>
+                                                <option value="1" {{ $freqOld=='1'? 'selected' : '' }}>Quinzenal</option>
+                                                <option value="2" {{ $freqOld=='2' ? 'selected' : '' }}>Mensal</option>
+                                            </select>
+                                        </div>
                                     </div>
                                 </fieldset>
                             </div>
@@ -354,57 +405,198 @@
                     <h5>Pagamento</h5>
                     <div class="linha-flex"></div>
                 </div>
-                <!-- Pagamento -->
+
                 @php
                 $pagto = old('pagto');
                 if (is_null($pagto) && isset($agenda)) {
                 $pagto = $agenda->VALOR_AGEND !== null ? 'S' : 'N';
                 }
+                $valorDisabled = ($pagto === 'N') ? 'disabled' : '';
+                $valorAtual = old('valor', $agenda->VALOR_AGEND ?? '');
+                $formaAtual = old('forma-pag', $agenda->FORMA_PAG ?? 'A VISTA');
+                $qtdParcelasAtual = (int) old('qtd_parcelas', 0);
                 @endphp
-                <div class="row g-3 align-items-end">
-                    <!-- Haverá Pagamento? -->
-                    <div class="col-12 col-md-3">
-                        <label for="pagto" class="form-label">Haverá Pagamento?<div id="help-pagto" class="form-text">Selecione “Sim” para informar o valor.</div></label>
-                        <select id="pagto" name="pagto" class="form-select" aria-describedby="help-pagto">
-                            <option value=""></option>
-                            <option value="S" {{ $pagto === 'S' ? 'selected' : '' }}>Sim</option>
-                            <option value="N" {{ $pagto === 'N' ? 'selected' : '' }}>Não</option>
-                        </select>
-                        @error('pagto')<div class="invalid-feedback d-block">{{ $message }}</div>@enderror
-                    </div>
-                    @php $valorDisabled = ($pagto === 'N') ? 'disabled' : ''; @endphp
-                    <div class="col-12 col-md-3">
-                        <label for="valor" class="form-label" style="font-size: 15px;">Valor</label>
-                        <div class="input-group">
-                            <span class="input-group-text">R$</span>
-                            <input
-                                type="text"
-                                id="valor"
-                                name="valor"
-                                class="form-control"
-                                placeholder="0,00"
-                                inputmode="decimal"
-                                value="{{ old('valor', $agenda->VALOR_AGEND ?? '') }}"
-                                {{ $valorDisabled }}>
+
+                {{-- LINHA ÚNICA: total 12 colunas no md+ (3 + 3 + 4 + 2) --}}
+                <div class="row g-3 align-items-stretch">
+                    <div class="row g-3 align-items-start">
+                        {{-- Forma de pagamento --}}
+                        <div class="row g-3">
+                            <!-- Coluna 1: Haverá Pagamento + Valor (lado a lado) -->
+                            <div class="col-12 col-md-5">
+                                <fieldset class="border rounded p-3 h-100">
+                                    <legend class="float-none w-auto px-2 fs-6 mb-2">Haverá Pagamento?</legend>
+
+                                    <div class="row g-3 align-items-end">
+                                        <!-- Haverá Pagamento? -->
+                                        <div class="col-12 col-sm-3">
+                                            <select id="pagto" name="pagto" class="form-select" aria-describedby="help-pagto">
+                                                <option value=""></option>
+                                                <option value="S" {{ $pagto === 'S' ? 'selected' : '' }}>Sim</option>
+                                                <option value="N" {{ $pagto === 'N' ? 'selected' : '' }}>Não</option>
+                                            </select>
+                                            @error('pagto')<div class="invalid-feedback d-block">{{ $message }}</div>@enderror
+                                        </div>
+
+                                        <!-- Valor -->
+                                        <div class="col-12 col-sm-5">
+                                            <label for="valor" class="form-label mb-1">Valor</label>
+                                            <div class="input-group">
+                                                <span class="input-group-text">R$</span>
+                                                <input
+                                                    type="text"
+                                                    id="valor"
+                                                    name="valor"
+                                                    class="form-control"
+                                                    placeholder="0,00"
+                                                    inputmode="decimal"
+                                                    value="{{ $valorAtual }}"
+                                                    {{ $valorDisabled }}>
+                                            </div>
+                                            @error('valor')<div class="invalid-feedback d-block">{{ $message }}</div>@enderror
+                                        </div>
+                                    </div>
+                                </fieldset>
+                            </div>
+
+                            <!-- Coluna 2: Forma de pagamento -->
+                            <div class="col-12 col-md-4">
+                                <fieldset class="border rounded p-3 h-100">
+                                    <legend class="float-none w-auto px-2 fs-6 mb-2">Forma de pagamento</legend>
+
+                                    <div class="btn-group w-100 mb-2" role="group" aria-label="Forma de pagamento">
+                                        <input type="radio" class="btn-check" name="forma-pag" id="fp-vista" value="A VISTA"
+                                            autocomplete="off" {{ $formaAtual === 'A VISTA' ? 'checked' : '' }}>
+                                        <label class="btn btn-outline-primary" for="fp-vista" style="flex:1 1 0">
+                                            <i class="fa-solid fa-money-bill me-2" aria-hidden="true"></i> À vista
+                                        </label>
+
+                                        <input type="radio" class="btn-check" name="forma-pag" id="fp-parcelado" value="PARCELADO"
+                                            autocomplete="off" {{ $formaAtual === 'PARCELADO' ? 'checked' : '' }}>
+                                        <label class="btn btn-outline-primary" for="fp-parcelado" style="flex:1 1 0">
+                                            <i class="fa-regular fa-credit-card me-2" aria-hidden="true"></i> Parcelado
+                                        </label>
+                                    </div>
+
+                                    @php
+                                    $qtdParcelasAtual = (int) old('qtd_parcelas', $qtdParcelasAtual ?? 0);
+                                    $diaVencAtual = (int) old('dia_venc', $agenda->DIA_VENC ?? 0);
+                                    @endphp
+
+                                    <div id="wrap-parcelas" class="mt-2" style="display:none;">
+                                        <div class="row g-2 align-items-center">
+                                            <div class="col-auto">
+                                                <label for="qtd-parcelas" class="form-label mb-0">Parcelas</label>
+                                            </div>
+                                            <div class="col-auto">
+                                                <select id="qtd-parcelas" name="qtd_parcelas" class="form-select form-select-sm">
+                                                    @for ($i = 2; $i <= 12; $i++)
+                                                        <option value="{{ $i }}" {{ $qtdParcelasAtual === $i ? 'selected' : '' }}>{{ $i }}x</option>
+                                                        @endfor
+                                                </select>
+                                            </div>
+
+                                            <div class="col-auto">
+                                                <label for="dia-venc" class="form-label mb-0">Data venc.</label>
+                                            </div>
+                                            <div class="col-1">
+                                                <input id="dia-venc" name="dia_venc" type="text" class="form-control form-control-sm datepicker" style="width: 9rem;">
+                                            </div>
+                                        </div>
+                                </fieldset>
+                            </div>
+
+                            {{-- Botão + Encaminhamento + Disciplina --}}
+                            <div class="col-12 col-md-3">
+                                <button class="btn btn-primary btn-lg w-100 mb-2" id="btn-agendar" type="submit">
+                                    <i class="bi bi-calendar-plus"></i> Agendar
+                                </button>
+
+                                <div class="form-check d-flex justify-content-center align-items-center gap-2 mb-2">
+                                    <input
+                                        class="form-check-input m-0"
+                                        id="encaminhamento"
+                                        type="checkbox"
+                                        name="encaminhamento"
+                                        value="1"
+                                        {{ old('encaminhamento') == '1' ? 'checked' : '' }}>
+                                    <label class="form-check-label" for="encaminhamento">Encaminhamento</label>
+                                </div>
+
+                                @php
+                                // valores para o select
+                                $valor = old('disciplina', isset($agenda) ? ($agenda->DISCIPLINA ?? '') : '');
+                                $rotulo = '';
+                                if ($valor !== '' && isset($agenda)) {
+                                $rotulo = ($agenda->DISCIPLINA ?? '') . '-' . ($agenda->DISCIPLINA_NOME ?? '');
+                                }
+                                @endphp
+                                <div id="wrap-encaminhamento" class="mt-2" style="display:none;">
+                                    <div class="form-floating">
+                                        <select id="disciplina-enc" name="disciplina-enc" class="form-select">
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
-                        @error('valor')<div class="invalid-feedback d-block">{{ $message }}</div>@enderror
                     </div>
 
-                    <div class="col-12 col-md-3">
-                        <label for="remarcado" class="form-label" style="font-size: 15px;">Remarcado?</label>
-                        <select id="remarcado" name="remarcado" class="form-select" disabled>
-                            <option value="0" {{ $remarcado == '0' ? 'selected' : '' }}>Não</option>
-                            <option value="1" {{ $remarcado == '1' ? 'selected' : '' }}>Sim</option>
-                        </select>
-                    </div>
-                    <div class="col-12 col-md-3 d-flex justify-content-md-end">
-                        <button class="btn btn-primary btn-lg w-100 w-md-auto" id="btn-agendar" type="submit">
-                            <i class="bi bi-calendar-plus"></i> Agendar
-                        </button>
-                    </div>
+                    <script>
+                        document.addEventListener('DOMContentLoaded', function() {
+                            // --- Forma de pagamento: mostrar/esconder parcelas ---
+                            const vista = document.getElementById('fp-vista');
+                            const parcelado = document.getElementById('fp-parcelado');
+                            const wrapParc = document.getElementById('wrap-parcelas');
+
+                            function toggleParcelas() {
+                                wrapParc.style.display = (parcelado && parcelado.checked) ? 'block' : 'none';
+                            }
+                            [vista, parcelado].forEach(el => el && el.addEventListener('change', toggleParcelas));
+                            toggleParcelas(); // estado inicial
+
+                            // --- Encaminhamento: mostrar/esconder disciplina ---
+                            const chkEnc = document.getElementById('encaminhamento');
+                            const wrapEnc = document.getElementById('wrap-encaminhamento');
+
+                            function toggleEncaminhamento() {
+                                wrapEnc.style.display = (chkEnc && chkEnc.checked) ? 'block' : 'none';
+                            }
+                            chkEnc && chkEnc.addEventListener('change', toggleEncaminhamento);
+                            toggleEncaminhamento(); // estado inicial (respeita old())
+
+                            // (Opcional) atualiza resumos simples
+                            const qtdParcelas = document.getElementById('qtd-parcelas');
+                            const parcelasResumo = document.getElementById('parcelas-resumo');
+                            const diaVenc = document.getElementById('dia-venc');
+                            const vencResumo = document.getElementById('venc-resumo');
+
+                            function updateParcelasResumo() {
+                                if (parcelasResumo && qtdParcelas) parcelasResumo.textContent = qtdParcelas.value ? `${qtdParcelas.value} parcelas` : '';
+                            }
+
+                            function updateVencResumo() {
+                                if (vencResumo && diaVenc) vencResumo.textContent = diaVenc.value ? `Vencimento: ${diaVenc.value}` : '';
+                            }
+                            qtdParcelas && qtdParcelas.addEventListener('change', updateParcelasResumo);
+                            diaVenc && diaVenc.addEventListener('change', updateVencResumo);
+                            updateParcelasResumo();
+                            updateVencResumo();
+                        });
+                    </script>
+
+                    <style>
+                        /* Refinos leves de layout */
+                        fieldset legend {
+                            margin-bottom: .25rem;
+                        }
+
+                        #wrap-encaminhamento .form-floating>label {
+                            opacity: .85;
+                        }
+                    </style>
+
                 </div>
             </div>
-
         </form>
     </div>
     </div>
@@ -425,6 +617,21 @@
             }
         })();
     </script>
+    <script>
+        document.addEventListener('change', function(e) {
+            if (e.target.name === 'recorrencia') {
+                const freq = document.getElementById('freq');
+                const isRec = e.target.value === '2';
+                freq.disabled = !isRec;
+            }
+
+            if (e.target.id === 'freq') {
+                const interval = document.getElementById('interval'); // opcional
+                if (interval) interval.value = (e.target.value === 'BIWEEKLY') ? 2 : 1;
+            }
+        });
+    </script>
+
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
     {{-- Erros de validação (errors bag) --}}

@@ -192,9 +192,6 @@ class OdontoUpdateController extends Controller
             ->where('ID_BOX_CLINICA', $idBox)
             ->value('DESCRICAO') ?? null;
 
-        $disciplina = DB::table('FAESA_CLINICA_SERVICO')
-            ->where('ID_SERVICO_CLINICA', (int) $request->input('procedimento'))
-            ->value('DISCIPLINA');
 
         $servico = DB::table('FAESA_CLINICA_SERVICO')
             ->where('ID_SERVICO_CLINICA', (int) $request->input('procedimento')) // se o PK for outro (ex.: ID_BOX_DISCIPLINA), ajuste aqui
@@ -255,6 +252,7 @@ class OdontoUpdateController extends Controller
 
     public function updateBoxDiscipline(Request $request, $idBoxDiscipline)
     {
+        dd($request);
         $disciplina = $request->input('disciplina');
         $turma = $request->input('turma');
         $diaSemana = $request->input('data');
@@ -280,28 +278,8 @@ class OdontoUpdateController extends Controller
                 ->delete();
         }
 
-        $dias = [
-            '1' =>  '7:30',
-            '2' =>  '8:15',
-            '3' =>  '9:00',
-            '4' =>  '9:45',
-            '5' =>  '10:15',
-            '6' =>  '11:00',
-            '7' =>  '11:45',
-            '8' =>  '12:30',
-            '9' =>  '13:15',
-            '10' => '14:00',
-            '11' => '14:45',
-            '12' => '15:30',
-            '13' => '16:15',
-            '14' => '17:00',
-            '15' => '17:45',
-            '16' => '18:30',
-        ];
-
         $horarios = collect((array) $request->input('dias_semana', []))
             ->map(fn($v) => (string) $v)                     // normaliza p/ string
-            ->filter(fn($v) => array_key_exists($v, $dias))  // só os válidos no mapa
             ->map(fn($v) => (int) $v)                        // para ordenar numericamente
             ->sort()
             ->values();

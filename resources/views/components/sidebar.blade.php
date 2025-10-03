@@ -30,11 +30,11 @@
         <li><a href="/odontologia/menu_agenda" style="font-size:medium;"><i class="fas fa-home"></i>Início</a></li>
         <li><a href="/odontologia/consultaragenda" style="font-size:medium;"><i class="fa-solid fa-calendar-alt"></i>Agenda</a></li>
         <li><a href="/odontologia/consultarpaciente" style="font-size:medium;"><i class="fas fa-users"></i>Pacientes</a></li>
-        <li><a href="/odontologia/consultarservico" style="font-size:medium;"><i class="fa-solid fa-tooth"></i>Procedimentos</a></li>
+        <li><a href="/odontologia/encaminhamentos" style="font-size:medium;"><i class="fas fa-sign-out-alt"></i>Encaminhamentos</a></li>
         <li><a href="/odontologia/consultardisciplinabox" style="font-size:medium;"><i class="fa-solid fa-layer-group"></i>Disciplinas por box</a></li>
         <li><a href="/odontologia/consultarbox" style="font-size:medium;"><i class="fas fa-hospital"></i>Box de atendimento</a></li>
         <li><a href="/odontologia/relatorio"style="font-size:medium;"><i class="fas fa-chart-bar"></i>Relatório</a></li>
         <li><a href="/odontologia/consultarusuario" style="font-size:medium;margin-bottom: 45px"><i class="fas fa-user"></i>Usuários</a></li>
     </ul>
-    <a id="logout" href="/logout" class="logout-link"><i class="fas fa-sign-out-alt"></i>Logout</a>
+    <a id="logout" href="/logout" class="logout-link"><i class="fas fa-sign-out-alt"></i>Sair</a>
 </nav>

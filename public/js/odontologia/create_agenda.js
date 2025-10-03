@@ -94,10 +94,10 @@ window.validarFormulario = function () {
     if (!turma) errors.push("A turma é obrigatória.");
     if (!procedimento) errors.push("O procedimento é obrigatório.");
 
-    if (recorrencia === '2') {
+    /*if (recorrencia === '2') {
         const diasMarcados = document.querySelectorAll('input[name="dia_recorrencia[]"]:checked');
         if (diasMarcados.length === 0) errors.push("Escolha ao menos um dia da recorrência.");
-    }
+    }*/
 
     if (errors.length) {
         Swal.fire({ icon: "warning", title: "Atenção", html: errors.join("<br>"), confirmButtonText: "Ok" });
@@ -264,7 +264,7 @@ $(document).ready(function () {
     // Selects simples
     $('#dia_semana').select2({ placeholder: '', allowClear: true, width: '100%' });
 
-    // Procedimentos (mantido)
+    // Procedimentos
     const $disciplineSelectProc = $('#form-select-proc');
     $disciplineSelectProc.select2({
         allowClear: true,
@@ -321,6 +321,7 @@ $(document).ready(function () {
             },
             cache: true
         }
+
     });
 
     // Carrega box de acordo com a disciplina
@@ -422,6 +423,10 @@ $(document).ready(function () {
         } else if (grid) {
             grid.innerHTML = `<div class="text-muted small">Selecione disciplina, box, turma e dia</div>`;
         }
+
+        if (disc && turma) {
+            carregaAlunos();
+        }
     }
 
     $date.on('change blur input', handleDate);
@@ -434,7 +439,7 @@ $(document).ready(function () {
     $('#form-select-discipline').on('change', tryReload);
     $('#form-select-turma').on('select2:select change', tryReload);
 
-    if (date.value) handleDate();
+    if ($date.value) handleDate();
 
     // =========================
     // reloadHorarios (mesmo nome)
@@ -458,6 +463,7 @@ $(document).ready(function () {
                 .sort((a, b) => toMin(a) - toMin(b));
             if (hrIni) hrIni.value = checked[0] || '';
             if (hrFim) hrFim.value = checked[checked.length - 1] || '';
+
         }
 
         function renderHorarios(items) {
@@ -476,7 +482,6 @@ $(document).ready(function () {
                 grid.insertAdjacentHTML('beforeend', `
                 <div class="time-item">
                 <input class="time-input" type="checkbox" id="${id}" name="horarios[]" value="${h}" checked>
-                <label class="time-card" for="${id}">${h}</label>
                 </div>`);
             });
 
@@ -491,6 +496,128 @@ $(document).ready(function () {
                 grid.innerHTML = `<div class="text-danger small">Erro ao carregar horários.</div>`;
             });
     }
+
+
+    function carregaAlunos() {
+        const disc = $disciplineSelect.val() || '';
+        const turma = $turmaSelect.val() || '';
+        const box = $boxSelect.val() || '';
+
+        if (!disc || !turma || !box) {
+            console.warn('Disciplina, turma ou box não selecionado(s).');
+            return;
+        }
+
+        const $wrap = $('#alunos-readonly');
+        if (!$wrap.length) {
+            console.warn('Container #alunos-readonly não encontrado.');
+            return;
+        }
+
+        // estado de carregamento
+        $wrap.html('<span class="text-muted">Carregando…</span>');
+
+        const url = `/odontologia/alunos/${encodeURIComponent(disc)}/${encodeURIComponent(turma)}/${encodeURIComponent(box)}`;
+
+        $.ajax({
+            url,
+            dataType: 'json',
+            cache: true,
+            data: { query: '' }, // ajuste se o backend exigir termo
+        })
+            .done(function (data) {
+                const alunos = document.getElementById('alunos-ids-eco');
+
+                if (!Array.isArray(data) || data.length === 0) {
+                    $wrap.html('<span class="text-muted">Nenhum aluno cadastrado</span>');
+                    if (alunos) {
+                        if (alunos.tagName === 'DIV') alunos.innerHTML = '';
+                        else alunos.value = '';
+                    }
+                    return;
+                }
+
+                const frag = document.createDocumentFragment();
+                data.forEach(p => {
+                    const ra = String(p.ALUNO ?? '').trim();
+                    const nome = p.SERVICO_CLINICA_DESC || p.NOME_COMPL || '';
+                    const span = document.createElement('span');
+                    span.className = 'badge bg-secondary';
+                    span.dataset.ra = ra;
+                    span.textContent = ra ? `${ra} — ${nome}` : nome;
+                    frag.appendChild(span);
+                });
+
+                $wrap.empty().append(frag);
+
+
+                if (alunos) {
+                    const ids = data.map(p => String(p.ALUNO ?? '').trim()).filter(Boolean);
+
+                    if (alunos.tagName === 'DIV') {
+                        // MODO ARRAY: cria vários inputs hidden
+                        alunos.innerHTML = '';
+                        ids.forEach(id => {
+                            const h = document.createElement('input');
+                            h.type = 'hidden';
+                            h.name = 'alunos_do_agendamento[]';
+                            h.value = id;
+                            alunos.appendChild(h);
+                        });
+                    } else {
+                        // MODO STRING: "1,2,3"
+                        alunos.value = ids.join(',');
+                    }
+                }
+            })
+            .fail(function (err) {
+                console.error(err);
+                $wrap.html('<span class="text-danger">Falha ao carregar alunos.</span>');
+            });
+    }
+
+    // jQuery objects
+    const $disciplinaEncaminhamento = $('#disciplina-enc');
+
+    function carregaDisciplinaEncaminhamento() {
+        // destrói antes de recriar (evita eventos duplicados)
+        if ($disciplinaEncaminhamento.data('select2')) {
+            $disciplinaEncaminhamento.select2('destroy');
+        }
+
+        // limpa seleção ao trocar a fonte
+        $disciplinaEncaminhamento.empty().trigger('change');
+
+        $disciplinaEncaminhamento.select2({
+            width: '100%',
+            placeholder: 'Disciplina do encaminhamento',
+            allowClear: true,
+            minimumInputLength: 0,
+            ajax: {
+                url: `/odontologia/disciplinascombox/`,
+                dataType: 'json',
+                delay: 250,
+                // ATENÇÃO: nome do parâmetro precisa bater com o seu backend
+                data: params => ({ query: params.term || '' }),
+                processResults: data => ({
+                    results: (Array.isArray(data) ? data : []).map(p => ({
+                        id: p.DISCIPLINA,                     // ou p.DISCIPLINA, conforme sua lógica
+                        text: p.NOME
+                        }))
+                }),
+                cache: true
+            }
+            // ,dropdownParent: $('#meuModal') // descomente se estiver dentro de modal Bootstrap
+        });
+    }
+
+    // inicializa
+    carregaDisciplinaEncaminhamento();
+
+    // re-carrega quando a turma mudar
+    $turmaSelect.on('change', carregaDisciplinaEncaminhamento);
+
+    carregaDisciplinaEncaminhamento();
 
     // Se mudar o seletor de "dia" (você usa #data como dia – mantido)
     document.getElementById('date').addEventListener('change', () => {

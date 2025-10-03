@@ -17,16 +17,8 @@ class LoginController extends Controller
             return redirect()->route('loginGET');
         } 
 
-        // VERIFICA CLINICAS QUE USUÁRIO TEM ACESSO
-        if(in_array(1, $clinicas) && in_array(2, $clinicas)) {
-            return redirect()->route('selecionar-clinica-get');
-
-        // CASO USUARIO POSSA ACESSAR SOMENTE PSICOLOGIA
-        } else if (in_array(1, $clinicas)) {
-           return redirect('/psicologia');
-
         // CASO USUARIO POSSA ACESSAR SOMENTE ODONTOLOGIA
-        } else if (in_array(2, $clinicas)) {
+        if (in_array(2, $clinicas)) {
             return redirect()->route('menu_agenda_odontologia');
 
         // CASO DE ACESSO INVÁLIDO

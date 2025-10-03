@@ -6,7 +6,7 @@ use Illuminate\Database\Eloquent\Model;
 
 class FaesaClinicaUsuario extends Model
 {
-    protected $table = 'FAESA_CLINICA_USUARIO';
+    protected $table = 'FAESA_CLINICA_USUARIO_GERAL';
 
     protected $primaryKey = 'ID_USUARIO';
 

@@ -31,22 +31,39 @@
             $isEdit = isset($paciente);
             @endphp
             @if($isEdit)
-            <div class="linha-com-titulo">
-                <h5>Dados Pessoais</h5>
-                <div class="linha-flex"></div>
-                <div style="text-align: right;flex:0.2,5">
-                    <button
-                        class="btn btn-primary btn-lg btn-log"
+            <div class="linha-com-titulo d-flex align-items-center gap-3 flex-wrap">
+                <h5 class="mb-0">Dados Pessoais</h5>
+                <div class="linha-flex flex-grow-1"></div>
+
+                @if(isset($paciente))
+                <div class="d-flex align-items-center ms-auto gap-2 flex-column flex-sm-row">
+                    <label for="status" class="form-label mb-0">Status do paciente</label>
+
+                    <select id="status" name="status"
+                        class="form-select form-select-sm w-auto"
+                        style="min-width: 220px"
+                        aria-label="Status do Paciente">
+                        <option value="0" {{ old('status', $paciente->STATUS ?? '') == '0' ? 'selected' : '' }}>Fila de espera</option>
+                        <option value="1" {{ old('status', $paciente->STATUS ?? '') == '1' ? 'selected' : '' }}>Em tratamento</option>
+                        <option value="2" {{ old('status', $paciente->STATUS ?? '') == '2' ? 'selected' : '' }}>Encaminhamento interno</option>
+                        <option value="3" {{ old('status', $paciente->STATUS ?? '') == '3' ? 'selected' : '' }}>Tratamento concluído</option>
+                        <option value="4" {{ old('status', $paciente->STATUS ?? '') == '4' ? 'selected' : '' }}>Abandono</option>
+                        <option value="5" {{ old('status', $paciente->STATUS ?? '') == '5' ? 'selected' : '' }}>Cancelado</option>
+                        <option value="6" {{ old('status', $paciente->STATUS ?? '') == '6' ? 'selected' : '' }}>Faleceu</option>
+                    </select>
+
+                    <button class="btn btn-outline-primary btn-sm"
                         type="button"
                         data-bs-toggle="modal"
                         data-bs-target="#auditModal"
                         data-paciente-id="{{ $paciente->ID_PACIENTE }}"
-                        data-url="{{ route('pacientes.audit', $paciente->ID_PACIENTE) }}"
-                        style="background-color:#007bff;color:#fff;border:none;padding:10px 20px;font-size:10px;border-radius:6px;cursor:pointer;">
-                        <i class="bi bi-calendar-plus"></i> Log
+                        data-url="{{ route('pacientes.audit', $paciente->ID_PACIENTE) }}">
+                        <i class="bi bi-clock-history me-1"></i> Log
                     </button>
                 </div>
+                @endif
             </div>
+
             @endif
             @php
             $isEdit = isset($paciente);
@@ -94,6 +111,7 @@
                         <option value="F">F</option>
                     </select>
                 </div>
+
             </div>
             <div class="linha-com-titulo">
                 <h5>Endereço</h5>
@@ -125,7 +143,7 @@
                 </div>
 
                 <div style="flex:0.5">
-                    <label for="complemento" style="font-size: 14px; color: #666;">Completmento</label>
+                    <label for="complemento" style="font-size: 14px; color: #666;">Complemento</label>
                     <input type="text" id="complemento" name="complemento" class="form-control"
                         value="{{ old('complemento', $paciente->COMPLEMENTO ?? '') }}" style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 6px; font-size: 14px;" maxlength="100">
                 </div>
@@ -147,16 +165,20 @@
                     <div class="linha-flex"></div>
                 </div>
 
-                <div style="flex: 1">
+                <div style="flex: 0.5;">
+                    <label class="form-label">Celulares para contato</label>
+                    <div id="celulares-wrapper">
+                        <input type="text" name="celulares[]" class="form-control mb-2" placeholder="(99) 99999-9999">
+                    </div>
+                    <button type="button" class="btn btn-sm btn-outline-primary" onclick="addCelular()">
+                        + Adicionar celular
+                    </button>
+                </div>
+
+                <div style="flex: 0.5;">
                     <label for="email" style="font-size: 14px; color: #666;">Email</label>
                     <input type="email" id="email" name="email" class="form-control"
                         value="{{ old('email', $paciente->E_MAIL_PACIENTE ?? '') }}" style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 6px; font-size: 14px;" maxlength="100">
-                </div>
-
-                <div style="flex: 1;">
-                    <label for="celular" style="font-size: 14px; color: #666;">Celular</label>
-                    <input type="text" id="celular" name="celular" class="form-control"
-                        value="{{ old('celular', $paciente->FONE_PACIENTE ?? '') }}" style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 6px; font-size: 14px;" maxlength="20">
                 </div>
 
                 <div class="linha-com-titulo">
@@ -166,7 +188,7 @@
 
                 <div class="row g-3" style="margin: 20px 0;">
                     <div style="flex: 1">
-                        <label for="nome_responsavel" style="font-size: 14px; color: #666;">Nome do resposável</label>
+                        <label for="nome_responsavel" style="font-size: 14px; color: #666;">Nome do responsável</label>
                         <input type="text" id="nome_responsavel" name="nome_responsavel" class="form-control"
                             value="{{ old('nome_responsavel', $paciente->NOME_RESPONSAVEL ?? '') }}" style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 6px; font-size: 14px;" maxlength="100">
                     </div>
@@ -181,7 +203,6 @@
                     <input type="text" id="obs_laudo" name="obs_laudo" class="form-control"
                         value="{{ old('obs_laudo', $paciente->OBSERVACAO ?? '') }}" style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 6px; font-size: 14px;" maxlength="20">
                 </div>
-
                 <div class="d-flex justify-content-between" style="margin-bottom: 20px;">
                     <a href="{{ url('/odontologia/consultarpaciente') }}" class="btn btn-primary" id="voltar">
                         Voltar
@@ -193,6 +214,17 @@
             </tr>
         </form>
     </div>
+    <script>
+        function addCelular() {
+            const wrapper = document.getElementById('celulares-wrapper');
+            const input = document.createElement('input');
+            input.type = 'text';
+            input.name = 'celulares[]';
+            input.className = 'form-control mb-2';
+            input.placeholder = '(99) 99999-9999';
+            wrapper.appendChild(input);
+        }
+    </script>
     @if (session('success'))
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script>

@@ -74,6 +74,7 @@ class OdontoConsultController extends Controller
                 'a.HR_AGEND_FIN',
                 'a.ID_SERVICO',
                 's.SERVICO_CLINICA_DESC',
+                'la.TURMA',
                 'la.ID_BOX',
                 'cb.DESCRICAO',
                 'p.ID_PACIENTE',
@@ -143,15 +144,11 @@ class OdontoConsultController extends Controller
     {
         $search = $request->input('query'); // termo digitado no select2
 
-        $query = DB::table('LYCEUM_BKP_PRODUCAO.dbo.LY_PESSOA')
-            ->select(
-                'PESSOA',
-                'NOME_COMPL',
-                'WINUSUARIO'
-            );
+        $query = DB::table('HADES.dbo.USUARIO')
+            ->select('NOMEUSUARIO', 'USUARIO');
 
         if (!empty($search)) {
-            $query->where('NOME_COMPL', 'like', '%' . $search . '%');
+            $query->where('NOMEUSUARIO', 'like', '%' . $search . '%');
         }
 
         $users = $query->limit(20)->get(); // limit pra não sobrecarregar
@@ -161,9 +158,9 @@ class OdontoConsultController extends Controller
 
     public function buscarPessoaLyceum(Request $requet, $pessoa)
     {
-        $pessoa = DB::table('LYCEUM_BKP_PRODUCAO.dbo.LY_PESSOA')
-            ->where('PESSOA', $pessoa)
-            ->select('NOME_COMPL', 'PESSOA', 'WINUSUARIO')
+        $pessoa = DB::table('HADES.dbo.USUARIO')
+            ->where('USUARIO', $pessoa)
+            ->select('NOMEUSUARIO', 'USUARIO')
             ->first();
 
         if (!$pessoa) {
@@ -175,22 +172,21 @@ class OdontoConsultController extends Controller
 
     public function buscarBoxeDisciplinas(Request $request)
     {
-        $disciplines = DB::table('FAESA_CLINICA_BOX_DISCIPLINA as bd')
+        $disciplines = DB::table('FAESA_CLINICA_BOX_DISCIPLINA_ALUNO as bd')
+            ->join('FAESA_CLINICA_BOX_DISCIPLINA as d','d.ID_BOX_DISCIPLINA','bd.ID_BOX_DISCIPLINA')
             ->join('FAESA_CLINICA_BOXES as b', 'b.ID_BOX_CLINICA', '=', 'bd.ID_BOX')
-            ->join('LYCEUM_BKP_PRODUCAO.dbo.LY_DISCIPLINA as ld', 'ld.DISCIPLINA', '=', 'bd.DISCIPLINA')
+            ->join('LYCEUM_BKP_PRODUCAO.dbo.LY_DISCIPLINA as ld', 'ld.DISCIPLINA', '=', 'd.DISCIPLINA')
             ->select(
                 'bd.ID_BOX_DISCIPLINA',
+                'd.DISCIPLINA',
                 'ld.NOME',
+                'bd.ALUNO',
                 'b.ID_BOX_CLINICA',
-                'bd.ID_BOX',
-                'bd.TURMA',
-                'bd.DISCIPLINA',
+                'd.ID_BOX',
+                'd.TURMA',
                 'b.DESCRICAO',
-                'bd.DIA_SEMANA',
-                'bd.HR_INICIO',
-                'bd.HR_FIM'
             )
-            ->where('bd.ID_CLINICA', '=', 2)
+            ->where('d.ID_CLINICA', '=', 2)
             ->get();
 
         return response()->json($disciplines);
@@ -322,64 +318,6 @@ class OdontoConsultController extends Controller
         return view('createPatient', compact('paciente'));
     }
 
-    public function getAgendamentos(Request $request)
-    {
-        // Você pode usar os parâmetros se quiser filtrar:
-        $start = $request->query('start');
-        $end = $request->query('end');
-        $turma = $request->query('TURMA') ?? $request->query('turma');
-
-        // Consulta os dados do banco
-        $agendamentos = DB::table('FAESA_CLINICA_AGENDAMENTO')
-            ->join('FAESA_CLINICA_PACIENTE', 'FAESA_CLINICA_AGENDAMENTO.ID_PACIENTE', '=', 'FAESA_CLINICA_PACIENTE.ID_PACIENTE')
-            ->join('FAESA_CLINICA_LOCAL_AGENDAMENTO', 'FAESA_CLINICA_AGENDAMENTO.ID_AGENDAMENTO', '=', 'FAESA_CLINICA_LOCAL_AGENDAMENTO.ID_AGENDAMENTO')
-            ->select(
-                'FAESA_CLINICA_AGENDAMENTO.ID_AGENDAMENTO as id',
-                'FAESA_CLINICA_AGENDAMENTO.ID_SERVICO as servicoId',
-                'FAESA_CLINICA_LOCAL_AGENDAMENTO.TURMA',
-                'FAESA_CLINICA_AGENDAMENTO.MENSAGEM',
-                'FAESA_CLINICA_AGENDAMENTO.DT_AGEND',
-                'FAESA_CLINICA_AGENDAMENTO.HR_AGEND_INI',
-                'FAESA_CLINICA_AGENDAMENTO.HR_AGEND_FIN',
-                'FAESA_CLINICA_AGENDAMENTO.OBSERVACOES',
-                'FAESA_CLINICA_AGENDAMENTO.STATUS_AGEND',
-                'FAESA_CLINICA_AGENDAMENTO.LOCAL',
-                'FAESA_CLINICA_PACIENTE.NOME_COMPL_PACIENTE as paciente'
-            )
-            ->where('FAESA_CLINICA_AGENDAMENTO.ID_CLINICA', '=', 2)
-            ->when($start && $end, function ($query) use ($start, $end) {
-                $query->whereBetween('FAESA_CLINICA_AGENDAMENTO.DT_AGEND', [$start, $end]);
-            })
-            ->when(!empty($turma), function ($q) use ($turma) {
-                $q->where('FAESA_CLINICA_LOCAL_AGENDAMENTO.TURMA', $turma);
-            })
-            ->get()
-            ->map(function ($item) {
-                return [
-                    'id' => $item->id,
-                    'servicoId' => $item->servicoId,
-                    'title' => $item->paciente,
-                    'start' => $item->DT_AGEND . 'T' . substr($item->HR_AGEND_INI, 0, 5),
-                    'end' => $item->DT_AGEND . 'T' . substr($item->HR_AGEND_FIN, 0, 5),
-                    'color' => match ($item->STATUS_AGEND) {
-                        0 => '#007bff',
-                        1 => '#dc3545',
-                        2 => '#28a745',
-                        default => '#6c757d',
-                    },
-                    'extendedProps' => [
-                        'observacoes' => $item->OBSERVACOES,
-                        'mensagem' => $item->MENSAGEM,
-                        'status' => $item->STATUS_AGEND,
-                        'local' => $item->LOCAL,
-                        'turma' => $item->TURMA
-                    ]
-                ];
-            });
-
-        return response()->json($agendamentos);
-    }
-
     public function fSelectService(Request $request)
     {
         $query_servico = $request->input('search-input');
@@ -474,12 +412,35 @@ class OdontoConsultController extends Controller
 
     public function getTodasTurmas($disciplina)
     {
-        $turma = DB::table('FAESA_CLINICA_BOX_DISCIPLINA')
-            ->select('TURMA')
+        $turma = DB::table('LYCEUM_BKP_PRODUCAO.dbo.LY_MATRICULA')
+            ->select('SUBTURMA1')
             ->where('DISCIPLINA', $disciplina)
             ->distinct()
-            ->pluck('TURMA');
+            ->pluck('SUBTURMA1');
         return response()->json($turma);
+    }
+
+    public function getTurmasAgendadas(Request $request)
+    {
+        $turma = DB::table('FAESA_CLINICA_LOCAL_AGENDAMENTO as la')
+            ->join('FAESA_CLINICA_AGENDAMENTO as a', 'a.ID_AGENDAMENTO', '=', 'la.ID_AGENDAMENTO')
+            ->select('la.TURMA')
+            ->distinct()
+            ->get(['ID_AGENDAMENTO', 'TURMA']);
+        return response()->json($turma);
+    }
+
+    public function getTodasTurmasSelecionada($turmaSelecionada)
+    {
+        $turmaSelecionada = DB::table('FAESA_CLINICA_LOCAL_AGENDAMENTO as la')
+            ->join('FAESA_CLINICA_AGENDAMENTO as a', 'a.ID_AGENDAMENTO', '=', 'la.ID_AGENDAMENTO')
+            ->join('FAESA_CLINICA_PACIENTE as p', 'p.ID_PACIENTE', '=', 'a.ID_PACIENTE')
+            ->join('FAESA_CLINICA_SERVICO as s', 's.ID_SERVICO_CLINICA', '=', 'a.ID_SERVICO')
+            ->select('p.NOME_COMPL_PACIENTE', 'p.ID_PACIENTE', 's.SERVICO_CLINICA_DESC', 'a.DT_AGEND', 'a.HR_AGEND_INI', 'a.HR_AGEND_FIN', 'la.TURMA', 'p.FONE_PACIENTE', 'a.ID_AGENDAMENTO')
+            ->where('la.TURMA', $turmaSelecionada)
+            ->distinct()
+            ->get();
+        return response()->json($turmaSelecionada);
     }
 
     public function getTurmas(Request $request)
@@ -530,6 +491,42 @@ class OdontoConsultController extends Controller
         return response()->json($horarios);
     }
 
+    public function getAlunosDisciplinaTurma($disciplina, $turma)
+    {
+        $alunos = DB::table('LYCEUM_BKP_PRODUCAO.dbo.LY_MATRICULA as M')
+            ->join('LYCEUM_BKP_PRODUCAO.dbo.LY_ALUNO as A', 'A.ALUNO', '=', 'M.ALUNO')
+            ->where('M.DISCIPLINA', $disciplina)
+            ->where('M.SUBTURMA1', $turma)
+            ->whereNotExists(function ($q) use ($disciplina, $turma) {
+                $q->select(DB::raw(1))
+                    ->from('FAESA_CLINICA_BOX_DISCIPLINA_ALUNO as DA')
+                    ->whereColumn('DA.ALUNO', 'M.ALUNO')
+                    ->where('M.DISCIPLINA', $disciplina)
+                    ->where('M.SUBTURMA1', $turma);
+            })
+            ->select('M.ALUNO', 'A.NOME_COMPL')
+            ->distinct()
+            ->orderBy('A.NOME_COMPL', 'asc')
+            ->get();
+
+        return response()->json($alunos);
+    }
+
+    public function getAlunosDisciplinaTurmaAgenda($disciplina, $turma, $box)
+    {
+
+        $alunos = DB::table('FAESA_CLINICA_BOX_DISCIPLINA_ALUNO as BD')
+            ->join('FAESA_CLINICA_BOX_DISCIPLINA as D', 'D.ID_BOX_DISCIPLINA', '=', 'BD.ID_BOX_DISCIPLINA')
+            ->join('LYCEUM_BKP_PRODUCAO.dbo.LY_ALUNO as A', 'A.ALUNO', '=', 'BD.ALUNO')
+            ->where('D.DISCIPLINA', $disciplina)
+            ->where('D.TURMA', $turma)
+            ->where('BD.ID_BOX', $box)
+            ->select('BD.ALUNO', 'A.NOME_COMPL')
+            ->orderBy('A.NOME_COMPL', 'asc')
+            ->get();
+        return response()->json($alunos);
+    }
+
     public function getBoxes(Request $request)
     {
         $query = DB::table('FAESA_CLINICA_BOXES')
@@ -574,8 +571,8 @@ class OdontoConsultController extends Controller
         }
 
         $query = DB::table('FAESA_CLINICA_USUARIO_GERAL')
-            ->select('NOME', 'ID', 'STATUS')
-            ->where('STATUS', '=', 'S')
+            ->select('ID', 'NOME', 'USUARIO', 'PESSOA', 'TIPO', 'STATUS')
+            ->where('STATUS', '=', 'Ativo')
             ->where('ID', '=', $userId);
 
         if ($request->has('query')) {

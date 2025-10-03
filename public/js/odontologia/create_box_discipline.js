@@ -1,10 +1,56 @@
 const add = document.getElementById('add');
 
 document.addEventListener('DOMContentLoaded', function () {
+
     const disciplina = document.getElementById('disciplina');
     const disciplinaSave = disciplina.value;
     const turma = document.getElementById('turma');
     const data = document.getElementById('data');
+
+    const CAP = 3; // Aqui limito o número de alunos no box
+    const state = {
+        selected: new Set(),                // ids marcados na lista
+        activeBox: null,                    // 'BOX 3', p.ex.
+        boxes: new Map(),                   // boxId -> Set<alunoId>
+        alunos: new Map(),                  // alunoId -> {id, nome}
+    };
+
+    // pega Set<alunoId> do box (cria se não existir)
+    function getBucket(boxId) {
+        if (!state.boxes.has(boxId)) state.boxes.set(boxId, new Set());
+        return state.boxes.get(boxId);
+    }
+
+    // aluno já alocado em algum box?
+    function isAssigned(id) {
+        for (const set of state.boxes.values()) if (set.has(id)) return true;
+        return false;
+    }
+
+    function renderAlunosSelectionState() {
+
+        document.querySelectorAll('#alunos-container input[name="alunos[]"]').forEach(cb => {
+            console.log('teste-2');
+            const id = cb.value;
+            const row = cb.closest('.aluno-row');
+            row?.classList.toggle('is-assigned', isAssigned(id));
+            // opcional: desmarcar check quando for alocado
+            /* if (isAssigned(id)) {
+                 cb.checked = false;
+                 state.selected.delete(id);
+             }*/
+        });
+    }
+
+    // destaca visualmente o box ativo
+    function efeitoBoxAtivo(boxId) {
+        document.querySelectorAll('#boxes-container .box-chip')
+            .forEach(chip => {
+                console.log('teste');
+                const val = chip.querySelector('input[name="boxes[]"]')?.value;
+                chip.classList.toggle('is-active', val === boxId);
+            });
+    }
 
     // Carregar Disciplinas
     fetch('/odontologia/disciplinas')
@@ -211,22 +257,127 @@ document.addEventListener('DOMContentLoaded', function () {
                 if (hrFim) hrFim.value = checked[checked.length - 1] || '';
             }
 
-            // exemplo de uso: depois que usuário escolher disciplina/turma/dia:
-            // fetch(`/odontologia/horarios/${disc}/${tur}/${dia}`)
-            //   .then(r => r.json())
-            //   .then(renderHorarios)
-            //   .catch(() => clearHorarios('Erro ao carregar horários.'));
-
-            // estado inicial
             clearHorarios();
-
 
             fetch(`/odontologia/horarios/${encodeURIComponent(disc)}/${encodeURIComponent(tur)}/${encodeURIComponent(dt)}`)
                 .then(r => r.json())
                 .then(items => {
-                    renderHorarios(items);      // <-- só isso
+                    renderHorarios(items);
                 })
                 .catch(() => clearHorarios('Erro ao carregar horários.'));
+
+            function renderAlunosEmTabela(data, alunosSelecionados = [], limitePorColuna = 10) {
+                const container = document.getElementById('alunos-container');
+                if (!container) return;
+
+                container.classList.add('alunos-wrapper');
+                container.innerHTML = '';
+
+                if (!Array.isArray(data) || data.length === 0) {
+                    container.innerHTML = '<p class="muted">Nenhum aluno encontrado.</p>';
+                    return;
+                }
+
+                // preenche mapa de alunos (nome) para uso na pré-seleção
+                data.forEach(it => {
+                    const id = String(it.ALUNO ?? '').trim();
+                    const nome = String(it.NOME_COMPL ?? '').trim();
+                    state.alunos.set(id, { id, nome });
+                });
+
+                const selecionadosStr = alunosSelecionados.map(String);
+                const frag = document.createDocumentFragment();
+
+                for (let i = 0; i < data.length; i += limitePorColuna) {
+                    const chunk = data.slice(i, i + limitePorColuna);
+
+                    const coluna = document.createElement('div');
+                    coluna.className = 'alunos-coluna';
+
+                    chunk.forEach(item => {
+                        const alunoId = String(item.ALUNO ?? '').trim();
+                        const nome = String(item.NOME_COMPL ?? '').trim();
+                        const isSelected = selecionadosStr.includes(alunoId);
+                        const already = isAssigned(alunoId);
+
+                        const row = document.createElement('label');
+                        row.className = 'aluno-row';
+                        if (already) row.classList.add('is-assigned');
+                        row.dataset.search = `${alunoId} ${nome}`.toLowerCase();
+
+                        const input = document.createElement('input');
+                        input.type = 'checkbox';
+                        input.name = 'alunos[]';
+                        input.value = alunoId;
+                        input.id = `aluno_${alunoId}`;
+                        input.checked = isSelected;
+                        input.dataset.nome = nome;
+                        input.setAttribute('aria-label', `Selecionar ${nome} (${alunoId})`);
+
+                        row.setAttribute('for', input.id);
+
+                        const info = document.createElement('div');
+                        info.className = 'aluno-info';
+
+                        const nomeEl = document.createElement('span');
+                        nomeEl.className = 'aluno-nome';
+                        nomeEl.textContent = nome || '(Sem nome)';
+                        nomeEl.title = nome;
+
+                        info.appendChild(nomeEl);
+                        row.appendChild(input);
+                        row.appendChild(info);
+                        coluna.appendChild(row);
+                    });
+
+                    frag.appendChild(coluna);
+                }
+
+                container.appendChild(frag);
+
+                // delegação: marca/desmarca mantém state.selected
+                container.addEventListener('change', onAlunoToggle, { once: true });
+            }
+
+            function onAlunoToggle(e) {
+                if (!e.target.matches('input[name="alunos[]"]')) return;
+                const id = String(e.target.value);
+                const nome = e.target.dataset.nome || state.alunos.get(id)?.nome || id;
+                state.alunos.set(id, { id, nome });
+                if (e.target.checked) state.selected.add(id);
+                else state.selected.delete(id);
+
+                // re-arma delegação para próximos changes
+                e.currentTarget.addEventListener('change', onAlunoToggle, { once: true });
+            }
+
+            async function carregarAlunos(disc, tur, alunosSelecionados = [], limitePorColuna = 10) {
+                const container = document.getElementById('alunos-container');
+                if (!container) {
+                    console.error('#alunos-container não encontrado');
+                    return;
+                }
+
+                container.classList.add('alunos-wrapper');
+                container.innerHTML = '<p class="muted">Carregando…</p>';
+
+                try {
+                    const res = await fetch(`/odontologia/alunos/${encodeURIComponent(disc)}/${encodeURIComponent(tur)}`, {
+                        headers: { 'Accept': 'application/json' }
+                    });
+                    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+
+                    const data = await res.json();
+                    renderAlunosEmTabela(data, alunosSelecionados, limitePorColuna);
+                } catch (e) {
+                    console.error(e);
+                    container.innerHTML = `<p class="error">Erro ao carregar alunos. ${e.message || ''}</p>`;
+                }
+            }
+
+            // Exemplo de uso:
+            carregarAlunos(disc, tur, [], 10);
+
         });
     });
 
@@ -234,32 +385,224 @@ document.addEventListener('DOMContentLoaded', function () {
         .then(response => response.json())
         .then(data => {
             const container = document.getElementById('boxes-container');
-            container.innerHTML = ''; // Limpa o conteúdo anterior
+            container.classList.add('boxes-wrapper');
+            container.innerHTML = '';
             data.forEach(item => {
-                const div = document.createElement('div');
+                const id = `box_${String(item.ID_BOX_CLINICA).replace(/\s+/g, '_')}`;
+                const isSelected = Array.isArray(boxesSelecionados) && boxesSelecionados.map(String).includes(String(item.ID_BOX_CLINICA));
+                const isDisponivel = (item.DISPONIVEL ?? true) === true;
 
-                const checkbox = document.createElement('input');
-                checkbox.type = 'checkbox';
-                checkbox.name = 'boxes[]';
-                checkbox.value = item.ID_BOX_CLINICA;
-                checkbox.id = `box_${item.ID_BOX_CLINICA.replace(/\s+/g, '_')}`;
+                const wrap = document.createElement('div');
+                wrap.className = 'box-chip';
 
-                if (Array.isArray(boxesSelecionados) && boxesSelecionados.includes(item.ID_BOX_CLINICA)) {
-                    checkbox.checked = true;
-                }
+                const input = document.createElement('input');
+                input.type = 'checkbox';
+                input.name = 'boxes[]';
+                input.value = item.ID_BOX_CLINICA;
+                input.id = id;
+                input.checked = !!isSelected;
+                if (!isDisponivel) input.disabled = true;
 
                 const label = document.createElement('label');
-                label.style.marginLeft = '6px';
-                label.htmlFor = checkbox.id;
-                label.textContent = ' ' + item.DESCRICAO;
+                label.setAttribute('for', id);
+                label.title = isDisponivel ? 'Disponível' : 'Indisponível';
 
-                div.appendChild(checkbox);
-                div.appendChild(label);
-                container.appendChild(div);
+                const text = document.createElement('span');
+                text.textContent = item.DESCRICAO;
+
+                if (item.SALA || item.STATUS) {
+                    const badge = document.createElement('span');
+                    badge.className = 'box-badge';
+                    badge.textContent = item.SALA ?? item.STATUS;
+                    label.appendChild(badge);
+                }
+
+                label.appendChild(text);
+                wrap.appendChild(input);
+                wrap.appendChild(label);
+                container.appendChild(wrap);
             });
-            console.log(boxesSelecionados)
+
+            container.addEventListener('click', (e) => {
+                const chip = e.target.closest('.box-chip');
+                if (!chip) return;
+
+                const input = chip.querySelector('input[name="boxes[]"]'); //Aqui verifico a quantidade de alunos selecionados para pintar o box
+                if (!input) return;
+
+                if (!state?.selected || state.selected.size === 0) {
+                    e.preventDefault();
+                    input.checked = false;
+                    console.log('Necessário selecionar ao menos 1 aluno para selecionar o box.');
+                    return;
+                }
+
+                state.activeBox = input.value;
+                efeitoBoxAtivo(state.activeBox);
+                assignSelectedToActive();
+            });
+
+            /*console.log('Boxes carregados:', data);
+            console.log('Selecionados:', boxesSelecionados);*/
         })
         .catch(error => {
             console.error('Erro ao carregar boxes:', error);
         });
+
+
+    function renderPreSelecao() {
+        const wrap = document.getElementById('pre-container');
+        if (!wrap) return;
+        wrap.innerHTML = '';
+
+        const entries = [...state.boxes.entries()].sort((a, b) => a[0].localeCompare(b[0], 'pt-BR'));
+        for (const [boxId, set] of entries) {
+            const box = document.createElement('div'); box.className = 'pre-box';
+            const head = document.createElement('div'); head.className = 'pre-header';
+            head.innerHTML = `<span class="tag">${boxId}</span><span class="pre-count">${set.size}/${CAP}</span>`;
+            box.appendChild(head);
+
+            const list = document.createElement('div'); list.className = 'pre-list';
+            for (const id of set) {
+                const nome = state.alunos.get(id)?.nome || id;
+                const chip = document.createElement('div'); chip.className = 'pre-chip';
+                chip.innerHTML = `<span>${nome}</span><button type="button" class="rm" data-rm="${boxId}|${id}">×</button>`;
+                list.appendChild(chip);
+            }
+            box.appendChild(list);
+            wrap.appendChild(box);
+        }
+    }
+
+    // remover da pré-seleção
+    document.getElementById('pre-container')?.addEventListener('click', (e) => {
+        const btn = e.target.closest('button.rm');
+        if (!btn) return;
+        const [boxId, alunoId] = btn.dataset.rm.split('|');
+        unassign(boxId, alunoId);
+    });
+
+    function renderAlunosBoxes() {
+        const wrap = document.getElementById('alunos-boxes-container');
+        if (!wrap) return;
+
+        // Limpa e trata vazio
+        wrap.innerHTML = '';
+        if (state.boxes.size === 0) {
+            wrap.innerHTML = '<p class="muted">Faça a pré-seleção de alunos e box.</p>';
+            return;
+        }
+
+        const frag = document.createDocumentFragment();
+
+        // Ordena boxes para render estável
+        const entries = [...state.boxes.entries()].sort((a, b) => a[0].localeCompare(b[0], 'pt-BR'));
+
+        for (const [boxId, set] of entries) {
+            const box = document.createElement('div');
+            box.className = 'pre-box';
+
+            // Cabeçalho do box: nome + contagem + limpar
+            const head = document.createElement('div');
+            head.className = 'pre-header';
+            head.innerHTML = `
+            <span class="tag">Box ${boxId}</span>
+            <span class="pre-count">${set.size}/${CAP}</span>
+            <button type="button" class="pre-clear" data-clear="${boxId}" title="Limpar este box">Limpar</button>
+        `;
+            box.appendChild(head);
+
+            // Lista de alunos (chips)
+            const list = document.createElement('div');
+            list.className = 'pre-list';
+
+            for (const id of set) {
+                const nome = state.alunos.get(id)?.nome || id;
+                const chip = document.createElement('div');
+                chip.className = 'pre-chip';
+                chip.innerHTML = `
+        <span class="nome" title="${nome}">${nome}</span>
+        <button type="button" class="rm" data-rm="${boxId}|${id}" aria-label="Remover ${nome} do ${boxId}">×</button>
+      `;
+                list.appendChild(chip);
+            }
+
+            box.appendChild(list);
+            frag.appendChild(box);
+        }
+
+        wrap.appendChild(frag);
+    }
+
+    function assignSelectedToActive() {
+        const container = document.getElementById('boxes-container');
+        const boxId = state.activeBox;
+        if (!boxId || !state?.selected || state.selected.size === 0) {
+            console.log('Necessário selecionar ao menos 1 aluno para selecionar o box.');
+            return;
+        }
+
+        container.addEventListener('click', (e) => {
+            const chip = e.target.closest('.box-chip');
+            if (!chip) return;
+
+            const input = chip.querySelector('input[name="boxes[]"]'); //Aqui verifico a quantidade de alunos selecionados para pintar o box
+            if (!input) return;
+
+            console.log('teste-1')
+            const bucket = state.boxes.get(boxId) ?? new Set();
+
+            if (input.checked && bucket && bucket.size > 0) {
+                e.preventDefault();           // impede toggle
+                input.checked = true;
+
+                return;
+            }
+
+
+            // aluno só em um box
+            for (const [bId, set] of state.boxes) {
+                if (bId !== boxId) for (const id of state.selected) set.delete(id);
+            }
+
+            for (const id of [...state.selected]) {
+                if (bucket.size >= CAP) break;
+                bucket.add(id);
+                state.selected.delete(id);
+            }
+
+            state.boxes.set(boxId, bucket);
+            renderPreSelecao?.();
+            renderAlunosBoxes();
+            renderAlunosSelectionState?.();
+        });
+    }
+
+    function unassign(boxId, alunoId) {
+        const set = state.boxes.get(boxId);
+        if (!set) return;
+        set.delete(alunoId);
+        if (set.size === 0) state.boxes.delete(boxId);
+        - renderPreSelecao?.();
+        + renderAlunosBoxes();
+        renderAlunosSelectionState?.();
+    }
+    const form = document.getElementById("form-agenda");
+    form.addEventListener('submit', (e) => {
+        // limpa hiddens anteriores para não duplicar em um segundo submit
+        form.querySelectorAll('input[name^="alocacoes["]').forEach(el => el.remove());
+
+        // gera inputs: alocacoes[BOX_ID][]=ALUNO_ID
+        state.boxes.forEach((setAlunos, boxId) => {
+            // de preferência use o ID numérico do box (ex.: ID_BOX_CLINICA)
+            setAlunos.forEach(alunoId => {
+                const input = document.createElement('input');
+                input.type = 'hidden';
+                input.name = `alocacoes[${boxId}][]`;
+                input.value = String(alunoId);
+                form.appendChild(input);
+            });
+        });
+    });
+
 });

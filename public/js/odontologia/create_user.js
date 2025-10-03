@@ -15,10 +15,8 @@ $(document).ready(function () {
             processResults: function (data) {
                 return {
                     results: data.map(p => ({
-                        id: p.PESSOA,
-                        text: p.NOME_COMPL,
-                        person: p.PESSOA,
-                        user: p.WINUSUARIO
+                        id: p.USUARIO,
+                        text: p.NOMEUSUARIO,
                     }))
                 };
             },
@@ -37,8 +35,7 @@ $(document).ready(function () {
         const d = e.params.data || {};
         console.log('Selecionado no select2:', d);
         $('#nome').val(d.text || '');
-        $('#winusuario').val(d.user || '');
-        $('#pessoa').val(d.person || ''); // usa o id correto do input (veja abaixo)
+        $('#winusuario').val(d.id || '');
     });
 
     // Limpar campos ao limpar o select
@@ -58,9 +55,8 @@ $('#selectUserLyceum').on('select2:select', function (e) {
         success: function (user) {
             const html = `
                 <tr>
-                    <td>${user.NOME_COMPL}</td>
-                    <td>${user.WINUSUARIO} ?? ''</td>
-                    <td>${user.PESSOA}</td>
+                    <td>${user.USUARIO}</td>
+                    <td>${user.NOMEUSUARIO} ?? ''</td>
                 </tr>
             `;
 

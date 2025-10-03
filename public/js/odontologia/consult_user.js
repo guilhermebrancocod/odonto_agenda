@@ -1,4 +1,4 @@
-function carregarTodosBox() {
+function carregarTodosUsuarios() {
     const $select = $('#selectUser');
     const $tbody = $('#table-user tbody');
 
@@ -15,7 +15,7 @@ function carregarTodosBox() {
                 const newOption = new Option(
                     user.NOME,
                     user.ID,
-                    false,
+                    user.STATUS,
                     false
                 );
                 $select.append(newOption);
@@ -68,7 +68,8 @@ $(document).ready(function () {
                 return {
                     results: data.map(p => ({
                         id: p.ID,
-                        text: p.NOME
+                        text: p.NOME,
+                        status: p.STATUS || ''
 
                     }))
                 };
@@ -83,7 +84,7 @@ $(document).ready(function () {
             document.querySelector('.select2-container--open .select2-search__field')?.focus();
         }, 0);
     });
-    carregarTodosBox();
+    carregarTodosUsuarios();
 });
 
 // Evento ao selecionar um paciente no select2
@@ -115,7 +116,7 @@ $('#selectUser').on('select2:select', function (e) {
                     </tr>
                 `;
             // Atualiza o corpo da tabela com apenas o paciente selecionado
-            $('#table-box tbody').html(html);
+            $('#table-user tbody').html(html);
         },
         error: function () {
             alert("Erro ao buscar os dados do box.");
