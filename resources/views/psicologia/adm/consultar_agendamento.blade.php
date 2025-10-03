@@ -23,7 +23,8 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
-            gap: 8px;
+            gap: 16px; 
+            flex-wrap: wrap;
         }
         #limitador-registros {
             display: flex;
@@ -37,7 +38,6 @@
             box-shadow: 0 0.75rem 1.25rem rgba(0,0,0,0.4) !important;
         }
 
-        /* Animação para alertas */
         @keyframes slideDownFadeOut {
             0%   { transform: translate(-50%, -100%); opacity: 0; }
             10%  { transform: translate(-50%, 0); opacity: 1; }
@@ -53,7 +53,46 @@
             filter: brightness(85%);
             transition: filter 0.2s ease-in-out;
         }
+        
+        @media (max-width: 992px) {
+            .table-cards thead {
+                display: none;
+            }
 
+            .table-cards tbody, .table-cards tr, .table-cards td {
+                display: block;
+                width: 100%;
+            }
+
+            .table-cards tr {
+                margin-bottom: 1rem;
+                border: 1px solid rgba(0,0,0,0.125);
+                border-radius: 0.375rem;
+            }
+
+            .table-cards td {
+                text-align: right; 
+                padding-left: 50%; 
+                position: relative;
+                border: none;
+                padding-top: 0.75rem;
+                padding-bottom: 0.75rem;
+            }
+            
+            .table-cards td:not(:last-child) {
+                 border-bottom: 1px solid #dee2e6;
+            }
+
+            .table-cards td::before {
+                content: attr(data-label);
+                position: absolute;
+                left: 0;
+                width: 50%;
+                padding-left: 1rem;
+                font-weight: bold;
+                text-align: left;
+            }
+        }
     </style>
 </head>
 
@@ -77,69 +116,54 @@
         </div>
     @endif
 
-    <div class="container ms-3 mw-100">
+    <div class="container-fluid ms-3 me-3 mt-3">
         <div class="row">
             <x-page-title>
-                    <p onclick="window.location.href = '/psicologia/criar-agendamento'" class="btn btn-success p-2 me-3" style="font-size: 15px;" >
-                        <span>Novo Agendamento</span>
-                    </p>
+                 <a href="/psicologia/criar-agendamento" class="btn btn-success p-2 me-3" style="font-size: 15px;">
+                    Novo Agendamento
+                </a>
             </x-page-title>
 
-            <div class="col-12 shadow-lg shadow-dark p-4 bg-body-tertiary rounded">
+            <div class="col-12 shadow-lg shadow-dark p-3 p-md-4 bg-body-tertiary rounded">
                 
-                <form id="search-form" class="w-100 mb-4">
+                <form id="search-form" class="mb-4">
                     <div class="row g-3">
-                        <div class="col-12 col-sm-6 col-md-3">
+                        <div class="col-12 col-sm-6 col-md-4 col-lg-3">
                             <div class="input-group">
                                 <span class="input-group-text"><i class="bi bi-person"></i></span>
                                 <input id="search-input" name="search" type="search" class="form-control" placeholder="Nome ou CPF do paciente" />
-                                <button type="button" class="btn btn-outline-secondary clear-input" data-target="search-input">
-                                    <i class="bi bi-x"></i>
-                                </button>
+                                <button type="button" class="btn btn-outline-secondary clear-input" data-target="search-input"><i class="bi bi-x"></i></button>
                             </div>
                         </div>
-
-                        <div class="col-12 col-sm-6 col-md-3">
+                        <div class="col-12 col-sm-6 col-md-4 col-lg-3">
                             <div class="input-group">
                                 <span class="input-group-text"><i class="bi bi-person-workspace"></i></span>
                                 <input id="aluno-input" name="aluno" type="search" class="form-control" placeholder="Nome/Matrícula do aluno" />
-                                <button type="button" class="btn btn-outline-secondary clear-input" data-target="aluno-input">
-                                    <i class="bi bi-x"></i>
-                                </button>
+                                <button type="button" class="btn btn-outline-secondary clear-input" data-target="aluno-input"><i class="bi bi-x"></i></button>
                             </div>
                         </div>
-
-                        <div class="col-12 col-sm-6 col-md-3">
+                        <div class="col-12 col-sm-6 col-md-4 col-lg-3">
                             <div class="input-group">
                                 <span class="input-group-text"><i class="bi bi-calendar-event"></i></span>
                                 <input id="date-input" name="date" type="text" class="form-control" placeholder="Data" />
-                                <button type="button" class="btn btn-outline-secondary clear-input" data-target="date-input">
-                                    <i class="bi bi-x"></i>
-                                </button>
+                                <button type="button" class="btn btn-outline-secondary clear-input" data-target="date-input"><i class="bi bi-x"></i></button>
                             </div>
                         </div>
-
-                        <div class="col-12 col-sm-6 col-md-3">
+                        <div class="col-12 col-sm-6 col-md-4 col-lg-3">
                             <div class="input-group">
                                 <span class="input-group-text"><i class="bi bi-clock-history"></i></span>
                                 <input id="start-time-input" name="start_time" type="text" class="form-control" placeholder="Hora Início" />
-                                <button type="button" class="btn btn-outline-secondary clear-input" data-target="start-time-input">
-                                    <i class="bi bi-x"></i>
-                                </button>
+                                <button type="button" class="btn btn-outline-secondary clear-input" data-target="start-time-input"><i class="bi bi-x"></i></button>
                             </div>
                         </div>
-
-                        <div class="col-12 col-sm-6 col-md-3">
+                        <div class="col-12 col-sm-6 col-md-4 col-lg-3">
                             <div class="input-group">
                                 <span class="input-group-text"><i class="bi bi-clock"></i></span>
                                 <input id="end-time-input" name="end_time" type="text" class="form-control" placeholder="Hora Fim" />
-                                <button type="button" class="btn btn-outline-secondary clear-input" data-target="end-time-input">
-                                    <i class="bi bi-x"></i>
-                                </button>
+                                <button type="button" class="btn btn-outline-secondary clear-input" data-target="end-time-input"><i class="bi bi-x"></i></button>
                             </div>
                         </div>
-
-                        <div class="col-12 col-sm-6 col-md-3">
+                        <div class="col-12 col-sm-6 col-md-4 col-lg-3">
                             <div class="input-group">
                                 <span class="input-group-text"><i class="bi bi-list-check"></i></span>
                                 <select id="status-input" name="status" class="form-select">
@@ -150,47 +174,28 @@
                                     <option value="Cancelado">Cancelado</option>
                                     <option value="Finalizado">Finalizado</option>
                                 </select>
-                                <button type="button" class="btn btn-outline-secondary clear-input" data-target="status-input">
-                                    <i class="bi bi-x"></i>
-                                </button>
+                                <button type="button" class="btn btn-outline-secondary clear-input" data-target="status-input"><i class="bi bi-x"></i></button>
                             </div>
                         </div>
-
-                        <div class="col-12 col-sm-6 col-md-3">
+                        <div class="col-12 col-sm-6 col-md-4 col-lg-3">
                             <div class="input-group">
                                 <span class="input-group-text"><i class="bi bi-briefcase"></i></span>
                                 <input id="service-input" name="service" type="text" class="form-control" placeholder="Serviço" />
-                                <button type="button" class="btn btn-outline-secondary clear-input" data-target="service-input">
-                                    <i class="bi bi-x"></i>
-                                </button>
+                                <button type="button" class="btn btn-outline-secondary clear-input" data-target="service-input"><i class="bi bi-x"></i></button>
                             </div>
                         </div>
-
-                        <div class="col-12 col-sm-6 col-md-3">
+                        <div class="col-12 col-sm-6 col-md-4 col-lg-3">
                             <div class="input-group">
                                 <span class="input-group-text"><i class="bi bi-geo-alt"></i></span>
                                 <input id="local-input" name="local" type="text" class="form-control" placeholder="Local" />
-                                <button type="button" class="btn btn-outline-secondary clear-input" data-target="local-input">
-                                    <i class="bi bi-x"></i>
-                                </button>
+                                <button type="button" class="btn btn-outline-secondary clear-input" data-target="local-input"><i class="bi bi-x"></i></button>
                             </div>
                         </div>
-
-                        <div class="col-12 col-sm-6 col-md-3">
-                            <div class="input-group">
-                                <span class="input-group-text"><i class="bi bi-currency-dollar"></i></span>
-                                <input id="valor-input" name="valor" type="text" class="form-control" placeholder="Valor" />
-                                <button type="button" class="btn btn-outline-secondary clear-input" data-target="valor-input">
-                                    <i class="bi bi-x"></i>
-                                </button>
-                            </div>
-                        </div>
-
-                        <div class="col-12 col-lg-auto d-flex gap-2">
-                            <button type="submit" class="btn btn-primary">
+                        <div class="col-12 col-sm-6 col-md-4 col-lg-3 d-flex gap-2">
+                             <button type="submit" class="btn btn-primary w-100">
                                 <i class="bi bi-search"></i> Pesquisar
                             </button>
-                            <button type="button" class="btn btn-outline-secondary" id="btnClearFilters">
+                            <button type="button" class="btn btn-outline-secondary" id="btnClearFilters" title="Limpar Filtros">
                                 Limpar
                             </button>
                         </div>
@@ -201,8 +206,8 @@
 
                 <div class="w-100">
                     <h5 class="mb-3">Resultados</h5>
-                    <div class="table-responsive border rounded" style="max-height: 55vh; overflow-y: auto;">
-                        <table class="table table-hover table-bordered align-middle mb-0">
+                    <div class="border rounded" style="max-height: 65vh; overflow-y: auto;">
+                        <table class="table table-hover table-bordered align-middle mb-0 table-cards">
                             <thead class="table-light" style="position: sticky; top: 0; z-index: 1;">
                                 <tr>
                                     <th>Paciente</th>
@@ -217,7 +222,7 @@
                                     <th>Valor</th>
                                     <th>Pago?</th>
                                     <th>Valor Pago</th>
-                                    <th>Ações</th>
+                                    <th class="text-center">Ações</th>
                                 </tr>
                             </thead>
                             <tbody id="agendamentos-tbody">
@@ -233,7 +238,7 @@
                             <span class="text-muted">Total de registros: 0</span>
                         </div>
                         <div id="limitador-registros">
-                            <label for="limit-select" class="form-label mb-0">Mostrar</label>
+                            <label for="limit-select" class="form-label mb-0 text-muted">Exibir:</label>
                             <select id="limit-select" class="form-select form-select-sm" style="width: auto;">
                                 <option value="10" selected>10</option>
                                 <option value="25">25</option>
@@ -270,7 +275,6 @@
                 const params = getFilters();
                 const url = `/psicologia/get-agendamento?${params.toString()}`;
 
-                // Adiciona um feedback visual de carregamento
                 agendamentosTbody.innerHTML = `<tr><td colspan="13" class="text-center"><div class="spinner-border spinner-border-sm" role="status"><span class="visually-hidden">Loading...</span></div> Carregando...</td></tr>`;
 
                 fetch(url)
@@ -311,26 +315,29 @@
                             const statusInfo = statusMap[status] || { color: 'text-muted', icon: 'bi-question-circle' };
 
                             const row = document.createElement('tr');
+                            
                             row.innerHTML = `
-                                <td>${paciente}</td>
-                                <td>${aluno}</td>
-                                <td>${servico}</td>
-                                <td>${data}</td>
-                                <td>${horaIni}</td>
-                                <td>${horaFim}</td>
-                                <td>${local}</td>
-                                <td class="fw-bold ${statusInfo.color}"><i class="bi ${statusInfo.icon} me-1"></i>${status}</td>
-                                <td>${reagendamento}</td>
-                                <td>${valor}</td>
-                                <td class="text-center">${checkPagamento}</td>
-                                <td>${valorPagamento}</td>
-                                <td class="d-flex flex-nowrap gap-1 agendamento-actions">
-                                    <a href="/psicologia/agendamento/${ag.ID_AGENDAMENTO}/editar" class="btn btn-warning flex-grow-1" title="Editar"><i class="bi bi-pencil"></i></a>
-                                    <form action="/psicologia/agendamento/${ag.ID_AGENDAMENTO}" method="POST" onsubmit="return confirm('Confirma a exclusão deste agendamento?');">
-                                        @csrf
-                                        @method('DELETE')
-                                        <button type="submit" class="btn btn-danger flex-grow-1" title="Excluir"><i class="bi bi-trash"></i></button>
-                                    </form>
+                                <td data-label="Paciente">${paciente}</td>
+                                <td data-label="Aluno">${aluno}</td>
+                                <td data-label="Serviço">${servico}</td>
+                                <td data-label="Data">${data}</td>
+                                <td data-label="Início">${horaIni}</td>
+                                <td data-label="Fim">${horaFim}</td>
+                                <td data-label="Local">${local}</td>
+                                <td data-label="Status" class="fw-bold ${statusInfo.color}"><i class="bi ${statusInfo.icon} me-1"></i>${status}</td>
+                                <td data-label="Reagendamento?">${reagendamento}</td>
+                                <td data-label="Valor">${valor}</td>
+                                <td data-label="Pago?" class="text-md-center">${checkPagamento}</td>
+                                <td data-label="Valor Pago">${valorPagamento}</td>
+                                <td data-label="Ações" class="agendamento-actions">
+                                    <div class="d-flex justify-content-end gap-1">
+                                        <a href="/psicologia/agendamento/${ag.ID_AGENDAMENTO}/editar" class="btn btn-sm btn-warning" title="Editar"><i class="bi bi-pencil"></i></a>
+                                        <form action="/psicologia/agendamento/${ag.ID_AGENDAMENTO}" method="POST" onsubmit="return confirm('Confirma a exclusão deste agendamento?');">
+                                            @csrf
+                                            @method('DELETE')
+                                            <button type="submit" class="btn btn-sm btn-danger" title="Excluir"><i class="bi bi-trash"></i></button>
+                                        </form>
+                                    </div>
                                 </td>
                             `;
                             agendamentosTbody.appendChild(row);
@@ -351,64 +358,37 @@
 
             document.getElementById('btnClearFilters').addEventListener('click', () => {
                 searchForm.reset();
-                // Limpa também os campos do Flatpickr
                 flatpickrInstances.forEach(instance => instance.clear());
                 carregarAgendamentos();
             });
 
-            // Carrega a lista ao abrir a página
             carregarAgendamentos();
         });
     </script>
     
     <script>
         flatpickr.localize(flatpickr.l10ns.pt);
-
-        const datePicker = flatpickr("#date-input", {
-            dateFormat: "Y-m-d",
-            altInput: true,
-            altFormat: "d/m/Y",
-            allowInput: true,
-            defaultDate: "today"
-        });
-
-        const startTimePicker = flatpickr("#start-time-input", {
-            enableTime: true,
-            noCalendar: true,
-            dateFormat: "H:i",
-            time_24hr: true
-        });
-
-        const endTimePicker = flatpickr("#end-time-input", {
-            enableTime: true,
-            noCalendar: true,
-            dateFormat: "H:i",
-            time_24hr: true
-        });
-
+        const datePicker = flatpickr("#date-input", { dateFormat: "Y-m-d", altInput: true, altFormat: "d/m/Y", allowInput: true });
+        const startTimePicker = flatpickr("#start-time-input", { enableTime: true, noCalendar: true, dateFormat: "H:i", time_24hr: true });
+        const endTimePicker = flatpickr("#end-time-input", { enableTime: true, noCalendar: true, dateFormat: "H:i", time_24hr: true });
         const flatpickrInstances = [datePicker, startTimePicker, endTimePicker];
     </script>
 
-    <!-- LIMPAR VALORES DE CAMPOS DE PESQUISA AO CLICAR NO X -->
     <script>
         document.querySelectorAll('.clear-input').forEach(btn => {
             btn.addEventListener('click', function() {
                 const targetId = this.getAttribute('data-target');
                 const input = document.getElementById(targetId);
-
                 if (!input) return;
-
                 if (input._flatpickr) {
                     input._flatpickr.clear();
                 } else {
                     input.value = "";
                 }
-
                 input.dispatchEvent(new Event('input'));
                 input.dispatchEvent(new Event('change')); 
             });
         });
     </script>
-
 </body>
 </html>

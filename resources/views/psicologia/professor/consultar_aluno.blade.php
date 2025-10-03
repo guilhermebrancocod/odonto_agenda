@@ -69,7 +69,7 @@
         </div>
     @endif
 
-    <div class="container ms-3 mw-100">
+    <div class="container ms-3 me-3 mw-100">
         <div class="row">
             <x-page-title></x-page-title>
 

@@ -86,7 +86,7 @@
     </div>
 @endif
 
-<div class="container ms-3 mw-100">
+<div class="container ms-3 me-3 mw-100">
 
     <!-- COMPONENT DE HEADER DE CADA PÁGINA DAS VIEWS -->
     <x-page-title>
