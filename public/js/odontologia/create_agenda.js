@@ -34,7 +34,7 @@ window.validarFormulario = function () {
     const recorrencia = document.querySelector('input[name="recorrencia"]:checked')?.value;
 
     // 1) Tente pelos IDs (únicos)
-    const hrIniEl = byId('hr_ini');
+    /*const hrIniEl = byId('hr_ini');
     const hrFimEl = byId('hr_fim');
     let hr_ini = hrIniEl?.value?.trim() || "";
     let hr_fim = hrFimEl?.value?.trim() || "";
@@ -64,7 +64,7 @@ window.validarFormulario = function () {
             if (hrIniEl) hrIniEl.value = hr_ini;
             if (hrFimEl) hrFimEl.value = hr_fim;
         }
-    }
+    }*/
 
     // ---- Validações demais ----
     const regexData = /^\d{2}\/\d{2}\/\d{4}$/;
@@ -130,69 +130,6 @@ function validarDataAnoAtual(campo) {
             return;
         }
     }
-}
-
-function getAllTimeBoxes() {
-    return Array.from(document.querySelectorAll('.time-check')).map(box => {
-        const input = box.querySelector('input.form-check-input');
-        const label = box.querySelector('label.form-check-label');
-        const base = (label?.dataset?.time || label?.textContent || '').trim();
-        return { box, input, label, base, norm: normalize(base) };
-    });
-}
-
-// Mantido o mesmo nome (global); usado por enableHorariosFrom.
-function disableAllHorarios() {
-    const all = getAllTimeBoxes();
-    all.forEach(({ input }) => {
-        if (!input) return;
-        input.checked = false;
-        input.disabled = true;
-    });
-    const hrIni = document.getElementById('hr_ini');
-    const hrFim = document.getElementById('hr_fim');
-    if (hrIni) hrIni.value = '';
-    if (hrFim) hrFim.value = '';
-}
-
-// util: "dd/mm/aaaa" -> código 1..7 (1=Domingo ... 7=Sábado)
-function brDateToWeekCode(br) {
-    if (!br) return '';
-    const [d, m, y] = br.split('/').map(Number);
-    if (!d || !m || !y) return '';
-    const js = new Date(y, m - 1, d); // JS: mês 0..11
-    const dow = js.getDay();           // 0=Dom .. 6=Sáb
-    return dow === 0 ? 1 : (dow + 1);  // 1..7 (1=Dom)
-}
-
-// utilitário para pré-selecionar programaticamente no Select2
-function hydrateSelect2($el, id, text) {
-    if (!id || !text) return;
-    const exists = Array.from($el[0].options).some(o => String(o.value) === String(id));
-    if (!exists) {
-        const opt = new Option(text, id, true, true);
-        $el.append(opt).trigger('change', { silentInit: true });
-    } else {
-        $el.val(String(id)).trigger('change', { silentInit: true });
-    }
-}
-// Exposto globalmente com o MESMO nome
-function updateHrBoundsFrom(items) {
-    const hrIni = document.getElementById('hr_ini');
-    const hrFim = document.getElementById('hr_fim');
-    if (!items || !items.length) {
-        if (hrIni) hrIni.value = '';
-        if (hrFim) hrFim.value = '';
-        return;
-    }
-    const starts = items.map(i => normalize(i.inicio)).sort((a, b) => toMinutes(a) - toMinutes(b));
-    const first = starts[0];
-    const last = starts[starts.length - 1];
-
-    if (hrIni) hrIni.value = padHHMM(first);
-
-    const lastObj = items.find(i => normalize(i.inicio) === last);
-    if (hrFim) hrFim.value = padHHMM(normalize(lastObj?.fim || last));
 }
 
 // =========================
@@ -603,7 +540,7 @@ $(document).ready(function () {
                     results: (Array.isArray(data) ? data : []).map(p => ({
                         id: p.DISCIPLINA,                     // ou p.DISCIPLINA, conforme sua lógica
                         text: p.NOME
-                        }))
+                    }))
                 }),
                 cache: true
             }
@@ -697,3 +634,66 @@ $(document).ready(function () {
         });
     }
 });
+
+function getAllTimeBoxes() {
+    return Array.from(document.querySelectorAll('.time-check')).map(box => {
+        const input = box.querySelector('input.form-check-input');
+        const label = box.querySelector('label.form-check-label');
+        const base = (label?.dataset?.time || label?.textContent || '').trim();
+        return { box, input, label, base, norm: normalize(base) };
+    });
+}
+
+// Mantido o mesmo nome (global); usado por enableHorariosFrom.
+function disableAllHorarios() {
+    const all = getAllTimeBoxes();
+    all.forEach(({ input }) => {
+        if (!input) return;
+        input.checked = false;
+        input.disabled = true;
+    });
+    const hrIni = document.getElementById('hr_ini');
+    const hrFim = document.getElementById('hr_fim');
+    if (hrIni) hrIni.value = '';
+    if (hrFim) hrFim.value = '';
+}
+
+// util: "dd/mm/aaaa" -> código 1..7 (1=Domingo ... 7=Sábado)
+function brDateToWeekCode(br) {
+    if (!br) return '';
+    const [d, m, y] = br.split('/').map(Number);
+    if (!d || !m || !y) return '';
+    const js = new Date(y, m - 1, d); // JS: mês 0..11
+    const dow = js.getDay();           // 0=Dom .. 6=Sáb
+    return dow === 0 ? 1 : (dow + 1);  // 1..7 (1=Dom)
+}
+
+// utilitário para pré-selecionar programaticamente no Select2
+function hydrateSelect2($el, id, text) {
+    if (!id || !text) return;
+    const exists = Array.from($el[0].options).some(o => String(o.value) === String(id));
+    if (!exists) {
+        const opt = new Option(text, id, true, true);
+        $el.append(opt).trigger('change', { silentInit: true });
+    } else {
+        $el.val(String(id)).trigger('change', { silentInit: true });
+    }
+}
+// Exposto globalmente com o MESMO nome
+function updateHrBoundsFrom(items) {
+    const hrIni = document.getElementById('hr_ini');
+    const hrFim = document.getElementById('hr_fim');
+    if (!items || !items.length) {
+        if (hrIni) hrIni.value = '';
+        if (hrFim) hrFim.value = '';
+        return;
+    }
+    const starts = items.map(i => normalize(i.inicio)).sort((a, b) => toMinutes(a) - toMinutes(b));
+    const first = starts[0];
+    const last = starts[starts.length - 1];
+
+    if (hrIni) hrIni.value = padHHMM(first);
+
+    const lastObj = items.find(i => normalize(i.inicio) === last);
+    if (hrFim) hrFim.value = padHHMM(normalize(lastObj?.fim || last));
+}

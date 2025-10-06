@@ -330,6 +330,7 @@ body nav img div {
         box-shadow: inset 0 0 0 1px #8dbbfd;
         font-weight: 600;
     }
+    
     /* Responsivo */
     @media (max-width: 992px) {
         .agendamento-grid {

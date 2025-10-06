@@ -184,16 +184,16 @@
                 <div class="col-6 col-md-2">
                     <div class="form-floating">
                         <input
-                            type="hidden"
-                            id="date_end"
+                            type="text"
+                            id="date"
                             name="date_end"
                             class="form-control datepicker"
                             placeholder="dd/mm/aaaa"
                             inputmode="numeric"
                             value="{{ old('date_end', isset($agenda->DT_AGEND_FINAL) ? \Carbon\Carbon::parse($agenda->DT_AGEND_FINAL)->format('d/m/Y') : '') }}">
+                        <label for="date">Data Final</label>
                     </div>
                 </div>
-
             </div>
             <div class="row g-4 align-items-start my-1">
                 <!-- Coluna principal (mais larga) -->
@@ -294,8 +294,8 @@
                                 </fieldset>
                             </div>
                             @php
-                            $hrIniRaw = old('hr_ini', $agenda->HR_AGEND_INI ?? null);
-                            $hrFimRaw = old('hr_fim', $agenda->HR_AGEND_FIN ?? null);
+                            $hrIniRaw = old('inicio', $agenda->HR_AGEND_INI ?? null);
+                            $hrFimRaw = old('fim', $agenda->HR_AGEND_FIN ?? null);
                             $hrIni = $hrIniRaw ? \Carbon\Carbon::parse($hrIniRaw)->format('H:i') : '';
                             $hrFim = $hrFimRaw ? \Carbon\Carbon::parse($hrFimRaw)->format('H:i') : '';
                             @endphp
@@ -324,7 +324,6 @@
                                     <input id="hr_fim" name="hr_fim" type="hidden" value="{{ $hrFim }}">
                                 </div>
                             </div>
-
                             <!-- DIREITA: recorrência -->
                             <div class="col-12 col-md-6">
                                 <div class="d-flex align-items-stretch gap-2">
@@ -371,9 +370,9 @@
                                             <select id="freq" name="freq" class="form-select form-select-sm w-auto"
                                                 @disabled(old('recorrencia','1')!='2' )>
                                                 @php $freqOld = old('freq','WEEKLY'); @endphp
-                                                <option value="0" {{ $freqOld=='0'  ? 'selected' : '' }}>Semanal</option>
-                                                <option value="1" {{ $freqOld=='1'? 'selected' : '' }}>Quinzenal</option>
-                                                <option value="2" {{ $freqOld=='2' ? 'selected' : '' }}>Mensal</option>
+                                                <option value="1" {{ $freqOld=='1'  ? 'selected' : '' }}>Semanal</option>
+                                                <option value="2" {{ $freqOld=='2'? 'selected' : '' }}>Quinzenal</option>
+                                                <option value="3" {{ $freqOld=='3' ? 'selected' : '' }}>Mensal</option>
                                             </select>
                                         </div>
                                     </div>
@@ -505,13 +504,13 @@
                                         </div>
                                 </fieldset>
                             </div>
-
                             {{-- Botão + Encaminhamento + Disciplina --}}
                             <div class="col-12 col-md-3">
                                 <button class="btn btn-primary btn-lg w-100 mb-2" id="btn-agendar" type="submit">
                                     <i class="bi bi-calendar-plus"></i> Agendar
                                 </button>
-
+                                @isset($agenda)
+                                <input type="hidden" name="encaminhamento" value="0">
                                 <div class="form-check d-flex justify-content-center align-items-center gap-2 mb-2">
                                     <input
                                         class="form-check-input m-0"
@@ -519,10 +518,12 @@
                                         type="checkbox"
                                         name="encaminhamento"
                                         value="1"
-                                        {{ old('encaminhamento') == '1' ? 'checked' : '' }}>
+                                        @checked(old('encaminhamento', $agenda->ENCAMINHAMENTO ?? 0) == 1)
+                                    >
                                     <label class="form-check-label" for="encaminhamento">Encaminhamento</label>
                                 </div>
-
+                                @endisset
+                                {{-- Disciplina (aparece se marcar encaminhamento) --}}
                                 @php
                                 // valores para o select
                                 $valor = old('disciplina', isset($agenda) ? ($agenda->DISCIPLINA ?? '') : '');

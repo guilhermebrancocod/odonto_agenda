@@ -105,7 +105,7 @@ class EncaminhamentoController extends Controller
                 'DT_AGEND_FINAL'    => $data['dt_agend'],
                 'ID_ALUNO'          => null,
                 'ID_SALA'           => null,
-                'ID_USUARIO'        => auth()->id() ?? null,
+                /*'ID_USUARIO'        => auth()->id() ?? null,*/
                 'CREATED_AT'        => now(),
                 'UPDATED_AT'        => now(),
             ]);

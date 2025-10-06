@@ -2,6 +2,13 @@ const add = document.getElementById('add');
 
 document.addEventListener('DOMContentLoaded', function () {
 
+    const boxesSelecionados = Array.isArray(window.boxesSelecionados) ? window.boxesSelecionados : [];
+
+    function warn(msg) {
+        if (window.toastr?.warning) toastr.warning(msg);
+        else alert(msg);
+    }
+
     const disciplina = document.getElementById('disciplina');
     const disciplinaSave = disciplina.value;
     const turma = document.getElementById('turma');
@@ -24,7 +31,6 @@ document.addEventListener('DOMContentLoaded', function () {
     function renderAlunosSelectionState() {
 
         document.querySelectorAll('#alunos-container input[name="alunos[]"]').forEach(cb => {
-            console.log('teste-2');
             const id = cb.value;
             const row = cb.closest('.aluno-row');
             row?.classList.toggle('is-assigned', isAssigned(id));
@@ -263,7 +269,6 @@ document.addEventListener('DOMContentLoaded', function () {
             function renderAlunosEmTabela(data, alunosSelecionados = [], limitePorColuna = 10) {
                 const container = document.getElementById('alunos-container');
                 if (!container) return;
-
                 container.classList.add('alunos-wrapper');
                 container.innerHTML = '';
 
@@ -352,10 +357,9 @@ document.addEventListener('DOMContentLoaded', function () {
                     return;
                 }
 
-                container.classList.add('alunos-wrapper');
-                container.innerHTML = '<p class="muted">Carregando…</p>';
-
                 try {
+                    container.classList.add('alunos-wrapper');
+                    container.innerHTML = '<p class="muted">Carregando…</p>';
                     const res = await fetch(`/odontologia/alunos/${encodeURIComponent(disc)}/${encodeURIComponent(tur)}`, {
                         headers: { 'Accept': 'application/json' }
                     });
@@ -364,7 +368,6 @@ document.addEventListener('DOMContentLoaded', function () {
                     const data = await res.json();
                     renderAlunosEmTabela(data, alunosSelecionados, limitePorColuna);
                 } catch (e) {
-                    console.error(e);
                     container.innerHTML = `<p class="error">Erro ao carregar alunos. ${e.message || ''}</p>`;
                 }
             }
@@ -427,7 +430,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 if (!state?.selected || state.selected.size === 0) {
                     e.preventDefault();
                     input.checked = false;
-                    console.log('Necessário selecionar ao menos 1 aluno para selecionar o box.');
+                    warn('Necessário selecionar ao menos 1 aluno para selecionar o box.');
                     return;
                 }
 
@@ -435,9 +438,6 @@ document.addEventListener('DOMContentLoaded', function () {
                 efeitoBoxAtivo(state.activeBox);
                 assignSelectedToActive();
             });
-
-            /*console.log('Boxes carregados:', data);
-            console.log('Selecionados:', boxesSelecionados);*/
         })
         .catch(error => {
             console.error('Erro ao carregar boxes:', error);
@@ -468,18 +468,9 @@ document.addEventListener('DOMContentLoaded', function () {
         }
     }
 
-    // remover da pré-seleção
-    document.getElementById('pre-container')?.addEventListener('click', (e) => {
-        const btn = e.target.closest('button.rm');
-        if (!btn) return;
-        const [boxId, alunoId] = btn.dataset.rm.split('|');
-        unassign(boxId, alunoId);
-    });
-
     function renderAlunosBoxes() {
         const wrap = document.getElementById('alunos-boxes-container');
         if (!wrap) return;
-
         // Limpa e trata vazio
         wrap.innerHTML = '';
         if (state.boxes.size === 0) {
@@ -528,12 +519,35 @@ document.addEventListener('DOMContentLoaded', function () {
         wrap.appendChild(frag);
     }
 
+    document.getElementById('alunos-boxes-container')?.addEventListener('click', (e) => {
+        // remover 1 aluno do box
+        const rmBtn = e.target.closest('button.rm');
+        if (rmBtn) {
+            const [boxId, alunoId] = rmBtn.dataset.rm.split('|');
+            unassign(boxId, alunoId);
+            return;
+        }
+
+        // limpar todo o box
+        const clearBtn = e.target.closest('button.pre-clear');
+        if (clearBtn) {
+            const boxId = clearBtn.dataset.clear;
+            const set = state.boxes.get(boxId);
+            if (set) set.clear();
+            state.boxes.delete(boxId);
+            renderPreSelecao?.();
+            renderAlunosBoxes();
+            renderAlunosSelectionState?.();
+        }
+    });
+
+
     function assignSelectedTo(boxId) {
         if (!boxId) return;
 
         const selected = [...(state?.selected ?? new Set())];
         if (selected.length === 0) {
-            console.log('Necessário selecionar ao menos 1 aluno para selecionar o box.');
+            warn('Necessário selecionar ao menos 1 aluno para selecionar o box.');
             return;
         }
 
@@ -575,49 +589,18 @@ document.addEventListener('DOMContentLoaded', function () {
     }
 
     function assignSelectedToActive() {
-        const container = document.getElementById('boxes-container');
         const boxId = state.activeBox;
         if (!boxId || !state?.selected || state.selected.size === 0) {
             console.log('Necessário selecionar ao menos 1 aluno para selecionar o box.');
             return;
         }
 
-        container.addEventListener('click', (e) => {
-            const chip = e.target.closest('.box-chip');
-            if (!chip) return;
+        assignSelectedTo(boxId);
 
-            const input = chip.querySelector('input[name="boxes[]"]'); //Aqui verifico a quantidade de alunos selecionados para pintar o box
-            if (!input) return;
+        renderPreSelecao?.();
+        renderAlunosBoxes();
+        renderAlunosSelectionState?.();
 
-            console.log('teste-1')
-            const bucket = state.boxes.get(boxId) ?? new Set();
-
-            if (input.checked && bucket && bucket.size > 0) {
-                e.preventDefault();           // impede toggle
-                input.checked = true;
-
-                return;
-            }
-
-
-            // aluno só em um box
-            for (const [bId, set] of state.boxes) {
-                if (bId !== boxId) for (const id of state.selected) set.delete(id);
-            }
-
-            for (const id of [...state.selected]) {
-                if (bucket.size >= CAP) break;
-                bucket.add(id);
-                state.selected.delete(id);
-            }
-
-            assignSelectedTo(boxId);
-
-            state.boxes.set(boxId, bucket);
-            renderPreSelecao?.();
-            renderAlunosBoxes();
-            renderAlunosSelectionState?.();
-        });
     }
 
     function unassign(boxId, alunoId) {
@@ -625,8 +608,8 @@ document.addEventListener('DOMContentLoaded', function () {
         if (!set) return;
         set.delete(alunoId);
         if (set.size === 0) state.boxes.delete(boxId);
-        - renderPreSelecao?.();
-        + renderAlunosBoxes();
+        renderPreSelecao?.();
+        renderAlunosBoxes();
         renderAlunosSelectionState?.();
     }
     const form = document.getElementById("form-agenda");

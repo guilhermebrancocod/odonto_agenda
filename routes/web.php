@@ -1,26 +1,22 @@
 <?php
-
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Odonto\OdontoCreateController;
 use App\Http\Controllers\Odonto\OdontoConsultController;
+
 use App\Http\Controllers\Odonto\OdontoUpdateController;
 use App\Http\Controllers\Odonto\OdontoDeleteController;
-use App\Http\Controllers\Psicologia\PacienteController;
-use App\Http\Controllers\Psicologia\AgendamentoController;
-use App\Http\Controllers\Psicologia\ServicoController;
-use App\Http\Controllers\LoginController;
-use App\Http\Controllers\Psicologia\AlunoController;
-use App\Http\Controllers\Psicologia\ClinicaController;
-use App\Http\Controllers\Psicologia\SalaController;
-use App\Http\Controllers\Psicologia\HorarioController;
-use App\Http\Controllers\Psicologia\DisciplinaController;
-use App\Models\FaesaClinicaServico;
-use App\Models\FaesaClinicaPaciente;
-use App\Http\Middleware\AuthMiddleware;
-use App\Http\Middleware\AuthProfessorMiddleware;
-use App\Http\Middleware\CheckClinicaMiddleware;
-use App\Http\Middleware\AuthAlunoMiddleware;
 
+use App\Http\Controllers\LoginController;
+
+use App\Http\Middleware\AuthMiddleware;
+use App\Http\Middleware\CheckClinicaMiddleware;
+
+use App\Http\Controllers\Odonto\PatientController;
+use App\Http\Controllers\Odonto\AgendaController;
+use App\Http\Controllers\Odonto\UserController;
+use App\Http\Controllers\Odonto\ServiceController;
+use App\Http\Controllers\Odonto\BoxDisciplineStudentsController;
+use App\Http\Controllers\Odonto\BoxesController;
 use App\Http\Controllers\Odonto\EncaminhamentoController;
 use App\Http\Controllers\Odonto\CalendarioController;
 
@@ -71,48 +67,46 @@ Route::middleware([AuthMiddleware::class, CheckClinicaMiddleware::class])->prefi
 
 //USER
 
-Route::post('/odontologia/criarusuario', [OdontoCreateController::class, 'createBox'])->name('createBox');
-Route::get('/odontologia/criarusuario/{userId}', [OdontoCreateController::class, 'editUser'])->name('editUser');
-Route::put('/updateUser/{userId}', [OdontoUpdateController::class, 'updateUser'])->name('updateUser');
-
-
+Route::post('/odontologia/criarusuario', [BoxesController::class, 'createBox'])->name('createBox');
+Route::get('/odontologia/criarusuario/{userId}', [UserController::class, 'editUser'])->name('editUser');
+Route::put('/updateUser/{userId}', [UserController::class, 'updateUser'])->name('updateUser');
 //LOG
-Route::get('/odontologia/pacientes/{id}/audits', [OdontoCreateController::class, 'historyPaciente'])->name('pacientes.audit');
+Route::get('/odontologia/pacientes/{id}/audits', [PatientController::class, 'historyPaciente'])->name('pacientes.audit');
 
 // CRIAÇÃO E EDIÇÃO - PACIENTE
-Route::get('/odontologia/criarpaciente', [OdontoCreateController::class, 'showForm'])->name('criarpaciente');
-Route::get('/odontologia/criarpaciente/{pacienteId}', [OdontoCreateController::class, 'editPatient'])->name('editPatient');
-Route::post('/odontologia/criarpaciente', [OdontoCreateController::class, 'fCreatePatient'])->name('createPatient');
-Route::put('/updatePatient/{id}', [OdontoUpdateController::class, 'updatePatient'])->name('updatePatient');
-Route::post('/odontologia/criarusuario', [OdontoCreateController::class, 'createUsuario'])->name('createUsuario');
-Route::put('/updateUser/{id}', [OdontoUpdateController::class, 'updateUser'])->name('updateUser');
+Route::get('/odontologia/criarpaciente', [PatientController::class, 'showForm'])->name('criarpaciente');
+Route::get('/odontologia/criarpaciente/{pacienteId}', [PatientController::class, 'editPatient'])->name('editPatient');
+Route::post('/odontologia/criarpaciente', [PatientController::class, 'fCreatePatient'])->name('createPatient');
+Route::put('/updatePatient/{id}', [PatientController::class, 'updatePatient'])->name('updatePatient');
+Route::post('/odontologia/criarusuario', [UserController::class, 'createUsuario'])->name('createUsuario');
+Route::put('/updateUser/{id}', [UserController::class, 'updateUser'])->name('updateUser');
 
 // SERVIÇOS
 Route::get('/odontologia/criarservico', function () {
     return view('odontologia/create_service');
 })->name('criarservico');
-Route::post('/odontologia/criarservico', [OdontoCreateController::class, 'createProcedures'])->name('createProcedures');
-Route::get('/criarservico/{idService}', [OdontoCreateController::class, 'editService'])->name('editService');
-Route::put('/criarservico/{idService}', [OdontoUpdateController::class, 'updateProcedures'])->name('updateProcedures');
+Route::post('/odontologia/criarservico', [ServiceController::class, 'createProcedures'])->name('createProcedures');
+Route::get('/criarservico/{idService}', [ServiceController::class, 'editService'])->name('editService');
+Route::put('/criarservico/{idService}', [ServiceController::class, 'updateProcedures'])->name('updateProcedures');
 
 // BOXES
 Route::get('/odontologia/criarbox', function () {
     return view('odontologia/create_box');
 })->name('criarbox');
-Route::post('/odontologia/criarbox', [OdontoCreateController::class, 'createBox'])->name('createBox');
-Route::get('/odontologia/criarbox/{boxId}', [OdontoCreateController::class, 'editBox'])->name('editBox');
-Route::put('/criarbox/{boxId}', [OdontoUpdateController::class, 'updateBox'])->name('updateBox');
+Route::post('/odontologia/criarbox', [BoxesController::class, 'createBox'])->name('createBox');
+Route::get('/odontologia/criarbox/{boxId}', [BoxesController::class, 'editBox'])->name('editBox');
+Route::put('/criarbox/{boxId}', [BoxesController::class, 'updateBox'])->name('updateBox');
 
 // BOX-DISCIPLINAS
-Route::post('/odontologia/criarboxdisciplina', [OdontoCreateController::class, 'createBoxDiscipline'])->name('createBoxDiscipline');
-Route::get('/odontologia/criarboxdisciplina/{idBoxDiscipline}', [OdontoCreateController::class, 'editBoxDiscipline'])->name('editBoxDiscipline');
+Route::post('/odontologia/criarboxdisciplina', [BoxDisciplineStudentsController::class, 'createBoxDiscipline'])->name('createBoxDiscipline');
+Route::get('/odontologia/criarboxdisciplina/{idBoxDiscipline}', [BoxDisciplineStudentsController::class, 'editBoxDiscipline'])->name('editBoxDiscipline');
 Route::get('/odontologia/deleteboxdisciplina/{idBoxDiscipline}', [OdontoDeleteController::class, 'deleteBoxDiscipline'])->name('deleteBoxDiscipline');
 Route::put('/criarboxdisciplina/{idBoxDiscipline}', [OdontoUpdateController::class, 'updateBoxDiscipline'])->name('updateBoxDiscipline');
 
 // AGENDA
-Route::post('/odontologia/criaragenda', [OdontoCreateController::class, 'fCreateAgenda'])->name('createAgenda');
-Route::get('/odontologia/criaragenda/{agendaId}', [OdontoCreateController::class, 'editAgenda'])->name('editAgenda');
-Route::put('/updateAgenda/{id}', [OdontoUpdateController::class, 'updateAgenda'])->name('updateAgenda');
+Route::post('/odontologia/criaragenda', [AgendaController::class, 'createAgenda'])->name('createAgenda');
+Route::get('/odontologia/criaragenda/{agendaId}', [AgendaController::class, 'editAgenda'])->name('editAgenda');
+Route::put('/updateAgenda/{id}', [AgendaController::class, 'updateAgenda'])->name('updateAgenda');
 
 //PERFIL
 
@@ -136,7 +130,7 @@ Route::get('/odontologia/datas/{disciplina}/{turma}', [OdontoConsultController::
 Route::get('/odontologia/horarios/{disciplina}/{turma}/{diasemana}', [OdontoConsultController::class, 'getHorariosDatasTurmaDisciplina']);
 Route::get('/odontologia/alunos/{disciplina}/{turma}', [OdontoConsultController::class, 'getAlunosDisciplinaTurma']);
 Route::get('/odontologia/alunos/{disciplina}/{turma}/{box}', [OdontoConsultController::class, 'getAlunosDisciplinaTurmaAgenda']);
-Route::get('/odontologia/boxes', [OdontoConsultController::class, 'getBoxes']);
+Route::get('/odontologia/boxes', [BoxesController::class, 'getBoxes']);
 Route::get('/odontologia/user/{userId}', [OdontoConsultController::class, 'getUserId']);
 Route::get('/odontologia/boxeservicos/{servicoId}', [OdontoConsultController::class, 'getBoxeServicos']);
 Route::get('/getPacientes', [OdontoConsultController::class, 'buscarPacientes']);
@@ -178,7 +172,7 @@ Route::prefix('odontologia')->group(function () {
 
 // EDIÇÕES MISC
 Route::post('/alterarstatus/{agendaId}', [OdontoUpdateController::class, 'editStatus'])->name('editStatus');
-Route::post('/definelocalatendimento/{agendaId,boxId}', [OdontoCreateController::class, 'defineLocalAtendimento'])->name('defineLocalAtendimento');
+Route::post('/definelocalatendimento/{agendaId,boxId}', [AgendaController::class, 'defineLocalAtendimento'])->name('defineLocalAtendimento');
 
 // VIEWS SEM CONTROLLER
 Route::get('/consultarpaciente', function () {
@@ -249,23 +243,4 @@ Route::middleware([AuthMiddleware::class])->group(function () {
         session()->forget('usuario');
         return redirect()->route('loginGET');
     })->name('logout');
-
-    Route::post('/selecionar-clinica', [ClinicaController::class, 'selecionarClinica'])->name('selecionar-clinica-post');
 });
-
-Route::post('/aluno/login', function () {
-    return redirect()->route('alunoAgenda');
-    // return view('psicologia.aluno.menu_agenda');
-})->name('alunoLoginPost');
-
-Route::get('/aluno/agendamentos-calendar', [AgendamentoController::class, 'getAgendamentosForCalendaraluno']);
-
-Route::get('/aluno/consultar-paciente/buscar', [PacienteController::class, 'getPacienteByNameCPFaluno'])->name('alunoGetPaciente');
-
-Route::get('/aluno/consultar-agendamento/buscar', [AgendamentoController::class, 'getAgendamentosForAluno'])->name('getAgendamentosForAluno');
-
-Route::get('/aluno/agendamento/{id}/editar', [AgendamentoController::class, 'editAgendamentoaluno'])->name('agendamentoaluno.edit');
-
-Route::put('/aluno/agendamento', [AgendamentoController::class, 'updateAgendamento'])->name('aluno.agendamento.update');
-
-Route::get('/aluno/pesquisar-disciplina', [ServicoController::class, 'getDisciplinaServico'])->name('alunoGetDisciplina');

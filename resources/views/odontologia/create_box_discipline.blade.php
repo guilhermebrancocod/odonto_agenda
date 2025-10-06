@@ -23,13 +23,12 @@
         $isEdit = isset($boxDiscipline) && isset($boxDiscipline->regra);
         $idBox = $isEdit ? $boxDiscipline->regra->ID_BOX_DISCIPLINA : null;
         @endphp
-        <form 
+        <form
             id="form-agenda"
             action="{{ $isEdit
                 ? route('updateBoxDiscipline', ['idBoxDiscipline' => $idBox])
                 : route('createBoxDiscipline') }}"
-            method="POST"
-        >
+            method="POST">
             @csrf
             @if ($isEdit)
             @method('PUT')
@@ -555,7 +554,7 @@
                     </div>
                 </div>
             </div>
-            <div class="d-flex justify-content-between" style="margin-bottom: 10px;">
+            <div class="d-flex justify-content-between">
                 <a href="{{ url('odontologia/consultardisciplinabox') }}" class="btn btn-primary" id="voltar">
                     Voltar
                 </a>
@@ -564,8 +563,6 @@
                 </button>
             </div>
         </form>
-    </div>
-    </form>
     </div>
     @if (session('success'))
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
