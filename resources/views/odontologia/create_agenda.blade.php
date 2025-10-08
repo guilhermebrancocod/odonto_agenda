@@ -315,9 +315,6 @@
                                         data-selected='@json($horariosSelecionados ?? [])'>
                                         <span class="text-muted">Informe dados</span>
                                     </div>
-                                    @isset($agenda)
-                                    <div class="text-muted small mt-2">Intervalo atual: {{ $hrIni }} – {{ $hrFim }}</div>
-                                    @endisset
                                 </fieldset>
                                 <div class="col-1">
                                     <input id="hr_ini" name="hr_ini" type="hidden" value="{{ $hrIni }}">
@@ -457,7 +454,6 @@
                                     </div>
                                 </fieldset>
                             </div>
-
                             <!-- Coluna 2: Forma de pagamento -->
                             <div class="col-12 col-md-4">
                                 <fieldset class="border rounded p-3 h-100">
@@ -599,7 +595,6 @@
                 </div>
             </div>
         </form>
-    </div>
     </div>
     <script>
         (function() {

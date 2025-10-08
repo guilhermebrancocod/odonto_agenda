@@ -1,460 +1,525 @@
-const add = document.getElementById('add');
+// == Agenda / Alocação de Alunos por Box ============================
+document.addEventListener('DOMContentLoaded', init);
 
-document.addEventListener('DOMContentLoaded', function () {
+function init() {
+    'use strict';
 
+    // ---- Constantes e Estado ---------------------------------------
+    const CAP = 2; // limite por box
     const boxesSelecionados = Array.isArray(window.boxesSelecionados) ? window.boxesSelecionados : [];
-
-    function warn(msg) {
-        if (window.toastr?.warning) toastr.warning(msg);
-        else alert(msg);
-    }
-
-    const disciplina = document.getElementById('disciplina');
-    const disciplinaSave = disciplina.value;
-    const turma = document.getElementById('turma');
-    const data = document.getElementById('data');
-
-    const CAP = 2; // Aqui limito o número de alunos no box
     const state = {
-        selected: new Set(),                // ids marcados na lista
-        activeBox: null,                    // 'BOX 3', p.ex.
-        boxes: new Map(),                   // boxId -> Set<alunoId>
-        alunos: new Map(),                  // alunoId -> {id, nome}
+        selected: new Set(),          // ids marcados (checkboxes)
+        activeBox: null,              // box em foco
+        boxes: new Map(),             // boxId -> Set<alunoId>
+        alunos: new Map(),            // alunoId -> {id, nome}
     };
 
-    // aluno já alocado em algum box?
-    function isAssigned(id) {
+    // ---- Helpers ----------------------------------------------------
+    const $ = (sel, root = document) => root.querySelector(sel);
+    const $$ = (sel, root = document) => Array.from(root.querySelectorAll(sel));
+
+    const warn = (msg) => (window.toastr?.warning ? toastr.warning(msg) : alert(msg));
+    const pad2 = (n) => String(n).padStart(2, '0');
+    const toMin = (hhmm) => { const [h, m] = String(hhmm).split(':').map(Number); return h * 60 + m; };
+    const normTime = (hhmm) => {
+        if (!hhmm) return '';
+        const [h, m] = String(hhmm).split(':').map(Number);
+        return `${pad2(h)}:${pad2(m)}`;
+    };
+
+    const isAssigned = (id) => {
         for (const set of state.boxes.values()) if (set.has(id)) return true;
         return false;
-    }
+    };
 
-    function renderAlunosSelectionState() {
+    // ---- Cache de elementos ----------------------------------------
+    const el = {
+        disciplina: $('#disciplina'),
+        turma: $('#turma'),
+        data: $('#data'),
+        grid: $('#horarios-grid'),
+        hrIni: $('#hrIni'),
+        hrFim: $('#hrFim'),
+        alunosWrap: $('#alunos-container'),
+        boxesWrap: $('#boxes-container'),
+        preWrap: $('#pre-container'),
+        alunosBoxesWrap: $('#alunos-boxes-container'),
+        form: $('#form-agenda')
+    };
 
-        document.querySelectorAll('#alunos-container input[name="alunos[]"]').forEach(cb => {
-            const id = cb.value;
-            const row = cb.closest('.aluno-row');
-            row?.classList.toggle('is-assigned', isAssigned(id));
-            // opcional: desmarcar check quando for alocado
-            /* if (isAssigned(id)) {
-                 cb.checked = false;
-                 state.selected.delete(id);
-             }*/
-        });
-    }
+    // =================================================================
+    // Carregamento básico (disciplinas / turmas / datas / horários)
+    // =================================================================
+    loadDisciplinas();
 
-    // destaca visualmente o box ativo
-    function efeitoBoxAtivo(boxId) {
-        document.querySelectorAll('#boxes-container .box-chip')
-            .forEach(chip => {
-                console.log('teste');
-                const val = chip.querySelector('input[name="boxes[]"]')?.value;
-                chip.classList.toggle('is-active', val === boxId);
-            });
-    }
+    el.disciplina?.addEventListener('change', onDisciplinaChange);
+    el.turma?.addEventListener('change', onTurmaChange);
+    el.data?.addEventListener('change', onDataChange);
 
-    // Carregar Disciplinas
-    fetch('/odontologia/disciplinas')
-        .then(r => r.json())
-        .then(items => {
+    async function loadDisciplinas() {
+        try {
+            const r = await fetch('/odontologia/disciplinas', { headers: { 'Accept': 'application/json' } });
+            const items = await r.json();
+
+            const disciplinaSave = el.disciplina?.value;
             if (!disciplinaSave) {
-                disciplina.innerHTML = '<option value="">Selecione a disciplina</option>';
+                el.disciplina.innerHTML = '<option value="">Selecione a disciplina</option>';
                 items.forEach(item => {
                     const opt = document.createElement('option');
                     opt.value = item.DISCIPLINA;
                     opt.textContent = `${item.NOME} (${item.DISCIPLINA})`;
-                    disciplina.appendChild(opt);
+                    el.disciplina.appendChild(opt);
                 });
             } else {
-                disciplina.value = disciplinaSave;
+                el.disciplina.value = disciplinaSave;
             }
-        })
-        .catch(err => console.error('Erro ao carregar disciplinas:', err));
-
-    function normalize(hhmm) {
-        if (!hhmm) return '';
-        const [h, m] = String(hhmm).split(':');
-        return `${parseInt(h, 10)}:${m}`; // "07:30" -> "7:30"
+        } catch (e) {
+            console.error('Erro ao carregar disciplinas:', e);
+        }
     }
 
-    function getAllTimeBoxes() {
-        return Array.from(document.querySelectorAll('.time-check')).map(box => {
-            const input = box.querySelector('input.form-check-input');
-            const label = box.querySelector('label.form-check-label');
-            const base = (label.dataset.time || label.textContent).trim();
-            return { box, input, label, base, norm: normalize(base) };
+    async function onDisciplinaChange() {
+        resetTurma();
+        resetData();
+        clearHorarios();
+
+        const disc = el.disciplina?.value;
+        if (!disc) return;
+
+        try {
+            const r = await fetch(`/odontologia/turmas/${encodeURIComponent(disc)}`, { headers: { 'Accept': 'application/json' } });
+            const items = await r.json();
+
+            el.turma.disabled = false;
+            el.turma.innerHTML = '<option value="">Selecione a turma</option>';
+            (items || []).forEach(t => {
+                const opt = new Option(t, t);
+                el.turma.appendChild(opt);
+            });
+        } catch (e) {
+            el.turma.innerHTML = '<option value="">Erro ao carregar turmas</option>';
+            console.error(e);
+        }
+    }
+
+    async function onTurmaChange() {
+        resetData();
+        clearHorarios();
+
+        const disc = el.disciplina?.value;
+        const tur = el.turma?.value;
+        if (!disc || !tur) if (disc && tur) {
+            loadAlunosGrid(disc, tur); // >>> FIX: busca alunos já aqui
+        };
+
+        try {
+            el.data.disabled = true;
+            el.data.innerHTML = '<option value="">Carregando datas...</option>';
+
+            const r = await fetch(`/odontologia/datas/${encodeURIComponent(disc)}/${encodeURIComponent(tur)}`, { headers: { 'Accept': 'application/json' } });
+            const items = await r.json();
+
+            const diasPT = { '1': 'domingo', '2': 'segunda-feira', '3': 'terça-feira', '4': 'quarta-feira', '5': 'quinta-feira', '6': 'sexta-feira', '7': 'sábado' };
+            el.data.innerHTML = '<option value="">Selecione a data</option>';
+
+            (items || []).forEach(d => {
+                const code = (typeof d === 'object') ? (d.DIA_SEMANA ?? d.data ?? d) : d;
+                el.data.appendChild(new Option(diasPT[code] || code, code));
+            });
+
+            el.data.disabled = false;
+        } catch (e) {
+            el.data.innerHTML = '<option value="">Erro ao carregar datas</option>';
+            console.error(e);
+        }
+    }
+
+    async function onDataChange() {
+        clearHorarios();
+
+        const disc = el.disciplina?.value;
+        const tur = el.turma?.value;
+        const dia = el.data?.value;
+        if (!disc || !tur || !dia) return;
+
+        try {
+            const r = await fetch(`/odontologia/horarios/${encodeURIComponent(disc)}/${encodeURIComponent(tur)}/${encodeURIComponent(dia)}`, { headers: { 'Accept': 'application/json' } });
+            const items = await r.json();
+            renderHorarios(items);
+        } catch (e) {
+            clearHorarios('Erro ao carregar horários.');
+        }
+
+        // alunos da turma (colunas)
+        loadAlunosGrid(disc, tur);
+    }
+
+    // no final do init()
+    bootstrapEdit();
+
+    function bootstrapEdit() {
+        const disc = el.disciplina?.value;
+        const tur = el.turma?.value;
+        const dia = el.data?.value;
+
+        // carrega alunos mesmo sem mexer nos selects
+        if (disc && tur) {
+            // Pega todos os alunos já alocados em qualquer box
+            const alunosMarcados = Object.values(window.alocacoesIniciais || {})
+                .flat()
+                .map(String);
+
+            loadAlunosGrid(disc, tur, alunosMarcados);
+        }
+
+        // se já vier dia, renderiza horários também
+        if (disc && tur && dia) onDataChange();
+    }
+
+    // =================================================================
+    // Horários
+    // =================================================================
+    function clearHorarios(msg = 'Selecione disciplina, turma e dia para ver horários.') {
+        if (!el.grid) return;
+        el.grid.innerHTML = `<div class="text-muted small">${msg}</div>`;
+        if (el.hrIni) el.hrIni.value = '';
+        if (el.hrFim) el.hrFim.value = '';
+    }
+
+    function renderHorarios(items) {
+        const set = new Set();
+        (items || []).forEach(it => {
+            const i = normTime(it.hrIni);
+            const f = normTime(it.hrFim);
+            if (i) set.add(i);
+            if (f) set.add(f);
         });
-    }
+        const horarios = Array.from(set).sort((a, b) => toMin(a) - toMin(b));
 
-    // Quando a disciplina muda, buscar as turmas daquela disciplina
-    disciplina.addEventListener('change', () => {
-        const valor = disciplina.value;
-        turma.innerHTML = '<option value="">Carregando turmas...</option>';
-        data.innerHTML = '<option value="">Selecione uma turma primeiro</option>';
-        data.disabled = true;
-
-        if (!valor) {
-            turma.innerHTML = '<option value="">Selecione uma disciplina primeiro</option>';
-            turma.disabled = true;
+        if (!horarios.length) {
+            clearHorarios('Sem horários disponíveis.');
             return;
         }
 
-        turma.disabled = false;
-        fetch(`/odontologia/turmas/${encodeURIComponent(valor)}`)
-            .then(r => r.json())
-            .then(items => {
-                turma.innerHTML = '<option value="">Selecione a turma</option>';
-                items.forEach(t => {
-                    const opt = document.createElement('option');
-                    // se seu backend retornou apenas array de strings (pluck), use opt.value = opt.textContent = t;
-                    opt.value = t;
-                    opt.textContent = t;
-                    turma.appendChild(opt);
-                });
-            })
-            .catch(err => {
-                console.error('Erro ao carregar turmas:', err);
-                turma.innerHTML = '<option value="">Erro ao carregar turmas</option>';
-            })
-
-        turma.addEventListener('change', () => {
-            const disc = disciplina.value;
-            const tur = turma.value;
-
-            data.innerHTML = '<option value="">Carregando datas...</option>';
-            data.disabled = true;
-
-            if (!disc || !tur) {
-                data.innerHTML = '<option value="">Selecione disciplina e turma primeiro</option>';
-                return;
-            }
-
-            fetch(`/odontologia/datas/${encodeURIComponent(disc)}/${encodeURIComponent(tur)}`)
-                .then(r => r.json())
-                .then(items => {
-                    data.innerHTML = '<option value="">Selecione a data</option>';
-
-                    if (!items || !items.length) {
-                        data.innerHTML = '<option value="">Sem datas disponíveis</option>';
-                        return;
-                    }
-
-                    const diasPT = {
-                        '1': 'domingo',
-                        '2': 'segunda-feira',
-                        '3': 'terça-feira',
-                        '4': 'quarta-feira',
-                        '5': 'quinta-feira',
-                        '6': 'sexta-feira',
-                        '7': 'sábado'
-                    };
-
-                    // items vindo de ->pluck('A.DT_AULA') (array de strings)
-                    items.forEach(d => {
-                        const opt = document.createElement('option');
-
-                        // se vier string tipo "2" ou número tipo 2, normaliza
-                        const code = (typeof d === 'object')
-                            ? (d.DIA_SEMANA ?? d.data ?? d)
-                            : d;
-
-                        opt.value = code;
-                        opt.textContent = diasPT[code] || code; // mostra nome ou fallback o número
-                        data.appendChild(opt);
-                    });
-
-                    data.disabled = false;
-                })
-                .catch(err => {
-                    console.error('Erro ao carregar datas:', err);
-                    data.innerHTML = '<option value="">Erro ao carregar datas</option>';
-                });
+        el.grid.innerHTML = '';
+        horarios.forEach((h, idx) => {
+            const id = `hor_${h.replace(':', '')}_${idx}`;
+              const checked = horarios.includes(h) ? 'checked' : '';
+            el.grid.insertAdjacentHTML('beforeend', `
+      <div class="time-item">
+        <input class="time-input" type="checkbox" id="${id}" name="horarios[]" value="${h}" ${checked}>
+        <label class="time-card" for="${id}">${h}</label>
+      </div>
+    `);
         });
 
-        data.addEventListener('change', () => {
-            const disc = disciplina.value;
-            const tur = turma.value;
-            const dt = data.value;
+        // >>> NOVO: aplica pré-seleção do banco
+        applyPreSelection();
 
-            const all = getAllTimeBoxes();
-            all.forEach(({ input, label, base }) => {
-                input.disabled = true;
-                input.checked = false;
-                label.innerHTML = base; // restaura o texto base (só início)
+        // Atualiza hr_ini/hr_fim quando o usuário mexer
+        el.grid.addEventListener('change', handleHorarioChange);
+    }
+
+    function applyPreSelection() {
+        // 1) tenta pelos hiddens; 2) fallback para data-* do grid
+        const ini = (el.hrIni?.value || el.grid.dataset.hrIni || '').slice(0, 5);
+        const fim = (el.hrFim?.value || el.grid.dataset.hrFim || '').slice(0, 5);
+
+        // Se você usa data-selected com array de horários exatos, preferir isso:
+        let selected = [];
+        try { selected = JSON.parse(el.grid.dataset.selected || '[]'); } catch { }
+
+        const inputs = Array.from(el.grid.querySelectorAll('input[name="horarios[]"]'));
+        const mark = (val) => {
+            const n = normTime(val);
+            const input = inputs.find(i => i.value === n);
+            if (input) input.checked = true;
+        };
+
+        if (selected.length) {
+            selected.forEach(mark);
+        } else if (ini && fim) {
+            const min = toMin(normTime(ini));
+            const max = toMin(normTime(fim));
+            inputs.forEach(i => {
+                const m = toMin(i.value);
+                i.checked = (m >= min && m <= max);
             });
+        }
 
-            if (!disc || !tur || !dt) return;
+        // garante que os hiddens fiquem preenchidos
+        handleHorarioChange();
+    }
 
+    function handleHorarioChange() {
+        const marcados = $$('input[name="horarios-grid[]"]:checked', el.grid).map(i => i.value).sort((a, b) => toMin(a) - toMin(b));
+        if (el.hrIni) el.hrIni.value = marcados[0] || '';
+        if (el.hrFim) el.hrFim.value = marcados[marcados.length - 1] || '';
+    }
 
-            const grid = document.getElementById('horarios-grid');
-            const hrIni = document.getElementById('hr_ini');
-            const hrFim = document.getElementById('hr_fim');
+    // =================================================================
+    // Alunos (lista em colunas com checkbox)
+    // =================================================================
 
-            // utilidades
-            const pad2 = n => String(n).padStart(2, '0');
-            const norm = hhmm => {
-                if (!hhmm) return '';
-                const [h, m] = String(hhmm).split(':').map(Number);
-                return `${pad2(h)}:${pad2(m)}`;
-            };
-            const toMin = hhmm => { const [h, m] = hhmm.split(':').map(Number); return h * 60 + m; };
-
-            // limpa e mostra placeholder
-            function clearHorarios(msg = 'Selecione disciplina, turma e dia para ver horários.') {
-                grid.innerHTML = `<div class="text-muted small">${msg}</div>`;
-                if (hrIni) hrIni.value = '';
-                if (hrFim) hrFim.value = '';
-            }
-
-            // desenha apenas o que veio do backend
-            function renderHorarios(items) {
-                grid.innerHTML = '';
-
-                // 1) Achata {inicio,fim} -> [horarios únicos]
-                const set = new Set();
-                (items || []).forEach(it => {
-                    const i = norm(it.inicio);
-                    const f = norm(it.fim);
-                    if (i) set.add(i);
-                    if (f) set.add(f);
-                });
-                const horarios = Array.from(set).sort((a, b) => toMin(a) - toMin(b));
-
-                if (!horarios.length) {
-                    grid.innerHTML = `<div class="text-muted small">Sem horários disponíveis.</div>`;
-                    if (hrIni) hrIni.value = '';
-                    if (hrFim) hrFim.value = '';
-                    return;
-                }
-
-                // 2) Renderiza UM checkbox por horário
-                horarios.forEach((h, idx) => {
-                    const id = `hor_${h.replace(':', '')}_${idx}`;
-                    const html = `
-                    <div class="time-item">
-                    <input class="time-input" type="checkbox" id="${id}" name="horarios[]" value="${h}" checked>
-                    <label class="time-card" for="${id}">${h}</label>
-                    </div>`;
-                    grid.insertAdjacentHTML('beforeend', html);
-                });
-
-                // 3) Atualiza hr_ini / hr_fim conforme seleção (opcional)
-                grid.addEventListener('change', onSelectChange, { once: true });
-                // também define valores iniciais vazios
-                if (hrIni) hrIni.value = '';
-                if (hrFim) hrFim.value = '';
-            }
-
-            function onSelectChange(e) {
-                // reatacha para próximas mudanças
-                grid.addEventListener('change', onSelectChange, { once: true });
-
-                const checked = Array
-                    .from(grid.querySelectorAll('input[name="horarios[]"]:checked'))
-                    .map(i => i.value)
-                    .sort((a, b) => toMin(a) - toMin(b));
-
-                if (hrIni) hrIni.value = checked[0] || '';
-                if (hrFim) hrFim.value = checked[checked.length - 1] || '';
-            }
-
-            clearHorarios();
-
-            fetch(`/odontologia/horarios/${encodeURIComponent(disc)}/${encodeURIComponent(tur)}/${encodeURIComponent(dt)}`)
-                .then(r => r.json())
-                .then(items => {
-                    renderHorarios(items);
-                })
-                .catch(() => clearHorarios('Erro ao carregar horários.'));
-
-            function renderAlunosEmTabela(data, alunosSelecionados = [], limitePorColuna = 10) {
-                const container = document.getElementById('alunos-container');
-                if (!container) return;
-                container.classList.add('alunos-wrapper');
-                container.innerHTML = '';
-
-                if (!Array.isArray(data) || data.length === 0) {
-                    container.innerHTML = '<p class="muted">Nenhum aluno encontrado.</p>';
-                    return;
-                }
-
-                // preenche mapa de alunos (nome) para uso na pré-seleção
-                data.forEach(it => {
-                    const id = String(it.ALUNO ?? '').trim();
-                    const nome = String(it.NOME_COMPL ?? '').trim();
-                    state.alunos.set(id, { id, nome });
-                });
-
-                const selecionadosStr = alunosSelecionados.map(String);
-                const frag = document.createDocumentFragment();
-
-                for (let i = 0; i < data.length; i += limitePorColuna) {
-                    const chunk = data.slice(i, i + limitePorColuna);
-
-                    const coluna = document.createElement('div');
-                    coluna.className = 'alunos-coluna';
-
-                    chunk.forEach(item => {
-                        const alunoId = String(item.ALUNO ?? '').trim();
-                        const nome = String(item.NOME_COMPL ?? '').trim();
-                        const isSelected = selecionadosStr.includes(alunoId);
-                        const already = isAssigned(alunoId);
-
-                        const row = document.createElement('label');
-                        row.className = 'aluno-row';
-                        if (already) row.classList.add('is-assigned');
-                        row.dataset.search = `${alunoId} ${nome}`.toLowerCase();
-
-                        const input = document.createElement('input');
-                        input.type = 'checkbox';
-                        input.name = 'alunos[]';
-                        input.value = alunoId;
-                        input.id = `aluno_${alunoId}`;
-                        input.checked = isSelected;
-                        input.dataset.nome = nome;
-                        input.setAttribute('aria-label', `Selecionar ${nome} (${alunoId})`);
-
-                        row.setAttribute('for', input.id);
-
-                        const info = document.createElement('div');
-                        info.className = 'aluno-info';
-
-                        const nomeEl = document.createElement('span');
-                        nomeEl.className = 'aluno-nome';
-                        nomeEl.textContent = nome || '(Sem nome)';
-                        nomeEl.title = nome;
-
-                        info.appendChild(nomeEl);
-                        row.appendChild(input);
-                        row.appendChild(info);
-                        coluna.appendChild(row);
-                    });
-
-                    frag.appendChild(coluna);
-                }
-
-                container.appendChild(frag);
-
-                // delegação: marca/desmarca mantém state.selected
-                container.addEventListener('change', onAlunoToggle, { once: true });
-            }
-
-            function onAlunoToggle(e) {
-                if (!e.target.matches('input[name="alunos[]"]')) return;
-                const id = String(e.target.value);
-                const nome = e.target.dataset.nome || state.alunos.get(id)?.nome || id;
-                state.alunos.set(id, { id, nome });
-                if (e.target.checked) state.selected.add(id);
-                else state.selected.delete(id);
-
-                // re-arma delegação para próximos changes
-                e.currentTarget.addEventListener('change', onAlunoToggle, { once: true });
-            }
-
-            async function carregarAlunos(disc, tur, alunosSelecionados = [], limitePorColuna = 10) {
-                const container = document.getElementById('alunos-container');
-                if (!container) {
-                    console.error('#alunos-container não encontrado');
-                    return;
-                }
-
-                try {
-                    container.classList.add('alunos-wrapper');
-                    container.innerHTML = '<p class="muted">Carregando…</p>';
-                    const res = await fetch(`/odontologia/alunos/${encodeURIComponent(disc)}/${encodeURIComponent(tur)}`, {
-                        headers: { 'Accept': 'application/json' }
-                    });
-                    if (!res.ok) throw new Error(`HTTP ${res.status}`);
-
-                    const data = await res.json();
-                    renderAlunosEmTabela(data, alunosSelecionados, limitePorColuna);
-                } catch (e) {
-                    container.innerHTML = `<p class="error">Erro ao carregar alunos. ${e.message || ''}</p>`;
-                }
-            }
-
-            // Exemplo de uso:
-            carregarAlunos(disc, tur, [], 10);
-
+    function renderAlunosSelectionState() {
+        $$('#alunos-container input[name="alunos[]"]').forEach(cb => {
+            const id = cb.value;
+            const row = cb.closest('.aluno-row');
+            row?.classList.toggle('is-assigned', isAssigned(id));
         });
-    });
+    }
+    async function loadAlunosGrid(disc, tur, alunosSelecionados = [], limitePorColuna = 10) {
+        if (!el.alunosWrap) return;
+        try {
+            el.alunosWrap.classList.add('alunos-wrapper');
+            el.alunosWrap.innerHTML = '<p class="muted">Carregando…</p>';
 
-    fetch('/odontologia/boxes')
-        .then(response => response.json())
-        .then(data => {
-            const container = document.getElementById('boxes-container');
-            container.classList.add('boxes-wrapper');
-            container.innerHTML = '';
-            data.forEach(item => {
-                const id = `box_${String(item.ID_BOX_CLINICA).replace(/\s+/g, '_')}`;
-                const isSelected = Array.isArray(boxesSelecionados) && boxesSelecionados.map(String).includes(String(item.ID_BOX_CLINICA));
-                const isDisponivel = (item.DISPONIVEL ?? true) === true;
+            const r = await fetch(`/odontologia/alunos/${encodeURIComponent(disc)}/${encodeURIComponent(tur)}`, { headers: { 'Accept': 'application/json' } });
+            if (!r.ok) throw new Error(`HTTP ${r.status}`);
+            const data = await r.json();
+            renderAlunosEmTabela(data, alunosSelecionados, limitePorColuna);
+            bindAlunosChangeOnce();
+        } catch (e) {
+            el.alunosWrap.innerHTML = `<p class="error">Erro ao carregar alunos. ${e.message || ''}</p>`;
+        }
+    }
 
-                const wrap = document.createElement('div');
-                wrap.className = 'box-chip';
+    function renderAlunosEmTabela(data, alunosSelecionados = [], limitePorColuna = 10) {
+        const container = el.alunosWrap;
+        if (!container) return;
+        container.innerHTML = '';
+        if (!Array.isArray(data) || data.length === 0) {
+            container.innerHTML = '<p class="muted">Nenhum aluno encontrado.</p>';
+            return;
+        }
+
+        // cache nomes
+        data.forEach(it => {
+            const id = String(it.ALUNO ?? '').trim();
+            const nome = String(it.NOME_COMPL ?? '').trim();
+            if (id) state.alunos.set(id, { id, nome });
+        });
+
+        const selecionadosStr = alunosSelecionados.map(String);
+        const frag = document.createDocumentFragment();
+
+        for (let i = 0; i < data.length; i += limitePorColuna) {
+            const col = document.createElement('div');
+            col.className = 'alunos-coluna';
+
+            data.slice(i, i + limitePorColuna).forEach(item => {
+                const alunoId = String(item.ALUNO ?? '').trim();
+                const nome = String(item.NOME_COMPL ?? '').trim();
+                const isSelected = selecionadosStr.includes(alunoId);
+                const already = isAssigned(alunoId);
+
+                const row = document.createElement('label');
+                row.className = `aluno-row${already ? ' is-assigned' : ''}`;
+                row.dataset.search = `${alunoId} ${nome}`.toLowerCase();
 
                 const input = document.createElement('input');
                 input.type = 'checkbox';
-                input.name = 'boxes[]';
-                input.value = item.ID_BOX_CLINICA;
-                input.id = id;
-                input.checked = !!isSelected;
-                if (!isDisponivel) input.disabled = true;
+                input.name = 'alunos[]';
+                input.value = alunoId;
+                input.id = `aluno_${alunoId}`;
+                input.checked = isSelected;
+                input.dataset.nome = nome;
+                input.setAttribute('aria-label', `Selecionar ${nome} (${alunoId})`);
 
-                const label = document.createElement('label');
-                label.setAttribute('for', id);
-                label.title = isDisponivel ? 'Disponível' : 'Indisponível';
+                const info = document.createElement('div');
+                info.className = 'aluno-info';
+                info.innerHTML = `<span class="aluno-nome" title="${nome}">${nome || '(Sem nome)'}</span>`;
 
-                const text = document.createElement('span');
-                text.textContent = item.DESCRICAO;
-
-                if (item.SALA || item.STATUS) {
-                    const badge = document.createElement('span');
-                    badge.className = 'box-badge';
-                    badge.textContent = item.SALA ?? item.STATUS;
-                    label.appendChild(badge);
-                }
-
-                label.appendChild(text);
-                wrap.appendChild(input);
-                wrap.appendChild(label);
-                container.appendChild(wrap);
+                row.appendChild(input);
+                row.appendChild(info);
+                col.appendChild(row);
             });
 
-            container.addEventListener('click', (e) => {
-                const chip = e.target.closest('.box-chip');
-                if (!chip) return;
+            frag.appendChild(col);
+        }
 
-                const input = chip.querySelector('input[name="boxes[]"]'); //Aqui verifico a quantidade de alunos selecionados para pintar o box
-                if (!input) return;
+        container.appendChild(frag);
+        renderAlunosSelectionState();
+    }
 
-                if (!state?.selected || state.selected.size === 0) {
-                    e.preventDefault();
-                    input.checked = false;
-                    warn('Necessário selecionar ao menos 1 aluno para selecionar o box.');
-                    return;
-                }
+    function bindAlunosChangeOnce() {
+        if (!el.alunosWrap || el.alunosWrap._bound) return;
+        el.alunosWrap._bound = true;
 
-                state.activeBox = input.value;
-                efeitoBoxAtivo(state.activeBox);
-                assignSelectedToActive();
-            });
-        })
-        .catch(error => {
-            console.error('Erro ao carregar boxes:', error);
+        el.alunosWrap.addEventListener('change', (e) => {
+            if (!e.target.matches('input[name="alunos[]"]')) return;
+            const id = String(e.target.value);
+            const nome = e.target.dataset.nome || state.alunos.get(id)?.nome || id;
+            state.alunos.set(id, { id, nome });
+
+            if (e.target.checked) state.selected.add(id);
+            else state.selected.delete(id);
+
+            renderAlunosSelectionState();
+        });
+    }
+
+    // =================================================================
+    // Boxes: carregar, clicar, destacar e alocar
+    // =================================================================
+
+    async function loadBoxes() {
+        const r = await fetch('/odontologia/boxes', { headers: { 'Accept': 'application/json' } });
+        const data = await r.json();
+
+        const c = el.boxesWrap;
+        c.innerHTML = '';
+        const pre = (Array.isArray(window.boxesSelecionados) ? window.boxesSelecionados : []).map(String);
+
+        data.forEach(item => {
+            const wrap = document.createElement('div');
+            wrap.className = 'box-chip';
+
+            const input = document.createElement('input');
+            input.type = 'checkbox';
+            input.name = 'boxes[]';
+            input.value = item.ID_BOX_CLINICA;
+            input.id = `box_${String(item.ID_BOX_CLINICA).replace(/\s+/g, '_')}`;
+            input.checked = pre.includes(String(item.ID_BOX_CLINICA));
+            if ((item.DISPONIVEL ?? true) !== true) input.disabled = true;
+
+            const label = document.createElement('label');
+            label.setAttribute('for', input.id);
+            label.title = input.disabled ? 'Indisponível' : 'Disponível';
+            label.appendChild(document.createTextNode(item.DESCRICAO));
+
+            wrap.appendChild(input);
+            wrap.appendChild(label);
+            c.appendChild(wrap);
+
+            // >>> FIX: pinta (classe) e define o activeBox inicial
+            if (input.checked) {
+                wrap.classList.add('is-active');
+                if (!state.activeBox) state.activeBox = input.value;
+            }
         });
 
+        // >>> FIX: garante highlight consistente
+        if (state.activeBox) efeitoBoxAtivo(state.activeBox);
 
+        if (!el.boxesWrap._bound) {
+            el.boxesWrap._bound = true;
+            el.boxesWrap.addEventListener('click', onBoxClick);
+        }
+    }
+
+    function seedFromServer() {
+        const init = window.alocacoesIniciais || {};
+        console.log(init);
+        let firstBox = null;
+
+        Object.entries(init).forEach(([boxId, arr]) => {
+            const set = new Set((arr || []).map(String));
+            if (set.size) {
+                state.boxes.set(String(boxId), set);
+                if (!firstBox) firstBox = String(boxId);
+            }
+        });
+
+        if (firstBox && !state.activeBox) state.activeBox = firstBox;
+
+        // pinta visualmente e sincroniza UI
+        if (state.activeBox) efeitoBoxAtivo(state.activeBox);
+        renderPreSelecao();
+        renderAlunosBoxes();
+        renderAlunosSelectionState(); // quando a grade de alunos carregar, isso marca “is-assigned”
+    }
+
+    loadBoxes();
+    seedFromServer();
+
+    function onBoxClick(e) {
+        const chip = e.target.closest('.box-chip');
+        if (!chip) return;
+
+        const input = chip.querySelector('input[name="boxes[]"]');
+        if (!input) return;
+
+        if (!state.selected || state.selected.size === 0) {
+            e.preventDefault();
+            input.checked = false;
+            warn('Necessário selecionar ao menos 1 aluno para selecionar o box.');
+            return;
+        }
+
+        state.activeBox = input.value;
+        efeitoBoxAtivo(state.activeBox);
+        assignSelectedToActive();
+    }
+
+    function efeitoBoxAtivo(boxId) {
+        $$('#boxes-container .box-chip').forEach(chip => {
+            const val = chip.querySelector('input[name="boxes[]"]')?.value;
+            chip.classList.toggle('is-active', val === boxId);
+        });
+    }
+
+    function assignSelectedToActive() {
+        const boxId = state.activeBox;
+        if (!boxId || !state.selected || state.selected.size === 0) return;
+        assignSelectedTo(boxId);
+        renderPreSelecao();
+        renderAlunosBoxes();
+        renderAlunosSelectionState();
+    }
+
+    function assignSelectedTo(boxId) {
+        const selected = [...(state.selected ?? new Set())];
+        if (selected.length === 0) {
+            warn('Necessário selecionar ao menos 1 aluno para selecionar o box.');
+            return;
+        }
+
+        const bucket = state.boxes.get(boxId) ?? new Set();
+        let free = CAP - bucket.size;
+        if (free <= 0) { warn('Box atingiu o limite de alunos'); return; }
+
+        // garante exclusividade do aluno em 1 box
+        for (const id of selected) {
+            for (const [bId, set] of state.boxes) if (bId !== boxId) set.delete(id);
+        }
+
+        let added = 0;
+        for (const id of selected) {
+            if (free <= 0) break;
+            bucket.add(id);
+            state.selected.delete(id);
+            free--; added++;
+        }
+        state.boxes.set(boxId, bucket);
+
+        if (added < selected.length) warn('Box atingiu o limite de alunos');
+    }
+
+    function unassign(boxId, alunoId) {
+        const set = state.boxes.get(boxId);
+        if (!set) return;
+        set.delete(alunoId);
+        if (set.size === 0) state.boxes.delete(boxId);
+        renderPreSelecao();
+        renderAlunosBoxes();
+        renderAlunosSelectionState();
+    }
+
+    // =================================================================
+    // Pré-visualização e lista final por box
+    // =================================================================
     function renderPreSelecao() {
-        const wrap = document.getElementById('pre-container');
+        const wrap = el.preWrap;
         if (!wrap) return;
-        wrap.innerHTML = '';
 
+        wrap.innerHTML = '';
         const entries = [...state.boxes.entries()].sort((a, b) => a[0].localeCompare(b[0], 'pt-BR'));
+
         for (const [boxId, set] of entries) {
             const box = document.createElement('div'); box.className = 'pre-box';
             const head = document.createElement('div'); head.className = 'pre-header';
-            head.innerHTML = `<span class="tag">${boxId}</span><span class="pre-count">${set.size}/${CAP}</span>`;
-            box.appendChild(head);
+            head.innerHTML = `<span class="tag">Box ${boxId}</span><span class="pre-count">${set.size}/${CAP}</span>`;
 
             const list = document.createElement('div'); list.className = 'pre-list';
             for (const id of set) {
@@ -463,15 +528,17 @@ document.addEventListener('DOMContentLoaded', function () {
                 chip.innerHTML = `<span>${nome}</span><button type="button" class="rm" data-rm="${boxId}|${id}">×</button>`;
                 list.appendChild(chip);
             }
+
+            box.appendChild(head);
             box.appendChild(list);
             wrap.appendChild(box);
         }
     }
 
     function renderAlunosBoxes() {
-        const wrap = document.getElementById('alunos-boxes-container');
+        const wrap = el.alunosBoxesWrap;
         if (!wrap) return;
-        // Limpa e trata vazio
+
         wrap.innerHTML = '';
         if (state.boxes.size === 0) {
             wrap.innerHTML = '<p class="muted">Faça a pré-seleção de alunos e box.</p>';
@@ -479,25 +546,20 @@ document.addEventListener('DOMContentLoaded', function () {
         }
 
         const frag = document.createDocumentFragment();
-
-        // Ordena boxes para render estável
         const entries = [...state.boxes.entries()].sort((a, b) => a[0].localeCompare(b[0], 'pt-BR'));
 
         for (const [boxId, set] of entries) {
             const box = document.createElement('div');
             box.className = 'pre-box';
 
-            // Cabeçalho do box: nome + contagem + limpar
             const head = document.createElement('div');
             head.className = 'pre-header';
             head.innerHTML = `
-            <span class="tag">Box ${boxId}</span>
-            <span class="pre-count">${set.size}/${CAP}</span>
-            <button type="button" class="pre-clear" data-clear="${boxId}" title="Limpar este box">Limpar</button>
-        `;
-            box.appendChild(head);
+        <span class="tag">Box ${boxId}</span>
+        <span class="pre-count">${set.size}/${CAP}</span>
+        <button type="button" class="pre-clear" data-clear="${boxId}" title="Limpar este box">Limpar</button>
+      `;
 
-            // Lista de alunos (chips)
             const list = document.createElement('div');
             list.className = 'pre-list';
 
@@ -506,12 +568,13 @@ document.addEventListener('DOMContentLoaded', function () {
                 const chip = document.createElement('div');
                 chip.className = 'pre-chip';
                 chip.innerHTML = `
-        <span class="nome" title="${nome}">${nome}</span>
-        <button type="button" class="rm" data-rm="${boxId}|${id}" aria-label="Remover ${nome} do ${boxId}">×</button>
-      `;
+          <span class="nome" title="${nome}">${nome}</span>
+          <button type="button" class="rm" data-rm="${boxId}|${id}" aria-label="Remover ${nome} do ${boxId}">×</button>
+        `;
                 list.appendChild(chip);
             }
 
+            box.appendChild(head);
             box.appendChild(list);
             frag.appendChild(box);
         }
@@ -519,115 +582,63 @@ document.addEventListener('DOMContentLoaded', function () {
         wrap.appendChild(frag);
     }
 
-    document.getElementById('alunos-boxes-container')?.addEventListener('click', (e) => {
-        // remover 1 aluno do box
-        const rmBtn = e.target.closest('button.rm');
-        if (rmBtn) {
-            const [boxId, alunoId] = rmBtn.dataset.rm.split('|');
-            unassign(boxId, alunoId);
-            return;
-        }
-
-        // limpar todo o box
-        const clearBtn = e.target.closest('button.pre-clear');
-        if (clearBtn) {
-            const boxId = clearBtn.dataset.clear;
-            const set = state.boxes.get(boxId);
-            if (set) set.clear();
-            state.boxes.delete(boxId);
-            renderPreSelecao?.();
-            renderAlunosBoxes();
-            renderAlunosSelectionState?.();
-        }
-    });
-
-
-    function assignSelectedTo(boxId) {
-        if (!boxId) return;
-
-        const selected = [...(state?.selected ?? new Set())];
-        if (selected.length === 0) {
-            warn('Necessário selecionar ao menos 1 aluno para selecionar o box.');
-            return;
-        }
-
-        // bucket alvo
-        const bucket = state.boxes.get(boxId) ?? new Set();
-        const before = bucket.size;
-        let free = CAP - before;
-
-        if (free <= 0) {
-            warn('Box atingiu o limite de alunos');
-            return; // mantém selecionados para você escolher outro box
-        }
-
-        // cada aluno só pode estar em 1 box: remove dos outros antes
-        for (const id of selected) {
-            for (const [bId, set] of state.boxes) {
-                if (bId !== boxId) set.delete(id);
+    // Delegação para remover aluno ou limpar box (registra 1x)
+    if (el.alunosBoxesWrap && !el.alunosBoxesWrap._bound) {
+        el.alunosBoxesWrap._bound = true;
+        el.alunosBoxesWrap.addEventListener('click', (e) => {
+            const rmBtn = e.target.closest('button.rm');
+            if (rmBtn) {
+                const [boxId, alunoId] = rmBtn.dataset.rm.split('|');
+                unassign(boxId, alunoId);
+                return;
             }
-        }
-
-        // adiciona até CAP; remove do selected apenas os que couberem
-        let added = 0;
-        for (const id of selected) {
-            if (free <= 0) break;
-            bucket.add(id);
-            state.selected.delete(id);
-            free--; added++;
-        }
-
-        state.boxes.set(boxId, bucket);
-
-        if (added < selected.length) {
-            // sobrou gente em selected → não coube todo mundo
-            warn('Box atingiu o limite de alunos');
-        }
-
-        renderAlunosBoxes?.();
-        renderAlunosSelectionState?.();
+            const clearBtn = e.target.closest('button.pre-clear');
+            if (clearBtn) {
+                const boxId = clearBtn.dataset.clear;
+                const set = state.boxes.get(boxId);
+                if (set) set.clear();
+                state.boxes.delete(boxId);
+                renderPreSelecao();
+                renderAlunosBoxes();
+                renderAlunosSelectionState();
+            }
+        });
     }
 
-    function assignSelectedToActive() {
-        const boxId = state.activeBox;
-        if (!boxId || !state?.selected || state.selected.size === 0) {
-            console.log('Necessário selecionar ao menos 1 aluno para selecionar o box.');
-            return;
-        }
+    // =================================================================
+    // Submit: serializa alocações -> inputs hidden
+    // =================================================================
+    el.form?.addEventListener('submit', () => {
 
-        assignSelectedTo(boxId);
+        if (el.hrIni && !el.hrIni.value && el.grid?.dataset.hrIni) el.hrIni.value = el.grid.dataset.hrIni;
+        if (el.hrFim && !el.hrFim.value && el.grid?.dataset.hrFim) el.hrFim.value = el.grid.dataset.hrFim;
+        // remove só os que o JS criou
+        el.form.querySelectorAll('.js-auto-aloc').forEach(n => n.remove());
 
-        renderPreSelecao?.();
-        renderAlunosBoxes();
-        renderAlunosSelectionState?.();
-
-    }
-
-    function unassign(boxId, alunoId) {
-        const set = state.boxes.get(boxId);
-        if (!set) return;
-        set.delete(alunoId);
-        if (set.size === 0) state.boxes.delete(boxId);
-        renderPreSelecao?.();
-        renderAlunosBoxes();
-        renderAlunosSelectionState?.();
-    }
-    const form = document.getElementById("form-agenda");
-    form.addEventListener('submit', (e) => {
-        // limpa hiddens anteriores para não duplicar em um segundo submit
-        form.querySelectorAll('input[name^="alocacoes["]').forEach(el => el.remove());
-
-        // gera inputs: alocacoes[BOX_ID][]=ALUNO_ID
         state.boxes.forEach((setAlunos, boxId) => {
-            // de preferência use o ID numérico do box (ex.: ID_BOX_CLINICA)
             setAlunos.forEach(alunoId => {
                 const input = document.createElement('input');
                 input.type = 'hidden';
                 input.name = `alocacoes[${boxId}][]`;
                 input.value = String(alunoId);
-                form.appendChild(input);
+                input.className = 'js-auto-aloc';
+                el.form.appendChild(input);
             });
         });
     });
 
-});
+    // =================================================================
+    // Resets auxiliares
+    // =================================================================
+    function resetTurma() {
+        if (!el.turma) return;
+        el.turma.disabled = true;
+        el.turma.innerHTML = '<option value="">Selecione uma disciplina primeiro</option>';
+    }
+
+    function resetData() {
+        if (!el.data) return;
+        el.data.disabled = true;
+        el.data.innerHTML = '<option value="">Selecione uma turma primeiro</option>';
+    }
+}

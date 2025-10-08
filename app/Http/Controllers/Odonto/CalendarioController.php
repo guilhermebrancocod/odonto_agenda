@@ -101,4 +101,17 @@ class CalendarioController extends Controller
 
         return response()->json($rows);
     }
+
+    public function editStatus(Request $request, $agendaId)
+    {
+
+        DB::table('FAESA_CLINICA_AGENDAMENTO')
+            ->where('ID_AGENDAMENTO', $agendaId)
+            ->update([
+                'STATUS_AGEND' => $request->input('status'),
+                'MENSAGEM' => $request->input('mensagem')
+            ]);
+
+        return response()->json(['success' => true, 'message' => 'Status atualizado com sucesso']);
+    }
 }

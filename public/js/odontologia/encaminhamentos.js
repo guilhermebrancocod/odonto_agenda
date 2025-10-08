@@ -1,66 +1,101 @@
-const $select = $('#listaEncaminhamentos');
-const $tbody = $('#table-service tbody');
+const $select = $('#filtroAgendamento');
+const $tbody = $('#table tbody');
 
-function carregarTodosEncaminhamentos() {
+function renderTabela(lista = []) {
+    $tbody.empty();
 
-    $.ajax({
-        url: '/odontologia/encaminhamentos',
-        dataType: 'json',
-        data: { query: '' },
-        success: function (data) {
-            $select.empty();
-            $tbody.empty();
+    if (!Array.isArray(lista) || lista.length === 0) {
+        $tbody.append(`
+      <tr><td colspan="5" class="text-center text-muted">Nenhum encaminhamento encontrado.</td></tr>
+    `);
+        return;
+    }
 
-            data.forEach(encaminhamento => {
-                // Adiciona ao select
-                const newOption = new Option(
-                    encaminhamento.DISCIPLINA,
-                    encaminhamento.ID,
-                    false,
-                    false
-                );
-                $select.append(newOption);
-                const html = `
-                    <tr class="row-enc data-id="${encaminhamento.ID}">
-                        <td>${encaminhamento.DISCIPLINA}</td>
-                        <td>${encaminhamento.ID_AGENDAMENTO}</td>
-                        <td>${encaminhamento.STATUS}</td>
-                        <td>
-                            <button 
-                                type="button" 
-                                class="criarEncaminhamento btn btn-link p-0 m-0 border-0" 
-                                style="color: inherit;" 
-                                data-id="${encaminhamento.ID}">
-                                <i class="fa-solid fa-square-caret-right"></i>
-                            </button>
-                        </td>
-                        <td>
-                            <button 
-                                type="button"
-                                class="cancelaEncaminhamento btn btn-link p-0 m-0 border-0" 
-                                style="color: inherit;" 
-                                data-id="${encaminhamento.ID}">
-                                <i class="fa-solid fa-trash"></i>
-                            </button>
-                        </td>
-                    </tr>
-                `;
-                $tbody.append(html);
-            });
-
-            $select.val(null).trigger('change');
-        },
-        error: function () {
-            console.error('Erro ao carregar os encaminhamentos.');
-        }
+    lista.forEach(enc => {
+        const html = `
+      <tr class="row-enc" data-id="${enc.ID}">
+        <td>${enc.DISCIPLINA ?? ''}</td>
+        <td>${enc.ID_AGENDAMENTO ?? ''}</td>
+        <td class="cell-status">${enc.STATUS ?? ''}</td>
+        <td>
+          <button type="button" class="criarEncaminhamento btn btn-link p-0 m-0 border-0" style="color:inherit" data-id="${enc.ID}">
+            <i class="fa-solid fa-square-caret-right"></i>
+          </button>
+        </td>
+        <td>
+          <button type="button" class="cancelaEncaminhamento btn btn-link p-0 m-0 border-0" style="color:inherit" data-id="${enc.ID}">
+            <i class="fa-solid fa-trash"></i>
+          </button>
+        </td>
+      </tr>`;
+        $tbody.append(html);
     });
 }
 
-$(document).ready(function () {
-    const $select = $('#listaEncaminhamentos');
+function fetchEncaminhamentos() {
+    // texto do item selecionado no select2 (se houver)
+    const selected = $select.select2('data');
+    const q = (selected?.[0]?.text || '').trim();
 
+    // status (radio)
+    const status = $('input[name="statusEncaminhamento"]:checked').val() || 'DISPONIVEL';
+
+    // (se quiser, adicione outros filtros aqui: disciplina, turma, etc.)
+    $.getJSON('/odontologia/encaminhamentos', {
+        query: q,
+        statusEncaminhamento: status
+    })
+        .done(renderTabela)
+        .fail(() => {
+            $tbody.html('<tr><td colspan="5" class="text-danger text-center">Erro ao carregar os encaminhamentos.</td></tr>');
+        });
+}
+
+$(document).ready(function () {
+    // Select2 remoto
     $select.select2({
-        placeholder: "Selecione o encaminhamento",
+        placeholder: "Busque por agendamentos…",
+        allowClear: true,
+        minimumInputLength: 0,
+        ajax: {
+            url: '/odontologia/encaminhamentos',
+            dataType: 'json',
+            delay: 250,
+            // já envia o status junto na busca do select
+            data: params => ({
+                query: params.term || '',
+                statusEncaminhamento: $('input[name="statusEncaminhamento"]:checked').val() || 'DISPONIVEL'
+            }),
+            processResults: data => ({
+                results: data.map(p => ({ id: p.ID, text: p.DISCIPLINA }))
+            }),
+            cache: true
+        }
+    });
+
+    // Foco no search do select2 ao abrir
+    $select.on('select2:open', () => {
+        setTimeout(() => {
+            document.querySelector('.select2-container--open .select2-search__field')?.focus();
+        }, 0);
+    });
+
+    // Dispara busca quando:
+    // - mudar o item do select
+    // - limpar o select
+    // - mudar o status
+    $select.on('select2:select select2:clear', fetchEncaminhamentos);
+    $('input[name="statusEncaminhamento"]').on('change', fetchEncaminhamentos);
+
+    // Carga inicial
+    fetchEncaminhamentos();
+});
+
+$(document).ready(function () {
+    const $filtroAgendamento = $('#filtroAgendamento');
+
+    $filtroAgendamento.select2({
+        placeholder: "Busque por agendamentos…",
         allowClear: true,
         minimumInputLength: 0,
         ajax: {
@@ -90,13 +125,7 @@ $(document).ready(function () {
         }, 0);
     });
 
-    carregarTodosEncaminhamentos();
-});
-
-// Evento ao selecionar um paciente no select2
-$('#listaEncaminhamentos').on('select2:select', function (e) {
-    const servicoId = e.params.data.id;
-
+    fetchEncaminhamentos();
 });
 
 // mini-form inline (ajuste campos conforme sua regra)
@@ -129,14 +158,14 @@ function inlineFormTemplate({ id, disciplina }) {
             </select>
           </div>
           <div class="flex-grow-1">
-            <label class="form-label mb-1">Alunos</label>
+            <label class="form-label mb-1">Dupla de alunos</label>
             <select class="form-select form-select-sm" name="aluno" required>
               <option value="">Selecione…</option>
             </select>
           </div>
           <div class="flex-grow-1">
             <label class="form-label mb-1">Dia</label>
-            <input type="text" class="form-control form-control-sm" name="obs" placeholder="">
+            <input type="text" class="form-control form-control-sm" name="data" placeholder="">
           </div>
           <div class="ms-auto d-flex gap-2">
             <button type="button" class="btn btn-light btn-sm fecharInline">Cancelar</button>
@@ -169,7 +198,7 @@ $tbody.on('click', '.criarEncaminhamento', function () {
     const pTurma = carregarTurmaPorDisciplina($form);
 
     $.when(pBoxes, pSemana, pTurma).done(function () {
-          $form.on('change', 'select[name="turma"], select[name="box"]', () => carregarAlunos($form));
+        $form.on('change', 'select[name="turma"], select[name="box"]', () => carregarAlunos($form));
     });
 });
 
@@ -185,8 +214,12 @@ $tbody.on('submit', '.form-inline-enc', function (e) {
     const id = dados.id;
 
     $.ajax({
-        url: `/odontologia/encaminhamentos/${id}/gerar-agendamento`, // ajuste sua rota
+        url: `/odontologia/encaminhamentos/${id}/gerar-agendamento`,
         type: 'POST',
+        headers: {
+            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+            'Accept': 'application/json'
+        },
         dataType: 'json',
         data: dados,
         beforeSend: () => $form.find('button[type=submit]').prop('disabled', true).text('Salvando…'),
@@ -264,42 +297,87 @@ function carregarAlunos($form) {
     const box = $form.find('select[name="box"]').val();
     const $aluno = $form.find('select[name="aluno"]');
 
-    console.log('disciplina:', $form.find('[name="disciplina"]').val());
-    console.log('turma:', $form.find('select[name="turma"]').val());
-    console.log('box:', $form.find('select[name="box"]').val());
-    console.log('tem select aluno?', $form.find('select[name="aluno"]').length);
-
     if (!disciplina || !turma || !box) {
         $aluno.prop('disabled', true).html('<option value="">Selecione turma e box…</option>');
+        // mantém compatibilidade com seu return "promessa"
         return $.Deferred().resolve().promise();
     }
 
+    const url = `/odontologia/disciplinas/${encodeURIComponent(disciplina)}/${encodeURIComponent(turma)}/${encodeURIComponent(box)}/alunos`;
+    const previous = $aluno.val(); // tenta preservar escolha depois
+
     $aluno.prop('disabled', true).html('<option value="">Carregando…</option>');
 
-    const url = `/odontologia/disciplinas/${encodeURIComponent(disciplina)}/${encodeURIComponent(turma)}/${encodeURIComponent(box)}/alunos`;
-
-    $.getJSON(url)
+    return $.getJSON(url)
         .done(lista => {
             if (!Array.isArray(lista) || lista.length === 0) {
                 $aluno.html('<option value="">Sem alunos para os filtros</option>');
                 return;
             }
+
             $aluno.empty().append('<option value="">Selecione…</option>');
 
             const vistos = new Set();
-            lista.forEach(item => {
-                const id = item.ID ?? item.id ?? item.MATRICULA ?? item.aluno_id;
-                const nome = item.NOME ?? item.nome ?? item.text;
-                if (id != null && nome && !vistos.has(id)) {
-                    $aluno.append(new Option(String(nome).trim(), String(id)));
-                    vistos.add(id);
+            const addOption = (a, b) => {
+                const idA = String(a.id).trim(), idB = String(b.id).trim();
+                const nomeA = String(a.nome).trim(), nomeB = String(b.nome).trim();
+                if (!idA || !idB || !nomeA || !nomeB) return;
+
+                const key = [idA, idB].sort().join('|');        // chave estável
+                const label = `${nomeA}, ${nomeB}`;               // exibição: "Aluno A, Aluno B"
+
+                if (!vistos.has(key)) {
+                    const opt = new Option(label, key);
+                    opt.dataset.id1 = idA; opt.dataset.nome1 = nomeA;
+                    opt.dataset.id2 = idB; opt.dataset.nome2 = nomeB;
+                    $aluno.append(opt);
+                    vistos.add(key);
                 }
-            });
+            };
+
+            let countCenario1 = 0;
+
+            if (vistos.size === 0) {
+                // --------- Carregando de alunos por ordem de chegada (pares sequenciais) ----------
+                let pendente = null;
+                lista.forEach(item => {
+                    const id = item.ID ?? item.id ?? item.MATRICULA ?? item.aluno_id;
+                    const nome = item.NOME ?? item.nome ?? item.text;
+                    if (!id || !nome) return;
+
+                    const curr = { id, nome };
+                    if (!pendente) {
+                        pendente = curr;
+                    } else {
+                        addOption(pendente, curr);
+                        pendente = null;
+                    }
+                });
+
+                if (pendente) {
+                    // sobrou 1 sem par — útil pra depurar backend
+                    console.warn('Aluno sem par (sobrando):', pendente);
+                }
+            }
+
+            // feedback e UX
+            if ($aluno.find('option').length === 1) {
+                $aluno.html('<option value="">Sem duplas formadas</option>');
+            } else {
+                // tenta restaurar seleção anterior, se ainda existir
+                if (previous && $aluno.find(`option[value="${previous}"]`).length) {
+                    $aluno.val(previous);
+                } else if ($aluno.find('option').length === 2) {
+                    $aluno.prop('selectedIndex', 1);
+                }
+            }
 
             $aluno.prop('disabled', false);
-            if ($aluno.find('option').length === 2) $aluno.prop('selectedIndex', 1);
+
         })
-        .fail(() => $aluno.html('<option value="">Erro ao carregar</option>'));
+        .fail(() => {
+            $aluno.html('<option value="">Erro ao carregar</option>');
+        });
 }
 
 // 2) Botão "Cancelar" do mini-form

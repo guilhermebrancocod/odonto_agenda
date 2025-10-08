@@ -11,6 +11,8 @@
     <link href="https://cdnjs.cloudflare.com/ajax/libs/mdb-ui-kit/7.1.0/mdb.min.css" rel="stylesheet" />
     <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
     <link href="/css/style.css" rel="stylesheet">
+
+    <meta name="csrf-token" content="{{ csrf_token() }}">
 </head>
 
 <body>
@@ -19,26 +21,60 @@
         <fieldset class="border p-3 rounded mb-3">
             <legend class="w-auto px-2">Encaminhamentos</legend>
         </fieldset>
-        <form id="form-search-service"  class="row g-3 needs-validation">
+        <form id="form-search-service" class="row g-3 needs-validation">
             <div class="linha-com-titulo">
                 <h5>Pesquisar</h5>
                 <div class="linha-flex"></div>
             </div>
-            <div style="display: flex; gap: 20px; align-items: flex-end; flex-wrap: wrap; margin: 20px 0;">
-                <div class="input-group" style="flex: 1; flex-direction: column;">
-                    <div class="form-outline">
-                        <select id="listaEncaminhamentos" name="listaEncaminhamentos" style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 6px; font-size: 14px;">
-                            <option></option>
-                        </select>
+            <!-- Card de Filtros -->
+            <div class="card border-0 shadow-sm mb-4">
+                <div class="card-body">
+                    <div class="row g-3 align-items-end">
+                        <!-- Select 1 -->
+                        <div class="col-12 col-md-6">
+                            <label for="filtroAgendamento" class="form-label mb-1">Agendamento</label>
+                            <select id="filtroAgendamento" name="filtroAgendamento" class="form-select form-select-sm">
+                                <option value="">Selecione…</option>
+                                <!-- opções via JS -->
+                            </select>
+                            <div class="form-text">Escolha o agendamento desejado.</div>
+                        </div>
+
+                        <!-- Select 2 (duplas/alunos/outro filtro) -->
+                        <div class="col-12 col-md-6">
+                            <label for="filtroDupla" class="form-label mb-1">Dupla/Alunos</label>
+                            <select id="filtroDupla" name="filtroDupla" class="form-select form-select-sm">
+                                <option value="">Selecione…</option>
+                                <!-- opções via JS -->
+                            </select>
+                            <div class="form-text">Mostra as duplas disponíveis para o filtro.</div>
+                        </div>
+
+                        <!-- Grupo de status como “pílulas” -->
+                        <div class="col-12">
+                            <label class="form-label d-block mb-1">Status</label>
+
+                            <div class="btn-group" role="group" aria-label="Filtro de status">
+                                <input type="radio" class="btn-check" name="statusEncaminhamento" id="statusDisp" value="DISPONIVEL" autocomplete="off" checked>
+                                <label class="btn btn-outline-primary btn-sm" for="statusDisp">
+                                    <i class="fa-solid fa-check me-1"></i>Disponível
+                                </label>
+
+                                <input type="radio" class="btn-check" name="statusEncaminhamento" id="statusReag" value="REAGENDADO" autocomplete="off">
+                                <label class="btn btn-outline-primary btn-sm" for="statusReag">
+                                    <i class="fa-solid fa-arrows-rotate me-1"></i>Reagendado
+                                </label>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
             <div class="linha-com-titulo">
-                <h5>Aguardando novo agendamento</h5>
+                <h5>Detalhes</h5>
                 <div class="linha-flex"></div>
             </div>
             <div class="datatable" style="margin-top:15px">
-                <table class="table datatable-table" id="table-service">
+                <table class="table datatable-table" id="table">
                     <thead class="datatable-header">
                         <tr style="padding-left: 1rem;">
                             <th>Disciplina</th>
@@ -50,7 +86,7 @@
                     </thead>
                     <tbody>
                         <tr id="row-empty">
-                            <td colspan="4" class="text-center text-muted">Carregando encaminhamentos...</td>
+                            <td colspan="5" class="text-center text-muted">Carregando encaminhamentos...</td>
                         </tr>
                     </tbody>
                 </table>

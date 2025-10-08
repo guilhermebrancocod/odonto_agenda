@@ -198,9 +198,6 @@ $(document).ready(function () {
         $('#hr_fim').timepicker('setTime', novaHoraFim);
     });
 
-    // Selects simples
-    $('#dia_semana').select2({ placeholder: '', allowClear: true, width: '100%' });
-
     // Procedimentos
     const $disciplineSelectProc = $('#form-select-proc');
     $disciplineSelectProc.select2({
@@ -239,10 +236,41 @@ $(document).ready(function () {
     $boxSelect.prop('disabled', true);
     $turmaSelect.prop('disabled', true);
 
+    function getDiaSemanaFromDateBR(dateStr) {
+        if (!dateStr || !/^\d{2}\/\d{2}\/\d{4}$/.test(dateStr)) return null;
+
+        const [dia, mes, ano] = dateStr.split('/').map(Number);
+        const data = new Date(ano, mes - 1, dia); // mês em JS é 0-based
+
+        if (isNaN(data)) return null;
+
+        const diaJS = data.getDay();
+        const mapa = {
+            1: 2, // segunda
+            2: 3, // terça
+            3: 4, // quarta
+            4: 5, // quinta
+            5: 6  // sexta
+        };
+
+        return mapa[diaJS] || null;
+    }
+
+    const $diasemana = document.getElementById('date');
+    const diaSemana = getDiaSemanaFromDateBR($diasemana.value);
+
     $disciplineSelect.select2({
         allowClear: true,
         ajax: {
-            url: '/odontologia/disciplinascombox/',
+            url: () => {
+                const dateVal = document.getElementById('date')?.value?.trim() || '';
+                const diaSemana = getDiaSemanaFromDateBR(dateVal);
+                if (!diaSemana) {
+                    console.warn('⚠️ Data inválida ou não selecionada.');
+                    return `/odontologia/disciplinascombox/`; // fallback seguro
+                }
+                return `/odontologia/disciplinascombox/${encodeURIComponent(diaSemana)}`;
+            },
             dataType: 'json',
             delay: 250,
             data: params => ({ query: params.term || '' }),
@@ -265,8 +293,10 @@ $(document).ready(function () {
     $('#form-select-box').select2({
         allowClear: true,
         ajax: {
-            url: function () {
-                return '/getBoxDisciplines/' + encodeURIComponent(disciplinaSelecionada || 'default');
+            url: () => {
+                const dateVal = document.getElementById('date')?.value?.trim() || '';
+                const diaSemana = getDiaSemanaFromDateBR(dateVal);
+                return `/getBoxDisciplines/${encodeURIComponent(disciplinaSelecionada)}/${encodeURIComponent(diaSemana)}`;
             },
             dataType: 'json',
             delay: 250,
@@ -293,7 +323,11 @@ $(document).ready(function () {
         placeholder: 'Selecione a turma',
         minimumInputLength: 0,
         ajax: {
-            url: '/odontologia/turmas',
+            url: () => {
+                const dateVal = document.getElementById('date')?.value?.trim() || '';
+                const diaSemana = getDiaSemanaFromDateBR(dateVal);
+                return `/odontologia/turmas/${encodeURIComponent(diaSemana)}`;
+            },
             type: 'GET',
             dataType: 'json',
             delay: 250,
@@ -407,18 +441,27 @@ $(document).ready(function () {
             grid.innerHTML = '';
             const set = new Set();
             (items || []).forEach(it => {
-                const i = norm(it.inicio);
-                const f = norm(it.fim);
+                const i = norm(it.hrIni);
+                const f = norm(it.hrFim);
                 if (i) set.add(i);
                 if (f) set.add(f);
             });
             const horarios = Array.from(set).sort((a, b) => toMin(a) - toMin(b));
 
+            if (horarios.length === 0) {
+                grid.innerHTML = `
+            <div class="text-muted small px-2 py-1">
+                Sem horários. Verifique e refaça o agendamento.
+            </div>`;
+                return;
+            }
+
             horarios.forEach((h, idx) => {
                 const id = `hor_${h.replace(':', '')}_${idx}`;
                 grid.insertAdjacentHTML('beforeend', `
                 <div class="time-item">
-                <input class="time-input" type="checkbox" id="${id}" name="horarios[]" value="${h}" checked>
+                    <input class="time-input" type="checkbox" id="${id}" name="horarios[]" value="${h}" checked>
+                    <label class="time-card" for="${id}">${h}</label>
                 </div>`);
             });
 
@@ -531,7 +574,7 @@ $(document).ready(function () {
             allowClear: true,
             minimumInputLength: 0,
             ajax: {
-                url: `/odontologia/disciplinascombox/`,
+                url: `/getBoxDisciplines`,
                 dataType: 'json',
                 delay: 250,
                 // ATENÇÃO: nome do parâmetro precisa bater com o seu backend

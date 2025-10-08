@@ -11,13 +11,38 @@ use Illuminate\Support\Facades\Validator;
 
 class AgendaController extends Controller
 {
-    /*public function showFormAgenda()
+
+    private function gerarFinanceiro($idAgendamento, Request $request)
     {
-        return view('odontologia/create_agenda');
-    }*/
+        $qtdParcelas = (int) $request->input('qtd_parcelas', 1);
+        $valorTotal = floatval(str_replace(',', '.', str_replace('.', '', $request->input('valor'))));
+        $valorParcela = round($valorTotal / $qtdParcelas, 2);
+        $dataVencimento = $request->filled('dia_venc')
+            ? \Carbon\Carbon::createFromFormat('d/m/Y', $request->input('dia_venc'))
+            : now();
+
+        $parcelas = [];
+
+        for ($i = 0; $i < $qtdParcelas; $i++) {
+            $dataAtual = $dataVencimento->copy()->addMonths($i);
+
+            $parcelas[] = [
+                'ID_AGENDAMENTO' => $idAgendamento,
+                'VALOR'          => $valorParcela,
+                'FORMA_PAG'      => $request->input('forma-pag'),
+                'VENCIMENTO'     => $dataAtual->format('Y-m-d'),
+                'CREATED_AT'     => now(),
+                'UPDATED_AT'     => now()
+            ];
+        }
+
+        DB::table('FAESA_CLINICA_AGENDAMENTO_FINANCEIRO')->insert($parcelas);
+    }
+
 
     public function createAgenda(Request $request)
     {
+
         $rules = [
             'ID_PACIENTE'     => ['required'],
             'status'          => ['required'],   // 11 dígitos
@@ -192,6 +217,9 @@ class AgendaController extends Controller
                 'DISCIPLINA'     => $disciplina,
                 'TURMA'          => $turma,
             ]);
+            if ($request->input('pagto') === 'S') {
+                $this->gerarFinanceiro($idAgendamento, $request);
+            }
         } else {
             $frequencia = (int) $request->input('freq'); // 1=semanal, 2=quinzenal, 3=mensal
             $rotuloRecorrencia = match ($frequencia) {
@@ -267,6 +295,10 @@ class AgendaController extends Controller
                     } else {
                         $cursor->addMonthNoOverflow(); // mensal (evita pular para mês seguinte errado em 29-31)
                     }
+                }
+
+                if ($request->input('pagto') === 'S') {
+                    $this->gerarFinanceiro($idAgendamento, $request);
                 }
 
                 DB::commit();
@@ -418,5 +450,153 @@ class AgendaController extends Controller
             'ID_AGENDAMENTO' => $agendaId,
             'ID_BOX' => $boxId
         ]);
+    }
+
+    public function fSelectAgenda(Request $request)
+    {
+        $query_agenda = $request->input('search-input');
+
+        $selectAgenda = DB::table('FAESA_CLINICA_AGENDAMENTO')
+            ->join('FAESA_CLINICA_PACIENTE', 'FAESA_CLINICA_AGENDAMENTO.ID_PACIENTE', '=', 'FAESA_CLINICA_PACIENTE.ID_PACIENTE')
+            ->select('FAESA_CLINICA_PACIENTE.NOME_COMPL_PACIENTE')
+            ->where(function ($query) use ($query_agenda) {
+                $query->where('FAESA_CLINICA_PACIENTE.NOME_COMPL_PACIENTE', 'like', '%' . $query_agenda . '%')
+                    ->orWhere('FAESA_CLINICA_PACIENTE.CPF_PACIENTE', 'like', '%' . $query_agenda . '%')
+                    ->where('FAESA_CLINICA_AGENDAMENTO.ID_CLINICA', '=', 2);
+            })
+            ->get();
+
+        return view('odontologia/consult_agenda', compact('selectAgenda', 'query_agenda'));
+    }
+
+
+    public function buscarAgendamentos(Request $request)
+    {
+        $pacienteId = $request->input('pacienteId');
+
+        $query = DB::table('FAESA_CLINICA_AGENDAMENTO as a')
+            ->join('FAESA_CLINICA_LOCAL_AGENDAMENTO as la', 'la.ID_AGENDAMENTO', '=', 'A.ID_AGENDAMENTO')
+            ->join('FAESA_CLINICA_BOXES as cb', 'cb.ID_BOX_CLINICA', '=', 'la.ID_BOX')
+            ->join('FAESA_CLINICA_PACIENTE as p', 'p.ID_PACIENTE', '=', 'a.ID_PACIENTE')
+            ->join('FAESA_CLINICA_SERVICO as s', 's.ID_SERVICO_CLINICA', '=', 'a.ID_SERVICO')
+            ->select(
+                'a.ID_AGENDAMENTO',
+                'a.DT_AGEND',
+                'a.HR_AGEND_INI',
+                'a.HR_AGEND_FIN',
+                'a.ID_SERVICO',
+                's.SERVICO_CLINICA_DESC',
+                'la.TURMA',
+                'la.ID_BOX',
+                'cb.DESCRICAO',
+                'p.ID_PACIENTE',
+                'p.NOME_COMPL_PACIENTE',
+                'p.E_MAIL_PACIENTE',
+                'p.FONE_PACIENTE'
+            )
+            ->where('a.ID_CLINICA', '=', 2)
+            ->orderByDesc('a.DT_AGEND');
+
+        if ($pacienteId) {
+            $query->where('a.ID_PACIENTE', $pacienteId);
+        }
+
+        $agendamentos = $query->get();
+
+        return response()->json($agendamentos);
+    }
+
+    public function listaAgendamentoId($pacienteId)
+    {
+        $agenda = DB::table('FAESA_CLINICA_AGENDAMENTO')
+            ->leftjoin('FAESA_CLINICA_PACIENTE', 'FAESA_CLINICA_AGENDAMENTO.ID_PACIENTE', '=', 'FAESA_CLINICA_PACIENTE.ID_PACIENTE')
+            ->leftjoin('FAESA_CLINICA_SERVICO', 'FAESA_CLINICA_SERVICO.ID_SERVICO_CLINICA', '=', 'FAESA_CLINICA_AGENDAMENTO.ID_SERVICO')
+            ->select(
+                'FAESA_CLINICA_PACIENTE.ID_PACIENTE',
+                'FAESA_CLINICA_PACIENTE.CPF_PACIENTE',
+                'FAESA_CLINICA_PACIENTE.NOME_COMPL_PACIENTE',
+                'FAESA_CLINICA_PACIENTE.E_MAIL_PACIENTE',
+                'FAESA_CLINICA_PACIENTE.FONE_PACIENTE',
+                'FAESA_CLINICA_AGENDAMENTO.ID_AGENDAMENTO',
+                'FAESA_CLINICA_AGENDAMENTO.DT_AGEND',
+                'FAESA_CLINICA_AGENDAMENTO.HR_AGEND_INI',
+                'FAESA_CLINICA_AGENDAMENTO.HR_AGEND_FIN',
+                'FAESA_CLINICA_AGENDAMENTO.ID_SERVICO',
+                'FAESA_CLINICA_SERVICO.SERVICO_CLINICA_DESC'
+            )
+            ->where('FAESA_CLINICA_PACIENTE.ID_PACIENTE', $pacienteId)
+            ->where('FAESA_CLINICA_AGENDAMENTO.ID_CLINICA', '=', 2)
+            ->get();
+
+        if (!$agenda) {
+            return response()->json(['erro' => 'Paciente não encontrado'], 404);
+        }
+
+        return response()->json($agenda);
+    }
+
+    public function getDatasTurmaDisciplina($disciplina, $turma)
+    {
+        $diasemana = DB::table('LYCEUM_BKP_PRODUCAO.dbo.LY_AGENDA as A')
+            ->where('A.ANO', 2025)
+            ->where('A.SEMESTRE', 2)
+            ->where('A.DISCIPLINA', $disciplina)
+            ->where('A.TURMA', $turma)
+            ->distinct()
+            ->orderBy('A.DIA_SEMANA')
+            ->pluck('DIA_SEMANA');
+        return response()->json($diasemana);
+    }
+
+    public function getHorariosDatasTurmaDisciplina($disciplina, $turma, $diasemana)
+    {
+        $diasemana = (int) $diasemana;
+        $horarios = DB::table('LYCEUM_BKP_PRODUCAO.dbo.LY_AGENDA as A')
+            ->where('A.ANO', 2025)
+            ->where('A.SEMESTRE', 2)
+            ->where('A.DISCIPLINA', $disciplina)
+            ->where('A.TURMA', $turma)
+            ->where('A.DIA_SEMANA', $diasemana)
+            ->selectRaw("CONVERT(varchar(5), CAST(A.HORA_INICIO as time), 108) as hrIni")
+            ->addSelect(DB::raw("CONVERT(varchar(5), CAST(A.HORA_FIM as time), 108) as hrFim"))
+            ->distinct()
+            ->get();
+        return response()->json($horarios);
+    }
+
+    public function getAlunosDisciplinaTurma($disciplina, $turma)
+    {
+        $alunos = DB::table('LYCEUM_BKP_PRODUCAO.dbo.LY_MATRICULA as M')
+            ->join('LYCEUM_BKP_PRODUCAO.dbo.LY_ALUNO as A', 'A.ALUNO', '=', 'M.ALUNO')
+            ->where('M.DISCIPLINA', $disciplina)
+            ->where('M.SUBTURMA1', $turma)
+            ->whereNotExists(function ($q) use ($disciplina, $turma) {
+                $q->select(DB::raw(1))
+                    ->from('FAESA_CLINICA_BOX_DISCIPLINA_ALUNO as DA')
+                    ->whereColumn('DA.ALUNO', 'M.ALUNO')
+                    ->where('M.DISCIPLINA', $disciplina)
+                    ->where('M.SUBTURMA1', $turma);
+            })
+            ->select('M.ALUNO', 'A.NOME_COMPL')
+            ->distinct()
+            ->orderBy('A.NOME_COMPL', 'asc')
+            ->get();
+
+        return response()->json($alunos);
+    }
+
+    public function getAlunosDisciplinaTurmaAgenda($disciplina, $turma, $box)
+    {
+        $alunos = DB::table('FAESA_CLINICA_BOX_DISCIPLINA_ALUNO as BD')
+            ->join('FAESA_CLINICA_BOX_DISCIPLINA as D', 'D.ID_BOX_DISCIPLINA', '=', 'BD.ID_BOX_DISCIPLINA')
+            ->join('LYCEUM_BKP_PRODUCAO.dbo.LY_ALUNO as A', 'A.ALUNO', '=', 'BD.ALUNO')
+            ->where('D.DISCIPLINA', $disciplina)
+            ->where('D.TURMA', $turma)
+            ->where('BD.ID_BOX', $box)
+            ->select('BD.ALUNO', 'A.NOME_COMPL')
+            ->orderBy('A.NOME_COMPL', 'asc')
+            ->get();
+
+        return response()->json($alunos);
     }
 }

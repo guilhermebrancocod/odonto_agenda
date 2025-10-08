@@ -12,30 +12,115 @@ class EncaminhamentoController extends Controller
 
     public function consultaEncaminhamentos(Request $request)
     {
-        $q = trim((string) $request->input('query', ''));
+        // -------- Filtros vindos da tela --------
+        $q = trim((string) ($request->input('q', $request->input('query', ''))));
 
-        $lista = DB::table('FAESA_CLINICA_AGENDAMENTO_ENCAMINHAMENTO')
-            ->select('ID', 'ID_AGENDAMENTO', 'DISCIPLINA', 'STATUS')
-            ->where('STATUS', '=', 'DISPONIVEL') // confirme se é DISPONIVEL ou ATIVO
-            ->when($q !== '', fn($qb) => $qb->where('DISCIPLINA', 'like', "%{$q}%"))
-            ->orderBy('DISCIPLINA')
-            ->limit(200)
-            ->get();
+        // status: aceita string ou array; default: DISPONIVEL
+        $statusParam = $request->input('statusEncaminhamento', $request->input('statusEncaminhamento'));
+        $status = collect(is_array($statusParam) ? $statusParam : [$statusParam])
+            ->filter()
+            ->map(fn($s) => strtoupper((string) $s))
+            ->unique()
+            ->values();
 
-        if ($request->wantsJson() || $request->ajax()) {
-            return response()->json($lista);
+        $disciplina = $request->input('disciplina');
+        $box        = $request->input('box');
+
+        // datas (YYYY-MM-DD). Se usar pt-BR, converta antes ou use CAST.
+        $data     = $request->input('data');   // data exata
+        $dataDe   = $request->input('de');     // intervalo início
+        $dataAte  = $request->input('ate');    // intervalo fim
+
+        $limit = (int) $request->input('limit', 200);
+        $limit = max(1, min($limit, 500)); // segurança
+
+        // -------- Query base --------
+        $qb = DB::table('FAESA_CLINICA_AGENDAMENTO_ENCAMINHAMENTO as e')
+            ->leftJoin('FAESA_CLINICA_AGENDAMENTO as a', 'a.ID_AGENDAMENTO', '=', 'e.ID_AGENDAMENTO')
+            ->select([
+                'e.ID',
+                'e.ID_AGENDAMENTO',
+                'e.DISCIPLINA',
+                'e.STATUS',
+                DB::raw('CAST(a.DT_AGEND AS date) as DATA'), // SQL Server-friendly
+                'a.HR_AGEND_INI',
+                'a.HR_AGEND_FIN',
+            ]);
+
+        // -------- Aplicação de filtros --------
+        $qb->when($status->isNotEmpty(), fn($q2) => $q2->whereIn('e.STATUS', $status->all()));
+        $qb->when($disciplina, fn($q2, $v) => $q2->where('e.DISCIPLINA', $v));
+        $qb->when($box,        fn($q2, $v) => $q2->where('e.ID_BOX', $v));
+
+        // data única
+        $qb->when($data, function ($q2, $v) {
+            // em SQL Server, CAST a date:
+            $q2->where(DB::raw('CAST(a.DT_AGEND AS date)'), '=', $v);
+        });
+
+        // intervalo de datas
+        if ($dataDe && $dataAte) {
+            $qb->whereBetween(DB::raw('CAST(a.DT_AGEND AS date)'), [$dataDe, $dataAte]);
         }
 
+        // busca livre (DISCIPLINA/TURMA/STATUS)
+        $qb->when($q !== '', function ($q2) use ($q) {
+            $like = "%{$q}%";
+            $q2->where(function ($w) use ($like) {
+                $w->where('e.DISCIPLINA', 'like', $like)
+                    ->orWhere('e.STATUS', 'like', $like);
+            });
+        });
+
+        $qb->orderBy('a.DT_AGEND', 'desc')
+            ->orderBy('e.DISCIPLINA')
+            ->limit($limit);
+
+        // -------- Formatos de resposta --------
+        // Formato Select2 (results: [{id, text, ...}])
+        if ($request->boolean('select2')) {
+            $items = $qb->get()->map(function ($r) {
+                $periodo = trim(($r->DATA ?? '') . ' ' . ($r->HR_AGEND_INI ?? ''));
+                $texto = trim(
+                    implode(' • ', array_filter([
+                        $r->DISCIPLINA,
+                        $periodo ?: null,
+                    ]))
+                );
+                return [
+                    'id'              => $r->ID,
+                    'text'            => $texto !== '' ? $texto : ('Enc. #' . $r->ID),
+                    'status'          => $r->STATUS,
+                    'id_agendamento'  => $r->ID_AGENDAMENTO,
+                    'disciplina'      => $r->DISCIPLINA,
+                    'turma'           => $r->TURMA ?? null,
+                    'data'            => $r->DATA ?? null,
+                    'hr_ini'          => $r->HR_AGEND_INI ?? null,
+                    'hr_fim'          => $r->HR_AGEND_FIN ?? null,
+                    'box'             => $r->ID_BOX ?? null,
+                ];
+            });
+
+            return response()->json(['results' => $items]);
+        }
+
+        // JSON “cru” (full) para AJAX
+        if ($request->wantsJson() || $request->ajax()) {
+            return response()->json($qb->get());
+        }
+
+        // Render HTML normal
+        $lista = $qb->get();
         return view('odontologia/encaminhamentos', [
-            'listaEncaminhamentos' => $lista
+            'listaEncaminhamentos' => $lista,
         ]);
     }
 
     public function infoEncaminhamentos($id)
     {
         $enc = DB::table('FAESA_CLINICA_AGENDAMENTO_ENCAMINHAMENTO as E')
-            ->join('FAESA_CLINICA_AGENDAMENTO as A', 'A.ID', '=', 'E.ID_AGENDAMENTO') // origem
-            ->leftJoin('LYCEUM_BKP_PRODUCAO.dbo.LY_ALUNO as AL', 'AL.ALUNO', '=', 'A.ID_PACIENTE') // se fizer sentido
+            ->join('FAESA_CLINICA_AGENDAMENTO as A', 'A.ID_AGENDAMENTO', '=', 'E.ID_AGENDAMENTO')
+            ->leftJoin('LYCEUM_BKP_PRODUCAO.dbo.LY_ALUNO as AL', 'AL.ALUNO', '=', 'A.ID_PACIENTE')
             ->selectRaw("
                 E.ID,
                 E.ID_AGENDAMENTO,
@@ -57,83 +142,113 @@ class EncaminhamentoController extends Controller
 
     public function gerarAgendamento($id, Request $request)
     {
-        // Validação básica do mini-form
-        $data = $request->validate([
-            'prof_destino' => 'required|integer',
-            'box'          => 'nullable|string|max:20',
-            'procedimento' => 'nullable|string|max:100',
-            'obs'          => 'nullable|string|max:500',
-            // horários/ data do novo agendamento (se você já decidir aqui)
-            'dt_agend'     => 'required|date',        // ex.: 2025-10-01
-            'hr_ini'       => 'required|date_format:H:i',
-            'hr_fim'       => 'required|date_format:H:i|after:hr_ini',
+        // Validação básica
+        $validated = $request->validate([
+            'data'         => ['required', 'date'], // ajuste o formato se vier d/m/Y
+            'box'          => ['required'],
+            'turma'        => ['required'],
+            'disciplina'   => ['nullable'],         // se vier do form
+            'prof_destino' => ['nullable'],
+            'aluno'        => ['required'],         // pode vir "123,456" | "123|456" | array
         ]);
 
-        // Carrega encaminhamento + checagem de status
-        $enc = DB::table('FAESA_CLINICA_AGENDAMENTO_ENCAMINHAMENTO')
-            ->where('ID', $id)->first();
-        abort_unless($enc, 404);
+        return DB::transaction(function () use ($id, $request, $validated) {
 
-        if ($enc->STATUS !== 'DISPONIVEL') {
-            return response()->json(['error' => 'Encaminhamento não está disponível.'], 409);
-        }
+            // (1) Carrega e bloqueia encaminhamento para evitar corrida
+            $enc = DB::table('FAESA_CLINICA_AGENDAMENTO_ENCAMINHAMENTO')
+                ->where('ID', $id)
+                ->lockForUpdate()
+                ->first();
 
-        // Dados do agendamento de origem (para herdar paciente, etc.)
-        $orig = DB::table('FAESA_CLINICA_AGENDAMENTO')->where('ID', $enc->ID_AGENDAMENTO)->first();
-        abort_unless($orig, 422, 'Agendamento de origem não encontrado.');
+            abort_unless($enc, 404);
+            if ($enc->STATUS !== 'DISPONIVEL') {
+                return response()->json(['error' => 'Encaminhamento não está disponível.'], 409);
+            }
 
-        $novoId = null;
+            // (2) Agendamento de origem
+            $orig = DB::table('FAESA_CLINICA_AGENDAMENTO')
+                ->where('ID_AGENDAMENTO', $enc->ID_AGENDAMENTO)
+                ->first();
 
-        DB::transaction(function () use ($request, $data, $enc, $orig, &$novoId) {
-            // 1) Cria o agendamento destino
+            abort_unless($orig, 422, 'Agendamento de origem não encontrado.');
+
+            // (3) Normaliza alunos: aceita "idA,idB", "idA|idB" ou array
+            $raw = $request->input('aluno');
+            $ids = collect(is_array($raw) ? $raw : preg_split('/[,\|]+/', (string) $raw))
+                ->filter(fn($v) => $v !== null && $v !== '')
+                ->map(fn($v) => trim((string) $v))
+                ->unique()
+                ->values();
+
+            if ($ids->count() !== 2) {
+                return response()->json(['error' => 'Selecione uma dupla válida de alunos.'], 422);
+            }
+
+            // (4) Cria o novo agendamento
             $novoId = DB::table('FAESA_CLINICA_AGENDAMENTO')->insertGetId([
-                'ID_CLINICA'        => $orig->ID_CLINICA ?? 2,
-                'ID_PACIENTE'       => $orig->ID_PACIENTE,
-                'ID_SERVICO'        => $orig->ID_SERVICO ?? null, // ajuste se usa serviço por disciplina
-                'DT_AGEND'          => $data['dt_agend'],
-                'HR_AGEND_INI'      => $data['hr_ini'],
-                'HR_AGEND_FIN'      => $data['hr_fim'],
-                'STATUS_AGEND'      => 'Agendado',
+                'ID_CLINICA'         => $orig->ID_CLINICA ?? 2,
+                'ID_PACIENTE'        => $orig->ID_PACIENTE,
+                'ID_SERVICO'         => $orig->ID_SERVICO ?? null,
+                'DT_AGEND'           => $validated['data'],
+                'HR_AGEND_INI'       => $orig->HR_AGEND_INI,
+                'HR_AGEND_FIN'       => $orig->HR_AGEND_FIN,
+                'STATUS_AGEND'       => 'ENCAMINHAMENTO',
                 'ID_AGEND_REMARCADO' => null,
-                'RECORRENCIA'       => '1',
-                'VALOR_AGEND'       => null,
-                'OBSERVACOES'       => $data['obs'] ?? null,
-                'LOCAL'             => $data['box'] ?? null,
-                'MENSAGEM'          => null,
-                'STATUS_PAG'        => null,
-                'VALOR_PAG'         => null,
-                'DT_AGEND_FINAL'    => $data['dt_agend'],
-                'ID_ALUNO'          => null,
-                'ID_SALA'           => null,
-                /*'ID_USUARIO'        => auth()->id() ?? null,*/
-                'CREATED_AT'        => now(),
-                'UPDATED_AT'        => now(),
+                'RECORRENCIA'        => '1',
+                'VALOR_AGEND'        => $orig->VALOR_AGEND,
+                'OBSERVACOES'        => $orig->OBSERVACOES ?? null,
+                'LOCAL'              => $request->input('box') ?? null,
+                'MENSAGEM'           => $orig->MENSAGEM ?? null,
+                'STATUS_PAG'         => $orig->STATUS_PAG ?? null,
+                'VALOR_PAG'          => $orig->VALOR_PAG ?? null,
+                'DT_AGEND_FINAL'     => $validated['data'],
+                'ID_ALUNO'           => $orig->ID_ALUNO ?? null,   // se não for usado aqui, pode remover
+                'ID_SALA'            => $orig->ID_SALA ?? null,    // <-- corrigido
+                'CREATED_AT'         => now(),
+                'UPDATED_AT'         => now(),
             ]);
 
-            // (Opcional) registrar local em tabela de locais
-            // DB::table('FAESA_CLINICA_LOCAL_AGENDAMENTO')->insert([
-            //     'ID_AGENDAMENTO' => $novoId,
-            //     'ID_BOX'         => $data['box'] ?? null,
-            //     'DISCIPLINA'     => $enc->DISCIPLINA,
-            //     'TURMA'          => null,
-            // ]);
+            // (5) Relaciona cada aluno em uma linha
+            foreach ($ids as $alunoId) {
+                DB::table('FAESA_CLINICA_AGENDAMENTO_ALUNO')->insert([
+                    'ID_CLINICA'     => $orig->ID_CLINICA ?? 2,
+                    'ID_AGENDAMENTO' => $novoId,
+                    'ALUNO'          => $alunoId,
+                    'ID_BOX'         => $request->input('box'),
+                    'DOCENTE'        => $request->input('prof_destino') ?? null,
+                    'STATUS'         => 'ATIVO',
+                    'ANO_LETIVO'     => 2025, // se precisar, derive dinamicamente
+                    'SEMESTRE'       => 2,
+                    'CREATED_AT'     => now(),
+                    'UPDATED_AT'     => now(),
+                ]);
+            }
 
-            // 2) Atualiza encaminhamento → ACEITO e linka o novo agendamento
+            // (6) Local/box + turma/discipina
+            DB::table('FAESA_CLINICA_LOCAL_AGENDAMENTO')->insert([
+                'ID_AGENDAMENTO' => $novoId,
+                'ID_BOX'         => $request->input('box'),       // <-- corrigido (sem $data)
+                'DISCIPLINA'     => $enc->DISCIPLINA ?? $request->input('disciplina'),
+                'TURMA'          => $request->input('turma'),
+            ]);
+
+            // (7) Atualiza encaminhamento → ACEITO e relaciona destino
             DB::table('FAESA_CLINICA_AGENDAMENTO_ENCAMINHAMENTO')
                 ->where('ID', $enc->ID)
                 ->update([
-                    'STATUS'                 => 'ACEITO',
-                    'ID_AGENDAMENTO_DESTINO' => $novoId,      // se você criou essa coluna
-                    'PROF_DESTINO'           => $data['prof_destino'] ?? null,
+                    'ID_AGENDAMENTO' => $orig->ID_AGENDAMENTO,
+                    'STATUS'                 => 'REAGENDADO',
                     'UPDATED_AT'             => now(),
+                    'CREATED_AT'             => now(),
+                    'ID_NOVO_AGENDAMENTO' => $novoId,
                 ]);
-        });
 
-        return response()->json([
-            'ok'                     => true,
-            'STATUS'                 => 'ACEITO',
-            'ID_AGENDAMENTO_DESTINO' => $novoId,
-        ]);
+            return response()->json([
+                'ok'                     => true,
+                'STATUS'                 => 'ACEITO',
+                'ID_NOVO_AGENDAMENTO' => $novoId,
+            ]);
+        });
     }
 
     public function boxesPorDisciplina($disciplina)
