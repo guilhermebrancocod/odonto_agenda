@@ -40,6 +40,7 @@ class EncaminhamentoController extends Controller
             ->select([
                 'e.ID',
                 'e.ID_AGENDAMENTO',
+                'e.ID_NOVO_AGENDAMENTO',
                 'e.DISCIPLINA',
                 'e.STATUS',
                 DB::raw('CAST(a.DT_AGEND AS date) as DATA'), // SQL Server-friendly

@@ -126,7 +126,7 @@ $('#selectBoxDiscipline').on('select2:select', function (e) {
         },
         success: function (disciplines) {
             const html = `
-                                        <tr>
+                    <tr>
                         <td>${disciplines.DISCIPLINA}</td>
                         <td>${disciplines.DESCRICAO}</td>
                         <td>${disciplines.TURMA}</td>

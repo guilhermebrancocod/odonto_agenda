@@ -9,7 +9,6 @@ use Illuminate\Support\Facades\DB;
 
 class CalendarioController extends Controller
 {
-
     public function getAgendamentos(Request $request)
     {
         // Você pode usar os parâmetros se quiser filtrar:

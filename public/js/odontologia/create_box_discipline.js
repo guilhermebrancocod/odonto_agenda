@@ -87,7 +87,7 @@ function init() {
         if (!disc) return;
 
         try {
-            const r = await fetch(`/odontologia/turmas/${encodeURIComponent(disc)}`, { headers: { 'Accept': 'application/json' } });
+            const r = await fetch(`/odontologia/turma/${encodeURIComponent(disc)}`, { headers: { 'Accept': 'application/json' } });
             const items = await r.json();
 
             el.turma.disabled = false;

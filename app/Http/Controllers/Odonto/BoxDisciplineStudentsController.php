@@ -118,7 +118,6 @@ class BoxDisciplineStudentsController extends Controller
 
     public function editBoxDiscipline(Request $request, int $idBoxDiscipline)
     {
-        $idBoxDiscipline = (int) $idBoxDiscipline;
         // 1) REGRA (linha única na tabela base)
         $regra = DB::table('FAESA_CLINICA_BOX_DISCIPLINA')
             ->where('ID_BOX_DISCIPLINA', $idBoxDiscipline)
@@ -372,6 +371,7 @@ class BoxDisciplineStudentsController extends Controller
             ->join('FAESA_CLINICA_BOXES as b', 'b.ID_BOX_CLINICA', '=', 'bd.ID_BOX')
             ->join('LYCEUM_BKP_PRODUCAO.dbo.LY_DISCIPLINA as ld', 'ld.DISCIPLINA', '=', 'd.DISCIPLINA')
             ->select(
+                'bd.ID_BOX_DISCIPLINA',
                 'd.DISCIPLINA',
                 'ld.NOME',
                 'b.DESCRICAO',
@@ -402,7 +402,7 @@ class BoxDisciplineStudentsController extends Controller
     public function getHorariosBoxDisciplinas($discipline)
     {
         $horarios = DB::table('FAESA_CLINICA_BOX_DISCIPLINA')
-            ->select('')
+            ->select('HR_INICIO', 'HR_FIM')
             ->where('FAESA_CLINICA_BOX_DISCIPLINA.ID_CLINICA', '=', 2)
             ->where('FAESA_CLINICA_BOX_DISCIPLINA.DISCIPLINA', trim($discipline))
             ->get();
@@ -475,10 +475,10 @@ class BoxDisciplineStudentsController extends Controller
         return response()->json($turmaSelecionada);
     }
 
-    public function getTurmas(Request $request, $diasemana)
+    public function getTurmas(Request $request,$diasemana)
     {
 
-        $disciplina = $request->query('disciplina');
+        $disciplina = trim($request->query('disciplina'));
         $box  = (int) $request->query('box');
 
         $turmas = DB::table('FAESA_CLINICA_BOX_DISCIPLINA')

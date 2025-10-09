@@ -214,10 +214,9 @@
         
         <form action="{{ route('loginPOST') }}" method="POST">
             @csrf
-
             <!-- USUARIO -->
             <div class="input-group">
-                <input type="text" id="login" name="login" required placeholder=" ">
+                <input type="text" id="login" name="usuario" required placeholder=" ">
                 <label for="login">Usuário</label>
             </div>
 

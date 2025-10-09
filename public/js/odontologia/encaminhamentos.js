@@ -16,6 +16,7 @@ function renderTabela(lista = []) {
       <tr class="row-enc" data-id="${enc.ID}">
         <td>${enc.DISCIPLINA ?? ''}</td>
         <td>${enc.ID_AGENDAMENTO ?? ''}</td>
+        <td>${enc.ID_NOVO_AGENDAMENTO ?? ''}</td>
         <td class="cell-status">${enc.STATUS ?? ''}</td>
         <td>
           <button type="button" class="criarEncaminhamento btn btn-link p-0 m-0 border-0" style="color:inherit" data-id="${enc.ID}">
@@ -165,7 +166,7 @@ function inlineFormTemplate({ id, disciplina }) {
           </div>
           <div class="flex-grow-1">
             <label class="form-label mb-1">Dia</label>
-            <input type="text" class="form-control form-control-sm" name="data" placeholder="">
+            <input type="date" class="form-control form-control-sm" name="data" placeholder="">
           </div>
           <div class="ms-auto d-flex gap-2">
             <button type="button" class="btn btn-light btn-sm fecharInline">Cancelar</button>

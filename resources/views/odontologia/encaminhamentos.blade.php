@@ -79,6 +79,7 @@
                         <tr style="padding-left: 1rem;">
                             <th>Disciplina</th>
                             <th>Agendamento Origem</th>
+                            <th>Agendamento Destino</th>
                             <th>Status</th>
                             <th>Encaminhar</th>
                             <th>Cancelar</th>

@@ -312,12 +312,12 @@ class PatientController extends Controller
 
     public function editarPaciente($pacienteId)
     {
-        $paciente = DB::table('FAESA_CLINICA_PACIENTE')->where('id', $pacienteId)->first();
+        $paciente = DB::table('FAESA_CLINICA_PACIENTE')->where('ID_PACIENTE', $pacienteId)->first();
 
         if (!$paciente) {
             abort(404);
         }
 
-        return view('createPatient', compact('paciente'));
+        return view('odontologia/create_patient', compact('paciente'));
     }
 }
