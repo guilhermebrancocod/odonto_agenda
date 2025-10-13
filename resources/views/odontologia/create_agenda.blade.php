@@ -390,6 +390,21 @@
                             value="{{ old('obs', $agenda->OBSERVACOES ?? '') }}">
                         <label for="obs">Observações</label>
                     </div>
+                    {{-- garante envio de 0 quando desmarcado --}}
+                    <input type="hidden" name="responsavel_presente" value="0">
+
+                    <div class="form-check mb-0" style="margin-top:10px;">
+                        <input
+                            class="form-check-input"
+                            id="responsavel_presente"
+                            type="checkbox"
+                            name="responsavel_presente"
+                            value="1"
+                            {{ old('responsavel_presente', $paciente->MENSAGEM ?? 0) ? 'checked' : '' }}>
+                        <label class="form-check-label" for="responsavel_presente">
+                            O responsável irá acompanhar o paciente durante o atendimento?
+                        </label>
+                    </div>
                 </div>
                 <!-- Status alinhado à direita em telas grandes -->
                 @php

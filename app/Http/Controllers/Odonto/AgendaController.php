@@ -39,7 +39,6 @@ class AgendaController extends Controller
         DB::table('FAESA_CLINICA_AGENDAMENTO_FINANCEIRO')->insert($parcelas);
     }
 
-
     public function createAgenda(Request $request)
     {
 
@@ -171,9 +170,13 @@ class AgendaController extends Controller
             ->where('ID_BOX_CLINICA', $idBox)
             ->value('DESCRICAO');
 
+        $responsavelPresente = $request->boolean('responsavel_presente');
+        $mensagem = $responsavelPresente
+            ? 'O responsável irá acompanhar o paciente no atendimento.'
+            : null;
+
         /*PERIODO DO AGENDAMENTO*/
         DB::beginTransaction();
-
         if ($request->recorrencia === 1) {
             $dt = $dataInicio->toDateString();
 
@@ -195,21 +198,26 @@ class AgendaController extends Controller
                 return back()->withInput()->with('alert', 'Conflito: já existe agendamento no mesmo box e horário.');
             }
 
-            $idAgendamento = DB::table('FAESA_CLINICA_AGENDAMENTO')->insertGetId([
+            $agendamento = [
                 'ID_CLINICA'         => $idClinica,
                 'ID_PACIENTE'        => (int) $request->input('ID_PACIENTE'),
                 'ID_SERVICO'         => $idServico,
                 'DT_AGEND'           => $dt,
-                'DT_AGEND_FINAL'     => $dt, // pontual: mesma data
+                'DT_AGEND_FINAL'     => $dt,
                 'HR_AGEND_INI'       => $hrIni,
                 'HR_AGEND_FIN'       => $hrFim,
+                'MENSAGEM'           => $mensagem,
                 'STATUS_AGEND'       => $request->input('status'),
                 'ID_AGEND_REMARCADO' => null,
                 'RECORRENCIA'        => 'pontual',
                 'VALOR_AGEND'        => $valor_convert,
                 'OBSERVACOES'        => $request->input('obs'),
                 'LOCAL'              => $descricaoLocal,
-            ]);
+            ];
+
+            // 5) Insert (no SQL Server informe o nome da PK identity)
+            $idAgendamento = DB::table('FAESA_CLINICA_AGENDAMENTO')
+                ->insertGetId($agendamento, 'ID_AGENDAMENTO');
 
             DB::table('FAESA_CLINICA_LOCAL_AGENDAMENTO')->insert([
                 'ID_AGENDAMENTO' => $idAgendamento,
@@ -270,6 +278,7 @@ class AgendaController extends Controller
                         'DT_AGEND_FINAL'     => $dt, // cada ocorrência é pontual
                         'HR_AGEND_INI'       => $hrIni,
                         'HR_AGEND_FIN'       => $hrFim,
+                        'MENSAGEM'           => $mensagem,
                         'STATUS_AGEND'       => $request->input('status'),
                         'ID_AGEND_REMARCADO' => null,
                         'RECORRENCIA'        => $rotuloRecorrencia,

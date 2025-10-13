@@ -34,8 +34,6 @@
             <div class="linha-com-titulo d-flex align-items-center gap-3 flex-wrap">
                 <h5 class="mb-0">Dados Pessoais</h5>
                 <div class="linha-flex flex-grow-1"></div>
-
-                @if(isset($paciente))
                 <div class="d-flex align-items-center ms-auto gap-2 flex-column flex-sm-row">
                     <label for="status" class="form-label mb-0">Status do paciente</label>
 
@@ -61,9 +59,7 @@
                         <i class="bi bi-clock-history me-1"></i> Log
                     </button>
                 </div>
-                @endif
             </div>
-
             @endif
             @php
             $isEdit = isset($paciente);
@@ -167,12 +163,51 @@
 
                 <div style="flex: 0.5;">
                     <label class="form-label">Celulares para contato</label>
+
                     <div id="celulares-wrapper">
-                        <input type="text" name="celulares[]" class="form-control mb-2" placeholder="(99) 99999-9999">
+                        @php
+                        // Prioriza valores antigos do form; senão usa os da controller
+                        $valores = old('contato', isset($contato) ? (array)$contato : []);
+                        if (empty($valores)) { $valores = ['']; } // garante ao menos 1 campo
+                        @endphp
+
+                        @foreach($valores as $i => $numero)
+                        <div class="input-group mb-2 celular-item">
+                            <input
+                                type="text"
+                                name="contato[]"
+                                class="form-control @error('contato.'.$i) is-invalid @enderror"
+                                placeholder="(99) 99999-9999"
+                                inputmode="numeric"
+                                pattern="\(?\d{2}\)?\s?\d{4,5}-?\d{4}"
+                                maxlength="20"
+                                value="{{ $numero }}">
+                            <button type="button" class="btn btn-outline-danger" onclick="remCelular(this)">&times;</button>
+                            @error('contato.'.$i)
+                            <div class="invalid-feedback">{{ $message }}</div>
+                            @enderror
+                        </div>
+                        @endforeach
                     </div>
+
                     <button type="button" class="btn btn-sm btn-outline-primary" onclick="addCelular()">
                         + Adicionar celular
                     </button>
+
+                    <template id="celular-template">
+                        <div class="input-group mb-2 celular-item">
+                            <input
+                                type="text"
+                                name="contato[]"
+                                class="form-control"
+                                placeholder="(99) 99999-9999"
+                                inputmode="numeric"
+                                pattern="\(?\d{2}\)?\s?\d{4,5}-?\d{4}"
+                                maxlength="20"
+                                value="">
+                            <button type="button" class="btn btn-outline-danger" onclick="remCelular(this)">&times;</button>
+                        </div>
+                    </template>
                 </div>
 
                 <div style="flex: 0.5;">
@@ -224,6 +259,19 @@
             input.placeholder = '(99) 99999-9999';
             wrapper.appendChild(input);
         }
+
+        function addCelular() {
+            const tpl = document.getElementById('celular-template');
+            document.getElementById('celulares-wrapper')
+                .appendChild(tpl.content.cloneNode(true));
+        }
+
+        function remCelular(btn) {
+            const wrapper = document.getElementById('celulares-wrapper');
+            const item = btn.closest('.celular-item');
+            if (wrapper.querySelectorAll('.celular-item').length > 1) item.remove();
+            else item.querySelector('input').value = '';
+        }
     </script>
     @if (session('success'))
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
@@ -247,6 +295,7 @@
         });
     </script>
     @endif
+    {{-- Scripts --}}
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datepicker/1.10.0/js/bootstrap-datepicker.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datepicker/1.10.0/locales/bootstrap-datepicker.pt-BR.min.js"></script>

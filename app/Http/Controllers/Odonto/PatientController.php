@@ -20,76 +20,85 @@ class PatientController extends Controller
 
     public function fCreatePatient(Request $request)
     {
-
+        // 1) Normaliza entradas
         $input = $request->all();
-        $input['cpf']              = preg_replace('/\D/', '', $input['cpf'] ?? '');
-        $input['cpf_responsavel']  = preg_replace('/\D/', '', $input['cpf_responsavel'] ?? '');
-        $input['celular']          = preg_replace('/\D/', '', $input['celular'] ?? '');
-        $input['cep']              = preg_replace('/\D/', '', $input['cep'] ?? '');
-        $input['cod_sus']          = preg_replace('/\D/', '', $input['cod_sus'] ?? '');
-        $input['estado']           = strtoupper(trim($input['estado'] ?? ''));
+        $input['cpf']             = preg_replace('/\D/', '', $input['cpf'] ?? '');
+        $input['cpf_responsavel'] = preg_replace('/\D/', '', $input['cpf_responsavel'] ?? '');
+        $input['cep']             = preg_replace('/\D/', '', $input['cep'] ?? '');
+        $input['cod_sus']         = preg_replace('/\D/', '', $input['cod_sus'] ?? '');
+        $input['estado']          = strtoupper(trim($input['estado'] ?? ''));
+
+        // Normaliza celulares (transforma para só dígitos, remove vazios)
+        $input['celulares'] = collect($input['celulares'] ?? [])
+            ->map(fn($s) => preg_replace('/\D+/', '', (string)$s))
+            ->filter() // remove null/vazio
+            ->values()
+            ->all();
+
         $request->merge($input);
 
+        // 2) Regras/erros
         $rules = [
-            'nome'            => ['required', 'string', 'max:255'],
-            'cpf'             => ['required', 'regex:/^\d{11}$/'],   // 11 dígitos
-            'dt_nasc'         => ['required', 'date_format:d/m/Y', 'before:today'],
+            'nome'             => ['required', 'string', 'max:255'],
+            'cpf'              => ['required', 'regex:/^\d{11}$/'],
+            'dt_nasc'          => ['required', 'date_format:d/m/Y', 'before:today'],
             'nome_responsavel' => [
                 Rule::requiredIf(function () use ($request) {
                     try {
                         $dob = Carbon::createFromFormat('d/m/Y', $request->input('dt_nasc'));
                     } catch (\Exception $e) {
                         return false;
-                    }   // se data inválida, não força
+                    }
                     return $dob->age < 18;
                 }),
                 'nullable',
                 'string',
                 'max:255',
             ],
-            'sexo'            => ['required', 'in:M,F'],
-            'cep'             => ['required', 'regex:/^\d{8}$/'],
-            'rua'             => ['nullable', 'string', 'max:255'],
-            'numero'          => ['required', 'string', 'max:10'],
-            'complemento'     => ['nullable', 'string', 'max:100'],
-            'bairro'          => ['nullable', 'string', 'max:100'],
-            'cidade'          => ['nullable', 'string', 'max:100'],
-            'estado'          => ['nullable', 'alpha', 'size:2'],     // UF
-            'email'           => ['required', 'email:rfc', 'max:100'],
-            'celular'         => ['required', 'regex:/^\d{10,11}$/'], // 10 ou 11 dígitos
-            'cod_sus'         => ['nullable', 'regex:/^\d{15}$/'],   // SUS geralmente 15 dígitos
-            'cpf_responsavel' => ['nullable', 'regex:/^\d{11}$/'],
-            'obs_laudo'       => ['nullable', 'string', 'max:255'],
+            'sexo'             => ['required', 'in:M,F'],
+            'cep'              => ['required', 'regex:/^\d{8}$/'],
+            'rua'              => ['nullable', 'string', 'max:255'],
+            'numero'           => ['required', 'string', 'max:10'],
+            'complemento'      => ['nullable', 'string', 'max:100'],
+            'bairro'           => ['nullable', 'string', 'max:100'],
+            'cidade'           => ['nullable', 'string', 'max:100'],
+            'estado'           => ['nullable', 'alpha', 'size:2'],
+            'email'            => ['required', 'email:rfc', 'max:100'],
+            'celulares'        => ['array'],                 // deixe opcional; ou use 'required|array'
+            'celulares.*'      => ['regex:/^\d{10,11}$/'],   // agora já são apenas dígitos
+            'cod_sus'          => ['nullable', 'regex:/^\d{15}$/'],
+            'cpf_responsavel'  => ['nullable', 'regex:/^\d{11}$/'],
+            'obs_laudo'        => ['nullable', 'string', 'max:255'],
         ];
 
         $messages = [
-            'nome.required'          => 'O nome é obrigatório.',
-            'cpf.required'           => 'O CPF é obrigatório.',
-            'cpf.regex'              => 'Informe um CPF com 11 dígitos (apenas números).',
-            'dt_nasc.required'       => 'A data de nascimento é obrigatória.',
-            'dt_nasc.required'       => 'A data de nascimento é obrigatória.',
-            'nome_responsavel.required' => 'Nome do Resposável obrigatório para menores de 18 anos.',
-            'dt_nasc.date_format'    => 'Use o formato de data dd/mm/aaaa.',
-            'dt_nasc.before'         => 'A data de nascimento deve ser anterior a hoje.',
-            'sexo.required'          => 'Informe o sexo.',
-            'sexo.in'                => 'Sexo inválido (use M ou F).',
-            'cep.required'           => 'CEP é obrigatório.',
-            'cep.regex'              => 'CEP deve ter 8 dígitos (apenas números).',
-            'numero.required'        => 'Número é obrigatório.',
-            'estado.alpha'           => 'UF deve conter apenas letras.',
-            'estado.size'            => 'UF deve ter 2 letras.',
-            'email.required'         => 'E-mail é obrigatório',
-            'email.email'            => 'E-mail inválido.',
-            'celular.required'       => 'Celular é obrigatório.',
-            'celular.regex'          => 'Celular deve ter 10 ou 11 dígitos (apenas números).',
-            'cod_sus.regex'          => 'Cartão SUS deve ter 15 dígitos.',
-            'cpf_responsavel.regex'  => 'CPF do responsável deve ter 11 dígitos.',
-            'obs_laudo.max'          => 'Laudo deve ter no máximo 255 caracteres.',
+            'nome.required'           => 'O nome é obrigatório.',
+            'cpf.required'            => 'O CPF é obrigatório.',
+            'cpf.regex'               => 'Informe um CPF com 11 dígitos (apenas números).',
+            'dt_nasc.required'        => 'A data de nascimento é obrigatória.',
+            'dt_nasc.date_format'     => 'Use o formato de data dd/mm/aaaa.',
+            'dt_nasc.before'          => 'A data de nascimento deve ser anterior a hoje.',
+            'nome_responsavel.required' => 'Nome do Responsável obrigatório para menores de 18 anos.',
+            'sexo.required'           => 'Informe o sexo.',
+            'sexo.in'                 => 'Sexo inválido (use M ou F).',
+            'cep.required'            => 'CEP é obrigatório.',
+            'cep.regex'               => 'CEP deve ter 8 dígitos (apenas números).',
+            'numero.required'         => 'Número é obrigatório.',
+            'estado.alpha'            => 'UF deve conter apenas letras.',
+            'estado.size'             => 'UF deve ter 2 letras.',
+            'email.required'          => 'E-mail é obrigatório',
+            'email.email'             => 'E-mail inválido.',
+            // se quiser tornar obrigatório:
+            // 'celulares.required'    => 'Informe pelo menos um celular.',
+            'celulares.*.regex'       => 'Celular deve ter 10 ou 11 dígitos.',
+            'cod_sus.regex'           => 'Cartão SUS deve ter 15 dígitos.',
+            'cpf_responsavel.regex'   => 'CPF do responsável deve ter 11 dígitos.',
+            'obs_laudo.max'           => 'Laudo deve ter no máximo 255 caracteres.',
         ];
 
         $validator = Validator::make($request->all(), $rules, $messages);
 
-        // Verifica se o CPF já existe
+        // CPF único
         $validator->after(function ($v) use ($request) {
             $cpf = $request->input('cpf');
             if (DB::table('FAESA_CLINICA_PACIENTE')->where('CPF_PACIENTE', $cpf)->exists()) {
@@ -98,10 +107,7 @@ class PatientController extends Controller
         });
 
         if ($validator->fails()) {
-            return back()
-                ->withErrors($validator)
-                ->withInput()
-                ->with('alert', 'Verifique os campos informados.');
+            return back()->withErrors($validator)->withInput()->with('alert', 'Verifique os campos informados.');
         }
 
         try {
@@ -110,39 +116,55 @@ class PatientController extends Controller
             return back()->withInput()->with('alert', 'Data de nascimento inválida.');
         }
 
-        // Cadastro do paciente
-        $row = [
-            'NOME_COMPL_PACIENTE' => $request->input('nome'),
-            'CPF_PACIENTE'        => $request->input('cpf'),
-            'COD_SUS'             => $request->input('cod_sus'),
-            'DT_NASC_PACIENTE'    => $dtNasc,
-            'SEXO_PACIENTE'       => $request->input('sexo'),
-            'CEP'                 => $request->input('cep'),
-            'ENDERECO'            => $request->input('rua'),
-            'END_NUM'             => $request->input('numero'),
-            'COMPLEMENTO'         => $request->input('complemento'),
-            'BAIRRO'              => $request->input('bairro'),
-            'MUNICIPIO'           => $request->input('cidade'),
-            'UF'                  => $request->input('estado'),
-            'E_MAIL_PACIENTE'     => $request->input('email'),
-            'FONE_PACIENTE'       => $request->input('celular'),
-            'NOME_RESPONSAVEL'    => $request->input('nome_responsavel'),
-            'CPF_RESPONSAVEL'     => $request->input('cpf_responsavel'),
-            'OBSERVACAO'          => $request->input('obs_laudo'),
-        ];
+        // 3) Persistência com transação
+        DB::transaction(function () use ($request, $dtNasc) {
 
-        // INSERT
-        $idPaciente = DB::table('FAESA_CLINICA_PACIENTE')
-            ->insertGetId($row, 'ID_PACIENTE'); // informe a PK no SQL Server
+            $row = [
+                'NOME_COMPL_PACIENTE' => $request->input('nome'),
+                'CPF_PACIENTE'        => $request->input('cpf'),
+                'COD_SUS'             => $request->input('cod_sus'),
+                'DT_NASC_PACIENTE'    => $dtNasc,
+                'SEXO_PACIENTE'       => $request->input('sexo'),
+                'CEP'                 => $request->input('cep'),
+                'ENDERECO'            => $request->input('rua'),
+                'END_NUM'             => $request->input('numero'),
+                'COMPLEMENTO'         => $request->input('complemento'),
+                'BAIRRO'              => $request->input('bairro'),
+                'MUNICIPIO'           => $request->input('cidade'),
+                'STATUS'              => 'Fila de espera',
+                'UF'                  => $request->input('estado'),
+                'E_MAIL_PACIENTE'     => $request->input('email'),
+                'NOME_RESPONSAVEL'    => $request->input('nome_responsavel'),
+                'CPF_RESPONSAVEL'     => $request->input('cpf_responsavel'),
+                'OBSERVACAO'          => $request->input('obs_laudo'),
+                // 'CREATED_AT' => now(), 'UPDATED_AT' => now(),
+            ];
 
-        // AUDITORIA
-        AuditLogger::created(
-            'FAESA_CLINICA_PACIENTE',
-            $idPaciente,
-            $row + ['ID_PACIENTE' => $idPaciente]
-        );
+            $idPaciente = DB::table('FAESA_CLINICA_PACIENTE')->insertGetId($row, 'ID_PACIENTE');
 
-        // Redirect PRG
+            $celulares = collect($request->input('celulares', []))
+                ->filter()                    // já são só dígitos
+                ->unique()                    // evita duplicados
+                ->map(fn($numero) => [
+                    'ID_PACIENTE'  => $idPaciente,
+                    'TIPO' => 'CELULAR',
+                    'NUMERO'       => $numero,
+                    // 'CREATED_AT' => now(), 'UPDATED_AT' => now(),
+                ])
+                ->values()
+                ->all();
+
+            if ($celulares) {
+                DB::table('FAESA_CLINICA_PACIENTE_CONTATO')->insert($celulares);
+            }
+
+            AuditLogger::created(
+                'FAESA_CLINICA_PACIENTE',
+                $idPaciente,
+                $row + ['ID_PACIENTE' => $idPaciente]
+            );
+        });
+
         return back()->with('success', 'Paciente criado com sucesso!');
     }
 
@@ -185,7 +207,8 @@ class PatientController extends Controller
             'cidade'          => ['nullable', 'string', 'max:100'],
             'estado'          => ['nullable', 'alpha', 'size:2'],     // UF
             'email'           => ['nullable', 'email:rfc', 'max:100'],
-            'celular'         => ['nullable', 'regex:/^\d{10,11}$/'], // 10 ou 11 dígitos
+            'celulares'        => ['array'],                 // deixe opcional; ou use 'required|array'
+            'celulares.*'      => ['regex:/^\d{10,11}$/'],
             'cod_sus'         => ['nullable', 'regex:/^\d{15}$/'],   // SUS geralmente 15 dígitos
             'nome_resposavel' => ['nullable', 'string', 'max:255', 'regex:/^[A-Za-zÀ-ÿ0-9\s]+$/'],
             'cpf_responsavel' => ['nullable', 'regex:/^\d{11}$/'],
@@ -310,14 +333,28 @@ class PatientController extends Controller
         return response()->json($pacientes);
     }
 
-    public function editarPaciente($pacienteId)
+    public function editarPaciente(int $pacienteId)
     {
-        $paciente = DB::table('FAESA_CLINICA_PACIENTE')->where('ID_PACIENTE', $pacienteId)->first();
+        $paciente = DB::table('FAESA_CLINICA_PACIENTE')
+            ->where('ID_PACIENTE', $pacienteId)
+            ->first();
 
         if (!$paciente) {
             abort(404);
         }
 
-        return view('odontologia/create_patient', compact('paciente'));
+        // Busca só celulares; ajuste se desejar trazer outros tipos
+        $contato = DB::table('FAESA_CLINICA_PACIENTE_CONTATO')
+            ->where('ID_PACIENTE', $pacienteId)
+            ->when(true, fn($q) => $q->where('TIPO', 'CELULAR')) // remova o when para todos os tipos
+            ->orderBy('ID_PACIENTE')
+            ->pluck('NUMERO')               // array de strings (só dígitos, se você salvou normalizado)
+            ->map(function ($n) {           // máscara opcional para exibir
+                $n = preg_replace('/\D+/', '', $n);
+                return preg_replace('/^(\d{2})(\d{4,5})(\d{4})$/', '($1) $2-$3', $n) ?: $n;
+            })
+            ->all();
+
+        return view('odontologia/create_patient', compact('paciente', 'contato'));
     }
 }
