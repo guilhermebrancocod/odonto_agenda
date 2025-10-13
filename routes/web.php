@@ -67,6 +67,10 @@ Route::middleware([AuthMiddleware::class . ':Admin,Coordenador,Usuario'])->group
         return view('odontologia/create_agenda');
     })->name('criaragenda');
 
+    Route::get('/odontologia/criarboxdisciplina', function () {
+        return view('odontologia/create_box_discipline');
+    })->name('criarboxdisciplina');
+
     Route::get('/criarservico', function () {
         return view('odontologia/create_service');
     })->name('criarservico_odontologia');
