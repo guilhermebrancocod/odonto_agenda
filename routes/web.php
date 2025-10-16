@@ -168,7 +168,7 @@ Route::get('/agenda/{pacienteId}', [BoxDisciplineStudentsController::class, 'lis
 
 // CONSULTA DE VIEWS
 Route::get('/odontologia/consultarpaciente', [PatientController::class, 'fSelectPatient'])->name('selectPatient');
-Route::get('/odontologia/consultarservico', [BoxDisciplineStudentsController::class, 'fSelectService'])->name('selectService');
+Route::get('/odontologia/consultarservico', [ServiceController::class, 'fSelectService'])->name('selectService');
 Route::get('/odontologia/consultarbox', [BoxesController::class, 'fSelectBox'])->name('selectBox');
 Route::get('/odontologia/consultarusuario', [UserController::class, 'selectUser'])->name('selectUser');
 Route::get('/odontologia/consultardisciplinabox', [BoxDisciplineStudentsController::class, 'fSelectBoxDiscipline'])->name('selectBoxDiscipline');

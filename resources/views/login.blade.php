@@ -2,7 +2,7 @@
 <html lang="pt-br">
 
 <head>
-    
+
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="icon" type="image/png" href="/favicon_faesa.png">
@@ -10,274 +10,341 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
 
 </head>
-    <style>
+<style>
+    :root {
+        --brand-500: #1b6e91;
+        /* hover */
+        --brand-600: #2596be;
+        /* principal */
+        --brand-700: #0f5975;
+        /* focos fortes */
+        --bg-1: #eaf5ff;
+        --bg-2: #d4eef7;
+        --card-bg: rgba(255, 255, 255, .9);
+        --border: rgba(37, 150, 190, .18);
+        --error: #c62828;
+        --ok: #0ea5a8;
+    }
 
-        body {
-            /* font-family: Arial, sans-serif; */
-            font-family: Arial, Helvetica, sans-serif;
-            margin: 0;
-            padding: 0;
-            background-color: #5CA4EA;   /* #107ed8  #5CA4EA */
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            height: 100vh;
-            overflow: hidden;
-        }
+    * {
+        box-sizing: border-box
+    }
 
-        .container {
-            width: 280px;
-            background-color: #fff;
-            padding: 70px 50px;
-            border-radius: 10px;
-            box-shadow: 3px 3px 13px #000;
-            /* box-shadow: 0 0 10px rgba(0, 0, 0, 0.1); */
-        }
+    body {
+        font-family: Arial, Helvetica, sans-serif;
+        margin: 0;
+        min-height: 100vh;
+        display: grid;
+        place-items: center;
+        background:
+            radial-gradient(1200px 600px at 10% 10%, var(--bg-2), transparent 60%),
+            radial-gradient(1000px 500px at 90% 20%, #f1fbff, transparent 55%),
+            linear-gradient(180deg, var(--bg-1), #f8fdff);
+        padding: 24px;
+    }
 
-        .container img {
-            display: block;
-            margin: 0 auto 20px;
-            width: 190px;
-            margin-bottom: 70px;
-        }
+    .container {
+        width: min(420px, 92vw);
+        background: var(--card-bg);
+        backdrop-filter: blur(6px);
+        border: 1px solid var(--border);
+        border-radius: 16px;
+        padding: 28px 26px 26px;
+        box-shadow: 0 18px 40px rgba(0, 0, 0, .08);
+    }
 
-        label {
-            font-size: 18px;
-        }
+    .brand {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 12px;
+        margin-bottom: 18px;
+    }
 
-        input[type="text"],
-        input[type="password"] {
-            width: calc(100% - 20px);
-            padding: 2px;
-            margin: 15px 0px;
-            border: 1px solid #ccc;
-            box-sizing: border-box;
-            border: 0 none;
-            outline: 0;
-            font-size: 16px;
-        }
+    .brand img {
+        width: 150px;
+        height: auto;
+        display: block;
+    }
 
-        input[type="submit"] {
-            width: 281px;
-            padding: 15px;
-            margin-top:15px;
-            background-color: #007bff;
-            border: none;
-            border-radius: 4px;
-            color: #fff;
-            cursor: pointer;
-            font-size: 15px;
-            height: 50px;
+    .clinic-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        background: #f0fbff;
+        color: var(--brand-600);
+        border: 1px solid var(--border);
+        padding: 8px 12px;
+        border-radius: 999px;
+        font-weight: 600;
+        font-size: 14px;
+        margin: 0 auto 8px;
+    }
 
-        }
+    .clinic-badge .dot {
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+        background: var(--ok);
+        box-shadow: 0 0 0 4px rgba(14, 165, 168, .12);
+    }
 
-        input[type="submit"]:hover {
-            background-color: #0056b3;
-        }
-        hr {
-            color: black;
-            margin-top: -10px;
-        }
-        .hr {
-            padding-bottom: 20px;
-        }
+    h4 {
+        text-align: center;
+        margin: 6px 0 18px;
+        font-size: 22px;
+        color: #16475b;
+        letter-spacing: .2px;
+    }
 
-        .error {
-            color: red;
-            margin-top: 5px;
-        }
+    form {
+        margin-top: 4px
+    }
 
-        .alert-danger {
-            color: #a94442;
-            background-color: #f2dede;
-            border-color: #ebccd1;
-            padding: 10px;
-            border-radius: 5px;
-            margin-bottom: 10px;
-        }
+    .input-group {
+        position: relative;
+        margin: 18px 0;
+    }
 
-        .forgot-password-link {
-            margin-top: 20px;
-        }
+    .input-group .icon {
+        position: absolute;
+        left: 10px;
+        top: 50%;
+        transform: translateY(-50%);
+        font-size: 18px;
+        color: #6b8691;
+        pointer-events: none;
+    }
 
-        .forgot-password-link a {
-            text-decoration: none;
-            color: #007bff;
-            font-size: 15px;
-        }
+    .input-group input {
+        width: 100%;
+        height: 48px;
+        padding: 14px 44px 0 38px;
+        /* espaço p/ ícone + label flutuante */
+        border-radius: 10px;
+        border: 1px solid #d7e6ee;
+        background: #fbfeff;
+        font-size: 16px;
+        outline: none;
+        transition: border-color .2s, box-shadow .2s, background .2s;
+    }
 
-        .forgot-password-link a:hover {
-            text-decoration: underline;
-        }
+    .input-group label {
+        position: absolute;
+        left: 38px;
+        top: 50%;
+        transform: translateY(-50%);
+        font-size: 14px;
+        color: #7d97a3;
+        background: transparent;
+        pointer-events: none;
+        transition: .2s;
+    }
 
-        .input-group {
-            position: relative;
-            margin-bottom: 20px;
-        }
+    .input-group input:focus {
+        border-color: var(--brand-600);
+        box-shadow: 0 0 0 4px rgba(37, 150, 190, .12);
+        background: #fff;
+    }
 
-        .input-group input {
-            width: 100%;
-            padding: 10px 40px 10px 5px;
-            font-size: 16px;
-            border: none;
-            border-bottom: 1px solid #ccc;
-            transition: all 0.3s ease;
-            background: transparent;
-        }
+    .input-group input:focus+label,
+    .input-group input:not(:placeholder-shown)+label {
+        top: 8px;
+        transform: none;
+        font-size: 11px;
+        color: var(--brand-600);
+    }
 
-        .input-group label {
-            position: absolute;
-            top: 10px;
-            left: 5px;
-            font-size: 16px;
-            color: gray;
-            pointer-events: none;
-            transition: 0.3s ease all;
-        }
+    .toggle-password {
+        position: absolute;
+        right: 10px;
+        top: 50%;
+        transform: translateY(-50%);
+        cursor: pointer;
+        font-size: 18px;
+        color: #6b8691;
+        user-select: none;
+        padding: 6px;
+        border-radius: 8px;
+    }
 
-        .input-group input:focus ~ label,
-        .input-group input:not(:placeholder-shown) ~ label {
-            top: -10px;
-            font-size: 12px;
-            color: #2596be;
-        }
+    .toggle-password:hover {
+        background: #eef7fb
+    }
 
-        .input-group input:focus {
-            border-bottom: 2px solid #2596be;
-        }
+    .alert-danger,
+    .error {
+        margin-top: 6px;
+        padding: 10px 12px;
+        border-radius: 8px;
+        background: #fdeaea;
+        color: #7a0f0f;
+        border: 1px solid #f5c2c7;
+        font-size: 14px;
+    }
 
-        .toggle-password {
-            position: absolute;
-            top: 50%;
-            right: 10px;
-            transform: translateY(-50%);
-            cursor: pointer;
-            font-size: 18px;
-            color: #999;
-            user-select: none;
-        }
+    .actions {
+        margin-top: 10px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px;
+        flex-wrap: wrap;
+    }
 
+    .forgot-password-link a {
+        color: var(--brand-600);
+        text-decoration: none;
+        font-size: 14px;
+        transition: color .2s, transform .2s;
+    }
 
+    .forgot-password-link a:hover {
+        color: var(--brand-500);
+        transform: translateX(2px);
+    }
 
-        /* ESQUECEU A SENHA? */
-        .forgot-password-link a {
-            display: inline-block;
-            color: #2596be;
-            text-decoration: none;
-            transition: color 0.3s ease, transform 0.3s ease;
-        }
+    .btn-primary {
+        width: 100%;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        height: 50px;
+        border: none;
+        border-radius: 10px;
+        cursor: pointer;
+        background: linear-gradient(180deg, var(--brand-600), var(--brand-500));
+        color: #fff;
+        font-size: 16px;
+        font-weight: 700;
+        letter-spacing: .2px;
+        box-shadow: 0 6px 16px rgba(37, 150, 190, .25);
+        transition: transform .12s ease, box-shadow .2s ease, filter .2s ease;
+    }
 
-        .forgot-password-link a:hover {
-            color:rgb(6, 91, 128);
-            transform: translateX(5px);
-        }
+    .btn-primary:hover {
+        transform: translateY(-1px);
+        box-shadow: 0 10px 20px rgba(37, 150, 190, .28);
+        filter: brightness(1.02);
+    }
 
+    .btn-primary:active {
+        transform: translateY(0)
+    }
 
+    /* Acessibilidade */
+    .btn-primary:focus-visible,
+    .forgot-password-link a:focus-visible,
+    .toggle-password:focus-visible,
+    .input-group input:focus-visible {
+        outline: 3px solid rgba(37, 150, 190, .35);
+        outline-offset: 2px;
+        border-radius: 10px;
+    }
 
-        /* BOÃO SUBMETER FORMULÁRIO */
-        input[type="submit"] {
-            background-color: #2596be;
-            color: white;
-            border: none;
-            padding: 12px 24px;
-            font-size: 16px;
-            border-radius: 6px;
-            cursor: pointer;
-            transition: background-color 0.3s ease, transform 0.2s ease, box-shadow 0.3s ease;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-        }
-
-        input[type="submit"]:hover {
-            background-color: #1b6e91;
-            transform: translateY(-2px);
-            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
-        }
-
-        input[type="submit"]:active {
-            transform: translateY(1px);
-            box-shadow: 0 3px 6px rgba(0, 0, 0, 0.1);
-        }
-
-
-
-    </style>
-
-
+    /* Rodapé sutil */
+    .footer-note {
+        margin-top: 14px;
+        text-align: center;
+        font-size: 12px;
+        color: #7d97a3;
+    }
+</style>
+</head>
 
 <body>
+
     <div class="container">
+        <div class="brand">
+            <img src="{{ asset('faesa.png') }}" alt="FAESA">
+        </div>
 
+        <div class="clinic-badge" aria-hidden="true">
+            <span class="dot"></span> Portal da Clínica
+        </div>
+        <h4>Odontologia</h4>
 
-        <!-- LOGO FAESA -->
-        <img src="{{ asset('faesa.png') }}" alt="Logo">
-        
-        
-        <form action="{{ route('loginPOST') }}" method="POST">
+        <form action="{{ route('loginPOST') }}" method="POST" novalidate>
             @csrf
-            <!-- USUARIO -->
+
+            <!-- Usuário -->
             <div class="input-group">
-                <input type="text" id="login" name="usuario" required placeholder=" ">
+                <i class="bi bi-person icon" aria-hidden="true"></i>
+                <input
+                    type="text"
+                    id="login"
+                    name="usuario"
+                    required
+                    placeholder=" "
+                    autocomplete="username"
+                    aria-label="Usuário" />
                 <label for="login">Usuário</label>
             </div>
 
-            
+            <!-- Senha -->
+            <div class="input-group">
+                <i class="bi bi-shield-lock icon" aria-hidden="true"></i>
+                <input
+                    type="password"
+                    id="senha"
+                    name="senha"
+                    required
+                    placeholder=" "
+                    autocomplete="current-password"
+                    aria-label="Senha" />
+                <label for="senha">Senha</label>
+                <button class="toggle-password" type="button" aria-label="Mostrar/ocultar senha" onclick="togglePasswordVisibility(this)">
+                    <i class="bi bi-eye"></i>
+                </button>
+            </div>
+
             @error('login')
             <div class="error">{{ $message }}</div>
             @enderror
-            
 
-
-            <div class="input-group">
-                <input type="password" id="senha" name="senha" required placeholder=" ">
-                <label for="senha">Senha</label>
-                <span class="toggle-password" onclick="togglePasswordVisibility(this)">
-                    <i class="bi bi-eye"></i>
-                </span>
-            </div>
-            
-            
             @error('senha')
             <div class="error">{{ $message }}</div>
             @enderror
 
             @if (session('error'))
-            <div class="alert alert-danger">
+            <div class="alert-danger">
                 {{ session('error') }}
             </div>
             @endif
 
-            
-            <input type="submit" value="Entrar">
+            <button type="submit" class="btn-primary">
+                <i class="bi bi-box-arrow-in-right" aria-hidden="true"></i> Entrar
+            </button>
 
-            
-            <!-- ESQUECEU A SENHA? -->
-            <div class="forgot-password-link">
-                <a href="https://acesso.faesa.br/#/auth-user/forgot-password">Esqueceu a senha?</a>
+            <div class="actions">
+                <div class="forgot-password-link">
+                    <a href="https://acesso.faesa.br/#/auth-user/forgot-password">Esqueceu a senha?</a>
+                </div>
             </div>
 
-
-
+            <div class="footer-note">
+                Acesso restrito a profissionais e alunos autorizados.
+            </div>
         </form>
     </div>
-
 </body>
+<script>
+    function togglePasswordVisibility(element) {
+        const input = document.getElementById("senha");
+        const icon = element.querySelector("i");
 
-    <script>
-        function togglePasswordVisibility(element) {
-            const input = document.getElementById("senha");
-            const icon = element.querySelector("i");
-
-            if (input.type === "password") {
-                input.type = "text";
-                icon.classList.remove("bi-eye");
-                icon.classList.add("bi-eye-slash");
-            } else {
-                input.type = "password";
-                icon.classList.remove("bi-eye-slash");
-                icon.classList.add("bi-eye");
-            }
+        if (input.type === "password") {
+            input.type = "text";
+            icon.classList.remove("bi-eye");
+            icon.classList.add("bi-eye-slash");
+        } else {
+            input.type = "password";
+            icon.classList.remove("bi-eye-slash");
+            icon.classList.add("bi-eye");
         }
-    </script>
+    }
+</script>
 
 
 

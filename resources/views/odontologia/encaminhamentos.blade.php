@@ -17,7 +17,7 @@
 
 <body>
     @include('components.sidebar')
-    <div style="margin-left:220px; padding: 30px; border-radius: 10px; background-color: #fff; box-shadow: 0 4px 12px rgba(0,0,0,0.05);width: 100%;">
+    <div style="margin-left:225px; padding: 30px; border-radius: 10px; background-color: #fff; box-shadow: 0 4px 12px rgba(0,0,0,0.05);width: 100%;">
         <fieldset class="border p-3 rounded mb-3">
             <legend class="w-auto px-2">Encaminhamentos</legend>
         </fieldset>

@@ -16,7 +16,7 @@
 <body>
     @include('components.sidebar')
     @include('odontologia.modal.log')
-    <div style="margin-left:220px; padding: 30px; border-radius: 10px; background-color: #fff; box-shadow: 0 4px 12px rgba(0,0,0,0.05);width: 100%;">
+    <div style="margin-left:225px; padding: 30px; border-radius: 10px; background-color: #fff; box-shadow: 0 4px 12px rgba(0,0,0,0.05);width: 100%;">
         <fieldset class="border p-3 rounded mb-3">
             <legend class="w-auto px-2">Cadastro Paciente</legend>
         </fieldset>
@@ -39,7 +39,7 @@
 
                     <select id="status" name="status"
                         class="form-select form-select-sm w-auto"
-                        style="min-width: 220px"
+                        style="min-width: 225px"
                         aria-label="Status do Paciente">
                         <option value="0" {{ old('status', $paciente->STATUS ?? '') == '0' ? 'selected' : '' }}>Fila de espera</option>
                         <option value="1" {{ old('status', $paciente->STATUS ?? '') == '1' ? 'selected' : '' }}>Em tratamento</option>
