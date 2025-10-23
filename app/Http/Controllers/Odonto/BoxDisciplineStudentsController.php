@@ -526,7 +526,6 @@ class BoxDisciplineStudentsController extends Controller
                 $query->where('HR_INICIO', 'like', '%' . $query_box_discipline . '%');
                 $query->where('HR_FIM', 'like', '%' . $query_box_discipline . '%');
             })
-            ->where('ID_CLINICA', '=', 2)
             ->get();
 
         return view('odontologia/consult_box_discipline', compact('selectBoxDiscipline', 'query_box_discipline'));

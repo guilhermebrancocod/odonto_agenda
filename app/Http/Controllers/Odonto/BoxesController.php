@@ -103,7 +103,6 @@ class BoxesController extends Controller
             ->where(function ($query) use ($query_box) {
                 $query->where('DESCRICAO', 'like', '%' . $query_box . '%');
             })
-            ->where('ID_CLINICA', '=', 2)
             ->get();
 
         return view('odontologia/consult_box', compact('selectBox', 'query_box'));

@@ -12,7 +12,7 @@ class UserController extends Controller
 
     public function editUser($userId)
     {
-        $user = DB::table('FAESA_CLINICA_USUARIO_GERAL')->where('ID', $userId)->first();
+        $user = DB::table('FAESA_CLINICA_USUARIO')->where('ID', $userId)->first();
 
         if (!$user) {
             abort(404);
@@ -23,7 +23,7 @@ class UserController extends Controller
 
     public function createUsuario(Request $request)
     {
-        DB::table('FAESA_CLINICA_USUARIO_GERAL')->insertGetId([
+        DB::table('FAESA_CLINICA_USUARIO')->insertGetId([
             'ID_CLINICA' => 2,
             'USUARIO' => $request->input('winusuario'),
             'NOME' => $request->input('nome'),
@@ -69,7 +69,7 @@ class UserController extends Controller
                 ->with('alert', 'Verifique os campos informados.');
         }
 
-        DB::table('FAESA_CLINICA_USUARIO_GERAL')
+        DB::table('FAESA_CLINICA_USUARIO')
             ->where('ID', $userId)
             ->update([
                 'NOME'      => $request->input('nome'),
@@ -86,7 +86,7 @@ class UserController extends Controller
     {
         $usuarioId = $request->input('userId');
 
-        $query = DB::table('FAESA_CLINICA_USUARIO_GERAL')
+        $query = DB::table('FAESA_CLINICA_USUARIO')
             ->select(
                 'ID',
                 'NOME',
@@ -141,7 +141,7 @@ class UserController extends Controller
     {
         $query = $request->input('search-input');
 
-        $selectUser = DB::table('FAESA_CLINICA_USUARIO_GERAL')
+        $selectUser = DB::table('FAESA_CLINICA_USUARIO')
             ->select('NOME', 'USUARIO')
             ->where('ID_CLINICA', 2)
             ->where('NOME', 'like', '%' . $query . '%')
@@ -156,7 +156,7 @@ class UserController extends Controller
             return response()->json(['error' => 'ID inválido'], 400);
         }
 
-        $query = DB::table('FAESA_CLINICA_USUARIO_GERAL')
+        $query = DB::table('FAESA_CLINICA_USUARIO')
             ->select('ID', 'NOME', 'USUARIO', 'PESSOA', 'TIPO', 'STATUS')
             ->where('STATUS', '=', 'Ativo')
             ->where('ID', '=', $userId);

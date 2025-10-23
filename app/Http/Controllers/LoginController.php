@@ -33,7 +33,7 @@ class LoginController extends Controller
         }
 
         // 3) Usuário local
-        $user = DB::table('FAESA_CLINICA_USUARIO_GERAL')
+        $user = DB::table('FAESA_CLINICA_USUARIO')
             ->where('USUARIO', $data['usuario'])
             ->first();
 
