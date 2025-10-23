@@ -121,7 +121,7 @@ class EncaminhamentoController extends Controller
     {
         $enc = DB::table('FAESA_CLINICA_AGENDAMENTO_ENCAMINHAMENTO as E')
             ->join('FAESA_CLINICA_AGENDAMENTO as A', 'A.ID_AGENDAMENTO', '=', 'E.ID_AGENDAMENTO')
-            ->leftJoin('LYCEUM_BKP_PRODUCAO.dbo.LY_ALUNO as AL', 'AL.ALUNO', '=', 'A.ID_PACIENTE')
+            ->leftJoin('LYCEUM.dbo.LY_ALUNO as AL', 'AL.ALUNO', '=', 'A.ID_PACIENTE')
             ->selectRaw("
                 E.ID,
                 E.ID_AGENDAMENTO,
