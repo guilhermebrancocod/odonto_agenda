@@ -5,7 +5,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="csrf-token" content="{{ csrf_token() }}">
-    <title>Menu</title>
+    <title>Menu | FAESA</title>
     <link rel="icon" type="image/png" href="/img/faesa_favicon.png">
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700&display=swap" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.11/index.global.min.css" rel="stylesheet">
@@ -13,7 +13,7 @@
 </head>
 
 <body>
-    @include('components.sidebar')
+    @include('partials.sidebar')
     <div id="calendar" style="min-width: 70%;"></div>
 
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>

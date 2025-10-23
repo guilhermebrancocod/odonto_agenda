@@ -8,6 +8,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Validator;
+use App\Services\Odontologia\AuditLogger;
 
 class AgendaController extends Controller
 {
@@ -151,12 +152,12 @@ class AgendaController extends Controller
             ->values();
 
         if ($horarios->isNotEmpty()) {
-            $hrIni = Carbon::createFromFormat('H:i', $request->input('hr_ini'))->format('H:i:s');
-            $hrFim = Carbon::createFromFormat('H:i', $request->input('hr_fim'))->format('H:i:s');
+            $hrIni = Carbon::createFromFormat('H:i', $request->input('hrIni'))->format('H:i:s');
+            $hrFim = Carbon::createFromFormat('H:i', $request->input('hrFim'))->format('H:i:s');
         } else {
             // fallback: se nada foi enviado em dias_semana, usa os campos do formulário
-            $hrIni = Carbon::createFromFormat('H:i', $request->input('hr_ini'))->format('H:i:s');
-            $hrFim = Carbon::createFromFormat('H:i', $request->input('hr_fim'))->format('H:i:s');
+            $hrIni = Carbon::createFromFormat('H:i', $request->input('hrIni'))->format('H:i:s');
+            $hrFim = Carbon::createFromFormat('H:i', $request->input('hrFim'))->format('H:i:s');
         }
 
         $rawValor = $request->input('valor');
@@ -270,7 +271,7 @@ class AgendaController extends Controller
                     }
 
                     // Insere a ocorrência do dia
-                    $idAgendamento = DB::table('FAESA_CLINICA_AGENDAMENTO')->insertGetId([
+                    $payloadAg = [
                         'ID_CLINICA'         => $idClinica,
                         'ID_PACIENTE'        => (int) $request->input('ID_PACIENTE'),
                         'ID_SERVICO'         => $idServico,
@@ -285,7 +286,24 @@ class AgendaController extends Controller
                         'VALOR_AGEND'        => $valor_convert,
                         'OBSERVACOES'        => $request->input('obs'),
                         'LOCAL'              => $descricaoLocal,
-                    ]);
+                    ];
+
+                    $idAgendamento = DB::table('FAESA_CLINICA_AGENDAMENTO')->insertGetId($payloadAg);
+
+                    $payloadLocal = [
+                        'ID_AGENDAMENTO' => $idAgendamento,
+                        'ID_BOX'         => $idBox,
+                        'DISCIPLINA'     => $disciplina,
+                        'TURMA'          => $turma,
+                    ];
+                    DB::table('FAESA_CLINICA_LOCAL_AGENDAMENTO')->insert($payloadLocal);
+
+
+                    AuditLogger::created(
+                        'FAESA_CLINICA_AGENDAMENTO',
+                        $idAgendamento,
+                        $payloadAg + ['ID_AGENDAMENTO' => $idAgendamento]
+                    );
 
                     DB::table('FAESA_CLINICA_LOCAL_AGENDAMENTO')->insert([
                         'ID_AGENDAMENTO' => $idAgendamento,
@@ -373,6 +391,7 @@ class AgendaController extends Controller
 
     public function updateAgenda(Request $request, $id)
     {
+
         $agenda = DB::table('FAESA_CLINICA_AGENDAMENTO')->where('ID_AGENDAMENTO', $id)->first();
         if (!$agenda) {
             return back()->withErrors('Agendamento não encontrado.');
@@ -400,25 +419,34 @@ class AgendaController extends Controller
             ->where('ID_SERVICO_CLINICA', (int) $request->input('procedimento')) // se o PK for outro (ex.: ID_BOX_DISCIPLINA), ajuste aqui
             ->value('ID_SERVICO_CLINICA');
 
+        $old = (array) DB::table('FAESA_CLINICA_AGENDAMENTO')->where('ID_AGENDAMENTO', $id)->first();
+        if (!$old) return back()->with('error', 'Agendamento não encontrado.');
+
+        $update = [
+            'ID_CLINICA' => $idClinica,
+            'ID_PACIENTE' => $request->input('ID_PACIENTE'),
+            'ID_SERVICO' => $servico,
+            'DT_AGEND' => $diaStr,
+            'DT_AGEND_FINAL' => $dateEnd,
+            'HR_AGEND_INI' => $request->input('hrIni'),
+            'HR_AGEND_FIN' => $request->input('hrFim'),
+            'STATUS_AGEND' => $request->input('status'),
+            'ID_AGEND_REMARCADO' => $request->input('ID_AGEND_REMARCADO') ?: null,
+            'RECORRENCIA' => $request->input('recorrencia'),
+            'VALOR_AGEND' => $valor_convert,
+            'OBSERVACOES' => $request->input('obs'),
+            'LOCAL' => $descricaoLocal
+        ];
+
         DB::table('FAESA_CLINICA_AGENDAMENTO as a')
             ->join('FAESA_CLINICA_LOCAL_AGENDAMENTO as la', 'la.ID_AGENDAMENTO', '=', 'A.ID_AGENDAMENTO')
             ->join('FAESA_CLINICA_BOXES as cb', 'cb.ID_BOX_CLINICA', '=', 'la.ID_BOX')
             ->where('la.ID_AGENDAMENTO', $id)
-            ->update([
-                'ID_CLINICA' => $idClinica,
-                'ID_PACIENTE' => $request->input('ID_PACIENTE'),
-                'ID_SERVICO' => $servico,
-                'DT_AGEND' => $diaStr,
-                'DT_AGEND_FINAL' => $dateEnd,
-                'HR_AGEND_INI' => $request->input('hr_ini'),
-                'HR_AGEND_FIN' => $request->input('hr_fim'),
-                'STATUS_AGEND' => $request->input('status'),
-                'ID_AGEND_REMARCADO' => $request->input('ID_AGEND_REMARCADO') ?: null,
-                'RECORRENCIA' => $request->input('recorrencia'),
-                'VALOR_AGEND' => $valor_convert,
-                'OBSERVACOES' => $request->input('obs'),
-                'LOCAL' => $descricaoLocal
-            ]);
+            ->update($update);
+
+        $new = array_merge($old, $update);
+
+        AuditLogger::updated('FAESA_CLINICA_AGENDAMENTO', $id, $old, $new);
 
         $updLocal = ['DISCIPLINA' => $request->input('disciplina')];
 
@@ -559,6 +587,7 @@ class AgendaController extends Controller
 
     public function getHorariosDatasTurmaDisciplina($disciplina, $turma, $diasemana)
     {
+
         $diasemana = (int) $diasemana;
         $horarios = DB::table('LYCEUM_BKP_PRODUCAO.dbo.LY_AGENDA as A')
             ->where('A.ANO', 2025)

@@ -9,6 +9,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
 use App\Services\Odontologia\AuditLogger;
+use App\Models\Odontologia\Paciente;
 
 class PatientController extends Controller
 {
@@ -260,27 +261,33 @@ class PatientController extends Controller
             return redirect()->back()->with('error', 'Paciente não encontrado.');
         }
 
-        DB::table('FAESA_CLINICA_PACIENTE')
-            ->where('ID_PACIENTE', $id)
-            ->update([
-                'NOME_COMPL_PACIENTE' => $request->input('nome'),
-                'COD_SUS'             => $request->input('cod_sus'),
-                'DT_NASC_PACIENTE'    => $dtNasc,
-                'SEXO_PACIENTE'       => $request->input('sexo'),
-                'CEP'                 => $request->input('cep'),
-                'ENDERECO'            => $request->input('rua'),
-                'END_NUM'             => $request->input('numero'),
-                'COMPLEMENTO'         => $request->input('complemento'),
-                'BAIRRO'              => $request->input('bairro'),
-                'MUNICIPIO'           => $request->input('cidade'),
-                'UF'                  => $request->input('estado'),
-                'E_MAIL_PACIENTE'     => $request->input('email'),
-                'FONE_PACIENTE'       => $request->input('celular'),
-                'NOME_RESPONSAVEL'    => $request->input('nome_resposavel'),
-                'CPF_RESPONSAVEL'     => $request->input('cpf_responsavel'),
-                'OBSERVACAO'          => $request->input('obs_laudo'),
-            ]);
+        $old = (array) DB::table('FAESA_CLINICA_PACIENTE')->where('ID_PACIENTE', $id)->first();
+        if (!$old) return back()->with('error', 'Paciente não encontrado.');
 
+        $update = [
+            'NOME_COMPL_PACIENTE' => $request->input('nome'),
+            'COD_SUS'             => $request->input('cod_sus'),
+            'DT_NASC_PACIENTE'    => $dtNasc,
+            'SEXO_PACIENTE'       => $request->input('sexo'),
+            'CEP'                 => $request->input('cep'),
+            'ENDERECO'            => $request->input('rua'),
+            'END_NUM'             => $request->input('numero'),
+            'COMPLEMENTO'         => $request->input('complemento'),
+            'BAIRRO'              => $request->input('bairro'),
+            'MUNICIPIO'           => $request->input('cidade'),
+            'UF'                  => $request->input('estado'),
+            'E_MAIL_PACIENTE'     => $request->input('email'),
+            'FONE_PACIENTE'       => $request->input('celular'),
+            'NOME_RESPONSAVEL'    => $request->input('nome_resposavel'),
+            'CPF_RESPONSAVEL'     => $request->input('cpf_responsavel'),
+            'OBSERVACAO'          => $request->input('obs_laudo'),
+        ];
+        DB::table('FAESA_CLINICA_PACIENTE')->where('ID_PACIENTE', $id)->update($update);
+
+        $new = array_merge($old, $update);
+
+        AuditLogger::updated('FAESA_CLINICA_PACIENTE', $id, $old, $new);
+        
         return redirect()->back()->with('success', 'Paciente atualizado com sucesso!');
     }
 

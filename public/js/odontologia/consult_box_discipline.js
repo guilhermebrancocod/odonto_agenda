@@ -45,8 +45,10 @@ function carregarTodosBoxDiscipline() {
                     <tr>
                         <td>${disciplines.NOME}</td>
                         <td>${disciplines.DESCRICAO}</td>
-                        <td>${disciplines.ALUNO}</td>
                         <td>${disciplines.TURMA}</td>
+                        <td>${diaSemana(disciplines.DIA_SEMANA)}</td>
+                        <td>${maskTime(disciplines.HR_INICIO)}</td>
+                        <td>${maskTime(disciplines.HR_FIM)}</td>
                         <td>
                             <button 
                                 type="button" 

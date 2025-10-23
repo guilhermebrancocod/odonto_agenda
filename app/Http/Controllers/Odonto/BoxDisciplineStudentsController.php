@@ -373,6 +373,9 @@ class BoxDisciplineStudentsController extends Controller
             ->select(
                 'bd.ID_BOX_DISCIPLINA',
                 'd.DISCIPLINA',
+                'd.DIA_SEMANA',
+                'd.HR_INICIO',
+                'd.HR_FIM',
                 'ld.NOME',
                 'b.DESCRICAO',
                 'bd.ALUNO',

@@ -56,11 +56,16 @@ class LoginController extends Controller
             $clinicas[] = (int) $user->ID_CLINICA;
         }
 
+        $tipo = isset($user->TIPO) ? $user->TIPO : null;
+        $nome = isset($user->NOME) ? $user->NOME : null;
+
         // 6) Regenerar e salvar sessão (ESSENCIAL)
         $request->session()->regenerate();
         session([
             'usuario'     => $user,         // seu middleware lê exatamente isso
+            'nome'        => $nome,
             'clinicas'    => $clinicas,
+            'tipo'        => $tipo,
             'SIT_USUARIO' => 'ATIVO',
         ]);
 

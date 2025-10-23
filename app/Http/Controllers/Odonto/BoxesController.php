@@ -20,6 +20,17 @@ class BoxesController extends Controller
         return redirect()->back()->with('success', 'Box cadastrado com sucesso!');
     }
 
+    public function getBoxeId($boxId, Request $request)
+    {
+        $query = DB::table('FAESA_CLINICA_BOXES')
+            ->select('DESCRICAO', 'ID_BOX_CLINICA', 'ATIVO')
+            ->where('FAESA_CLINICA_BOXES.ID_BOX_CLINICA', '=', $boxId);
+
+        $boxes = $query->get();
+
+        return response()->json($boxes);
+    }
+
     public function getBoxes(Request $request)
     {
         $query = DB::table('FAESA_CLINICA_BOXES')

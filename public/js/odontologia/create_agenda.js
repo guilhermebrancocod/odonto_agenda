@@ -439,6 +439,7 @@ $(document).ready(function () {
 
         function renderHorarios(items) {
             grid.innerHTML = '';
+
             const set = new Set();
             (items || []).forEach(it => {
                 const i = norm(it.hrIni);
@@ -446,28 +447,40 @@ $(document).ready(function () {
                 if (i) set.add(i);
                 if (f) set.add(f);
             });
+
             const horarios = Array.from(set).sort((a, b) => toMin(a) - toMin(b));
 
             if (horarios.length === 0) {
                 grid.innerHTML = `
-            <div class="text-muted small px-2 py-1">
-                Sem horários. Verifique e refaça o agendamento.
-            </div>`;
+                <div class="text-muted small px-2 py-1">
+                    Sem horários. Verifique e refaça o agendamento.
+                </div>`;
                 return;
             }
 
-            horarios.forEach((h, idx) => {
-                const id = `hor_${h.replace(':', '')}_${idx}`;
-                grid.insertAdjacentHTML('beforeend', `
-                <div class="time-item">
-                    <input class="time-input" type="checkbox" id="${id}" name="horarios[]" value="${h}" checked>
-                    <label class="time-card" for="${id}">${h}</label>
-                </div>`);
-            });
+            // 👉 Cabeçalho com o range global
+            const menor = horarios[0];
+            const maior = horarios[horarios.length - 1];
+
+            grid.insertAdjacentHTML('beforeend', `
+                <div class="time-item time-range">
+                    <span class="time-range-text">
+                    de: <strong>${menor}</strong> até <strong>${maior}</strong>
+                    </span>
+                </div>
+            `);
+
+            const inputIni = document.querySelector('#hrIni');
+            const inputFim = document.querySelector('#hrFim');
+            if (inputIni && inputFim) {
+                inputIni.value = menor;
+                inputFim.value = maior;
+            }
 
             grid.addEventListener('change', onSelectChange, { once: true });
             onSelectChange();
         }
+
 
         fetch(`/odontologia/horarios/${encodeURIComponent(disc)}/${encodeURIComponent(turma)}/${encodeURIComponent(diaSelecionadoParam)}`)
             .then(r => r.json())

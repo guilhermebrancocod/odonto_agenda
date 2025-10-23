@@ -19,7 +19,7 @@
     @include('partials.sidebar')
     <div style="margin-left:225px; padding: 30px; border-radius: 10px; background-color: #fff; box-shadow: 0 4px 12px rgba(0,0,0,0.05);width: 100%;">
         <fieldset class="border p-3 rounded mb-3">
-            <legend class="w-auto px-2">Encaminhamentos</legend>
+            <legend class="w-auto px-2">Relatorios</legend>
         </fieldset>
         <form id="form-search-service" class="row g-3 needs-validation">
             <div class="linha-com-titulo">
@@ -31,20 +31,24 @@
                 <div class="card-body">
                     <div class="row g-3 align-items-end">
                         <!-- Select 1 -->
-                        <!--<div class="col-12 col-md-6">
+                        <div class="col-12 col-md-6">
                             <label for="filtroAgendamento" class="form-label mb-1">Agendamento</label>
                             <select id="filtroAgendamento" name="filtroAgendamento" class="form-select form-select-sm">
                                 <option value="">Selecione…</option>
+                                <!-- opções via JS -->
                             </select>
                             <div class="form-text">Escolha o agendamento desejado.</div>
                         </div>
+
+                        <!-- Select 2 (duplas/alunos/outro filtro) -->
                         <div class="col-12 col-md-6">
                             <label for="filtroDupla" class="form-label mb-1">Dupla/Alunos</label>
                             <select id="filtroDupla" name="filtroDupla" class="form-select form-select-sm">
                                 <option value="">Selecione…</option>
+                                <!-- opções via JS -->
                             </select>
                             <div class="form-text">Mostra as duplas disponíveis para o filtro.</div>
-                        </div>-->
+                        </div>
 
                         <!-- Grupo de status como “pílulas” -->
                         <div class="col-12">

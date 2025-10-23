@@ -6,7 +6,7 @@
     <div class="modal-content">
       <div class="modal-header">
         <h5 class="modal-title">
-          Histórico do Paciente <span id="audit-pid" class="text-muted"></span>
+          Auditoria ID: <span id="audit-pid" class="text-muted"></span>
         </h5>
         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fechar"></button>
       </div>
@@ -29,7 +29,6 @@
     document.addEventListener('click', async (e) => {
       const btn = e.target.closest('.btn-log');
       if (!btn) return;
-
       const url = btn.dataset.url;
       const pid = btn.dataset.pacienteId;
 
@@ -75,7 +74,7 @@
               <span class="badge bg-${user} text-uppercase">${r.EVENT}</span>
               <small class="text-muted ms-2">${when}</small>
             </div>
-            <div><small class="text-muted">Usuário: ${escapeHtml(user)}</small></div>
+            <!--<div><small class="text-muted">ID: ${escapeHtml(user)}</small></div>-->
           </div>
           <div class="card-body">
             ${changes}

@@ -12,7 +12,7 @@
 </head>
 
 <body>
-    @include('components.sidebar')
+    @include('partials.sidebar')
     <div style="max-width: 1200px; margin-left:225px; padding: 30px; border-radius: 10px; background-color: #fff; box-shadow: 0 4px 12px rgba(0,0,0,0.05);">
         <div style="text-align: center; margin-bottom: 30px;margin-top: 5px;">
             <h2 style="margin: 0; font-size: 28px; color: #333;">Relatório de agendamentos</h2>

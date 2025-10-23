@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Cadastro</title>
+    <title>Novo Agendamento | FAESA</title>
     <link rel="icon" type="image/png" href="/img/faesa_favicon.png">
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700&display=swap" rel="stylesheet">
 
@@ -124,7 +124,8 @@
 </style>
 
 <body>
-    @include('components.sidebar')
+    @include('odontologia.modal.log')
+    @include('partials.sidebar')
     <div style="margin-left:225px; padding: 30px; border-radius: 10px; background-color: #fff; box-shadow: 0 4px 12px rgba(0,0,0,0.05);width: 100%;">
         <fieldset class="border p-1 rounded mb-3">
             <legend class="w-auto px-2">Novo agendamento</legend>
@@ -136,9 +137,21 @@
             @if(isset($agenda))
             @method('PUT')
             @endif
+            @php
+            $isEdit = isset($agenda);
+            @endphp
+            @if($isEdit)
             <div class="linha-com-titulo">
                 <h5>Paciente</h5>
                 <div class="linha-flex"></div>
+                <button class="btn btn-outline-primary btn-log"
+                    type="button"
+                    data-bs-toggle="modal"
+                    data-bs-target="#auditModal"
+                    data-paciente-id="{{ $agenda->ID_AGENDAMENTO }}"
+                    data-url="{{ route('pacientes.audit', $agenda->ID_AGENDAMENTO) }}">
+                    <i class="bi bi-clock-history me-1"></i> Log
+                </button>
             </div>
             <div style="display: flex; align-items: flex-end; gap: 10px; flex-wrap: wrap; margin: 15px 0;">
                 <div style="flex: 1; min-width: 250px;">
@@ -151,6 +164,7 @@
                     </select>
                 </div>
             </div>
+            @endif
             <div class="linha-com-titulo">
                 <h5>Datalhes</h5>
                 <div class="linha-flex"></div>
@@ -317,8 +331,8 @@
                                     </div>
                                 </fieldset>
                                 <div class="col-1">
-                                    <input id="hr_ini" name="hr_ini" type="hidden" value="{{ $hrIni }}">
-                                    <input id="hr_fim" name="hr_fim" type="hidden" value="{{ $hrFim }}">
+                                    <input id="hrIni" name="hrIni" type="hidden" value="{{ $hrIni }}">
+                                    <input id="hrFim" name="hrFim" type="hidden" value="{{ $hrFim }}">
                                 </div>
                             </div>
                             <!-- DIREITA: recorrência -->

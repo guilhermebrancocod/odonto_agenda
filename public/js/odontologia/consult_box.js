@@ -89,29 +89,41 @@ $('#selectBoxes').on('select2:select', function (e) {
 
     // Busca os dados completos do paciente via AJAX
     $.ajax({
-        url: `/odontologia/boxes/${boxId}`,
+        url: `/odontologia/boxes/${boxId}`, // boxId é a variável externa com o ID
         type: 'GET',
         dataType: 'json',
-        success: function (boxId) {
+        success: function (data) {
+            // Normaliza o payload (objeto, array, ou objeto aninhado)
+            const box = Array.isArray(data)
+                ? data[0]
+                : (data.box ?? data);
+
+            if (!box) {
+                console.warn('Resposta inesperada:', data);
+                alert('Formato de resposta inesperado.');
+                return;
+            }
+
             const html = `
-                    <tr>
-                        <td>${boxId.DESCRICAO}</td>
-                        <td>${boxId.ATIVO}</td>
-                        <td>
-                            <button 
-                                type="button" 
-                                class="edit-box btn btn-link p-0 m-0 border-0" 
-                                style="color: inherit;" 
-                                data-id="${boxId.ID_BOX_CLINICA}">
-                                <i class="fa fa-pencil-alt"></i>
-                            </button>
-                        </td>
-                    </tr>
-                `;
-            // Atualiza o corpo da tabela com apenas o paciente selecionado
+      <tr>
+        <td>${box.DESCRICAO ?? ''}</td>
+        <td>${box.ATIVO ?? ''}</td>
+        <td>
+          <button 
+            type="button" 
+            class="edit-box btn btn-link p-0 m-0 border-0" 
+            style="color: inherit;" 
+            data-id="${box.ID_BOX_CLINICA ?? ''}">
+            <i class="fa fa-pencil-alt"></i>
+          </button>
+        </td>
+      </tr>
+    `;
+
             $('#table-box tbody').html(html);
         },
-        error: function () {
+        error: function (xhr) {
+            console.error('Erro', xhr);
             alert("Erro ao buscar os dados do box.");
         }
     });

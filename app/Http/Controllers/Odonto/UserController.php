@@ -2,13 +2,10 @@
 
 namespace App\Http\Controllers\Odonto;
 
-use Illuminate\Validation\Rule;
-use Carbon\Carbon;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
-use App\Services\Odontologia\AuditLogger;
 
 class UserController extends Controller
 {
@@ -41,7 +38,6 @@ class UserController extends Controller
     {
         $rows = DB::table('FAESA_CLINICA_ODONTOLOGIA_AUDITORIA')
             ->where('AUDITABLE_ID', $id)
-            ->where('EVENT', '=', 'created')
             ->select('AUDITABLE_ID', 'OLD_VALUES', 'NEW_VALUES', 'created_at', 'updated_at')
             ->orderByDesc('created_at')
             ->get();
