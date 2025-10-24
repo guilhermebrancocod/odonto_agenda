@@ -218,7 +218,7 @@ class AgendamentoService
     {
         $professor = session('professor');
         $turmas = array_column($professor[4], 'TURMA');
-        $alunos = DB::table('LYCEUM_BKP_PRODUCAO.dbo.LY_MATRICULA as mat')
+        $alunos = DB::table('LYCEUM.dbo.LY_MATRICULA as mat')
             ->join('FAESA_CLINICA_AGENDAMENTO as ag', 'ag.ID_ALUNO', 'mat.ALUNO')
             ->whereIn('mat.TURMA', $turmas)
             ->pluck('ag.ID_ALUNO');
@@ -429,7 +429,7 @@ class AgendamentoService
     private function _isFeriado(string $data): bool
     {
         $dataCarbon = Carbon::parse($data)->format('Y-m-d');
-        return DB::table('LYCEUM_BKP_PRODUCAO.dbo.LY_FERIADO')
+        return DB::table('LYCEUM.dbo.LY_FERIADO')
             ->where('DATA', '=', $dataCarbon)
             ->exists();
     }

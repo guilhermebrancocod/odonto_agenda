@@ -51,7 +51,6 @@ class BoxDisciplineStudentsController extends Controller
             // 3.1) Garante/obtém a linha de regra para CADA box
             foreach ($data['boxes'] as $boxId) {
                 $attrs = [
-                    'ID_CLINICA' => 2,
                     'ID_BOX'     => (int) $boxId,
                     'DISCIPLINA' => $data['disciplina'],
                     'TURMA'      => $data['turma'],
@@ -68,7 +67,7 @@ class BoxDisciplineStudentsController extends Controller
                 } else {
                     // cria e pega o ID
                     $idBoxDisc = DB::table('FAESA_CLINICA_BOX_DISCIPLINA')->insertGetId(
-                        $attrs + ['DT_CADASTRO' => DB::raw('SYSDATETIME()')]
+                        $attrs + ['CREATED_AT' => DB::raw('SYSDATETIME()')]
                     );
                 }
 
@@ -134,7 +133,7 @@ class BoxDisciplineStudentsController extends Controller
 
         // 2) ALUNOS vinculados (recorrência)
         $alunos = DB::table('FAESA_CLINICA_BOX_DISCIPLINA_ALUNO as BDA')
-            ->leftJoin('LYCEUM_BKP_PRODUCAO.dbo.LY_ALUNO as A', 'A.ALUNO', '=', 'BDA.ALUNO')
+            ->leftJoin('LYCEUM.dbo.LY_ALUNO as A', 'A.ALUNO', '=', 'BDA.ALUNO')
             ->where('BDA.ID_BOX_DISCIPLINA', $idBoxDiscipline)
             ->when($ano, fn($q) => $q->where('BDA.ANO', $ano))
             ->when($sem, fn($q) => $q->where('BDA.SEMESTRE', $sem))
@@ -144,7 +143,7 @@ class BoxDisciplineStudentsController extends Controller
             ->get();
 
         $nome = DB::table('FAESA_CLINICA_BOX_DISCIPLINA as BD')
-            ->join('LYCEUM_BKP_PRODUCAO.dbo.ly_disciplina as D', 'D.DISCIPLINA', '=', 'BD.DISCIPLINA')
+            ->join('LYCEUM.dbo.ly_disciplina as D', 'D.DISCIPLINA', '=', 'BD.DISCIPLINA')
             ->where('BD.ID_BOX_DISCIPLINA', $idBoxDiscipline)
             ->value('D.NOME');
 
@@ -262,7 +261,6 @@ class BoxDisciplineStudentsController extends Controller
             foreach ($boxesParaAdicionar as $boxId) {
                 DB::table('FAESA_CLINICA_BOX_DISCIPLINA')->insert([
                     'ID_BOX_DISCIPLINA' => $idBoxDiscipline,
-                    'ID_CLINICA'        => 2,
                     'ID_BOX'            => $boxId,
                     'DISCIPLINA'        => $disciplina,
                     'TURMA'             => $turma,
@@ -369,7 +367,7 @@ class BoxDisciplineStudentsController extends Controller
         $disciplines = DB::table('FAESA_CLINICA_BOX_DISCIPLINA_ALUNO as bd')
             ->join('FAESA_CLINICA_BOX_DISCIPLINA as d', 'd.ID_BOX_DISCIPLINA', 'bd.ID_BOX_DISCIPLINA')
             ->join('FAESA_CLINICA_BOXES as b', 'b.ID_BOX_CLINICA', '=', 'bd.ID_BOX')
-            ->join('LYCEUM_BKP_PRODUCAO.dbo.LY_DISCIPLINA as ld', 'ld.DISCIPLINA', '=', 'd.DISCIPLINA')
+            ->join('LYCEUM.dbo.LY_DISCIPLINA as ld', 'ld.DISCIPLINA', '=', 'd.DISCIPLINA')
             ->select(
                 'bd.ID_BOX_DISCIPLINA',
                 'd.DISCIPLINA',
@@ -381,7 +379,6 @@ class BoxDisciplineStudentsController extends Controller
                 'bd.ALUNO',
                 'd.TURMA',
             )
-            ->where('d.ID_CLINICA', '=', 2)
             ->distinct()
             ->get();
 
@@ -393,7 +390,6 @@ class BoxDisciplineStudentsController extends Controller
         $boxes = DB::table('FAESA_CLINICA_BOX_DISCIPLINA')
             ->join('FAESA_CLINICA_BOXES', 'FAESA_CLINICA_BOXES.ID_BOX_CLINICA', '=', 'FAESA_CLINICA_BOX_DISCIPLINA.ID_BOX')
             ->select('FAESA_CLINICA_BOXES.ID_BOX_CLINICA', 'FAESA_CLINICA_BOXES.DESCRICAO')
-            ->where('FAESA_CLINICA_BOX_DISCIPLINA.ID_CLINICA', '=', 2)
             ->where('FAESA_CLINICA_BOX_DISCIPLINA.DISCIPLINA', trim($discipline))
             ->where('FAESA_CLINICA_BOX_DISCIPLINA.DIA_SEMANA', $diasemana)
             ->distinct()
@@ -406,7 +402,6 @@ class BoxDisciplineStudentsController extends Controller
     {
         $horarios = DB::table('FAESA_CLINICA_BOX_DISCIPLINA')
             ->select('HR_INICIO', 'HR_FIM')
-            ->where('FAESA_CLINICA_BOX_DISCIPLINA.ID_CLINICA', '=', 2)
             ->where('FAESA_CLINICA_BOX_DISCIPLINA.DISCIPLINA', trim($discipline))
             ->get();
 
@@ -416,7 +411,7 @@ class BoxDisciplineStudentsController extends Controller
     public function disciplinascombox($diasemana)
     {
         $disciplina = DB::table('FAESA_CLINICA_BOX_DISCIPLINA as A')
-            ->join('LYCEUM_BKP_PRODUCAO.dbo.LY_DISCIPLINA as D', 'D.DISCIPLINA', '=', 'A.DISCIPLINA')
+            ->join('LYCEUM.dbo.LY_DISCIPLINA as D', 'D.DISCIPLINA', '=', 'A.DISCIPLINA')
             ->select('D.DISCIPLINA', 'D.NOME')
             ->where('A.DIA_SEMANA', '=', $diasemana)
             ->distinct()
@@ -427,9 +422,9 @@ class BoxDisciplineStudentsController extends Controller
 
     public function getDisciplinas(Request $request)
     {
-        $turmas = DB::table('LYCEUM_BKP_PRODUCAO.dbo.LY_AGENDA as A')
-            ->join('LYCEUM_BKP_PRODUCAO.dbo.LY_DISCIPLINA as D', 'D.DISCIPLINA', '=', 'A.DISCIPLINA')
-            ->join('LYCEUM_BKP_PRODUCAO.dbo.LY_TURMA as T', function ($join) {
+        $turmas = DB::table('LYCEUM.dbo.LY_AGENDA as A')
+            ->join('LYCEUM.dbo.LY_DISCIPLINA as D', 'D.DISCIPLINA', '=', 'A.DISCIPLINA')
+            ->join('LYCEUM.dbo.LY_TURMA as T', function ($join) {
                 $join->on('T.DISCIPLINA', '=', 'D.DISCIPLINA')
                     ->on('T.ANO', '=', 'A.ANO')
                     ->on('T.SEMESTRE', '=', 'A.SEMESTRE');
@@ -447,7 +442,7 @@ class BoxDisciplineStudentsController extends Controller
 
     public function getTodasTurmas($disciplina)
     {
-        $turma = DB::table('LYCEUM_BKP_PRODUCAO.dbo.LY_MATRICULA')
+        $turma = DB::table('LYCEUM.dbo.LY_MATRICULA')
             ->select('SUBTURMA1')
             ->where('DISCIPLINA', $disciplina)
             ->distinct()
@@ -526,7 +521,6 @@ class BoxDisciplineStudentsController extends Controller
                 $query->where('HR_INICIO', 'like', '%' . $query_box_discipline . '%');
                 $query->where('HR_FIM', 'like', '%' . $query_box_discipline . '%');
             })
-            ->where('ID_CLINICA', '=', 2)
             ->get();
 
         return view('odontologia/consult_box_discipline', compact('selectBoxDiscipline', 'query_box_discipline'));

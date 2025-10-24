@@ -13,7 +13,6 @@ class BoxesController extends Controller
     public function createBox(Request $request)
     {
         DB::table('FAESA_CLINICA_BOXES')->insertGetId([
-            'ID_CLINICA' => 2,
             'DESCRICAO' => $request->input('descricao'),
             'ATIVO' => $request->input('status'),
         ]);
@@ -65,7 +64,6 @@ class BoxesController extends Controller
         DB::table('FAESA_CLINICA_BOXES')
             ->where('ID_BOX_CLINICA', $idBox)
             ->update([
-                'ID_CLINICA' => 2,
                 'DESCRICAO' => $request->input('descricao'),
                 'ATIVO' => $request->input('status')
             ]);
@@ -82,8 +80,7 @@ class BoxesController extends Controller
                 'DESCRICAO',
                 'ATIVO',
                 'ID_BOX_CLINICA'
-            )
-            ->where('ID_CLINICA', '=', 2);
+            );
 
         if ($boxesId) {
             $query->where('ID_BOX_CLINICA', $boxesId);
@@ -103,7 +100,6 @@ class BoxesController extends Controller
             ->where(function ($query) use ($query_box) {
                 $query->where('DESCRICAO', 'like', '%' . $query_box . '%');
             })
-            ->where('ID_CLINICA', '=', 2)
             ->get();
 
         return view('odontologia/consult_box', compact('selectBox', 'query_box'));

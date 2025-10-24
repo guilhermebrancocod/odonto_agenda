@@ -119,7 +119,7 @@ class AgendaController extends Controller
 
         if ($ini->equalTo($fim)) {
             // PONTUAL: checa apenas o dia
-            $ehFeriado = DB::table('LYCEUM_BKP_PRODUCAO.dbo.LY_FERIADO')
+            $ehFeriado = DB::table('LYCEUM.dbo.LY_FERIADO')
                 ->whereDate('DATA', $ini->toDateString())
                 ->exists();
 
@@ -131,7 +131,7 @@ class AgendaController extends Controller
             // forma sargável: [ini, fim+1dia)
             $fimExclusivo = $fim->copy()->addDay()->startOfDay();
 
-            $temFeriado = DB::table('LYCEUM_BKP_PRODUCAO.dbo.LY_FERIADO')
+            $temFeriado = DB::table('LYCEUM.dbo.LY_FERIADO')
                 ->where('DATA', '=', $ini)
                 ->where('DATA', '=',  $fimExclusivo)
                 ->exists();
@@ -346,7 +346,7 @@ class AgendaController extends Controller
         // 1) Cabeçalho do agendamento (sem AA aqui)
         $agenda = DB::table('FAESA_CLINICA_AGENDAMENTO as a')
             ->leftJoin('FAESA_CLINICA_LOCAL_AGENDAMENTO as la', 'la.ID_AGENDAMENTO', '=', 'a.ID_AGENDAMENTO')
-            ->leftJoin('LYCEUM_BKP_PRODUCAO.dbo.LY_DISCIPLINA as ld', 'ld.DISCIPLINA', '=', 'la.DISCIPLINA')
+            ->leftJoin('LYCEUM.dbo.LY_DISCIPLINA as ld', 'ld.DISCIPLINA', '=', 'la.DISCIPLINA')
             ->leftJoin('FAESA_CLINICA_BOXES as cb', 'cb.ID_BOX_CLINICA', '=', 'la.ID_BOX')
             ->leftJoin('FAESA_CLINICA_PACIENTE as p', 'p.ID_PACIENTE', '=', 'a.ID_PACIENTE')
             ->join('FAESA_CLINICA_SERVICO as s', 's.ID_SERVICO_CLINICA', '=', 'a.ID_SERVICO')
@@ -381,7 +381,7 @@ class AgendaController extends Controller
 
         // 2) Alunos selecionados para este agendamento (apenas IDs)
         $alunosSelecionados = DB::table('FAESA_CLINICA_AGENDAMENTO_ALUNO as aa')
-            ->join('LYCEUM_BKP_PRODUCAO.dbo.LY_ALUNO as a', 'a.ALUNO', '=', 'aa.ALUNO')
+            ->join('LYCEUM.dbo.LY_ALUNO as a', 'a.ALUNO', '=', 'aa.ALUNO')
             ->where('aa.ID_AGENDAMENTO', $agendaId)
             ->pluck('a.NOME_COMPL', 'aa.ALUNO')   // valor, chave
             ->toArray();
@@ -574,7 +574,7 @@ class AgendaController extends Controller
 
     public function getDatasTurmaDisciplina($disciplina, $turma)
     {
-        $diasemana = DB::table('LYCEUM_BKP_PRODUCAO.dbo.LY_AGENDA as A')
+        $diasemana = DB::table('LYCEUM.dbo.LY_AGENDA as A')
             ->where('A.ANO', 2025)
             ->where('A.SEMESTRE', 2)
             ->where('A.DISCIPLINA', $disciplina)
@@ -589,7 +589,7 @@ class AgendaController extends Controller
     {
 
         $diasemana = (int) $diasemana;
-        $horarios = DB::table('LYCEUM_BKP_PRODUCAO.dbo.LY_AGENDA as A')
+        $horarios = DB::table('LYCEUM.dbo.LY_AGENDA as A')
             ->where('A.ANO', 2025)
             ->where('A.SEMESTRE', 2)
             ->where('A.DISCIPLINA', $disciplina)
@@ -604,8 +604,8 @@ class AgendaController extends Controller
 
     public function getAlunosDisciplinaTurma($disciplina, $turma)
     {
-        $alunos = DB::table('LYCEUM_BKP_PRODUCAO.dbo.LY_MATRICULA as M')
-            ->join('LYCEUM_BKP_PRODUCAO.dbo.LY_ALUNO as A', 'A.ALUNO', '=', 'M.ALUNO')
+        $alunos = DB::table('LYCEUM.dbo.LY_MATRICULA as M')
+            ->join('LYCEUM.dbo.LY_ALUNO as A', 'A.ALUNO', '=', 'M.ALUNO')
             ->where('M.DISCIPLINA', $disciplina)
             ->where('M.SUBTURMA1', $turma)
             ->whereNotExists(function ($q) use ($disciplina, $turma) {
@@ -627,7 +627,7 @@ class AgendaController extends Controller
     {
         $alunos = DB::table('FAESA_CLINICA_BOX_DISCIPLINA_ALUNO as BD')
             ->join('FAESA_CLINICA_BOX_DISCIPLINA as D', 'D.ID_BOX_DISCIPLINA', '=', 'BD.ID_BOX_DISCIPLINA')
-            ->join('LYCEUM_BKP_PRODUCAO.dbo.LY_ALUNO as A', 'A.ALUNO', '=', 'BD.ALUNO')
+            ->join('LYCEUM.dbo.LY_ALUNO as A', 'A.ALUNO', '=', 'BD.ALUNO')
             ->where('D.DISCIPLINA', $disciplina)
             ->where('D.TURMA', $turma)
             ->where('BD.ID_BOX', $box)

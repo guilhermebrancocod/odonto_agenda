@@ -31,7 +31,7 @@ class AppServiceProvider extends ServiceProvider
 
                     // Se estiver em outra conexão, use: DB::connection('sqlsrv')->table(...)
                     $name = Cache::store('file')->remember($cacheKey, 600, function () use ($idUsuario, $loginKey) {
-                        $q = DB::table('FAESA_CLINICA_USUARIO_GERAL');
+                        $q = DB::table('FAESA_CLINICA_USUARIO');
 
                         if ($idUsuario) {
                             $q->where('ID', $idUsuario);

@@ -77,7 +77,7 @@ class CalendarioController extends Controller
 
         $rows = DB::table('FAESA_CLINICA_BOX_DISCIPLINA_ALUNO as DA')
             ->join('FAESA_CLINICA_BOX_DISCIPLINA as BD', 'BD.ID_BOX_DISCIPLINA', '=', 'DA.ID_BOX_DISCIPLINA')
-            ->leftJoin('LYCEUM_BKP_PRODUCAO.DBO.LY_ALUNO as LA', 'LA.ALUNO', '=', 'DA.ALUNO')
+            ->leftJoin('LYCEUM.DBO.LY_ALUNO as LA', 'LA.ALUNO', '=', 'DA.ALUNO')
             ->whereNotExists(function ($q) use ($ini, $fim) {
                 $q->select(DB::raw(1))
                     ->from('FAESA_CLINICA_AGENDAMENTO_ALUNO as AA')
