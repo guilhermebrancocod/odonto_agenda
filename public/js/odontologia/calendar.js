@@ -82,7 +82,7 @@ document.addEventListener('DOMContentLoaded', function () {
                         <th>Dia</th>
                         <th>Início</th>
                         <th>Fim</th>
-                        <th class="text-end col-2" style="width: 10%;">Agendar</th>
+                        <!00<th class="text-end col-2" style="width: 10%;">Agendar</th>-->
                     </tr>
                     </thead>
                     <tbody>
@@ -95,11 +95,11 @@ document.addEventListener('DOMContentLoaded', function () {
                         <td>${diaSemana(r.DIA_SEMANA) ?? ''}</td>
                         <td>${tdTime(r.HR_INICIO)}</td>
                         <td>${tdTime(r.HR_FIM)}</td>
-                        <td class="text-end">
+                        <!--<td class="text-end">
                             <a class="btn btn-sm btn-primary" href="${mkUrl(r)}" title="Criar agendamento">
                             <i class="fa-solid fa-calendar-plus fa-xs"></i> Agendar
                             </a>
-                        </td>
+                        </td>-->
                         </tr>
                     `).join('')}
                     </tbody>

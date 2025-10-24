@@ -125,4 +125,73 @@ class BoxesController extends Controller
 
         return response()->json($boxeId);
     }
+
+    public function replaceBoxDiscipline(Request $request)
+    {
+        $rows = DB::table('FAESA_CLINICA_BOXES')
+            ->where('ATIVO', '=', 'S')
+            ->select('ID_BOX_CLINICA', 'DESCRICAO')
+            ->get();
+
+        return response()->json($rows);
+    }
+
+    public function updateReplaceBox(Request $request, int $id)
+    {
+        $validated = $request->validate([
+            'novo_box_id'        => ['required', 'integer'],
+            'box_disciplina_id'  => ['nullable', 'integer'], // opcional, já vem na URL
+        ]);
+
+        $novoBoxId = (int) $validated['novo_box_id'];
+        $boxDisciplinaId = (int) ($validated['box_disciplina_id'] ?? $id);
+
+
+        // Busca o box atual para evitar update desnecessário
+        $atual = DB::table('FAESA_CLINICA_BOX_DISCIPLINA')
+            ->select('ID_BOX')
+            ->where('ID_BOX_DISCIPLINA', $boxDisciplinaId)
+            ->first();
+
+        if (!$atual) {
+            return response()->json(['ok' => false, 'message' => 'Box/Disciplina não encontrado.'], 404);
+        }
+        if ((int)$atual->ID_BOX === $novoBoxId) {
+            return response()->json(['ok' => true, 'message' => 'Nada a alterar (mesmo box).']);
+        }
+
+        try {
+            $result = DB::transaction(function () use ($boxDisciplinaId, $novoBoxId) {
+                // Atualiza o box “pai” (grade/agenda)
+                $updDisc = DB::table('FAESA_CLINICA_BOX_DISCIPLINA')
+                    ->where('ID_BOX_DISCIPLINA', $boxDisciplinaId)
+                    ->update([
+                        'ID_BOX'     => $novoBoxId,
+                        'UPDATED_AT' => DB::raw('GETDATE()'), // SQL Server
+                    ]);
+
+                // Propaga o novo box para todos os alunos atrelados àquele box_disciplina
+                $updAlunos = DB::table('FAESA_CLINICA_BOX_DISCIPLINA_ALUNO')
+                    ->where('ID_BOX_DISCIPLINA', $boxDisciplinaId)
+                    ->update([
+                        'ID_BOX'     => $novoBoxId,
+                        'UPDATED_AT' => DB::raw('GETDATE()'),
+                    ]);
+
+                return ['upd_disciplina' => $updDisc, 'upd_alunos' => $updAlunos];
+            });
+
+            return response()->json([
+                'ok' => true,
+                'message' => 'Box trocado com sucesso.',
+                'rows' => $result, // {upd_disciplina: X, upd_alunos: Y}
+            ]);
+        } catch (\Throwable $e) {
+            report($e);
+            return response()->json([
+                'ok' => false,
+                'message' => 'Erro ao trocar o box.',
+            ], 500);
+        }
+    }
 }

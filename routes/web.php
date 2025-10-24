@@ -74,11 +74,11 @@ Route::middleware([AuthMiddleware::class . ':Admin,Coordenador'])->group(functio
         return view('odontologia/create_box_discipline');
     })->name('criarboxdisciplina');
 
-    Route::get('/criarservico', function () {
+    Route::get('criarservico', function () {
         return view('odontologia/create_service');
     })->name('criarservico_odontologia');
 
-    Route::get('/criarusuario', function () {
+    Route::get('/odontologia/criarusuario', function () {
         return view('odontologia/create_user');
     })->name('criarusuario_odontologia');
 
@@ -88,7 +88,7 @@ Route::middleware([AuthMiddleware::class . ':Admin,Coordenador'])->group(functio
 });
 
 //USER
-Route::post('/odontologia/criarusuario', [BoxesController::class, 'createBox'])->name('createBox');
+Route::post('/odontologia/criarusuario', [UserController::class, 'createUsuario'])->name('createUsuario');
 Route::get('/odontologia/criarusuario/{userId}', [UserController::class, 'editUser'])->name('editUser');
 Route::put('/updateUser/{userId}', [UserController::class, 'updateUser'])->name('updateUser');
 
@@ -117,6 +117,9 @@ Route::get('/odontologia/criarbox', function () {
 Route::post('/odontologia/criarbox', [BoxesController::class, 'createBox'])->name('createBox');
 Route::get('/odontologia/criarbox/{boxId}', [BoxesController::class, 'editBox'])->name('editBox');
 Route::put('/criarbox/{boxId}', [BoxesController::class, 'updateBox'])->name('updateBox');
+
+Route::get('/odontologia/trocabox', [BoxesController::class, 'replaceBoxDiscipline'])->name('box.troca');
+Route::post('/odontologia/trocabox/{id}', [BoxesController::class, 'updateReplaceBox'])->name('box.troca.update');
 
 // BOX-DISCIPLINAS
 Route::post('/odontologia/criarboxdisciplina', [BoxDisciplineStudentsController::class, 'createBoxDiscipline'])->name('createBoxDiscipline');
@@ -168,7 +171,7 @@ Route::middleware([AuthMiddleware::class . ':Admin,Coordenador'])->group(functio
     Route::get('/consultaboxdisciplina/{idBoxDiscipline}', [BoxDisciplineStudentsController::class, 'consultaboxdisciplina']);
     Route::get('/paciente/{pacienteId}', [PatientController::class, 'listaPacienteId']);
     Route::get('/servicos/{servicoId}', [BoxDisciplineStudentsController::class, 'listaServicosId']);
-    Route::get('/agenda/{pacienteId}', [BoxDisciplineStudentsController::class, 'listaAgendamentoId']);
+    Route::get('/agenda/{pacienteId}', [AgendaController::class, 'listaAgendamentoId']);
 });
 
 // CONSULTA DE VIEWS — restritas a Usuario

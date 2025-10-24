@@ -45,6 +45,7 @@ function carregarTodosBoxDiscipline() {
                     <tr>
                         <td>${disciplines.NOME}</td>
                         <td>${disciplines.DESCRICAO}</td>
+                        <td>${disciplines.ALUNO}</td>
                         <td>${disciplines.TURMA}</td>
                         <td>${diaSemana(disciplines.DIA_SEMANA)}</td>
                         <td>${maskTime(disciplines.HR_INICIO)}</td>
@@ -131,6 +132,7 @@ $('#selectBoxDiscipline').on('select2:select', function (e) {
                     <tr>
                         <td>${disciplines.DISCIPLINA}</td>
                         <td>${disciplines.DESCRICAO}</td>
+                        <td>${disciplines.ALUNO}</td>
                         <td>${disciplines.TURMA}</td>
                         <td>${diaSemana(disciplines.DIA_SEMANA)}</td>
                         <td>${maskTime(disciplines.HR_INICIO)}</td>

@@ -485,14 +485,17 @@
                                 </fieldset>
                             </div>
                         </div>
-                        @if($isEdit)
+                        @if ($isEdit)
                         <div class="d-flex justify-content-end mt-3">
-                            <button type="submit" class="btn btn-primary ms-auto">
-                                Realizar troca de box
+                            <button
+                                type="button"
+                                class="btn btn-outline-primary btn-log"
+                                data-update-url="{{ route('box.troca.update', ['id' => $idBox]) }}"
+                                data-box-disciplina-id="{{ $idBox }}">
+                                Trocar box
                             </button>
                         </div>
                         @endif
-
                     </div>
 
                     <div class="container" id="assigner">
@@ -639,6 +642,158 @@
         });
     </script>
     @endif
+    <div id="trocaBoxPopup" style="display:none;position:fixed;inset:0;z-index:9999;background:rgba(0,0,0,.25);align-items:center;justify-content:center;">
+        <div style="background:#fff;border:1px solid #ddd;border-radius:10px;padding:14px;min-width:280px;box-shadow:0 10px 30px rgba(0,0,0,.15);">
+            <div style="font-weight:600;margin-bottom:8px">Selecione o novo box</div>
+            <select id="trocaBoxSelect" style="width:100%;padding:.4rem;border:1px solid #ccc;border-radius:6px" disabled>
+                <option>Carregando...</option>
+            </select>
+            <div style="margin-top:10px;display:flex;gap:8px;justify-content:flex-end">
+                <button type="button" id="trocaBoxCancel" style="padding:.4rem .7rem;border:1px solid #ccc;border-radius:6px;background:#f8f9fa">Cancelar</button>
+                <button type="button" id="trocaBoxConfirm" style="padding:.4rem .7rem;border:1px solid #0d6efd;border-radius:6px;background:#0d6efd;color:#fff" disabled>Confirmar</button>
+            </div>
+            <div id="trocaBoxMsg" style="margin-top:8px;font-size:.875rem;color:#6c757d;display:none"></div>
+        </div>
+    </div>
+    <meta name="csrf-token" content="{{ csrf_token() }}">
+
+    <script>
+        (function() {
+            const LIST_URL = @json(route('box.troca')); // GET que retorna os boxes [{id, nome}]
+            const popup = document.getElementById('trocaBoxPopup');
+            const selectEl = document.getElementById('trocaBoxSelect');
+            const confirmBtn = document.getElementById('trocaBoxConfirm');
+            const cancelBtn = document.getElementById('trocaBoxCancel');
+            const msgEl = document.getElementById('trocaBoxMsg');
+
+            let currentUpdateUrl = null;
+            let currentBoxDisciplinaId = null;
+
+            // Abre popup quando clicar no botão .btn-log
+            document.addEventListener('click', async (e) => {
+                const btn = e.target.closest('.btn-log');
+                if (!btn) return;
+
+                currentUpdateUrl = btn.dataset.updateUrl || null;
+                currentBoxDisciplinaId = btn.dataset.boxDisciplinaId || null;
+
+                resetPopup();
+                showPopup(true);
+
+                try {
+                    const res = await fetch(LIST_URL, {
+                        headers: {
+                            'Accept': 'application/json'
+                        }
+                    });
+                    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+                    const boxes = await res.json();
+                    renderOptions(boxes);
+                    selectEl.disabled = false;
+                } catch (err) {
+                    showMsg('Erro ao carregar boxes: ' + err.message, true);
+                    renderOptions([]);
+                }
+            });
+
+            // Habilita confirmar quando selecionar
+            selectEl.addEventListener('change', () => {
+                confirmBtn.disabled = !selectEl.value;
+            });
+
+            // Confirmar envio
+            confirmBtn.addEventListener('click', async () => {
+                if (!selectEl.value) return;
+                if (!currentUpdateUrl) return showMsg('URL de atualização não definida.', true);
+
+                setLoading(true);
+                try {
+                    const token = document.querySelector('meta[name="csrf-token"]')?.content || '';
+                    const res = await fetch(currentUpdateUrl, {
+                        method: 'POST',
+                        headers: {
+                            'Accept': 'application/json',
+                            'Content-Type': 'application/json',
+                            'X-CSRF-TOKEN': token
+                        },
+                        body: JSON.stringify({
+                            novo_box_id: selectEl.value,
+                            box_disciplina_id: currentBoxDisciplinaId
+                        })
+                    });
+                    if (!res.ok) {
+                        let msg = `HTTP ${res.status}`;
+                        try {
+                            const j = await res.json();
+                            if (j?.message) msg = j.message;
+                        } catch {}
+                        throw new Error(msg);
+                    }
+                    showMsg('Box atualizado com sucesso!', false);
+                    setTimeout(() => location.reload(), 500);
+                } catch (err) {
+                    showMsg('Falha ao atualizar: ' + err.message, true);
+                } finally {
+                    setLoading(false);
+                }
+            });
+
+            // Cancelar
+            cancelBtn.addEventListener('click', () => showPopup(false));
+            // Fecha ao clicar fora da caixinha
+            popup.addEventListener('click', (e) => {
+                if (e.target === popup) showPopup(false);
+            });
+            // Esc fecha
+            document.addEventListener('keydown', (e) => {
+                if (e.key === 'Escape') showPopup(false);
+            });
+
+            // Helpers
+            function showPopup(visible) {
+                popup.style.display = visible ? 'flex' : 'none';
+            }
+
+            function resetPopup() {
+                msgEl.style.display = 'none';
+                msgEl.textContent = '';
+                msgEl.style.color = '#6c757d';
+                selectEl.innerHTML = '<option>Carregando...</option>';
+                selectEl.disabled = true;
+                confirmBtn.disabled = true;
+                confirmBtn.textContent = 'Confirmar';
+            }
+
+            function renderOptions(items) {
+                selectEl.innerHTML = '';
+                if (!items?.length) {
+                    selectEl.innerHTML = '<option value="">Nenhum box disponível</option>';
+                    confirmBtn.disabled = true;
+                    return;
+                }
+                selectEl.insertAdjacentHTML('beforeend', '<option value="">Selecione...</option>');
+                items.forEach(it => {
+                    const id = it.id ?? it.ID_BOX_CLINICA ?? '';
+                    const nome = it.nome ?? it.DESCRICAO ?? `Box ${id}`;
+                    if (!id) return;
+                    selectEl.insertAdjacentHTML('beforeend', `<option value="${id}">${nome}</option>`);
+                });
+            }
+
+            function showMsg(text, error) {
+                msgEl.style.display = 'block';
+                msgEl.textContent = text;
+                msgEl.style.color = error ? '#dc3545' : '#198754';
+            }
+
+            function setLoading(is) {
+                selectEl.disabled = is;
+                confirmBtn.disabled = is || !selectEl.value;
+                confirmBtn.textContent = is ? 'Salvando...' : 'Confirmar';
+            }
+        })();
+    </script>
+
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datepicker/1.10.0/js/bootstrap-datepicker.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datepicker/1.10.0/locales/bootstrap-datepicker.pt-BR.min.js"></script>
