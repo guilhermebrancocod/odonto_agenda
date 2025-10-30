@@ -96,10 +96,11 @@ class BoxesController extends Controller
         $query_box = $request->input('search-input');
 
         $selectBox = DB::table('FAESA_CLINICA_BOXES')
-            ->select('DESCRICAO')
+            ->selectRaw('top 10 DESCRICAO, ID_BOX_CLINICA')
             ->where(function ($query) use ($query_box) {
                 $query->where('DESCRICAO', 'like', '%' . $query_box . '%');
             })
+            ->orderBy('DESCRICAO')
             ->get();
 
         return view('odontologia/consult_box', compact('selectBox', 'query_box'));

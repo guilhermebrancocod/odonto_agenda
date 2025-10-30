@@ -314,7 +314,6 @@ class PatientController extends Controller
             ->select('ID_PACIENTE', 'NOME_COMPL_PACIENTE', 'CPF_PACIENTE', 'E_MAIL_PACIENTE', 'FONE_PACIENTE')
             ->where('NOME_COMPL_PACIENTE', 'like', '%' . $query . '%')
             ->orWhere('CPF_PACIENTE', 'like', '%' . $query . '%')
-            ->limit(10)
             ->get(['ID_PACIENTE', 'NOME_COMPL_PACIENTE']);
 
         return response()->json($pacientes);

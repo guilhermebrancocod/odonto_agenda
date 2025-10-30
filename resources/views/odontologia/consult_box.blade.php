@@ -59,6 +59,25 @@
                     <tbody>
                     </tbody>
                 </table>
+                <div class="pagination-container" style="display: flex; justify-content: center; margin-top: 20px;">
+                    <nav aria-label="Navegação de página">
+                        <ul class="pagination">
+                            <li class="page-item" id="prev-page">
+                                <a class="page-link" href="#" aria-label="Anterior">
+                                    <span aria-hidden="true">&laquo;</span>
+                                </a>
+                            </li>
+                            <li class="page-item" id="next-page">
+                                <a class="page-link" href="#" aria-label="Próximo">
+                                    <span aria-hidden="true">&raquo;</span>
+                                </a>
+                            </li>
+                        </ul>
+                    </nav>
+                    <div class="ml-3 d-flex align-items-center">
+                        <span id="page-info" style="margin-left: 10px;">Página <span id="current-page">1</span> de <span id="total-pages">1</span></span>
+                    </div>
+                </div>
             </div>
         </form>
     </div>

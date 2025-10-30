@@ -20,42 +20,86 @@ function formatDateStr(value) {
     return `${parts[2]}/${parts[1]}/${parts[0]}`;
 }
 
-function carregarTodosAgendamentos() {
-    const $tbody = $('#table-agenda tbody');
+// Variáveis para paginação
+let currentPage = 1;
+const itemsPerPage = 10;
+let allAgendamentos = [];
 
+function updatePagination() {
+    const totalPages = Math.ceil(allAgendamentos.length / itemsPerPage) || 1;
+    
+    // Atualiza o texto de informação da página
+    $('#page-info').text(`Página ${currentPage} de ${totalPages}`);
+    
+    // Habilita/desabilita botões de navegação
+    $('#prev-page').toggleClass('disabled', currentPage === 1);
+    $('#next-page').toggleClass('disabled', currentPage === totalPages || allAgendamentos.length === 0);
+    
+    // Mostra mensagem quando não há agendamentos
+    if (allAgendamentos.length === 0) {
+        $('#no-appointments-message').show();
+        $('#table-agenda').hide();
+    } else {
+        $('#no-appointments-message').hide();
+        $('#table-agenda').show();
+    }
+}
+
+function loadAgendamentosPage(page) {
+    const $tbody = $('#table-agenda tbody');
+    $tbody.empty();
+    
+    if (allAgendamentos.length === 0) {
+        updatePagination();
+        return;
+    }
+    
+    const start = (page - 1) * itemsPerPage;
+    const end = Math.min(start + itemsPerPage, allAgendamentos.length);
+    
+    for (let i = start; i < end; i++) {
+        const agendamento = allAgendamentos[i];
+        const html = `
+            <tr>
+                <td>${agendamento.NOME_COMPL_PACIENTE ?? ''}</td>
+                <td>${formatDateStr(agendamento.DT_AGEND ?? '')}</td>
+                <td>${maskTime(agendamento.HR_AGEND_INI ?? '')} - ${maskTime(agendamento.HR_AGEND_FIN ?? '')}</td>
+                <td>${agendamento.SERVICO_CLINICA_DESC ? agendamento.SERVICO_CLINICA_DESC : ''}</td>
+                <td>${agendamento.TURMA ? agendamento.TURMA : ''}</td>
+                <td>${agendamento.FONE_PACIENTE ? maskPhone(agendamento.FONE_PACIENTE) : ''}</td>
+                <td>
+                    <button 
+                        type="button" 
+                        class="edit-agenda btn btn-link p-0 m-0 border-0" 
+                        style="color: inherit;" 
+                        data-id="${agendamento.ID_AGENDAMENTO}">
+                        <i class="fa fa-pencil-alt"></i>
+                    </button>
+                </td>
+            </tr>
+        `;
+        $tbody.append(html);
+    }
+    
+    updatePagination();
+}
+
+function carregarTodosAgendamentos() {
     $.ajax({
         url: '/getAgenda',
         dataType: 'json',
         success: function (data) {
-            $tbody.empty();
-            data.forEach(agendamento => {
-                const html = `
-                    <tr>
-                        <td>${agendamento.NOME_COMPL_PACIENTE ?? ''}</td>
-                        <td>${formatDateStr(agendamento.DT_AGEND ?? '')}</td>
-                        <td>${maskTime(agendamento.HR_AGEND_INI ?? '')} - ${maskTime(agendamento.HR_AGEND_FIN ?? '')}</td>
-                        <td>${agendamento.SERVICO_CLINICA_DESC ? agendamento.SERVICO_CLINICA_DESC : ''}</td>
-                        <td>${agendamento.TURMA ? agendamento.TURMA : ''}</td>
-                        <td>${agendamento.FONE_PACIENTE ? maskPhone(agendamento.FONE_PACIENTE) : ''}</td>
-                        <td>
-                            <button 
-                                type="button" 
-                                class="edit-agenda btn btn-link p-0 m-0 border-0" 
-                                style="color: inherit;" 
-                                data-id="${agendamento.ID_AGENDAMENTO}">
-                                <i class="fa fa-pencil-alt"></i>
-                            </button>
-                        </td>
-                    </tr>
-                `;
-                $tbody.append(html);
-            });
+            allAgendamentos = data;
+            currentPage = 1;
+            
+            // Carrega a primeira página
+            loadAgendamentosPage(currentPage);
         },
         error: function () {
             alert("Erro ao buscar os agendamentos.");
         }
     });
-    $select.val(null).trigger('change');
+    /*$select.val(null).trigger('change');*/
 }
 
 $(document).ready(function () {
@@ -118,7 +162,7 @@ $(document).ready(function () {
         }
     });
 
-    $select.val(null).trigger('change');
+    /*$select.val(null).trigger('change');*/
 
     carregarTodosAgendamentos();
 
@@ -127,6 +171,23 @@ $(document).ready(function () {
         setTimeout(() => {
             document.querySelector('.select2-container--open .select2-search__field')?.focus();
         }, 0);
+    });
+    
+    // Event listeners para os botões de paginação
+    $('#prev-page').on('click', function(e) {
+        e.preventDefault();
+        if ($(this).hasClass('disabled')) return;
+        
+        currentPage--;
+        loadAgendamentosPage(currentPage);
+    });
+    
+    $('#next-page').on('click', function(e) {
+        e.preventDefault();
+        if ($(this).hasClass('disabled')) return;
+        
+        currentPage++;
+        loadAgendamentosPage(currentPage);
     });
 });
 // Evento ao selecionar um paciente no select2
@@ -138,32 +199,17 @@ $('#selectPatient').on('select2:select', function (e) {
         type: 'GET',
         dataType: 'json',
         success: function (paciente) {
-            let html =''
-            // Monta o HTML da linha da tabela
-            paciente.forEach(function(paciente){
-                html += `
-                <tr>
-                    <td>${paciente.NOME_COMPL_PACIENTE}</td>
-                    <td>${formatDateStr(paciente.DT_AGEND)}</td>
-                    <td>${maskTime(paciente.HR_AGEND_INI)} - ${maskTime(paciente.HR_AGEND_FIN)}</td>
-                    <td>${paciente.SERVICO_CLINICA_DESC}</td>
-                    <td>${paciente.TURMA}</td>
-                    <td>${maskPhone(paciente.FONE_PACIENTE)}</td>
-                    <td>
-                        <button 
-                            type="button" 
-                            class="edit-agenda btn btn-link p-0 m-0 border-0" 
-                            style="color: inherit;" 
-                            data-id="${paciente.ID_AGENDAMENTO}">
-                            <i class="fa fa-pencil-alt"></i>
-                        </button>
-                    </td>
-                </tr>
-            `;
-            })
-
-            // Atualiza o corpo da tabela
-            $('#table-agenda tbody').html(html);
+            allAgendamentos = paciente;
+            currentPage = 1;
+            
+            if (paciente.length === 0) {
+                $('#no-appointments-message').show();
+                $('#table-agenda').hide();
+            } else {
+                $('#no-appointments-message').hide();
+                $('#table-agenda').show();
+                loadAgendamentosPage(currentPage);
+            }
         },
         error: function () {
             alert("Erro ao buscar os dados do paciente.");
@@ -200,7 +246,7 @@ $(document).ready(function () {
         }
     });
 
-    $select.val(null).trigger('change');
+    /*$select.val(null).trigger('change');*/
 
     carregarTodosAgendamentos();
 

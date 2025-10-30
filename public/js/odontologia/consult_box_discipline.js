@@ -18,9 +18,82 @@ function diaSemana(value) {
     }
 }
 
+// Variáveis para paginação
+let currentPage = 1;
+const itemsPerPage = 10;
+let allDisciplines = [];
+
+function updatePagination() {
+    const totalPages = Math.ceil(allDisciplines.length / itemsPerPage) || 1;
+    
+    // Atualiza o texto de informação da página
+    $('#page-info').text(`Página ${currentPage} de ${totalPages}`);
+    
+    // Habilita/desabilita botões de navegação
+    $('#prev-page').toggleClass('disabled', currentPage === 1);
+    $('#next-page').toggleClass('disabled', currentPage === totalPages || allDisciplines.length === 0);
+    
+    // Mostra mensagem quando não há disciplinas
+    if (allDisciplines.length === 0) {
+        $('#no-disciplines-message').show();
+        $('#box-discipline').hide();
+    } else {
+        $('#no-disciplines-message').hide();
+        $('#box-discipline').show();
+    }
+}
+
+function loadDisciplinesPage(page) {
+    const $tbody = $('#box-discipline tbody');
+    $tbody.empty();
+    
+    if (allDisciplines.length === 0) {
+        updatePagination();
+        return;
+    }
+    
+    const start = (page - 1) * itemsPerPage;
+    const end = Math.min(start + itemsPerPage, allDisciplines.length);
+    
+    for (let i = start; i < end; i++) {
+        const disciplines = allDisciplines[i];
+        const html = `
+            <tr>
+                <td>${disciplines.NOME}</td>
+                <td>${disciplines.DESCRICAO}</td>
+                <td>${disciplines.ALUNO}</td>
+                <td>${disciplines.TURMA}</td>
+                <td>${diaSemana(disciplines.DIA_SEMANA)}</td>
+                <td>${maskTime(disciplines.HR_INICIO)}</td>
+                <td>${maskTime(disciplines.HR_FIM)}</td>
+                <td>
+                    <button 
+                        type="button" 
+                        class="edit-boxdisciplines btn btn-link p-0 m-0 border-0" 
+                        style="color: inherit;" 
+                        data-id="${disciplines.ID_BOX_DISCIPLINA}">
+                        <i class="fa fa-pencil-alt"></i>
+                    </button>
+                </td>
+                <td>
+                    <button 
+                        type="button" 
+                        class="delete-boxdisciplines btn btn-link p-0 m-0 border-0" 
+                        style="color: inherit;" 
+                        data-id="${disciplines.ID_BOX_DISCIPLINA}">
+                        <i class="fas fa-trash-alt"></i>
+                    </button>
+                </td>
+            </tr>
+        `;
+        $tbody.append(html);
+    }
+    
+    updatePagination();
+}
+
 function carregarTodosBoxDiscipline() {
     const $select = $('#selectBoxDiscipline');
-    const $tbody = $('#box-discipline tbody');
 
     $.ajax({
         url: '/getBoxDisciplines',
@@ -28,10 +101,11 @@ function carregarTodosBoxDiscipline() {
         data: { query: '' },
         success: function (data) {
             $select.empty();
-            $tbody.empty();
+            allDisciplines = data;
+            currentPage = 1;
 
+            // Adiciona ao select
             data.forEach(disciplines => {
-                // Adiciona ao select
                 const newOption = new Option(
                     disciplines.DISCIPLINA,
                     disciplines.ID_BOX_DISCIPLINA,
@@ -39,40 +113,10 @@ function carregarTodosBoxDiscipline() {
                     false
                 );
                 $select.append(newOption);
-
-                // Adiciona à tabela
-                const html = `
-                    <tr>
-                        <td>${disciplines.NOME}</td>
-                        <td>${disciplines.DESCRICAO}</td>
-                        <td>${disciplines.ALUNO}</td>
-                        <td>${disciplines.TURMA}</td>
-                        <td>${diaSemana(disciplines.DIA_SEMANA)}</td>
-                        <td>${maskTime(disciplines.HR_INICIO)}</td>
-                        <td>${maskTime(disciplines.HR_FIM)}</td>
-                        <td>
-                            <button 
-                                type="button" 
-                                class="edit-boxdisciplines btn btn-link p-0 m-0 border-0" 
-                                style="color: inherit;" 
-                                data-id="${disciplines.ID_BOX_DISCIPLINA}">
-                                <i class="fa fa-pencil-alt"></i>
-                            </button>
-                        </td>
-                        <td>
-                            <button 
-                                type="button" 
-                                class="delete-boxdisciplines btn btn-link p-0 m-0 border-0" 
-                                style="color: inherit;" 
-                                data-id="${disciplines.ID_BOX_DISCIPLINA}">
-                                <i class="fas fa-trash-alt"></i>
-                            </button>
-                        </td>
-                    </tr>
-                `;
-                $tbody.append(html);
             });
 
+            // Carrega a primeira página
+            loadDisciplinesPage(currentPage);
             $select.val(null).trigger('change');
         },
         error: function () {
@@ -113,55 +157,59 @@ $(document).ready(function () {
             document.querySelector('.select2-container--open .select2-search__field')?.focus();
         }, 0);
     });
+    
+    // Event listeners para os botões de paginação
+    $('#prev-page').on('click', function(e) {
+        e.preventDefault();
+        if ($(this).hasClass('disabled')) return;
+        
+        currentPage--;
+        loadDisciplinesPage(currentPage);
+    });
+    
+    $('#next-page').on('click', function(e) {
+        e.preventDefault();
+        if ($(this).hasClass('disabled')) return;
+        
+        currentPage++;
+        loadDisciplinesPage(currentPage);
+    });
+    
     carregarTodosBoxDiscipline();
 });
 
 // Evento ao selecionar um paciente no select2
 $('#selectBoxDiscipline').on('select2:select', function (e) {
-    const idBoxDiscipline = e.params.data.id;
-    // Busca os dados completos do paciente via AJAX
+    const id = e.params.data.id;
     $.ajax({
-        url: `/consultaboxdisciplina/${idBoxDiscipline}`,
-        dataType: 'json',
-        delay: 250,
-        data: function (params) {
-            return { query: params.term || '' };
+        url: `/getBoxDiscipline/${id}`,
+        type: 'GET',
+        success: function (data) {
+            $('#box-discipline tbody').empty();
+            
+            if (!data) {
+                $('#no-disciplines-message').show();
+                $('#box-discipline').hide();
+                $('.pagination-container').hide();
+                return;
+            }
+            
+            // Armazenar os dados em um array (mesmo que seja apenas um item)
+            allDisciplines = [data];
+            currentPage = 1;
+            
+            // Esconder a mensagem de "sem disciplinas" e mostrar a tabela
+            $('#no-disciplines-message').hide();
+            $('#box-discipline').show();
+            
+            // Carregar a primeira página
+            loadDisciplinesPage(currentPage);
         },
-        success: function (disciplines) {
-            const html = `
-                    <tr>
-                        <td>${disciplines.DISCIPLINA}</td>
-                        <td>${disciplines.DESCRICAO}</td>
-                        <td>${disciplines.ALUNO}</td>
-                        <td>${disciplines.TURMA}</td>
-                        <td>${diaSemana(disciplines.DIA_SEMANA)}</td>
-                        <td>${maskTime(disciplines.HR_INICIO)}</td>
-                        <td>${maskTime(disciplines.HR_FIM)}</td>
-                        <td>
-                            <button 
-                                type="button" 
-                                class="edit-boxdisciplines btn btn-link p-0 m-0 border-0" 
-                                style="color: inherit;" 
-                                data-id="${disciplines.ID_BOX_DISCIPLINA}">
-                                <i class="fa fa-pencil-alt"></i>
-                            </button>
-                        </td>
-                        <td>
-                            <button 
-                                type="button" 
-                                class="delete-boxdisciplines btn btn-link p-0 m-0 border-0" 
-                                style="color: inherit;" 
-                                data-id="${disciplines.ID_BOX_DISCIPLINA}">
-                                <i class="fas fa-trash-alt"></i>
-                            </button>
-                        </td>
-                    </tr>
-                `;
-            // Atualiza o corpo da tabela com apenas o paciente selecionado
-            $('#box-discipline tbody').html(html);
-        },
-        error: function () {
-            alert("Erro ao buscar os dados box/disciplina.");
+        error: function (error) {
+            console.error('Erro ao buscar box discipline:', error);
+            $('#no-disciplines-message').show();
+            $('#box-discipline').hide();
+            $('.pagination-container').hide();
         }
     });
 });

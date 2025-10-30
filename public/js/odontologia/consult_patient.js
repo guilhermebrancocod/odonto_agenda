@@ -17,9 +17,15 @@ function formatCPF(value) {
         .slice(0, 14); // Garante no máximo 14 caracteres
 }
 
+let currentPage = 1;
+let itemsPerPage = 10;
+let allPacientes = [];
+
 function carregarTodosPacientes() {
     const $select = $('#selectPatient');
     const $tbody = $('#table-patient tbody'); // garante que você tem um <tbody>
+
+
 
     $.ajax({
         url: '/getPacientes',
@@ -29,15 +35,50 @@ function carregarTodosPacientes() {
             // Limpa a tabela e o select
             $select.empty();
             $tbody.empty();
-
+            allPacientes = data;
             data.forEach(paciente => {
                 // Adiciona ao select
                 const newOption = new Option(paciente.NOME_COMPL_PACIENTE, paciente.ID_PACIENTE, false, false);
 
                 $select.append(newOption);
 
-                // Adiciona à tabela
-                const html = `
+            });
+
+            $select.val(null).trigger('change');
+
+            // Atualiza a paginação
+            updatePagination();
+            // Carrega a primeira página
+            loadPacientesPage(currentPage);
+        }
+    });
+}
+
+// Função para atualizar a paginação
+function updatePagination() {
+    const totalPages = Math.ceil(allPacientes.length / itemsPerPage);
+    $('#total-pages').text(totalPages);
+    $('#current-page').text(currentPage);
+
+    // Habilita/desabilita botões de navegação
+    $('#prev-page').toggleClass('disabled', currentPage === 1);
+    $('#next-page').toggleClass('disabled', currentPage === totalPages || totalPages === 0);
+}
+
+// Função para carregar uma página específica
+function loadPacientesPage(page) {
+    const $tbody = $('#table-patient tbody');
+    $tbody.empty();
+
+    const startIndex = (page - 1) * itemsPerPage;
+    const endIndex = Math.min(startIndex + itemsPerPage, allPacientes.length);
+
+    // Exibe os pacientes da página atual
+    for (let i = startIndex; i < endIndex; i++) {
+        const paciente = allPacientes[i];
+
+        // Adiciona à tabela
+        const html = `
                 <tr>
                     <td>${formatCPF(paciente.CPF_PACIENTE)}</td>
                     <td>${paciente.NOME_COMPL_PACIENTE}</td>
@@ -54,13 +95,8 @@ function carregarTodosPacientes() {
                     </td>
                 </tr>
                 `;
-
-                $tbody.append(html);
-            });
-
-            $select.val(null).trigger('change');
-        }
-    });
+        $tbody.append(html);
+    }
 }
 
 $(document).ready(function () {
@@ -82,7 +118,7 @@ $(document).ready(function () {
                     results: data.map(p => ({
                         id: p.ID_PACIENTE,
                         text: p.NOME_COMPL_PACIENTE
-                        
+
                     }))
                 };
             },
@@ -95,6 +131,26 @@ $(document).ready(function () {
         setTimeout(() => {
             document.querySelector('.select2-container--open .select2-search__field')?.focus();
         }, 0);
+    });
+
+    // Eventos de paginação
+    $('#prev-page').on('click', function (e) {
+        e.preventDefault();
+        if (currentPage > 1) {
+            currentPage--;
+            loadPacientesPage(currentPage);
+            updatePagination();
+        }
+    });
+
+    $('#next-page').on('click', function (e) {
+        e.preventDefault();
+        const totalPages = Math.ceil(allPacientes.length / itemsPerPage);
+        if (currentPage < totalPages) {
+            currentPage++;
+            loadPacientesPage(currentPage);
+            updatePagination();
+        }
     });
 
     // 👇 Única chamada necessária ao carregar

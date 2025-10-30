@@ -1,3 +1,8 @@
+// Variáveis de paginação
+let currentPage = 1;
+let itemsPerPage = 10;
+let allBoxes = [];
+
 function carregarTodosBox() {
     const $select = $('#selectBoxes');
     const $tbody = $('#table-box tbody');
@@ -9,9 +14,12 @@ function carregarTodosBox() {
         success: function (data) {
             $select.empty();
             $tbody.empty();
+            
+            // Armazena todos os boxes
+            allBoxes = data;
 
+            // Adiciona ao select
             data.forEach(box => {
-                // Adiciona ao select
                 const newOption = new Option(
                     box.DESCRICAO,
                     box.ID_BOX_CLINICA,
@@ -19,32 +27,60 @@ function carregarTodosBox() {
                     false
                 );
                 $select.append(newOption);
-
-                // Adiciona à tabela
-                const html = `
-                    <tr>
-                        <td>${box.DESCRICAO}</td>
-                        <td>${box.ATIVO}</td>
-                        <td>
-                            <button 
-                                type="button" 
-                                class="edit-box btn btn-link p-0 m-0 border-0" 
-                                style="color: inherit;" 
-                                data-id="${box.ID_BOX_CLINICA}">
-                                <i class="fa fa-pencil-alt"></i>
-                            </button>
-                        </td>
-                    </tr>
-                `;
-                $tbody.append(html);
             });
 
             $select.val(null).trigger('change');
+            
+            // Atualiza a paginação
+            updatePagination();
+            // Carrega a primeira página
+            loadBoxesPage(currentPage);
         },
         error: function () {
             console.error('Erro ao carregar os serviços.');
         }
     });
+}
+
+// Função para atualizar a paginação
+function updatePagination() {
+    const totalPages = Math.ceil(allBoxes.length / itemsPerPage);
+    $('#total-pages').text(totalPages);
+    $('#current-page').text(currentPage);
+    
+    // Habilita/desabilita botões de navegação
+    $('#prev-page').toggleClass('disabled', currentPage === 1);
+    $('#next-page').toggleClass('disabled', currentPage === totalPages || totalPages === 0);
+}
+
+// Função para carregar uma página específica
+function loadBoxesPage(page) {
+    const $tbody = $('#table-box tbody');
+    $tbody.empty();
+    
+    const startIndex = (page - 1) * itemsPerPage;
+    const endIndex = Math.min(startIndex + itemsPerPage, allBoxes.length);
+    
+    // Exibe os boxes da página atual
+    for (let i = startIndex; i < endIndex; i++) {
+        const box = allBoxes[i];
+        const html = `
+            <tr>
+                <td>${box.DESCRICAO}</td>
+                <td>${box.ATIVO}</td>
+                <td>
+                    <button 
+                        type="button" 
+                        class="edit-box btn btn-link p-0 m-0 border-0" 
+                        style="color: inherit;" 
+                        data-id="${box.ID_BOX_CLINICA}">
+                        <i class="fa fa-pencil-alt"></i>
+                    </button>
+                </td>
+            </tr>
+        `;
+        $tbody.append(html);
+    }
 }
 
 $(document).ready(function () {
@@ -80,6 +116,27 @@ $(document).ready(function () {
             document.querySelector('.select2-container--open .select2-search__field')?.focus();
         }, 0);
     });
+    
+    // Eventos de paginação
+    $('#prev-page').on('click', function(e) {
+        e.preventDefault();
+        if (currentPage > 1) {
+            currentPage--;
+            loadBoxesPage(currentPage);
+            updatePagination();
+        }
+    });
+    
+    $('#next-page').on('click', function(e) {
+        e.preventDefault();
+        const totalPages = Math.ceil(allBoxes.length / itemsPerPage);
+        if (currentPage < totalPages) {
+            currentPage++;
+            loadBoxesPage(currentPage);
+            updatePagination();
+        }
+    });
+    
     carregarTodosBox();
 });
 

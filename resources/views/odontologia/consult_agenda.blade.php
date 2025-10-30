@@ -75,6 +75,22 @@
                     <tbody>
                     </tbody>
                 </table>
+                <div id="no-appointments-message" style="display: none; text-align: center; padding: 20px; font-size: 16px;">
+                    Sem agendamentos
+                </div>
+                <div class="pagination-container">
+                    <nav aria-label="Navegação de página">
+                        <ul class="pagination justify-content-center">
+                            <li class="page-item disabled" id="prev-page">
+                                <a class="page-link" href="#" tabindex="-1">&laquo;</a>
+                            </li>
+                            <li class="page-item" id="next-page">
+                                <a class="page-link" href="#">&raquo;</a>
+                            </li>
+                        </ul>
+                    </nav>
+                    <div id="page-info" class="text-center mt-2">Página 1 de 1</div>
+                </div>
             </div>
         </form>
     </div>
