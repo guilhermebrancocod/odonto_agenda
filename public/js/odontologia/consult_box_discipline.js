@@ -25,14 +25,14 @@ let allDisciplines = [];
 
 function updatePagination() {
     const totalPages = Math.ceil(allDisciplines.length / itemsPerPage) || 1;
-    
+
     // Atualiza o texto de informação da página
     $('#page-info').text(`Página ${currentPage} de ${totalPages}`);
-    
+
     // Habilita/desabilita botões de navegação
     $('#prev-page').toggleClass('disabled', currentPage === 1);
     $('#next-page').toggleClass('disabled', currentPage === totalPages || allDisciplines.length === 0);
-    
+
     // Mostra mensagem quando não há disciplinas
     if (allDisciplines.length === 0) {
         $('#no-disciplines-message').show();
@@ -46,15 +46,15 @@ function updatePagination() {
 function loadDisciplinesPage(page) {
     const $tbody = $('#box-discipline tbody');
     $tbody.empty();
-    
+
     if (allDisciplines.length === 0) {
         updatePagination();
         return;
     }
-    
+
     const start = (page - 1) * itemsPerPage;
     const end = Math.min(start + itemsPerPage, allDisciplines.length);
-    
+
     for (let i = start; i < end; i++) {
         const disciplines = allDisciplines[i];
         const html = `
@@ -88,7 +88,7 @@ function loadDisciplinesPage(page) {
         `;
         $tbody.append(html);
     }
-    
+
     updatePagination();
 }
 
@@ -157,24 +157,24 @@ $(document).ready(function () {
             document.querySelector('.select2-container--open .select2-search__field')?.focus();
         }, 0);
     });
-    
+
     // Event listeners para os botões de paginação
-    $('#prev-page').on('click', function(e) {
+    $('#prev-page').on('click', function (e) {
         e.preventDefault();
         if ($(this).hasClass('disabled')) return;
-        
+
         currentPage--;
         loadDisciplinesPage(currentPage);
     });
-    
-    $('#next-page').on('click', function(e) {
+
+    $('#next-page').on('click', function (e) {
         e.preventDefault();
         if ($(this).hasClass('disabled')) return;
-        
+
         currentPage++;
         loadDisciplinesPage(currentPage);
     });
-    
+
     carregarTodosBoxDiscipline();
 });
 
@@ -182,28 +182,27 @@ $(document).ready(function () {
 $('#selectBoxDiscipline').on('select2:select', function (e) {
     const id = e.params.data.id;
     $.ajax({
-        url: `/getBoxDiscipline/${id}`,
+        url: `/getBoxDisciplines/${id}`,
         type: 'GET',
         success: function (data) {
-            $('#box-discipline tbody').empty();
-            
-            if (!data) {
-                $('#no-disciplines-message').show();
-                $('#box-discipline').hide();
-                $('.pagination-container').hide();
-                return;
-            }
-            
-            // Armazenar os dados em um array (mesmo que seja apenas um item)
-            allDisciplines = [data];
+            $select.empty();
+            allDisciplines = data;
             currentPage = 1;
-            
-            // Esconder a mensagem de "sem disciplinas" e mostrar a tabela
-            $('#no-disciplines-message').hide();
-            $('#box-discipline').show();
-            
-            // Carregar a primeira página
+
+            // Adiciona ao select
+            data.forEach(disciplines => {
+                const newOption = new Option(
+                    disciplines.DISCIPLINA,
+                    disciplines.ID_BOX_DISCIPLINA,
+                    disciplines.NOME,
+                    false
+                );
+                $select.append(newOption);
+            });
+
+            // Carrega a primeira página
             loadDisciplinesPage(currentPage);
+            $select.val(null).trigger('change');
         },
         error: function (error) {
             console.error('Erro ao buscar box discipline:', error);

@@ -13,25 +13,30 @@ use App\Http\Controllers\Odonto\ServiceController;
 use App\Http\Controllers\Odonto\BoxDisciplineStudentsController;
 use App\Http\Controllers\Odonto\BoxesController;
 use App\Http\Controllers\Odonto\EncaminhamentoController;
+use App\Http\Controllers\Odonto\ReportController;
 use App\Http\Controllers\Odonto\CalendarioController;
+
+//-----RELATORIOS---//
+use App\Http\Controllers\Odonto\Relatorios\RelatorioAgendamentoController;
+use App\Http\Controllers\Odonto\Relatorios\RelatorioEncaminhamentoController;
+use App\Http\Controllers\Odonto\Relatorios\RelatorioFinanceiroController;
+use App\Http\Controllers\Odonto\Relatorios\RelatorioDisciplinaBoxController;
+use App\Http\Controllers\Odonto\Relatorios\RelatorioAcessoController;
+use App\Http\Controllers\Odonto\Relatorios\RelatorioUsuarioController;
 
 // -------------------- ODONTOLOGIA --------------------
 
 // ===== LOGIN (SEM middleware!) =====
 Route::get('/login', function () {
     if (session()->has('usuario') || Auth::check()) {
-        return redirect()->route('menu_agenda'); // destino logado
+        return redirect()->route('menu_agenda');
     }
     return view('login');
 })->name('loginGET');
 
 Route::post('/login', [LoginController::class, 'login'])->name('loginPOST');
 
-Route::get('/logout', function () {
-    session()->forget('usuario');
-    if (Auth::check()) Auth::logout(); // encerra guard (se usar)
-    return redirect()->route('loginGET');
-})->name('logout');
+Route::post('/logout', [LoginController::class, 'logout'])->name('logout');
 
 // ===== RAIZ "/" ÚNICA =====
 // Se não logado -> /login; se logado -> menu.
@@ -61,6 +66,22 @@ Route::middleware([AuthMiddleware::class . ':Admin,Coordenador'])->group(functio
     Route::get('/relatorio', function () {
         return view('odontologia/report_agenda');
     })->name('relatorio_odontologia');
+
+    Route::get('relatorio/agendamentos', function () {
+        return view('odontologia/relatorio/agendamentos');
+    })->name('relatorio.agendamentos');
+
+    Route::get('relatorio/encaminhamentos', function () {
+        return view('odontologia/relatorio/encaminhamentos');
+    })->name('relatorio.encaminhamento');
+
+    Route::get('relatorio/financeiro', function () {
+        return view('odontologia/relatorio/financeiro');
+    })->name('relatorio.financeiro');
+
+    Route::get('relatorio/acessos', function () {
+        return view('odontologia/relatorio/acessos');
+    })->name('relatorio.acessos');
 
     Route::get('/odontologia/criarpaciente', function () {
         return view('odontologia/create_patient');
@@ -145,6 +166,7 @@ Route::middleware([AuthMiddleware::class . ':Admin,Coordenador'])->group(functio
 Route::middleware([AuthMiddleware::class . ':Admin,Coordenador'])->group(function () {
     Route::get('/odontologia/disciplinascombox/{diasemana}', [BoxDisciplineStudentsController::class, 'disciplinascombox']);
     Route::get('/getBoxDisciplines/{discipline}/{diasemana}', [BoxDisciplineStudentsController::class, 'boxesDisciplina']);
+    Route::get('/getBoxDisciplines/{idboxdisciplina}', [BoxDisciplineStudentsController::class, 'boxesDisciplinaId']);
     Route::get('/procedimentos', [ServiceController::class, 'procedimento']);
     Route::get('/odontologia/turma/{diasemana}/', [BoxDisciplineStudentsController::class, 'getTodasTurmas']);
     Route::get('/odontologia/turmasAgendadas/', [BoxDisciplineStudentsController::class, 'getTurmasAgendadas']);
@@ -192,9 +214,7 @@ Route::prefix('odontologia/encaminhamentos')->group(function () {
 });
 
 Route::prefix('odontologia/relatorios')->group(function () {
-    Route::get('/', [EncaminhamentoController::class, 'consultaEncaminhamentos'])->name('listaEncaminhamentos');
-    Route::get('/{id}', [EncaminhamentoController::class, 'infoEncaminhamentos'])->name('informacoesEncaminhamentos');
-    Route::post('/{id}/gerar-agendamento', [EncaminhamentoController::class, 'gerarAgendamento'])->name('gerarEncaminhamentos');
+    Route::get('/', [ReportController::class, 'consultaRelatorios'])->name('listaRelatorios');
 });
 
 Route::prefix('odontologia')->group(function () {
@@ -203,6 +223,15 @@ Route::prefix('odontologia')->group(function () {
     Route::get('/disciplinas/{disciplina}/turmas', [EncaminhamentoController::class, 'turmasPorDisciplina']);
     Route::get('/disciplinas/{disciplina}/{turma}/{box}/alunos', [EncaminhamentoController::class, 'alunos']);
 });
+
+// RELATORIOS
+Route::prefix('odontologia')->group(function () {
+    Route::get('/relatorio/agendamentos', [RelatorioAgendamentoController::class, 'Agendamento'])->name('listaAgendamentos');
+    Route::get('/relatorio/encaminhamentos', [RelatorioEncaminhamentoController::class, 'Encaminhamento'])->name('listaEncaminhamentos');
+    Route::get('/relatorio/financeiro', [RelatorioFinanceiroController::class, 'Financeiro'])->name('listaFinanceiro');
+    Route::get('/relatorio/acessos', [RelatorioAcessoController::class, 'Acesso'])->name('listaAcessos');
+});
+
 
 // EDIÇÕES MISC
 Route::post('/alterarstatus/{agendaId}', [CalendarioController::class, 'editStatus'])->name('editStatus');

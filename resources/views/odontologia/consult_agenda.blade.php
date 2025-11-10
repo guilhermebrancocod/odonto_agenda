@@ -24,34 +24,49 @@
                 <h5>Pesquisar</h5>
                 <div class="linha-flex"></div>
             </div>
-            <div style="display: flex; flex-wrap: wrap; gap: 16px; align-items: flex-end; margin: 20px 0;">
-                <!-- Campo turma -->
-                <div style="flex: 1 1 200px;">
+            <div style="
+  display:flex; flex-wrap:wrap; gap:16px; align-items:flex-end; margin:20px 0;
+  background:#f8f9fa; border:1px solid #e5e7eb; border-radius:10px; padding:12px 16px;
+  box-shadow:0 1px 2px rgba(0,0,0,.04);
+">
+                <!-- Turma -->
+                <div style="flex:1 1 220px; min-width:200px;">
+                    <label for="selectTurma" style="display:block; font-size:12px; color:#6b7280; margin-bottom:6px;">
+                        Turma
+                    </label>
                     <select id="selectTurma" name="selectTurma"
-                        style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 6px; font-size: 14px;">
+                        style="width:100%; height:40px; padding:0 12px; border:1px solid #d1d5db; border-radius:8px; font-size:14px; background:#fff; outline:none;">
                         <option></option>
                     </select>
                 </div>
 
-                <!-- Campo paciente -->
-                <div style="flex: 2 1 300px;">
+                <!-- Paciente -->
+                <div style="flex:2 1 340px; min-width:260px;">
+                    <label for="selectPatient" style="display:block; font-size:12px; color:#6b7280; margin-bottom:6px;">
+                        Paciente
+                    </label>
                     <select id="selectPatient" name="selectPatient"
-                        style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 6px; font-size: 14px;">
+                        style="width:100%; height:40px; padding:0 12px; border:1px solid #d1d5db; border-radius:8px; font-size:14px; background:#fff; outline:none;">
                         <option></option>
                     </select>
                 </div>
 
                 <!-- Botões -->
-                <div style="display: flex; gap: 10px; flex-shrink: 0;">
-                    <button type="submit" id='reload'
-                        style="background-color: #007bff; color: #fff; border: none; padding: 10px 15px; font-size: 14px; border-radius: 6px; cursor: pointer;"
-                        title="Limpar">
-                        <iconify-icon icon="streamline:arrow-round-left-solid"></iconify-icon>
+                <div style="display:flex; gap:10px; flex-shrink:0; margin-left:auto;">
+                    <button type="submit" id="reload" title="Limpar"
+                        style="display:inline-flex; align-items:center; justify-content:center; gap:8px;
+             background:#ffffff; color:#374151; border:1px solid #d1d5db; padding:0 14px; height:40px;
+             font-size:14px; font-weight:500; border-radius:8px; cursor:pointer;">
+                        <iconify-icon icon="streamline:arrow-round-left-solid" style="font-size:18px;"></iconify-icon>
+                        <span style="display:inline-block;">Limpar</span>
                     </button>
-                    <button type="submit" id='add'
-                        style="background-color: #007bff; color: #fff; border: none; padding: 10px 15px; font-size: 14px; border-radius: 6px; cursor: pointer;"
-                        title="Adicionar paciente">
-                        <iconify-icon icon="ix:add-circle-filled"></iconify-icon>
+
+                    <button type="submit" id="add" title="Adicionar paciente"
+                        style="display:inline-flex; align-items:center; justify-content:center; gap:8px;
+             background:#0d6efd; color:#fff; border:1px solid #0d6efd; padding:0 14px; height:40px;
+             font-size:14px; font-weight:500; border-radius:8px; cursor:pointer;">
+                        <iconify-icon icon="ix:add-circle-filled" style="font-size:18px;"></iconify-icon>
+                        <span style="display:inline-block;">Adicionar</span>
                     </button>
                 </div>
             </div>

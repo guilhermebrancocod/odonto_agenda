@@ -43,6 +43,8 @@ class AgendaController extends Controller
     public function createAgenda(Request $request)
     {
 
+        $user_id = session('usuario');  
+
         $rules = [
             'ID_PACIENTE'     => ['required'],
             'status'          => ['required'],   // 11 dígitos
@@ -52,7 +54,6 @@ class AgendaController extends Controller
             'disciplina'  => ['required'],
             'ID_BOX'      => ['required'],
             'turma'       => ['required'],
-            'procedimento' => ['required'],
 
             'recorrencia' => ['required', 'integer', 'in:1,2'],
         ];
@@ -69,7 +70,6 @@ class AgendaController extends Controller
             'disciplina.required'   => 'A disciplina é obrigatória.',
             'ID_BOX.required'       => 'O box é obrigatório.',
             'turma.required'        => 'A turma é obrigatória.',
-            'procedimento.required' => 'O procedimento é obrigatório.',
             'recorrencia.required'  => 'A recorrência é obrigatória.',
 
             'frequencia.required_if:recorrencia,2|in:1,2,3' => 'A frequência é obrigatória para recorrência.',
@@ -211,7 +211,7 @@ class AgendaController extends Controller
                 'STATUS_AGEND'       => $request->input('status'),
                 'ID_AGEND_REMARCADO' => null,
                 'RECORRENCIA'        => 'pontual',
-                'VALOR_AGEND'        => $valor_convert,
+                'VALOR_AGENDA'        => $valor_convert,
                 'OBSERVACOES'        => $request->input('obs'),
                 'LOCAL'              => $descricaoLocal,
             ];
@@ -283,7 +283,7 @@ class AgendaController extends Controller
                         'STATUS_AGEND'       => $request->input('status'),
                         'ID_AGEND_REMARCADO' => null,
                         'RECORRENCIA'        => $rotuloRecorrencia,
-                        'VALOR_AGEND'        => $valor_convert,
+                        'VALOR_AGENDA'        => $valor_convert,
                         'OBSERVACOES'        => $request->input('obs'),
                         'LOCAL'              => $descricaoLocal,
                     ];
@@ -302,15 +302,16 @@ class AgendaController extends Controller
                     AuditLogger::created(
                         'FAESA_CLINICA_AGENDAMENTO',
                         $idAgendamento,
+                        $user_id->ID,
                         $payloadAg + ['ID_AGENDAMENTO' => $idAgendamento]
                     );
 
-                    DB::table('FAESA_CLINICA_LOCAL_AGENDAMENTO')->insert([
+                    /*DB::table('FAESA_CLINICA_LOCAL_AGENDAMENTO')->insert([
                         'ID_AGENDAMENTO' => $idAgendamento,
                         'ID_BOX'         => $idBox,
                         'DISCIPLINA'     => $disciplina,
                         'TURMA'          => $turma,
-                    ]);
+                    ]);*/
 
                     $criados++;
 
@@ -349,7 +350,6 @@ class AgendaController extends Controller
             ->leftJoin('LYCEUM.dbo.LY_DISCIPLINA as ld', 'ld.DISCIPLINA', '=', 'la.DISCIPLINA')
             ->leftJoin('FAESA_CLINICA_BOXES as cb', 'cb.ID_BOX_CLINICA', '=', 'la.ID_BOX')
             ->leftJoin('FAESA_CLINICA_PACIENTE as p', 'p.ID_PACIENTE', '=', 'a.ID_PACIENTE')
-            ->join('FAESA_CLINICA_SERVICO as s', 's.ID_SERVICO_CLINICA', '=', 'a.ID_SERVICO')
             ->where('a.ID_CLINICA', 2)
             ->where('a.ID_AGENDAMENTO', $agendaId)
             ->select(
@@ -369,8 +369,7 @@ class AgendaController extends Controller
                 'ld.NOME AS DISCIPLINA_NOME',
                 'la.TURMA',
                 'a.UPDATED_AT',
-                'a.VALOR_AGEND',
-                's.SERVICO_CLINICA_DESC',
+                'a.VALOR_AGENDA',
                 'p.NOME_COMPL_PACIENTE'
             )
             ->first();
@@ -383,7 +382,7 @@ class AgendaController extends Controller
         $alunosSelecionados = DB::table('FAESA_CLINICA_AGENDAMENTO_ALUNO as aa')
             ->join('LYCEUM.dbo.LY_ALUNO as a', 'a.ALUNO', '=', 'aa.ALUNO')
             ->where('aa.ID_AGENDAMENTO', $agendaId)
-            ->pluck('a.NOME_COMPL', 'aa.ALUNO')   // valor, chave
+            ->pluck('a.NOME_COMPL', 'aa.ALUNO')
             ->toArray();
 
         return view('odontologia.create_agenda', compact('agenda', 'alunosSelecionados' /*, 'alunosMap'*/));
@@ -433,7 +432,7 @@ class AgendaController extends Controller
             'STATUS_AGEND' => $request->input('status'),
             'ID_AGEND_REMARCADO' => $request->input('ID_AGEND_REMARCADO') ?: null,
             'RECORRENCIA' => $request->input('recorrencia'),
-            'VALOR_AGEND' => $valor_convert,
+            'VALOR_AGENDA' => $valor_convert,
             'OBSERVACOES' => $request->input('obs'),
             'LOCAL' => $descricaoLocal
         ];
@@ -444,9 +443,10 @@ class AgendaController extends Controller
             ->where('la.ID_AGENDAMENTO', $id)
             ->update($update);
 
+        $user_id = session('usuario');
         $new = array_merge($old, $update);
 
-        AuditLogger::updated('FAESA_CLINICA_AGENDAMENTO', $id, $old, $new);
+        AuditLogger::updated('FAESA_CLINICA_AGENDAMENTO', $id, $user_id->ID, $old, $new);
 
         $updLocal = ['DISCIPLINA' => $request->input('disciplina')];
 
@@ -515,14 +515,14 @@ class AgendaController extends Controller
             ->join('FAESA_CLINICA_LOCAL_AGENDAMENTO as la', 'la.ID_AGENDAMENTO', '=', 'A.ID_AGENDAMENTO')
             ->join('FAESA_CLINICA_BOXES as cb', 'cb.ID_BOX_CLINICA', '=', 'la.ID_BOX')
             ->join('FAESA_CLINICA_PACIENTE as p', 'p.ID_PACIENTE', '=', 'a.ID_PACIENTE')
-            ->join('FAESA_CLINICA_SERVICO as s', 's.ID_SERVICO_CLINICA', '=', 'a.ID_SERVICO')
+            /*->join('FAESA_CLINICA_SERVICO as s', 's.ID_SERVICO_CLINICA', '=', 'a.ID_SERVICO')*/
             ->select(
                 'a.ID_AGENDAMENTO',
                 'a.DT_AGEND',
                 'a.HR_AGEND_INI',
                 'a.HR_AGEND_FIN',
                 'a.ID_SERVICO',
-                's.SERVICO_CLINICA_DESC',
+                /*'s.SERVICO_CLINICA_DESC',*/
                 'la.TURMA',
                 'la.ID_BOX',
                 'cb.DESCRICAO',
@@ -547,19 +547,18 @@ class AgendaController extends Controller
     {
         $agenda = DB::table('FAESA_CLINICA_AGENDAMENTO')
             ->leftjoin('FAESA_CLINICA_PACIENTE', 'FAESA_CLINICA_AGENDAMENTO.ID_PACIENTE', '=', 'FAESA_CLINICA_PACIENTE.ID_PACIENTE')
-            ->leftjoin('FAESA_CLINICA_SERVICO', 'FAESA_CLINICA_SERVICO.ID_SERVICO_CLINICA', '=', 'FAESA_CLINICA_AGENDAMENTO.ID_SERVICO')
+            ->leftjoin('FAESA_CLINICA_LOCAL_AGENDAMENTO', 'FAESA_CLINICA_LOCAL_AGENDAMENTO.ID_AGENDAMENTO', '=', 'FAESA_CLINICA_AGENDAMENTO.ID_AGENDAMENTO')
             ->select(
                 'FAESA_CLINICA_PACIENTE.ID_PACIENTE',
                 'FAESA_CLINICA_PACIENTE.CPF_PACIENTE',
                 'FAESA_CLINICA_PACIENTE.NOME_COMPL_PACIENTE',
                 'FAESA_CLINICA_PACIENTE.E_MAIL_PACIENTE',
                 'FAESA_CLINICA_PACIENTE.FONE_PACIENTE',
+                'FAESA_CLINICA_LOCAL_AGENDAMENTO.TURMA',
                 'FAESA_CLINICA_AGENDAMENTO.ID_AGENDAMENTO',
                 'FAESA_CLINICA_AGENDAMENTO.DT_AGEND',
                 'FAESA_CLINICA_AGENDAMENTO.HR_AGEND_INI',
                 'FAESA_CLINICA_AGENDAMENTO.HR_AGEND_FIN',
-                'FAESA_CLINICA_AGENDAMENTO.ID_SERVICO',
-                'FAESA_CLINICA_SERVICO.SERVICO_CLINICA_DESC'
             )
             ->where('FAESA_CLINICA_PACIENTE.ID_PACIENTE', $pacienteId)
             ->where('FAESA_CLINICA_AGENDAMENTO.ID_CLINICA', '=', 2)
@@ -604,16 +603,23 @@ class AgendaController extends Controller
 
     public function getAlunosDisciplinaTurma($disciplina, $turma)
     {
+        $tipo = DB::table('LYCEUM.dbo.LY_DISCIPLINA as D')
+            ->where('DISCIPLINA', $disciplina)
+            ->value('TIPO');
+
+        $campo = $tipo === 'TEOPRA' ? 'M.SUBTURMA1' : 'M.TURMA';
+
         $alunos = DB::table('LYCEUM.dbo.LY_MATRICULA as M')
             ->join('LYCEUM.dbo.LY_ALUNO as A', 'A.ALUNO', '=', 'M.ALUNO')
+            ->join('LYCEUM.dbo.LY_DISCIPLINA as D', 'D.DISCIPLINA', '=', 'M.DISCIPLINA')
             ->where('M.DISCIPLINA', $disciplina)
-            ->where('M.SUBTURMA1', $turma)
-            ->whereNotExists(function ($q) use ($disciplina, $turma) {
+            ->where($campo, $turma)
+            ->whereNotExists(function ($q) use ($disciplina, $turma, $campo) {
                 $q->select(DB::raw(1))
                     ->from('FAESA_CLINICA_BOX_DISCIPLINA_ALUNO as DA')
                     ->whereColumn('DA.ALUNO', 'M.ALUNO')
                     ->where('M.DISCIPLINA', $disciplina)
-                    ->where('M.SUBTURMA1', $turma);
+                    ->where($campo, $turma);
             })
             ->select('M.ALUNO', 'A.NOME_COMPL')
             ->distinct()

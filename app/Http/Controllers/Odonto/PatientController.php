@@ -9,7 +9,6 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
 use App\Services\Odontologia\AuditLogger;
-use App\Models\Odontologia\Paciente;
 
 class PatientController extends Controller
 {
@@ -142,6 +141,7 @@ class PatientController extends Controller
             ];
 
             $idPaciente = DB::table('FAESA_CLINICA_PACIENTE')->insertGetId($row, 'ID_PACIENTE');
+            $user_id = session('usuario');
 
             $celulares = collect($request->input('celulares', []))
                 ->filter()                    // já são só dígitos
@@ -162,6 +162,7 @@ class PatientController extends Controller
             AuditLogger::created(
                 'FAESA_CLINICA_PACIENTE',
                 $idPaciente,
+                $user_id->ID,
                 $row + ['ID_PACIENTE' => $idPaciente]
             );
         });
@@ -171,6 +172,7 @@ class PatientController extends Controller
 
     public function updatePatient(Request $request, $id)
     {
+        $user_id = session('usuario');      
 
         $input = $request->all();
         $input['cpf']              = preg_replace('/\D/', '', $input['cpf'] ?? '');
@@ -283,10 +285,12 @@ class PatientController extends Controller
             'OBSERVACAO'          => $request->input('obs_laudo'),
         ];
         DB::table('FAESA_CLINICA_PACIENTE')->where('ID_PACIENTE', $id)->update($update);
-
+        
+        $user_id = session('usuario');
+        
         $new = array_merge($old, $update);
 
-        AuditLogger::updated('FAESA_CLINICA_PACIENTE', $id, $old, $new);
+        AuditLogger::updated('FAESA_CLINICA_PACIENTE', $id, $user_id->ID, $old, $new);
         
         return redirect()->back()->with('success', 'Paciente atualizado com sucesso!');
     }

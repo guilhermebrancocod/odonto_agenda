@@ -398,6 +398,18 @@ class BoxDisciplineStudentsController extends Controller
         return response()->json($boxes);
     }
 
+    public function boxesDisciplinaId($id)
+    {
+        $boxes = DB::table('FAESA_CLINICA_BOX_DISCIPLINA')
+            ->join('FAESA_CLINICA_BOXES', 'FAESA_CLINICA_BOXES.ID_BOX_CLINICA', '=', 'FAESA_CLINICA_BOX_DISCIPLINA.ID_BOX')
+            ->select('FAESA_CLINICA_BOXES.ID_BOX_CLINICA', 'FAESA_CLINICA_BOXES.DESCRICAO')
+            ->where('FAESA_CLINICA_BOX_DISCIPLINA.ID_BOX_DISCIPLINA', $id)
+            ->distinct()
+            ->get();
+
+        return response()->json($boxes);
+    }
+
     public function getHorariosBoxDisciplinas($discipline)
     {
         $horarios = DB::table('FAESA_CLINICA_BOX_DISCIPLINA')
@@ -431,8 +443,8 @@ class BoxDisciplineStudentsController extends Controller
             })
             ->where('A.ANO', 2025)
             ->where('A.SEMESTRE', 2)
-            ->where('T.CURSO', 2009)
-            ->where('D.TIPO', '=', 'TEOPRA')
+            ->where('T.CURSO','=', '2009')
+            ->whereIn('D.TIPO', ['TEOPRA', 'PRATICA'])
             ->select('D.DISCIPLINA', 'D.NOME')
             ->distinct()
             ->get();
@@ -442,11 +454,22 @@ class BoxDisciplineStudentsController extends Controller
 
     public function getTodasTurmas($disciplina)
     {
-        $turma = DB::table('LYCEUM.dbo.LY_MATRICULA')
-            ->select('SUBTURMA1')
+        $tipo = DB::table('LYCEUM.dbo.LY_DISCIPLINA as D')
             ->where('DISCIPLINA', $disciplina)
+            ->value('TIPO');
+
+        $campo = $tipo === 'TEOPRA' ? 'M.SUBTURMA1' : 'M.TURMA';
+
+        $turma = DB::table('LYCEUM.dbo.LY_MATRICULA as M')
+            ->join('LYCEUM.dbo.LY_AGENDA as A', 'A.DISCIPLINA', '=', 'M.DISCIPLINA')
+            ->join('LYCEUM.dbo.LY_DISCIPLINA as D', 'D.DISCIPLINA', '=', 'M.DISCIPLINA')
+            ->where('A.DISCIPLINA', $disciplina)
+            ->selectRaw("$campo as TURMA_EXIBICAO")
+            ->whereNotNull(DB::raw($campo))
+            ->whereRaw("LTRIM(RTRIM($campo)) <> ''")
             ->distinct()
-            ->pluck('SUBTURMA1');
+            ->orderBy('TURMA_EXIBICAO')
+            ->pluck('TURMA_EXIBICAO');
         return response()->json($turma);
     }
 
@@ -465,8 +488,7 @@ class BoxDisciplineStudentsController extends Controller
         $turmaSelecionada = DB::table('FAESA_CLINICA_LOCAL_AGENDAMENTO as la')
             ->join('FAESA_CLINICA_AGENDAMENTO as a', 'a.ID_AGENDAMENTO', '=', 'la.ID_AGENDAMENTO')
             ->join('FAESA_CLINICA_PACIENTE as p', 'p.ID_PACIENTE', '=', 'a.ID_PACIENTE')
-            ->join('FAESA_CLINICA_SERVICO as s', 's.ID_SERVICO_CLINICA', '=', 'a.ID_SERVICO')
-            ->select('p.NOME_COMPL_PACIENTE', 'p.ID_PACIENTE', 's.SERVICO_CLINICA_DESC', 'a.DT_AGEND', 'a.HR_AGEND_INI', 'a.HR_AGEND_FIN', 'la.TURMA', 'p.FONE_PACIENTE', 'a.ID_AGENDAMENTO')
+            ->select('p.NOME_COMPL_PACIENTE', 'p.ID_PACIENTE', 'a.DT_AGEND', 'a.HR_AGEND_INI', 'a.HR_AGEND_FIN', 'la.TURMA', 'p.FONE_PACIENTE', 'a.ID_AGENDAMENTO')
             ->where('la.TURMA', $turmaSelecionada)
             ->distinct()
             ->get();

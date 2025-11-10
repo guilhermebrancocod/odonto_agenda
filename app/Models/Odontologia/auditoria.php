@@ -13,7 +13,7 @@ class Audit extends Model
     protected $fillable = [
         'AUDITABLE_TYPE',
         'AUDITABLE_ID',
-        'USER_ID',
+        'USER_NAME',
         'EVENT',
         'OLD_VALUES',
         'NEW_VALUES',

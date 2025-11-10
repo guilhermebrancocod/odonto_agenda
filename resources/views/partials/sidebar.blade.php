@@ -81,7 +81,7 @@ $nome = trim($nome);
         <li>
             <a href="/odontologia/encaminhamentos"
                 class="{{ request()->is('odontologia/encaminhamentos') ? 'active' : '' }}">
-                <i class="fa-solid fa-layer-group"></i>Encaminhamentos
+                <i class="fa-solid fa-share"></i>Encaminhamentos
             </a>
         </li>
         <li>
@@ -98,8 +98,8 @@ $nome = trim($nome);
         </li>
         <li>
             <a href="/odontologia/relatorios"
-                class="{{ request()->is('odontologia/relatorio') ? 'active' : '' }}">
-                <i class="fas fa-chart-bar"></i>Relatório
+                class="{{ request()->is('odontologia/relatorios') ? 'active' : '' }}">
+                <i class="fas fa-chart-bar"></i>Relatórios
             </a>
         </li>
     </ul>
@@ -117,7 +117,8 @@ $nome = trim($nome);
     </ul>
     @endif
 
-    <a id="logout" href="/logout" class="logout-link">
-        <i class="fas fa-sign-out-alt"></i>Sair
-    </a>
+    <form action="{{ route('logout') }}" method="POST" class="inline">
+        @csrf
+        <button id="logout" type="submit"><i class="fas fa-sign-out-alt"></i>Sair</button>
+    </form>
 </nav>

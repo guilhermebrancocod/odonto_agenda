@@ -153,6 +153,7 @@
                     <i class="bi bi-clock-history me-1"></i> Log
                 </button>
             </div>
+            @endif
             <div style="display: flex; align-items: flex-end; gap: 10px; flex-wrap: wrap; margin: 15px 0;">
                 <div style="flex: 1; min-width: 250px;">
                     <select id="selectPatient" name="ID_PACIENTE" class="form-control" style="width: 100%;">
@@ -164,7 +165,6 @@
                     </select>
                 </div>
             </div>
-            @endif
             <div class="linha-com-titulo">
                 <h5>Datalhes</h5>
                 <div class="linha-flex"></div>
@@ -434,10 +434,10 @@
                 @php
                 $pagto = old('pagto');
                 if (is_null($pagto) && isset($agenda)) {
-                $pagto = $agenda->VALOR_AGEND !== null ? 'S' : 'N';
+                $pagto = $agenda->VALOR_AGENDA !== null ? 'S' : 'N';
                 }
                 $valorDisabled = ($pagto === 'N') ? 'disabled' : '';
-                $valorAtual = old('valor', $agenda->VALOR_AGEND ?? '');
+                $valorAtual = old('valor', $agenda->VALOR_AGENDA ?? '');
                 $formaAtual = old('forma-pag', $agenda->FORMA_PAG ?? 'A VISTA');
                 $qtdParcelasAtual = (int) old('qtd_parcelas', 0);
                 @endphp

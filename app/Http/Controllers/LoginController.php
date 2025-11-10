@@ -8,7 +8,10 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Auth;
+use Carbon\Carbon;
 use Illuminate\Support\Facades\Log;
+use App\Services\Odontologia\AuditLogger;
+
 
 class LoginController extends Controller
 {
@@ -62,15 +65,12 @@ class LoginController extends Controller
         // 6) Regenerar e salvar sessão (ESSENCIAL)
         $request->session()->regenerate();
         session([
-            'usuario'     => $user,         // seu middleware lê exatamente isso
+            'usuario'     => $user,
             'nome'        => $nome,
             'clinicas'    => $clinicas,
             'tipo'        => $tipo,
             'SIT_USUARIO' => 'ATIVO',
         ]);
-
-        // (Opcional) se usar guard do Laravel:
-        // Auth::loginUsingId($user->ID);
 
         // 7) Gate por clínica (se precisar da 2)
         if (!empty($clinicas) && !in_array(2, $clinicas, true)) {
@@ -78,6 +78,21 @@ class LoginController extends Controller
             return redirect()->route('loginGET')
                 ->with('error', 'Usuário sem acesso à clínica de Odontologia.');
         }
+        $agora = Carbon::now('America/Sao_Paulo');
+        $user_name = session('usuario')->USUARIO;
+        AuditLogger::login(
+            'FAESA_CLINICA_USUARIO',
+            $user->ID,
+            $user_name,
+            [
+                'USUARIO' => $user->USUARIO,
+                'NOME' => $user->NOME,
+                'DATA_LOGIN' => $agora->format('Y-m-d'),
+                'HORA_LOGIN' => $agora->format('H:i:s'),
+                'IP' => $request->ip(),
+                'USER_AGENT' => $request->header('User-Agent')
+            ]
+        );
 
         // 8) Redirecionar
         return redirect()->intended(route('menu_agenda'));
@@ -85,10 +100,38 @@ class LoginController extends Controller
 
     public function logout(Request $request)
     {
+        // 1) Capturar usuário ANTES de mexer na sessão/guard
+        $user = session('usuario');
+        $user_name = session('usuario');
+        $agora = Carbon::now('America/Sao_Paulo');
+        // 2) Auditar logout ANTES de limpar sessão (mantém contexto)
+        try {
+            AuditLogger::logout(
+                'FAESA_CLINICA_USUARIO',
+                $user->ID,
+                $user_name->USUARIO,
+                [
+                    'USUARIO'      => $user->USUARIO ?? null,
+                    'NOME'         => $user->NOME ?? null,
+                    'DATA_LOGOUT'  => $agora->format('Y-m-d'),
+                    'HORA_LOGOUT'  => $agora->format('H:i:s'),
+                    'IP'           => $request->ip(),
+                    'USER_AGENT'   => substr($request->header('User-Agent') ?? '', 0, 255),
+                ]
+            );
+        } catch (\Throwable $e) {
+            Log::warning('Falha ao auditar logout: ' . $e->getMessage());
+            // segue o fluxo mesmo assim
+        }
+
+        if (Auth::check()) {
+            Auth::logout();
+        }
         session()->forget(['usuario', 'clinicas', 'SIT_USUARIO']);
-        if (Auth::check()) Auth::logout();
         $request->session()->invalidate();
         $request->session()->regenerateToken();
+
+        
         return redirect()->route('loginGET');
     }
 

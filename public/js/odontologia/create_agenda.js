@@ -92,7 +92,6 @@ window.validarFormulario = function () {
     if (!disciplina) errors.push("A disciplina é obrigatória.");
     if (!box) errors.push("O box é obrigatório.");
     if (!turma) errors.push("A turma é obrigatória.");
-    if (!procedimento) errors.push("O procedimento é obrigatório.");
 
     /*if (recorrencia === '2') {
         const diasMarcados = document.querySelectorAll('input[name="dia_recorrencia[]"]:checked');

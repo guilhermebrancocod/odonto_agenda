@@ -17,7 +17,6 @@
 }
 
 .sidebar {
-
     width: 240px;
     height: 100vh;
     position: fixed;
@@ -32,6 +31,7 @@
     padding: 18px 12px 12px;
     box-shadow: var(--shadow);
     z-index: 1030;
+    min-height: 100vh;
 }
 
 .logo-wrap {
@@ -158,24 +158,31 @@
 
 /* Logout */
 #logout {
-    margin-top: auto;
-    margin: 10px 8px 12px;
-    padding: 12px 14px;
-    color: var(--white);
-    text-decoration: none;
+    all: unset;
+    box-sizing: border-box;
     display: flex;
     align-items: center;
     gap: 10px;
-    border-radius: 10px;
+    padding: 12px 20px;
+    margin: 10px 8px 25px;;
+    margin-top: 180px;
+    width: 95%;
+    border-radius: 13px;
     background: rgba(220, 38, 38, .9);
+    color: var(--white);
+    cursor: pointer;
+    text-decoration: underline;
     transition: filter .2s, transform .1s;
-    margin-top: auto;
-    margin-bottom: 25px;
 }
 
 #logout:hover {
     filter: brightness(1.05);
     transform: translateX(1px);
+}
+
+#logout:focus-visible {
+    outline: 2px solid rgba(255, 255, 255, .9);
+    outline-offset: 2px;
 }
 
 /* Foco acessível */

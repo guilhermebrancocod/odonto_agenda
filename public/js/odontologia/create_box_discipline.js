@@ -4,14 +4,13 @@ document.addEventListener('DOMContentLoaded', init);
 function init() {
     'use strict';
 
-    // ---- Constantes e Estado ---------------------------------------
-    const CAP = 2; // limite por box
+    const CAP = 3; // limite por box
     const boxesSelecionados = Array.isArray(window.boxesSelecionados) ? window.boxesSelecionados : [];
     const state = {
-        selected: new Set(),          // ids marcados (checkboxes)
-        activeBox: null,              // box em foco
-        boxes: new Map(),             // boxId -> Set<alunoId>
-        alunos: new Map(),            // alunoId -> {id, nome}
+        selected: new Set(),          
+        activeBox: null,           
+        boxes: new Map(),             
+        alunos: new Map(),           
     };
 
     // ---- Helpers ----------------------------------------------------
@@ -31,8 +30,6 @@ function init() {
         for (const set of state.boxes.values()) if (set.has(id)) return true;
         return false;
     };
-
-    // ---- Cache de elementos ----------------------------------------
     const el = {
         disciplina: $('#disciplina'),
         turma: $('#turma'),
@@ -46,10 +43,6 @@ function init() {
         alunosBoxesWrap: $('#alunos-boxes-container'),
         form: $('#form-agenda')
     };
-
-    // =================================================================
-    // Carregamento básico (disciplinas / turmas / datas / horários)
-    // =================================================================
     loadDisciplinas();
 
     el.disciplina?.addEventListener('change', onDisciplinaChange);
