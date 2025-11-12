@@ -82,8 +82,7 @@ class CalendarioController extends Controller
                 $q->select(DB::raw(1))
                     ->from('FAESA_CLINICA_AGENDAMENTO_ALUNO as AA')
                     ->whereColumn('AA.ALUNO', 'DA.ALUNO')
-                    ->when($ini && $fim, fn($qq) => $qq->whereBetween('AA.DT_AGEND', [$ini, $fim]))
-                    ->where('AA.ID_CLINICA', 2);
+                    ->when($ini && $fim, fn($qq) => $qq->whereBetween('AA.DT_AGEND', [$ini, $fim]));
                 // ->whereNotIn('AA.STATUS_AGEND', ['Cancelado']);
             })
             ->select([

@@ -72,7 +72,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
                 const table = `
                 <div class="table-responsive" style="font-size: small">
-                <table class="table table-sm align-middle mb-0">
+                <table class="table align-middle mb-0">
                     <thead class="table-light">
                     <tr class="col-2">
                         <th>Matrícula</th>
@@ -105,7 +105,7 @@ document.addEventListener('DOMContentLoaded', function () {
                     </tbody>
                 </table>
                 </div>
-            `;
+                `;
 
                 bodyEl.innerHTML = table;
             })
