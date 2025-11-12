@@ -5,12 +5,18 @@ function init() {
     'use strict';
 
     const CAP = 3; // limite por box
+    const capByDisc = new Map([['D009826', 3]]);
+
+    function getCap(disciplina) {
+        return capByDisc.get(disciplina) ?? CAP;
+    }
+
     const boxesSelecionados = Array.isArray(window.boxesSelecionados) ? window.boxesSelecionados : [];
     const state = {
-        selected: new Set(),          
-        activeBox: null,           
-        boxes: new Map(),             
-        alunos: new Map(),           
+        selected: new Set(),
+        activeBox: null,
+        boxes: new Map(),
+        alunos: new Map(),
     };
 
     // ---- Helpers ----------------------------------------------------
@@ -197,7 +203,7 @@ function init() {
         el.grid.innerHTML = '';
         horarios.forEach((h, idx) => {
             const id = `hor_${h.replace(':', '')}_${idx}`;
-              const checked = horarios.includes(h) ? 'checked' : '';
+            const checked = horarios.includes(h) ? 'checked' : '';
             el.grid.insertAdjacentHTML('beforeend', `
       <div class="time-item">
         <input class="time-input" type="checkbox" id="${id}" name="horarios[]" value="${h}" ${checked}>
@@ -461,7 +467,7 @@ function init() {
         renderAlunosSelectionState();
     }
 
-    function assignSelectedTo(boxId) {
+    function assignSelectedTo(boxId, disciplina) {
         const selected = [...(state.selected ?? new Set())];
         if (selected.length === 0) {
             warn('Necessário selecionar ao menos 1 aluno para selecionar o box.');
@@ -469,7 +475,9 @@ function init() {
         }
 
         const bucket = state.boxes.get(boxId) ?? new Set();
-        let free = CAP - bucket.size;
+        const cap = getCap(disciplina);
+        
+        let free = cap - bucket.size;
         if (free <= 0) { warn('Box atingiu o limite de alunos'); return; }
 
         // garante exclusividade do aluno em 1 box

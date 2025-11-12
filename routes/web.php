@@ -156,7 +156,7 @@ Route::put('/updateAgenda/{id}', [AgendaController::class, 'updateAgenda'])->nam
 //PERFIL
 Route::get('/perfil', [LoginController::class, 'login']);
 
-Route::middleware([AuthMiddleware::class . ':Admin,Coordenador'])->group(function () {
+Route::middleware([AuthMiddleware::class . ':Admin,Coordenador,Usuario'])->group(function () {
     //CALENDÁRIO
     Route::get('/odontologia/agendamentos', [CalendarioController::class, 'getAgendamentos']);
     Route::get('/odontologia/agendamentos/alunos-sem-agendamento', [CalendarioController::class, 'getAlunosSemAgendamento']);
@@ -184,7 +184,6 @@ Route::middleware([AuthMiddleware::class . ':Admin,Coordenador'])->group(functio
 
     Route::get('/getPacientes', [PatientController::class, 'buscarPacientes']);
     Route::get('/getProcedures', [ServiceController::class, 'buscarProcedimentos']);
-    Route::get('/getAgenda', [AgendaController::class, 'buscarAgendamentos']);
     Route::get('/getBoxes', [BoxesController::class, 'buscarBoxes']);
     Route::get('/getUser', [UserController::class, 'buscarUsuarios']);
     Route::get('/getUserLyceum', [UserController::class, 'buscarUsuariosLyceum']);
@@ -204,6 +203,11 @@ Route::middleware([AuthMiddleware::class . ':Admin,Coordenador'])->group(functio
     Route::get('/odontologia/consultarusuario', [UserController::class, 'selectUser'])->name('selectUser');
     Route::get('/odontologia/consultardisciplinabox', [BoxDisciplineStudentsController::class, 'fSelectBoxDiscipline'])->name('selectBoxDiscipline');
     Route::get('/odontologia/consultaragenda', [AgendaController::class, 'fSelectAgenda'])->name('selectAgenda');
+});
+
+Route::middleware([AuthMiddleware::class . ':Admin,Coordenador,Usuario'])->group(function () {
+Route::get('/odontologia/consultaragenda', [AgendaController::class, 'fSelectAgenda'])->name('selectAgenda');
+Route::get('/getAgenda', [AgendaController::class, 'buscarAgendamentos']);
 });
 
 //ENCAMINHAMENTO (sem mudança)

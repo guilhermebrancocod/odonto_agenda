@@ -34,6 +34,11 @@
     min-height: 100vh;
 }
 
+.nav-items {
+    flex: 1;
+    /* ocupa o espaço disponível */
+}
+
 .logo-wrap {
     display: flex;
     flex-direction: column;
@@ -164,7 +169,8 @@
     align-items: center;
     gap: 10px;
     padding: 12px 20px;
-    margin: 10px 8px 25px;;
+    margin: 10px 8px 25px;
+    align-self: center;
     margin-top: 180px;
     width: 95%;
     border-radius: 13px;

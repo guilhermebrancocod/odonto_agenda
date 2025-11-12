@@ -33,11 +33,13 @@ class BoxesController extends Controller
     public function getBoxes(Request $request)
     {
         $query = DB::table('FAESA_CLINICA_BOXES')
-            ->select('DESCRICAO', 'ID_BOX_CLINICA', 'ATIVO');
+            ->select('DESCRICAO', 'ID_BOX_CLINICA', 'ATIVO')
+            ->where('FAESA_CLINICA_BOXES.ATIVO', '=', 'S');
 
         if ($request->has('query')) {
             $search = $request->query('query');
-            $query->where('FAESA_CLINICA_BOXES.DESCRICAO', 'like', '%' . $search . '%');
+            $query
+            ->where('FAESA_CLINICA_BOXES.DESCRICAO', 'like', '%' . $search . '%');
         }
 
         $boxes = $query->get();

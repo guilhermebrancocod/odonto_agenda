@@ -43,7 +43,7 @@ class AgendaController extends Controller
     public function createAgenda(Request $request)
     {
 
-        $user_id = session('usuario');  
+        $user_id = session('usuario');
 
         $rules = [
             'ID_PACIENTE'     => ['required'],
@@ -298,6 +298,29 @@ class AgendaController extends Controller
                     ];
                     DB::table('FAESA_CLINICA_LOCAL_AGENDAMENTO')->insert($payloadLocal);
 
+                    $alunosRaw = (string) $request->input('alunos_visualizados', '');
+                    $alunos = array_values(array_unique(array_filter(array_map('trim', explode(',', $alunosRaw)))));
+
+                    $dt = Carbon::createFromFormat('d/m/Y', $request->input('date')); // ajuste se o formato variar
+                    $anoLetivo = (int) $dt->year;
+                    $semestre  = ($dt->month <= 6) ? 1 : 2;
+
+                    $now = now();
+                    $payloadAluno = [];
+
+                    foreach ($alunos as $Aluno) {
+                        $payloadAluno[] = [
+                            'ID_AGENDAMENTO' => $idAgendamento,
+                            'ALUNO'          => (int) $Aluno,
+                            'DOCENTE'        => null,
+                            'STATUS'         => $request->input('status'),
+                            'SEMESTRE'       => $semestre,
+                            'ANO_LETIVO'     => $anoLetivo,
+                            'CREATED_AT'     => $now,
+                            'UPDATED_AT'     => $now,
+                        ];
+                    }
+                    DB::table('FAESA_CLINICA_AGENDAMENTO_ALUNO')->insert($payloadAluno);
 
                     AuditLogger::created(
                         'FAESA_CLINICA_AGENDAMENTO',
@@ -442,6 +465,12 @@ class AgendaController extends Controller
             ->join('FAESA_CLINICA_BOXES as cb', 'cb.ID_BOX_CLINICA', '=', 'la.ID_BOX')
             ->where('la.ID_AGENDAMENTO', $id)
             ->update($update);
+
+        DB::table('FAESA_CLINICA_AGENDAMENTO_ALUNO')
+            ->where('ID_AGENDAMENTO', $id)
+            ->update([
+                'STATUS' => $request->input('status')
+            ]);
 
         $user_id = session('usuario');
         $new = array_merge($old, $update);

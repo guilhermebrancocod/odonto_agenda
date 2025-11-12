@@ -28,97 +28,99 @@ $nome = trim($nome);
     <i class="fas fa-bars" aria-hidden="true"></i>
     <span class="sr-only">Abrir menu</span>
 </button>
+@if(in_array($tipo, ['Admin','Coordenador','Usuario'], true))
+<div class="sidebar">
+    <nav class="sidebar" role="navigation" aria-label="Menu principal">
+        <div class="logo-wrap">
+            <a href="/perfil" class="user-chip" title="{{ $nome }}" aria-label="Perfil de {{ $nome }}">
+                <span class="status-dot" aria-hidden="true"></span>
+                <i class="fas fa-user-circle" aria-hidden="true"></i>
+                <span class="user-name">{{ $nome }}</span>
+            </a>
+            <img src="/img/faesa.png" alt="FAESA">
+        </div>
 
-<nav class="sidebar" role="navigation" aria-label="Menu principal">
-    <div class="logo-wrap">
-        <a href="/perfil" class="user-chip" title="{{ $nome }}" aria-label="Perfil de {{ $nome }}">
-            <span class="status-dot" aria-hidden="true"></span>
-            <i class="fas fa-user-circle" aria-hidden="true"></i>
-            <span class="user-name">{{ $nome }}</span>
-        </a>
-        <img src="/img/faesa.png" alt="FAESA">
-    </div>
+        <div class="clinic-badge">
+            <i class="fas fa-tooth" aria-hidden="true"></i>
+            <span>Odontologia</span>
+        </div>
+        <div class="nav-items">
 
-    <div class="clinic-badge">
-        <i class="fas fa-tooth" aria-hidden="true"></i>
-        <span>Odontologia</span>
-    </div>
+            <ul class="nav-section">
+                <li>
+                    <a href="/odontologia/menu_agenda"
+                        class="{{ request()->is('odontologia/menu_agenda') ? 'active' : '' }}"
+                        aria-current="{{ request()->is('odontologia/menu_agenda') ? 'page' : '' }}">
+                        <i class="fas fa-home"></i>Início
+                    </a>
+                </li>
 
-    @if(in_array($tipo, ['Admin','Coordenador','Usuario'], true))
-    <ul class="nav-section">
-        <li>
-            <a href="/odontologia/menu_agenda"
-                class="{{ request()->is('odontologia/menu_agenda') ? 'active' : '' }}"
-                aria-current="{{ request()->is('odontologia/menu_agenda') ? 'page' : '' }}">
-                <i class="fas fa-home"></i>Início
-            </a>
-        </li>
+                <li>
+                    <a href="/odontologia/consultaragenda"
+                        class="{{ request()->is('odontologia/consultaragenda') ? 'active' : '' }}">
+                        <i class="fa-solid fa-calendar-alt"></i>Agenda
+                    </a>
+                </li>
 
-        <li>
-            <a href="/odontologia/consultaragenda"
-                class="{{ request()->is('odontologia/consultaragenda') ? 'active' : '' }}">
-                <i class="fa-solid fa-calendar-alt"></i>Agenda
-            </a>
-        </li>
+            </ul>
+            @endif
 
-    </ul>
-    @endif
+            @if(in_array($tipo, ['Admin','Coordenador'], true))
+            <ul class="nav-section">
+                <li>
+                    <a href="/odontologia/consultarpaciente"
+                        class="{{ request()->is('odontologia/consultarpaciente') ? 'active' : '' }}">
+                        <i class="fas fa-users"></i>Pacientes
+                    </a>
+                </li>
+                <li>
+                    <a href="/odontologia/criaragenda"
+                        class="{{ request()->is('odontologia/criaragenda') ? 'active' : '' }}">
+                        <i class="fas fa-calendar-plus"></i>Novo agendamento
+                    </a>
+                </li>
+                <li>
+                    <a href="/odontologia/encaminhamentos"
+                        class="{{ request()->is('odontologia/encaminhamentos') ? 'active' : '' }}">
+                        <i class="fa-solid fa-share"></i>Encaminhamentos
+                    </a>
+                </li>
+                <li>
+                    <a href="/odontologia/consultardisciplinabox"
+                        class="{{ request()->is('odontologia/consultardisciplinabox') ? 'active' : '' }}">
+                        <i class="fa-solid fa-layer-group"></i>Disciplinas por box
+                    </a>
+                </li>
+                <li>
+                    <a href="/odontologia/consultarbox"
+                        class="{{ request()->is('odontologia/consultarbox') ? 'active' : '' }}">
+                        <i class="fas fa-hospital"></i>Box de atendimento
+                    </a>
+                </li>
+                <li>
+                    <a href="/odontologia/relatorios"
+                        class="{{ request()->is('odontologia/relatorios') ? 'active' : '' }}">
+                        <i class="fas fa-chart-bar"></i>Relatórios
+                    </a>
+                </li>
+            </ul>
+            @endif
 
-    @if(in_array($tipo, ['Admin','Coordenador'], true))
-    <ul class="nav-section">
-        <li>
-            <a href="/odontologia/consultarpaciente"
-                class="{{ request()->is('odontologia/consultarpaciente') ? 'active' : '' }}">
-                <i class="fas fa-users"></i>Pacientes
-            </a>
-        </li>
-        <li>
-            <a href="/odontologia/criaragenda"
-                class="{{ request()->is('odontologia/criaragenda') ? 'active' : '' }}">
-                <i class="fas fa-calendar-plus"></i>Novo agendamento
-            </a>
-        </li>
-        <li>
-            <a href="/odontologia/encaminhamentos"
-                class="{{ request()->is('odontologia/encaminhamentos') ? 'active' : '' }}">
-                <i class="fa-solid fa-share"></i>Encaminhamentos
-            </a>
-        </li>
-        <li>
-            <a href="/odontologia/consultardisciplinabox"
-                class="{{ request()->is('odontologia/consultardisciplinabox') ? 'active' : '' }}">
-                <i class="fa-solid fa-layer-group"></i>Disciplinas por box
-            </a>
-        </li>
-        <li>
-            <a href="/odontologia/consultarbox"
-                class="{{ request()->is('odontologia/consultarbox') ? 'active' : '' }}">
-                <i class="fas fa-hospital"></i>Box de atendimento
-            </a>
-        </li>
-        <li>
-            <a href="/odontologia/relatorios"
-                class="{{ request()->is('odontologia/relatorios') ? 'active' : '' }}">
-                <i class="fas fa-chart-bar"></i>Relatórios
-            </a>
-        </li>
-    </ul>
-    @endif
-
-    {{-- Somente Admin --}}
-    @if($tipo === 'Admin')
-    <ul class="nav-section">
-        <li>
-            <a href="/odontologia/consultarusuario"
-                class="{{ request()->is('odontologia/consultarusuario') ? 'active' : '' }}">
-                <i class="fas fa-user"></i>Usuários
-            </a>
-        </li>
-    </ul>
-    @endif
-
-    <form action="{{ route('logout') }}" method="POST" class="inline">
-        @csrf
-        <button id="logout" type="submit"><i class="fas fa-sign-out-alt"></i>Sair</button>
-    </form>
+            {{-- Somente Admin --}}
+            @if($tipo === 'Admin')
+            <ul class="nav-section">
+                <li>
+                    <a href="/odontologia/consultarusuario"
+                        class="{{ request()->is('odontologia/consultarusuario') ? 'active' : '' }}">
+                        <i class="fas fa-user"></i>Usuários
+                    </a>
+                </li>
+            </ul>
+            @endif
+        </div>
+        <form action="{{ route('logout') }}" method="POST" class="inline">
+            @csrf
+            <button id="logout" type="submit"><i class="fas fa-sign-out-alt"></i>Sair</button>
+        </form>
+</div>
 </nav>
