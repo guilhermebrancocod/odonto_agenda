@@ -37,7 +37,7 @@ class ServiceController extends Controller
     public function editService($idService)
     {
 
-        $servico = DB::table('FAESA_CLINICA_SERVICO')->where('ID_SERVICO_CLINICA', $idService)->first();
+        $servico = DB::table('FAESA_CLINICA_SERVICO')->where('ID_SERVICO', $idService)->first();
 
         if (!$servico) {
             return redirect('/odontologia/consultarservico')->with('error', 'Serviço não encontrado.');
@@ -60,7 +60,7 @@ class ServiceController extends Controller
 
         // Atualiza os dados do serviço
         DB::table('FAESA_CLINICA_SERVICO')
-            ->where('ID_SERVICO_CLINICA', $idService)
+            ->where('ID_SERVICO', $idService)
             ->update([
                 'ID_CLINICA' => 2,
                 'SERVICO_CLINICA_DESC' => $descricao,
@@ -75,9 +75,9 @@ class ServiceController extends Controller
     {
         // serviço (sem depender de disciplina)
         $row = DB::table('FAESA_CLINICA_SERVICO as s')
-            ->where('s.ID_SERVICO_CLINICA', $servicoId)
+            ->where('s.ID_SERVICO', $servicoId)
             ->select(
-                's.ID_SERVICO_CLINICA as id',
+                's.ID_SERVICO as id',
                 's.SERVICO_CLINICA_DESC as descricao',
                 's.VALOR_SERVICO as valor',
                 's.ATIVO as ativo'
@@ -99,7 +99,7 @@ class ServiceController extends Controller
     public function procedimento(Request $request)
     {
         $query = DB::table('FAESA_CLINICA_SERVICO')
-            ->select('ID_SERVICO_CLINICA', 'SERVICO_CLINICA_DESC')
+            ->select('ID_SERVICO', 'SERVICO_CLINICA_DESC')
             ->where('ID_CLINICA', '=', 2)
             ->where('ATIVO', '=', 'S');
 
@@ -134,7 +134,7 @@ class ServiceController extends Controller
 
         $procedimentos =  DB::table('FAESA_CLINICA_SERVICO')
             ->select(
-                'FAESA_CLINICA_SERVICO.ID_SERVICO_CLINICA',
+                'FAESA_CLINICA_SERVICO.ID_SERVICO',
                 'SERVICO_CLINICA_DESC',
                 'VALOR_SERVICO',
                 'ATIVO'

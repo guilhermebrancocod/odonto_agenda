@@ -19,7 +19,7 @@
             <legend class="w-auto px-2">Cadastro de Procedimento</legend>
         </fieldset>
         <form id="form" class="row g-3 needs-validation"
-            action="{{ isset($servico) ? route('updateProcedures', $servico->ID_SERVICO_CLINICA) : route('createProcedures') }}"
+            action="{{ isset($servico) ? route('updateProcedures', $servico->ID_SERVICO) : route('createProcedures') }}"
             method="POST">
             @csrf
             @if(isset($servico))

@@ -14,7 +14,7 @@ function carregarTodosProcedimentos() {
                 // Adiciona ao select
                 const newOption = new Option(
                     procedimento.SERVICO_CLINICA_DESC,
-                    procedimento.ID_SERVICO_CLINICA,
+                    procedimento.ID_SERVICO,
                     false,
                     false
                 );
@@ -29,7 +29,7 @@ function carregarTodosProcedimentos() {
                                 type="button" 
                                 class="editService btn btn-link p-0 m-0 border-0" 
                                 style="color: inherit;" 
-                                data-id="${procedimento.ID_SERVICO_CLINICA}">
+                                data-id="${procedimento.ID_SERVICO}">
                                 <i class="fa fa-pencil-alt"></i>
                             </button>
                         </td>
@@ -63,7 +63,7 @@ $(document).ready(function () {
             processResults: function (data) {
                 return {
                     results: data.map(p => ({
-                        id: p.ID_SERVICO_CLINICA,
+                        id: p.ID_SERVICO,
                         text: p.SERVICO_CLINICA_DESC,
 
                     }))

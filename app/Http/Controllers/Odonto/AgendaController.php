@@ -438,8 +438,8 @@ class AgendaController extends Controller
 
 
         $servico = DB::table('FAESA_CLINICA_SERVICO')
-            ->where('ID_SERVICO_CLINICA', (int) $request->input('procedimento')) // se o PK for outro (ex.: ID_BOX_DISCIPLINA), ajuste aqui
-            ->value('ID_SERVICO_CLINICA');
+            ->where('ID_SERVICO', (int) $request->input('procedimento')) // se o PK for outro (ex.: ID_BOX_DISCIPLINA), ajuste aqui
+            ->value('ID_SERVICO');
 
         $old = (array) DB::table('FAESA_CLINICA_AGENDAMENTO')->where('ID_AGENDAMENTO', $id)->first();
         if (!$old) return back()->with('error', 'Agendamento não encontrado.');
@@ -544,7 +544,7 @@ class AgendaController extends Controller
             ->join('FAESA_CLINICA_LOCAL_AGENDAMENTO as la', 'la.ID_AGENDAMENTO', '=', 'A.ID_AGENDAMENTO')
             ->join('FAESA_CLINICA_BOXES as cb', 'cb.ID_BOX_CLINICA', '=', 'la.ID_BOX')
             ->join('FAESA_CLINICA_PACIENTE as p', 'p.ID_PACIENTE', '=', 'a.ID_PACIENTE')
-            /*->join('FAESA_CLINICA_SERVICO as s', 's.ID_SERVICO_CLINICA', '=', 'a.ID_SERVICO')*/
+            /*->join('FAESA_CLINICA_SERVICO as s', 's.ID_SERVICO', '=', 'a.ID_SERVICO')*/
             ->select(
                 'a.ID_AGENDAMENTO',
                 'a.DT_AGEND',
