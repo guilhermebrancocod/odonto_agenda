@@ -265,7 +265,7 @@ $(document).ready(function () {
                 const dateVal = document.getElementById('date')?.value?.trim() || '';
                 const diaSemana = getDiaSemanaFromDateBR(dateVal);
                 if (!diaSemana) {
-                    console.warn('⚠️ Data inválida ou não selecionada.');
+                    console.warn('Data inválida ou não selecionada.');
                     return `/odontologia/disciplinascombox/`; // fallback seguro
                 }
                 return `/odontologia/disciplinascombox/${encodeURIComponent(diaSemana)}`;

@@ -82,7 +82,7 @@ document.addEventListener('DOMContentLoaded', function () {
                         <th>Dia</th>
                         <th>Início</th>
                         <th>Fim</th>
-                        <!00<th class="text-end col-2" style="width: 10%;">Agendar</th>-->
+                        <!--<!00<th class="text-end col-2" style="width: 10%;">Agendar</th>-->
                     </tr>
                     </thead>
                     <tbody>
@@ -156,13 +156,14 @@ document.addEventListener('DOMContentLoaded', function () {
                 const e = arg.event;
                 const turma = e.extendedProps?.turma || e.extendedProps?.TURMA || '';
                 const local = e.extendedProps?.local || 'Sem local';
+                const alunos = e.extendedProps?.NOME_ALUNO || [];
                 const status = e.extendedProps?.status || '';
 
                 const el = document.createElement('div');
                 el.innerHTML = `
                     <div style="display:flex;flex-direction:column;gap:2px;">
                     <strong>${e.title || ''}</strong>
-                    <small>${local}${turma ? ' • Turma ' + turma : ''}${status ? ' • ' + status : ''}</small>
+                    <small>${local}${turma ? ' • Turma ' + turma : ''}${status ? ' • ' + status : ''}${alunos?.length ? ' • Aluno ' + alunos.join(', ') : ''}</small>
                     </div>
                 `;
                 return { domNodes: [el] };
@@ -216,6 +217,7 @@ document.addEventListener('DOMContentLoaded', function () {
                         <div style="text-align: left; font-size: 16px;">
                         <p><strong>Paciente:</strong> ${info.event.title}</p>
                         <p><strong>Local:</strong> ${info.event.extendedProps.local || 'Sem local definido'}</p>
+                        <p><strong>Aluno:</strong> ${info.event.extendedProps.NOME_ALUNO?.join(', ') || 'Sem aluno definido'}</p>
                         <p><strong>Status:</strong>
                             <span 
                             style="color: ${statusAtual === 'Agendado' ? '#007bff' :

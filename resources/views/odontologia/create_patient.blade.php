@@ -254,7 +254,7 @@
             const wrapper = document.getElementById('celulares-wrapper');
             const input = document.createElement('input');
             input.type = 'text';
-            input.name = 'celulares[]';
+            input.name = 'contato[]';
             input.className = 'form-control mb-2';
             input.placeholder = '(99) 99999-9999';
             wrapper.appendChild(input);

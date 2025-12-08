@@ -79,17 +79,17 @@ class AgendaController extends Controller
 
         $validator->after(function ($v) use ($request) {
             if ($v->errors()->has('date') || $v->errors()->has('date_end')) {
-                return; // já falhou formato/required; não compara agora
+                return; 
             }
             if (!$request->filled('date') || !$request->filled('date_end')) {
-                return; // alguma está vazia; deixa o 'required' atuar
+                return; 
             }
 
             try {
                 $ini = Carbon::createFromFormat('d/m/Y', $request->input('date'))->startOfDay();
                 $fim = Carbon::createFromFormat('d/m/Y', $request->input('date_end'))->startOfDay();
             } catch (\Throwable $e) {
-                // se quebrar aqui, as mensagens de date_format já cobrem
+                
                 return;
             }
 

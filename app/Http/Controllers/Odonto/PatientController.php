@@ -29,7 +29,7 @@ class PatientController extends Controller
         $input['estado']          = strtoupper(trim($input['estado'] ?? ''));
 
         // Normaliza celulares (transforma para só dígitos, remove vazios)
-        $input['celulares'] = collect($input['celulares'] ?? [])
+        $input['contato'] = collect($input['contato'] ?? [])
             ->map(fn($s) => preg_replace('/\D+/', '', (string)$s))
             ->filter() // remove null/vazio
             ->values()
@@ -64,8 +64,8 @@ class PatientController extends Controller
             'cidade'           => ['nullable', 'string', 'max:100'],
             'estado'           => ['nullable', 'alpha', 'size:2'],
             'email'            => ['required', 'email:rfc', 'max:100'],
-            'celulares'        => ['array'],                 // deixe opcional; ou use 'required|array'
-            'celulares.*'      => ['regex:/^\d{10,11}$/'],   // agora já são apenas dígitos
+            'contato'        => ['array'],                 // deixe opcional; ou use 'required|array'
+            'contato.*'      => ['regex:/^\d{10,11}$/'],   // agora já são apenas dígitos
             'cod_sus'          => ['nullable', 'regex:/^\d{15}$/'],
             'cpf_responsavel'  => ['nullable', 'regex:/^\d{11}$/'],
             'obs_laudo'        => ['nullable', 'string', 'max:255'],
@@ -89,8 +89,8 @@ class PatientController extends Controller
             'email.required'          => 'E-mail é obrigatório',
             'email.email'             => 'E-mail inválido.',
             // se quiser tornar obrigatório:
-            // 'celulares.required'    => 'Informe pelo menos um celular.',
-            'celulares.*.regex'       => 'Celular deve ter 10 ou 11 dígitos.',
+            // 'contato.required'    => 'Informe pelo menos um contato.',
+            'contato.*.regex'       => 'Contato deve ter 10 ou 11 dígitos.',
             'cod_sus.regex'           => 'Cartão SUS deve ter 15 dígitos.',
             'cpf_responsavel.regex'   => 'CPF do responsável deve ter 11 dígitos.',
             'obs_laudo.max'           => 'Laudo deve ter no máximo 255 caracteres.',
@@ -143,7 +143,7 @@ class PatientController extends Controller
             $idPaciente = DB::table('FAESA_CLINICA_PACIENTE')->insertGetId($row, 'ID_PACIENTE');
             $user_id = session('usuario');
 
-            $celulares = collect($request->input('celulares', []))
+            $contato = collect($request->input('contato', []))
                 ->filter()                    // já são só dígitos
                 ->unique()                    // evita duplicados
                 ->map(fn($numero) => [
@@ -155,8 +155,8 @@ class PatientController extends Controller
                 ->values()
                 ->all();
 
-            if ($celulares) {
-                DB::table('FAESA_CLINICA_PACIENTE_CONTATO')->insert($celulares);
+            if ($contato) {
+                DB::table('FAESA_CLINICA_PACIENTE_CONTATO')->insert($contato);
             }
 
             AuditLogger::created(
@@ -172,12 +172,12 @@ class PatientController extends Controller
 
     public function updatePatient(Request $request, $id)
     {
-        $user_id = session('usuario');      
+        $user_id = session('usuario');
 
         $input = $request->all();
         $input['cpf']              = preg_replace('/\D/', '', $input['cpf'] ?? '');
         $input['cpf_responsavel']  = preg_replace('/\D/', '', $input['cpf_responsavel'] ?? '');
-        $input['celular']          = preg_replace('/\D/', '', $input['celular'] ?? '');
+        $input['contato']          = preg_replace('/\D/', '', $input['contato'] ?? '');
         $input['cep']              = preg_replace('/\D/', '', $input['cep'] ?? '');
         $input['cod_sus']          = preg_replace('/\D/', '', $input['cod_sus'] ?? '');
         $input['estado']           = strtoupper(trim($input['estado'] ?? ''));
@@ -210,8 +210,8 @@ class PatientController extends Controller
             'cidade'          => ['nullable', 'string', 'max:100'],
             'estado'          => ['nullable', 'alpha', 'size:2'],     // UF
             'email'           => ['nullable', 'email:rfc', 'max:100'],
-            'celulares'        => ['array'],                 // deixe opcional; ou use 'required|array'
-            'celulares.*'      => ['regex:/^\d{10,11}$/'],
+            'contato'        => ['array'],                 // deixe opcional; ou use 'required|array'
+            'contato.*'      => ['regex:/^\d{10,11}$/'],
             'cod_sus'         => ['nullable', 'regex:/^\d{15}$/'],   // SUS geralmente 15 dígitos
             'nome_resposavel' => ['nullable', 'string', 'max:255', 'regex:/^[A-Za-zÀ-ÿ0-9\s]+$/'],
             'cpf_responsavel' => ['nullable', 'regex:/^\d{11}$/'],
@@ -233,7 +233,7 @@ class PatientController extends Controller
             'estado.alpha'           => 'UF deve conter apenas letras.',
             'estado.size'            => 'UF deve ter 2 letras.',
             'email.email'            => 'E-mail inválido.',
-            'celular.regex'          => 'Celular deve ter 10 ou 11 dígitos (apenas números).',
+            'contato.*.regex'         => 'Contato deve ter 10 ou 11 dígitos (apenas números).',
             'cod_sus.regex'          => 'Cartão SUS deve ter 15 dígitos.',
             'nome_resposavel.regex' => 'O nome do responsável inválido.',
             'cpf_responsavel.regex'  => 'CPF do responsável deve ter 11 dígitos.',
@@ -279,19 +279,42 @@ class PatientController extends Controller
             'MUNICIPIO'           => $request->input('cidade'),
             'UF'                  => $request->input('estado'),
             'E_MAIL_PACIENTE'     => $request->input('email'),
-            'FONE_PACIENTE'       => $request->input('celular'),
             'NOME_RESPONSAVEL'    => $request->input('nome_resposavel'),
             'CPF_RESPONSAVEL'     => $request->input('cpf_responsavel'),
             'OBSERVACAO'          => $request->input('obs_laudo'),
         ];
+
+        $contato = collect($request->input('contato', []))
+            ->filter() // remove vazios / null / ''
+            ->unique() // evita duplicados
+            ->map(fn($numero) => [
+                'ID_PACIENTE' => $paciente->ID_PACIENTE,
+                'TIPO'        => 'CELULAR',
+                'NUMERO'      => $numero,
+                /*'CREATED_AT'  => now(),
+                'UPDATED_AT'  => now(),*/
+            ])
+            ->values()
+            ->all();
+
+        // Se vieram contatos, zera e recria
+        DB::table('FAESA_CLINICA_PACIENTE_CONTATO')
+            ->where('ID_PACIENTE', $paciente->ID_PACIENTE)
+            ->delete();
+
+        if (!empty($contato)) {
+            DB::table('FAESA_CLINICA_PACIENTE_CONTATO')
+                ->insert($contato);
+        }
+
         DB::table('FAESA_CLINICA_PACIENTE')->where('ID_PACIENTE', $id)->update($update);
-        
+
         $user_id = session('usuario');
-        
+
         $new = array_merge($old, $update);
 
         AuditLogger::updated('FAESA_CLINICA_PACIENTE', $id, $user_id->ID, $old, $new);
-        
+
         return redirect()->back()->with('success', 'Paciente atualizado com sucesso!');
     }
 

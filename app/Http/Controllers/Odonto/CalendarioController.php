@@ -16,38 +16,51 @@ class CalendarioController extends Controller
         $end = $request->query('end');
         $turma = $request->query('TURMA') ?? $request->query('turma');
 
-        // Consulta os dados do banco
-        $agendamentos = DB::table('FAESA_CLINICA_AGENDAMENTO')
-            ->join('FAESA_CLINICA_PACIENTE', 'FAESA_CLINICA_AGENDAMENTO.ID_PACIENTE', '=', 'FAESA_CLINICA_PACIENTE.ID_PACIENTE')
-            ->join('FAESA_CLINICA_LOCAL_AGENDAMENTO', 'FAESA_CLINICA_AGENDAMENTO.ID_AGENDAMENTO', '=', 'FAESA_CLINICA_LOCAL_AGENDAMENTO.ID_AGENDAMENTO')
+        // 1) Busca e agrupa os alunos por agendamento
+        $alunosPorAgendamento = DB::table('FAESA_CLINICA_AGENDAMENTO_ALUNO AS AA')
+            ->join('LYCEUM.dbo.LY_ALUNO AS A', 'AA.ALUNO', '=', 'A.ALUNO')
             ->select(
-                'FAESA_CLINICA_AGENDAMENTO.ID_AGENDAMENTO as id',
-                'FAESA_CLINICA_AGENDAMENTO.ID_SERVICO as servicoId',
-                'FAESA_CLINICA_LOCAL_AGENDAMENTO.TURMA',
-                'FAESA_CLINICA_AGENDAMENTO.MENSAGEM',
-                'FAESA_CLINICA_AGENDAMENTO.DT_AGEND',
-                'FAESA_CLINICA_AGENDAMENTO.HR_AGEND_INI',
-                'FAESA_CLINICA_AGENDAMENTO.HR_AGEND_FIN',
-                'FAESA_CLINICA_AGENDAMENTO.OBSERVACOES',
-                'FAESA_CLINICA_AGENDAMENTO.STATUS_AGEND',
-                'FAESA_CLINICA_AGENDAMENTO.LOCAL',
-                'FAESA_CLINICA_PACIENTE.NOME_COMPL_PACIENTE as paciente'
+                'AA.ID_AGENDAMENTO',
+                'AA.ALUNO',
+                'A.NOME_COMPL as NOME_ALUNO'
             )
-            ->where('FAESA_CLINICA_AGENDAMENTO.ID_CLINICA', '=', 2)
+            ->get()
+            ->groupBy('ID_AGENDAMENTO')      
+            ->map(function ($grupo) {
+                return $grupo->pluck('NOME_ALUNO')->all();
+            });
+
+        // 2) Busca os agendamentos e injeta os alunos no map
+        $agendamentos = DB::table('FAESA_CLINICA_AGENDAMENTO AS A')
+            ->join('FAESA_CLINICA_PACIENTE AS P', 'A.ID_PACIENTE', '=', 'P.ID_PACIENTE')
+            ->join('FAESA_CLINICA_LOCAL_AGENDAMENTO AS L', 'A.ID_AGENDAMENTO', '=', 'L.ID_AGENDAMENTO')
+            ->select(
+                'A.ID_AGENDAMENTO as id',
+                'A.ID_SERVICO as servicoId',
+                'L.TURMA',
+                'A.MENSAGEM',
+                'A.DT_AGEND',
+                'A.HR_AGEND_INI',
+                'A.HR_AGEND_FIN',
+                'A.OBSERVACOES',
+                'A.STATUS_AGEND',
+                'A.LOCAL',
+                'P.NOME_COMPL_PACIENTE as paciente'
+            )
+            ->where('A.ID_CLINICA', '=', 2)
             ->when($start && $end, function ($query) use ($start, $end) {
-                $query->whereBetween('FAESA_CLINICA_AGENDAMENTO.DT_AGEND', [$start, $end]);
+                $query->whereBetween('A.DT_AGEND', [$start, $end]);
             })
             ->when(!empty($turma), function ($q) use ($turma) {
-                $q->where('FAESA_CLINICA_LOCAL_AGENDAMENTO.TURMA', $turma);
+                $q->where('L.TURMA', $turma);
             })
             ->get()
-            ->map(function ($item) {
+            ->map(function ($item) use ($alunosPorAgendamento) {
                 return [
-                    'id' => $item->id,
-                    'servicoId' => $item->servicoId,
+                    'id'    => $item->id,
                     'title' => $item->paciente,
                     'start' => $item->DT_AGEND . 'T' . substr($item->HR_AGEND_INI, 0, 5),
-                    'end' => $item->DT_AGEND . 'T' . substr($item->HR_AGEND_FIN, 0, 5),
+                    'end'   => $item->DT_AGEND . 'T' . substr($item->HR_AGEND_FIN, 0, 5),
                     'color' => match ($item->STATUS_AGEND) {
                         0 => '#007bff',
                         1 => '#dc3545',
@@ -56,11 +69,12 @@ class CalendarioController extends Controller
                     },
                     'extendedProps' => [
                         'observacoes' => $item->OBSERVACOES,
-                        'mensagem' => $item->MENSAGEM,
-                        'status' => $item->STATUS_AGEND,
-                        'local' => $item->LOCAL,
-                        'turma' => $item->TURMA
-                    ]
+                        'mensagem'    => $item->MENSAGEM,
+                        'status'      => $item->STATUS_AGEND,
+                        'local'       => $item->LOCAL,
+                        'turma'       => $item->TURMA,
+                        'NOME_ALUNO'      => $alunosPorAgendamento[$item->id] ?? [],
+                    ],
                 ];
             });
 

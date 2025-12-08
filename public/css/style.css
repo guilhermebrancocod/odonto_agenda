@@ -227,6 +227,11 @@ img {
         .agendamento-grid {
             grid-template-columns: 1fr;
         }
+
+        .fc-button-group{
+            margin-left: 75px;
+            margin-bottom: 5px;
+        }
     }
 
 }

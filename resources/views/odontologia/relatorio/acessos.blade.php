@@ -73,10 +73,8 @@
                             <th>Usuário</th>
                             <th>Nome</th>
                             <th>Evento</th>
-                            <th>Data Login</th>
-                            <th>Hora Login</th>
-                            <th>Data Logout</th>
-                            <th>Hora Logout</th>
+                            <th>Data</th>
+                            <th>Hora</th>
                         </tr>
                     </thead>
                     <tbody></tbody>

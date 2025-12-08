@@ -80,7 +80,7 @@
                     <tbody></tbody>
                 </table>
                 <div id="no-appointments-message" style="display: none; text-align: center; padding: 20px; font-size: 16px;">
-                    Sem encaminhamentos encontrados.
+                    Nenhum registro encontrado.
                 </div>
                 <div class="pagination-container">
                     <nav aria-label="Navegação de página">

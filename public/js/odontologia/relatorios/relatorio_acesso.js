@@ -47,10 +47,8 @@ function listaAcessos(page) {
         <td>${a.USER_NAME ?? ''}</td>
         <td>${a.NOME ?? ''}</td>
         <td>${a.EVENT ?? ''}</td>
-        <td>${formatDateStr(a.DATA_LOGIN ?? '')}</td>
-        <td>${maskTime(a.HORA_LOGIN ?? '')}</td>
-        <td>${formatDateStr(a.DATA_LOGOUT ?? '')}</td>
-        <td>${maskTime(a.HORA_LOGOUT ?? '')}</td>
+        <td>${formatDateStr(a.DATA_LOGIN ?? a.DATA_LOGOUT)}</td>
+        <td>${maskTime(a.HORA_LOGIN ?? a.HORA_LOGOUT)}</td>
         <td>${a.STATUS ?? ''}</td>
       </tr>
     `);
